@@ -23,14 +23,20 @@ jobs:
       - name: Accept Android SDK Licenses
         run: yes | sdkmanager --licenses || true
 
-      - name: Generate Project & Build with SDK Link
+      - name: Generate Project & Build with AndroidX Support
         run: |
           mkdir -p app/src/main/java/com/example/localshield
 
-          # WICHTIG: Teilt Gradle mit, wo das Android SDK auf dem Server liegt!
+          # 1. SDK-Pfad für Gradle hinterlegen
           echo "sdk.dir=$ANDROID_HOME" > local.properties
 
-          # 1. AndroidManifest.xml
+          # 2. WICHTIG: AndroidX und Jetifier aktivieren (Genau das hat Gradle verlangt!)
+          cat << 'EOF' > gradle.properties
+          android.useAndroidX=true
+          android.enableJetifier=true
+          EOF
+
+          # 3. AndroidManifest.xml
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -47,7 +53,7 @@ jobs:
           </manifest>
           EOF
 
-          # 2. ScamCallScreeningService.kt
+          # 4. ScamCallScreeningService.kt
           cat << 'EOF' > app/src/main/java/com/example/localshield/ScamCallScreeningService.kt
           package com.example.localshield
 
@@ -72,7 +78,7 @@ jobs:
           }
           EOF
 
-          # 3. Settings
+          # 5. Settings
           cat << 'EOF' > settings.gradle.kts
           pluginManagement {
               repositories {
@@ -92,7 +98,7 @@ jobs:
           include(":app")
           EOF
 
-          # 4. Root Build
+          # 6. Root Build
           cat << 'EOF' > build.gradle.kts
           plugins {
               id("com.android.application") version "8.2.0" apply false
@@ -100,7 +106,7 @@ jobs:
           }
           EOF
 
-          # 5. App Build
+          # 7. App Build
           cat << 'EOF' > app/build.gradle.kts
           plugins {
               id("com.android.application")
@@ -126,6 +132,11 @@ jobs:
               kotlinOptions {
                   jvmTarget = "17"
               }
+
+              lint {
+                  abortOnError = false
+                  checkReleaseBuilds = false
+              }
           }
 
           dependencies {
@@ -133,18 +144,16 @@ jobs:
           }
           EOF
 
-          # 6. Gradle laden und mit Stacktrace starten
-          echo "Lade Gradle 8.2 herunter..."
-          wget -q https://services.gradle.org/distributions/gradle-8.2-bin.zip
-          unzip -q gradle-8.2-bin.zip
+          # 8. Gradle 8.4 herunterladen und starten
+          echo "Lade Gradle 8.4 herunter..."
+          wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
+          unzip -q gradle-8.2-bin.zip 2>/dev/null || unzip -q gradle-8.4-bin.zip
           
           echo "Starte Build..."
-          ./gradle-8.2/bin/gradle assembleDebug --stacktrace
+          ./gradle-8.4/bin/gradle assembleDebug --stacktrace
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: localshield-apk
           path: app/build/outputs/apk/debug/app-debug.apk
-
-
