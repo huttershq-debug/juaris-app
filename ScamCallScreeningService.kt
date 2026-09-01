@@ -1,5 +1,6 @@
 package com.example.localshield
 
+import android.content.Context
 import android.os.Build
 import android.telecom.Call
 import android.telecom.CallScreeningService
@@ -14,58 +15,50 @@ class ScamCallScreeningService : CallScreeningService() {
 
         // 1. Unterdrückte oder anonyme Nummern sofort blockieren
         if (phoneNumber == null) {
-            responseBuilder.setDisallowCall(true)
-            responseBuilder.setRejectCall(true)
-            responseBuilder.setSkipCallLog(false)
-            responseBuilder.setSkipNotification(true)
+            blockCall(responseBuilder)
             respondToCall(callDetails, responseBuilder.build())
             return
         }
 
-        // 2. Nummer gegen unsere echte Betrugs- und Spam-Liste prüfen
-        val isScam = checkNumberLocally(phoneNumber)
-
-        if (isScam) {
-            // Betrugsversuch erkannt -> Sofort blockieren und auflegen
-            responseBuilder.setDisallowCall(true)
-            responseBuilder.setRejectCall(true)
-            responseBuilder.setSkipCallLog(false)
-            responseBuilder.setSkipNotification(true)
+        // 2. Prüfen, ob die Nummer dauerhaft auf dem Gerät gesperrt ist
+        if (isNumberBlockedPermanently(applicationContext, phoneNumber)) {
+            blockCall(responseBuilder)
         } else {
-            // Nummer ist sauber -> Durchlassen
             responseBuilder.setDisallowCall(false)
         }
 
         respondToCall(callDetails, responseBuilder.build())
     }
 
-    private fun checkNumberLocally(number: String): Boolean {
-        // ECHTE LISTE: Bekannte internationale Spam- und Betrugs-Vorwahlen (z.B. Ping-Anrufe)
+    private fun blockCall(builder: CallResponse.Builder) {
+        builder.setDisallowCall(true)
+        builder.setRejectCall(true)
+        builder.setSkipCallLog(false)
+        builder.setSkipNotification(true)
+    }
+
+    private fun isNumberBlockedPermanently(context: Context, number: String): Boolean {
+        // A) Feste Liste bekannter internationaler Betrugs-Vorwahlen
         val suspiciousPrefixes = listOf(
-            "+243", // Demokratische Republik Kongo
+            "+243", // DR Kongo
             "+225", // Elfenbeinküste
             "+232", // Sierra Leone
             "+375", // Belarus
-            "+882", // Satelliten-Netzwerke (oft teurer Betrug)
-            "+881" // Satelliten-Netzwerke
+            "+882", // Satelliten
+            "+881" // Satelliten
         )
-
-        // Prüfen, ob die Nummer mit einer dieser Spam-Vorwahlen beginnt
+        
         for (prefix in suspiciousPrefixes) {
             if (number.startsWith(prefix)) {
-                return true // Anruf blockieren!
+                return true
             }
         }
 
-        // MANUELLE LISTE: Hier kannst du ganz gezielt einzelne Nummern eintragen, die dich nerven
-        val manualBlockedNumbers = listOf(
-            // Beispiel: "+436601234567" 
-        )
+        // B) Abgleich mit dem dauerhaften lokalen Speicher des Handys
+        val prefs = context.getSharedPreferences("LocalShieldPrefs", Context.MODE_PRIVATE)
+        val blockedSet = prefs.getStringSet("blocked_numbers", mutableSetOf()) ?: mutableSetOf()
 
-        if (manualBlockedNumbers.contains(number)) {
-            return true // Anruf blockieren!
-        }
-
-        return false // Kein Treffer -> Anruf wird durchgelassen
+        return blockedSet.contains(number)
     }
 }
+
