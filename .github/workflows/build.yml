@@ -23,7 +23,7 @@ jobs:
           # Verzeichnisse erstellen
           mkdir -p app/src/main/java/com/example/localshield
 
-          # 1. AndroidManifest.xml direkt fehlerfrei schreiben
+          # 1. AndroidManifest.xml
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -41,7 +41,7 @@ jobs:
           </manifest>
           EOF
 
-          # 2. ScamCallScreeningService.kt direkt fehlerfrei schreiben
+          # 2. ScamCallScreeningService.kt (Korrektur mit vollem Klassennamen)
           cat << 'EOF' > app/src/main/java/com/example/localshield/ScamCallScreeningService.kt
           package com.example.localshield
 
@@ -50,7 +50,7 @@ jobs:
 
           class ScamCallScreeningService : CallScreeningService() {
               override fun onScreenCall(callDetails: Call.Details) {
-                  val response = CallResponse.Builder()
+                  val response = CallScreeningService.CallResponse.Builder()
                       .setDisallowCall(false)
                       .setRejectCall(false)
                       .setSkipCallLog(false)
@@ -81,7 +81,7 @@ jobs:
           include(":app")
           EOF
 
-          # 4. Root Build.gradle.kts (Exakt kompatibel zu AGP 8.2.0)
+          # 4. Root Build.gradle.kts
           cat << 'EOF' > build.gradle.kts
           plugins {
               id("com.android.application") version "8.2.0" apply false
@@ -122,7 +122,7 @@ jobs:
           }
           EOF
 
-          # 6. Perfekt abgestimmtes Gradle 8.2 direkt herunterladen und ausführen
+          # 6. Gradle 8.2 herunterladen und bauen
           echo "Lade Gradle 8.2 herunter..."
           wget -q https://services.gradle.org/distributions/gradle-8.2-bin.zip
           unzip -q gradle-8.2-bin.zip
