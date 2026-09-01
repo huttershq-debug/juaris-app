@@ -23,21 +23,15 @@ jobs:
       - name: Accept Android SDK Licenses
         run: yes | sdkmanager --licenses || true
 
-      - name: Generate Complete LocalShield App & Build
+      - name: Generate Clean Project & Build
         run: |
           mkdir -p app/src/main/java/com/example/localshield
 
-          # 1. AndroidManifest.xml mit Systemrechten für den CallScreeningService
+          # 1. Absolut minimales, fehlerfreies Manifest ohne UI-Abhängigkeiten
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-              <application
-                  android:label="LocalShield"
-                  android:icon="@mipmap/ic_launcher"
-                  android:roundIcon="@mipmap/ic_launcher_round"
-                  android:supportsRtl="true"
-                  android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-                  
+              <application android:label="LocalShield">
                   <service
                       android:name=".ScamCallScreeningService"
                       android:permission="android.permission.BIND_SCREENING_SERVICE"
@@ -50,7 +44,7 @@ jobs:
           </manifest>
           EOF
 
-          # 2. Echter, funktionsfähiger Service mit Offline-Prüfung
+          # 2. Der CallScreeningService Code
           cat << 'EOF' > app/src/main/java/com/example/localshield/ScamCallScreeningService.kt
           package com.example.localshield
 
@@ -58,36 +52,24 @@ jobs:
           import android.telecom.CallScreeningService
 
           class ScamCallScreeningService : CallScreeningService() {
-
               override fun onScreenCall(callDetails: Call.Details) {
-                  // Nur eingehende Anrufe prüfen
                   if (callDetails.callDirection == Call.Details.DIRECTION_INCOMING) {
                       val phoneNumber = callDetails.handle?.schemeSpecificPart ?: ""
-                      
-                      // Hier findet die lokale Prüfung statt (vollkommen offline)
-                      val isScam = checkLocalBlacklist(phoneNumber)
+                      val isScam = phoneNumber.startsWith("+4399") || phoneNumber.startsWith("+4999")
 
                       val response = CallScreeningService.CallResponse.Builder()
-                          .setDisallowCall(isScam) // Anruf blockieren, falls Scam
-                          .setRejectCall(isScam) // Direkt auflegen
-                          .setSkipCallLog(isScam) // Optional: Aus Anrufliste ausschließen
-                          .setSkipNotification(isScam) // Klingeln unterdrücken
+                          .setDisallowCall(isScam)
+                          .setRejectCall(isScam)
+                          .setSkipCallLog(isScam)
+                          .setSkipNotification(isScam)
                           .build()
-
                       respondToCall(callDetails, response)
                   }
-              }
-
-              private fun checkLocalBlacklist(number: String): Boolean {
-                  // Platzhalter für deine spätere lokale Datenbank (z.B. Room oder SQLite)
-                  // Testweise blockieren wir Nummern mit bestimmten Test-Präfixen
-                  val localBlacklist = listOf("+43999", "+49999", "0900")
-                  return localBlacklist.any { number.startsWith(it) }
               }
           }
           EOF
 
-          # 3. Gradle Settings
+          # 3. Settings
           cat << 'EOF' > settings.gradle.kts
           pluginManagement {
               repositories {
@@ -107,7 +89,7 @@ jobs:
           include(":app")
           EOF
 
-          # 4. Root Build.gradle.kts
+          # 4. Root Build
           cat << 'EOF' > build.gradle.kts
           plugins {
               id("com.android.application") version "8.2.0" apply false
@@ -115,7 +97,7 @@ jobs:
           }
           EOF
 
-          # 5. App Build.gradle.kts mit allen nötigen Abhängigkeiten
+          # 5. App Build (ohne unnötige UI-Bibliotheken)
           cat << 'EOF' > app/build.gradle.kts
           plugins {
               id("com.android.application")
@@ -145,11 +127,10 @@ jobs:
 
           dependencies {
               implementation("androidx.core:core-ktx:1.12.0")
-              implementation("androidx.appcompat:appcompat:1.6.1")
           }
           EOF
 
-          # 6. Gradle herunterladen und ausführen
+          # 6. Gradle herunterladen und bauen
           echo "Lade Gradle 8.2 herunter..."
           wget -q https://services.gradle.org/distributions/gradle-8.2-bin.zip
           unzip -q gradle-8.2-bin.zip
