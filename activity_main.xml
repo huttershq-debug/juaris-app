@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#0F172A"
+    android:padding="24dp"
+    android:gravity="center_horizontal">
+
+    <!-- App Titel -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="LocalShield"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="40dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Dein unsichtbarer Anruf-Schutz"
+        android:textSize="14sp"
+        android:textColor="#94A3B8"
+        android:layout_marginBottom="40dp" />
+
+    <!-- Status Card -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#1E293B"
+        android:padding="24dp"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🛡️ SCHUTZ AKTIV"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#34D399"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Spam-Nummern werden lokal im Hintergrund abgefangen und blockiert."
+            android:textSize="14sp"
+            android:textColor="#CBD5E1"
+            android:textAlignment="center" />
+    </LinearLayout>
+
+    <!-- Info Box unten -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="100% Offline • Keine Cloud • Volle Privatsphäre"
+        android:textSize="12sp"
+        android:textColor="#64748B"
+        android:textAlignment="center"
+        android:layout_marginTop="40dp" />
+
+</LinearLayout>
