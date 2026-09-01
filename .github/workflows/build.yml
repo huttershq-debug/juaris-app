@@ -17,6 +17,8 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          items: platforms;android-34
 
       - name: Accept Android SDK Licenses
         run: yes | sdkmanager --licenses || true
@@ -124,10 +126,11 @@ jobs:
           unzip -q gradle-8.2-bin.zip
           
           echo "Starte Build..."
-          ./gradle-8.2/bin/gradle assembleDebug
+          ./gradle-8.2/bin/gradle assembleDebug --info
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: localshield-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+
