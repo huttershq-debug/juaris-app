@@ -18,6 +18,9 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Accept Android SDK Licenses
+        run: yes | sdkmanager --licenses || true
+
       - name: Generate Complete Clean Project & Build
         run: |
           mkdir -p app/src/main/java/com/example/localshield
@@ -120,8 +123,8 @@ jobs:
           wget -q https://services.gradle.org/distributions/gradle-8.2-bin.zip
           unzip -q gradle-8.2-bin.zip
           
-          echo "Starte Build mit Stacktrace..."
-          ./gradle-8.2/bin/gradle assembleDebug --stacktrace
+          echo "Starte Build..."
+          ./gradle-8.2/bin/gradle assembleDebug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
