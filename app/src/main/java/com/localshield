@@ -1,4 +1,4 @@
-package com.localshield.app
+package com.localshield
 
 import android.os.Bundle
 import android.widget.TextView
