@@ -11,7 +11,7 @@ class ScamCallScreeningService : CallScreeningService() {
     override fun onScreenCall(callDetails: Call.Details) {
         val phoneNumber = callDetails.handle?.schemeSpecificPart ?: ""
 
-        // LOKALER CHECK: Alles läuft zu 100% auf dem Gerät
+        // LOKALER CHECK: Alles laeuft zu 100% auf dem Geraet
         val isScamDetected = checkNumberLocally(phoneNumber)
 
         val responseBuilder = CallResponse.Builder()
@@ -30,7 +30,7 @@ class ScamCallScreeningService : CallScreeningService() {
     }
 
     private fun checkNumberLocally(number: String): Boolean {
-        // Test-Liste für bekannte Betrugsnummern
+        // Test-Liste fuer bekannte Betrugsnummern
         val localScamDatabase = listOf("+43123456789", "+49190123456")
         return localScamDatabase.contains(number)
     }
