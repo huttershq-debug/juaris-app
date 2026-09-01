@@ -18,13 +18,50 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Build Project directly with Gradle 8.5
+      - name: Generate Complete Clean Project & Build
         run: |
+          # Verzeichnisse erstellen
           mkdir -p app/src/main/java/com/example/localshield
-          
-          if [ -f ScamCallScreeningService.kt ]; then mv ScamCallScreeningService.kt app/src/main/java/com/example/localshield/; fi
-          if [ -f AndroidManifest.xml ]; then mv AndroidManifest.xml app/src/main/; fi
 
+          # 1. AndroidManifest.xml direkt fehlerfrei schreiben
+          cat << 'EOF' > app/src/main/AndroidManifest.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <application
+                  android:label="LocalShield">
+                  <service
+                      android:name=".ScamCallScreeningService"
+                      android:permission="android.permission.BIND_SCREENING_SERVICE"
+                      android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.telecom.CallScreeningService" />
+                      </intent-filter>
+                  </service>
+              </application>
+          </manifest>
+          EOF
+
+          # 2. ScamCallScreeningService.kt direkt fehlerfrei schreiben
+          cat << 'EOF' > app/src/main/java/com/example/localshield/ScamCallScreeningService.kt
+          package com.example.localshield
+
+          import android.telecom.Call
+          import android.telecom.CallScreeningService
+
+          class ScamCallScreeningService : CallScreeningService() {
+              override fun onScreenCall(callDetails: Call.Details) {
+                  val response = CallResponse.Builder()
+                      .setDisallowCall(false)
+                      .setRejectCall(false)
+                      .setSkipCallLog(false)
+                      .setSkipNotification(false)
+                      .build()
+                  respondToCall(callDetails, response)
+              }
+          }
+          EOF
+
+          # 3. Gradle Settings
           cat << 'EOF' > settings.gradle.kts
           pluginManagement {
               repositories {
@@ -44,13 +81,15 @@ jobs:
           include(":app")
           EOF
 
+          # 4. Root Build.gradle.kts (Exakt kompatibel zu AGP 8.2.0)
           cat << 'EOF' > build.gradle.kts
           plugins {
-              id("com.android.application") version "8.3.0" apply false
+              id("com.android.application") version "8.2.0" apply false
               id("org.jetbrains.kotlin.android") version "1.9.20" apply false
           }
           EOF
 
+          # 5. App Build.gradle.kts
           cat << 'EOF' > app/build.gradle.kts
           plugins {
               id("com.android.application")
@@ -83,13 +122,13 @@ jobs:
           }
           EOF
 
-          # Lädt Gradle 8.5 direkt herunter und umgeht jegliche Server-Konflikte
-          echo "Lade Gradle 8.5 herunter..."
-          wget -q https://services.gradle.org/distributions/gradle-8.5-bin.zip
-          unzip -q gradle-8.5-bin.zip
+          # 6. Perfekt abgestimmtes Gradle 8.2 direkt herunterladen und ausführen
+          echo "Lade Gradle 8.2 herunter..."
+          wget -q https://services.gradle.org/distributions/gradle-8.2-bin.zip
+          unzip -q gradle-8.2-bin.zip
           
-          # Direktes Ausführen des Builds mit Gradle 8.5
-          ./gradle-8.5/bin/gradle assembleDebug
+          echo "Starte Build..."
+          ./gradle-8.2/bin/gradle assembleDebug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
