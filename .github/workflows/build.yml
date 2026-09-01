@@ -20,10 +20,8 @@ jobs:
 
       - name: Generate Complete Clean Project & Build
         run: |
-          # Verzeichnisse erstellen
           mkdir -p app/src/main/java/com/example/localshield
 
-          # 1. AndroidManifest.xml
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -41,7 +39,6 @@ jobs:
           </manifest>
           EOF
 
-          # 2. ScamCallScreeningService.kt (Korrektur mit vollem Klassennamen)
           cat << 'EOF' > app/src/main/java/com/example/localshield/ScamCallScreeningService.kt
           package com.example.localshield
 
@@ -61,7 +58,6 @@ jobs:
           }
           EOF
 
-          # 3. Gradle Settings
           cat << 'EOF' > settings.gradle.kts
           pluginManagement {
               repositories {
@@ -81,7 +77,6 @@ jobs:
           include(":app")
           EOF
 
-          # 4. Root Build.gradle.kts
           cat << 'EOF' > build.gradle.kts
           plugins {
               id("com.android.application") version "8.2.0" apply false
@@ -89,7 +84,6 @@ jobs:
           }
           EOF
 
-          # 5. App Build.gradle.kts
           cat << 'EOF' > app/build.gradle.kts
           plugins {
               id("com.android.application")
@@ -122,13 +116,12 @@ jobs:
           }
           EOF
 
-          # 6. Gradle 8.2 herunterladen und bauen
           echo "Lade Gradle 8.2 herunter..."
           wget -q https://services.gradle.org/distributions/gradle-8.2-bin.zip
           unzip -q gradle-8.2-bin.zip
           
-          echo "Starte Build..."
-          ./gradle-8.2/bin/gradle assembleDebug
+          echo "Starte Build mit Stacktrace..."
+          ./gradle-8.2/bin/gradle assembleDebug --stacktrace
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
