@@ -23,11 +23,14 @@ jobs:
       - name: Accept Android SDK Licenses
         run: yes | sdkmanager --licenses || true
 
-      - name: Generate Clean Project & Build
+      - name: Generate Project & Build with SDK Link
         run: |
           mkdir -p app/src/main/java/com/example/localshield
 
-          # 1. Absolut minimales, fehlerfreies Manifest ohne UI-Abhängigkeiten
+          # WICHTIG: Teilt Gradle mit, wo das Android SDK auf dem Server liegt!
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+
+          # 1. AndroidManifest.xml
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -44,7 +47,7 @@ jobs:
           </manifest>
           EOF
 
-          # 2. Der CallScreeningService Code
+          # 2. ScamCallScreeningService.kt
           cat << 'EOF' > app/src/main/java/com/example/localshield/ScamCallScreeningService.kt
           package com.example.localshield
 
@@ -97,7 +100,7 @@ jobs:
           }
           EOF
 
-          # 5. App Build (ohne unnötige UI-Bibliotheken)
+          # 5. App Build
           cat << 'EOF' > app/build.gradle.kts
           plugins {
               id("com.android.application")
@@ -130,17 +133,18 @@ jobs:
           }
           EOF
 
-          # 6. Gradle herunterladen und bauen
+          # 6. Gradle laden und mit Stacktrace starten
           echo "Lade Gradle 8.2 herunter..."
           wget -q https://services.gradle.org/distributions/gradle-8.2-bin.zip
           unzip -q gradle-8.2-bin.zip
           
           echo "Starte Build..."
-          ./gradle-8.2/bin/gradle assembleDebug
+          ./gradle-8.2/bin/gradle assembleDebug --stacktrace
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: localshield-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+
 
