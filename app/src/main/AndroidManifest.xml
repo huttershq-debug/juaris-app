@@ -1,23 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <application
-        android:allowBackup="true"
-        android:label="LocalShield"
-        android:icon="@android:drawable/ic_menu_manage"
-        android:roundIcon="@android:drawable/ic_menu_manage"
-        android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+   <application
+    android:allowBackup="true"
+    android:label="LocalShield"
+    android:icon="@drawable/ic_shield"
+    android:roundIcon="@drawable/ic_shield"
+    android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
 
-        <activity
-            android:name="com.localshield.v5.MainActivity"
-            android:exported="true"
-            android:icon="@android:drawable/ic_menu_manage">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-    </application>
+    <activity
+        android:name=".com.localshield.v5.MainActivity"
+        android:exported="true"
+        android:icon="@drawable/ic_shield">
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+    </activity>
+</application>
 
 </manifest> 
