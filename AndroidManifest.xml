@@ -10,7 +10,7 @@
         
         <!-- Unsere Startseite mit App-Icon -->
         <activity
-            android:name=".MainActivity"
+            android:name="com.localshield.v5.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
