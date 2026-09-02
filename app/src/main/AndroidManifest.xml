@@ -5,6 +5,7 @@
     <application
         android:allowBackup="true"
         android:label="Localshield"
+        android:icon="@android:drawable/ic_menu_compass"
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
 
         <activity
