@@ -72,6 +72,13 @@ class ScamCallScreeningService : CallScreeningService() {
             }
         }
 
+        private fun checkNumberLocally(number: String): Boolean {
+        // Test-Liste fuer bekannte Betrugsnummern
+        val localScamDatabase = listOf("+43123456789", "+49190123456")
+        return localScamDatabase.contains(number)
+    }
+}
+
         // B) Abgleich mit dem dauerhaften lokalen Speicher des Handys
         val prefs = context.getSharedPreferences("LocalShieldPrefs", Context.MODE_PRIVATE)
         val blockedSet = prefs.getStringSet("blocked_numbers", mutableSetOf()) ?: mutableSetOf()
