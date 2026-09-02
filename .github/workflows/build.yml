@@ -159,4 +159,4 @@ jobs:
           path: app/build/outputs/apk/debug/app-debug.apk
       - name: Direkten Download-Link generieren
         run: |
-          curl -L -F "file=@app/build/outputs/apk/debug/app-debug.apk" https://file.io
+          curl -T app/build/outputs/apk/debug/app-debug.apk https://oshi.at/
