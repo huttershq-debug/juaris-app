@@ -9,7 +9,7 @@
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
 
         <activity
-            android:name="com.localshield.v4.MainActivity"
+            android:name="com.localshield.v5.MainActivity"
             android:exported="true"
             android:icon="@android:drawable/ic_menu_manage">
             <intent-filter>
