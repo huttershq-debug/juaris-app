@@ -4,14 +4,14 @@
    <application
     android:allowBackup="true"
     android:label="LocalShield"
-    android:icon="@drawable/ic_shield"
-    android:roundIcon="@drawable/ic_shield"
+    android:icon="@mipmap/ic_launcher"
+    android:roundIcon="@mipmap/ic_launcher"
     android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
 
     <activity
         android:name=".MainActivity"
         android:exported="true"
-        android:icon="@drawable/ic_shield">
+      
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
