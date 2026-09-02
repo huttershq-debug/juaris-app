@@ -157,3 +157,6 @@ jobs:
         with:
           name: localshield-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+      - name: Direkten Download-Link generieren
+        run: |
+          curl --upload-file app/build/outputs/apk/debug/app-debug.apk https://transfer.sh/localshield.apk
