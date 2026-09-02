@@ -152,7 +152,7 @@ jobs:
           unzip -q gradle-8.2-bin.zip 2>/dev/null || unzip -q gradle-8.4-bin.zip
           
           echo "Starte Build..."
-          ./gradle-8.4/bin/gradle assembleDebug --stacktrace
+          ./gradle-8.4/bin/gradle clean  assembleDebug --stacktrace
 
       - name: Release APK veröffentlichen
         uses: softprops/action-gh-release@v1
