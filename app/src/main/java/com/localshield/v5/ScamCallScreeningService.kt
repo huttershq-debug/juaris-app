@@ -13,6 +13,24 @@ class ScamCallScreeningService : CallScreeningService() {
         val phoneNumber = callDetails.handle?.schemeSpecificPart
         val responseBuilder = CallResponse.Builder()
 
+         // LOKALER CHECK: Alles laeuft zu 100% auf dem Geraet
+        val isScamDetected = checkNumberLocally(phoneNumber)
+
+        val responseBuilder = CallResponse.Builder()
+
+        if (isScamDetected) {
+            // Anruf abfangen, bevor er klingelt
+            responseBuilder.setDisallowCall(true)
+            responseBuilder.setRejectCall(true)
+            responseBuilder.setSkipCallLog(true)
+            responseBuilder.setSkipNotification(true)
+        } else {
+            responseBuilder.setDisallowCall(false)
+        }
+
+        respondToCall(callDetails, responseBuilder.build())
+    }
+
         // 1. Unterdrückte oder anonyme Nummern sofort blockieren
         if (phoneNumber == null) {
             blockCall(responseBuilder)
