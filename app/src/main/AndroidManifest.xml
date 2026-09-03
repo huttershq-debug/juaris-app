@@ -4,8 +4,8 @@
    <application
     android:allowBackup="true"
     android:label="LocalShield"
-    android:icon="@mipmap/ic_launcher"
-    android:roundIcon="@mipmap/ic_launcher"
+    android:icon="@mipmap/julias_icon"
+    android:roundIcon="@mipmap/julias_icon"
     android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
 
     <activity
