@@ -170,7 +170,9 @@ fun ControlToggleItem(title: String, description: String, checked: Boolean, onCh
             Switch(
                 checked = checked,
                 onCheckedChange = onCheckedChange,
-                colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFF4CAF50))
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = Color(0xFF4CAF50)
+                )
             )
         }
     }
