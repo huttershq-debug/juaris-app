@@ -1,8 +1,8 @@
-name: Build Android APK
+Name: Build Android APK
 
 on: [push]
 permissions:
-   contents: write 
+   contents: write
 
 jobs:
   build:
@@ -32,17 +32,20 @@ jobs:
           # 1. SDK-Pfad für Gradle hinterlegen
           echo "sdk.dir=$ANDROID_HOME" > local.properties
 
-          # 2. WICHTIG: AndroidX und Jetifier aktivieren (Genau das hat Gradle verlangt!)
+          # 2. WICHTIG: AndroidX und Jetifier aktivieren
           cat << 'EOF' > gradle.properties
           android.useAndroidX=true
           android.enableJetifier=true
           EOF
 
-          # 3. AndroidManifest.xml
+          # 3. AndroidManifest.xml (JETZT MIT ICON-VERKNÜPFUNG!)
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-              <application android:label="LocalShield">
+              <application 
+                  android:label="LocalShield"
+                  android:icon="@mipmap/julias_icon"
+                  android:roundIcon="@mipmap/julias_icon">
                   <service
                       android:name=".ScamCallScreeningService"
                       android:permission="android.permission.BIND_SCREENING_SERVICE"
@@ -108,7 +111,7 @@ jobs:
           }
           EOF
 
-          # 7. App Build
+          # 7. App Build (JETZT MIT VERSIONCODE 5!)
           cat << 'EOF' > app/build.gradle.kts
           plugins {
               id("com.android.application")
@@ -123,8 +126,8 @@ jobs:
                   applicationId = "com.example.localshield"
                   minSdk = 24
                   targetSdk = 34
-                  versionCode = 1
-                  versionName = "1.0"
+                  versionCode = 5
+                  versionName = "5.0"
               }
 
               compileOptions {
@@ -150,9 +153,9 @@ jobs:
           echo "Lade Gradle 8.4 herunter..."
           wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
           unzip -q gradle-8.2-bin.zip 2>/dev/null || unzip -q gradle-8.4-bin.zip
-          
+         
           echo "Starte Build..."
-          ./gradle-8.4/bin/gradle clean  assembleDebug --stacktrace
+          ./gradle-8.4/bin/gradle clean assembleDebug --stacktrace
 
       - name: Release APK veröffentlichen
         uses: softprops/action-gh-release@v1
