@@ -11,7 +11,7 @@ class SmsFilterReceiver : BroadcastReceiver() {
     companion object {
         private const val TAG = "SmsFilter"
         private val SPAM_PATTERNS = listOf(
-            "paket", "konto gesperrt", "zollgebühr", "klicken sie", 
+            "paket", "konto gesperrt", "zollgebühr", "klicken sie",
             "verification code", "banking update", "wallet locked"
         )
     }
@@ -19,11 +19,11 @@ class SmsFilterReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Telephony.Sms.Intents.SMS_RECEIVED_ACTION) {
             val messages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
-            
+
             for (message in messages) {
                 val sender = message.displayOriginatingAddress ?: "Unbekannt"
                 val body = message.messageBody ?: ""
-                
+
                 Log.d(TAG, "Eingehende SMS von $sender analysiert.")
 
                 if (isPhishingOrSpam(body)) {
@@ -39,7 +39,7 @@ class SmsFilterReceiver : BroadcastReceiver() {
         return SPAM_PATTERNS.any { lowerText.contains(it) }
     }
 
-    private fun logBlockedSsmLocally(context: Context, sender: String, body: String) {
+    private fun logBlockedSmsLocally(context: Context, sender: String, body: String) {
         Log.d(TAG, "BLOCKIERT: SMS von $sender wurde lokal gefiltert.")
     }
 }
