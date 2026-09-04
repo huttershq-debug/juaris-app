@@ -1,4 +1,4 @@
-package com.juaris.app
+package com.localshield.v5
 
 object LocalPhishingAnalyzer {
 
