@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.localshield.v5'
+    namespace 'com.juaris.app'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.localshield.v5"
+        applicationId "com.juaris.app"
         minSdk 26
         targetSdk 34
         versionCode 5
