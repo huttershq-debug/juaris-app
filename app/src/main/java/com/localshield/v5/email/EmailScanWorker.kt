@@ -1,4 +1,4 @@
-package com.localshield.v5.email
+package com.juaris.app.email
 
 import android.content.Context
 import android.util.Log
