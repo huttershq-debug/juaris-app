@@ -1,8 +1,3 @@
-
-Benedikt Wolfgang Hütter <hutters.hq@gmail.com>
-17:21 (vor 0 Minuten)
-an mich
-
 package com.localshield.v5
 
 import android.os.Bundle
