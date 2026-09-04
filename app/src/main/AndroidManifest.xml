@@ -7,7 +7,7 @@
 
    <application
     android:allowBackup="true"
-    android:label="LocalShield"
+    android:label="@string/app_name"
     android:icon="@mipmap/julias_icon"
     android:roundIcon="@mipmap/julias_icon"
     android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
