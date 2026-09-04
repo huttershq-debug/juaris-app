@@ -20,15 +20,20 @@
     </intent-filter>
 </receiver>
 
+ <!-- Das neue High-End Dashboard als Start-Bildschirm -->
+        <activity 
+            android:name=".ui.DashboardActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
-    <activity
-        android:name=".MainActivity"
-        android:exported="true"
-      
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
+        <!-- Die alte MainActivity läuft im Hintergrund weiter -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true" />
     </activity>
 </application>
 
