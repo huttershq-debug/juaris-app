@@ -1,4 +1,4 @@
-package com.localshield.v5.sms
+package com.juaris.app.sms
 
 import android.content.BroadcastReceiver
 import android.content.Context
