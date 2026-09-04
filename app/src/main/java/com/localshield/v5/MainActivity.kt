@@ -1,32 +1,51 @@
 package com.localshield.v5
 
 import android.os.Bundle
-import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
-import com.localshield.v5.email.EmailScanWorker
-import java.util.concurrent.TimeUnit
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        val textView = TextView(this)
-        textView.text = "🛡️ LocalShield läuft erfolgreich!"
-        textView.textSize = 20f
-        setContentView(textView)
-
-        // --- Lokalen E-Mail-Hintergrund-Scan starten ---
-        startEmailBackgroundScan()
-    }
-
-    private fun startEmailBackgroundScan() {
-        // Plant einen periodischen Scan ein (z. B. alle 30 Minuten auf dem S23)
-        val emailWorkRequest = PeriodicWorkRequestBuilder<EmailScanWorker>(
-            30, TimeUnit.MINUTES
-        ).build()
-
-        WorkManager.getInstance(applicationContext).enqueue(emailWorkRequest)
+        setContent {
+            MaterialTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    DashboardScreen()
+                }
+            }
+        }
     }
 }
+
+@Composable
+fun DashboardScreen() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "LocalShield Security",
+            style = MaterialTheme.typography.headlineMedium
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(text = "Status: Aktiv & Geschützt", style = MaterialTheme.typography.bodyLarge)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "SMS-Filter: Aktiv (Priorität 999)", style = MaterialTheme.typography.bodyMedium)
+            }
+        }
+    }
+}
+
