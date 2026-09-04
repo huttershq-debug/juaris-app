@@ -1,28 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-   <uses-permission android:name="android.permission.RECEIVE_SMS" />
-<uses-permission android:name="android.permission.READ_SMS" />
-   <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Notwendige Berechtigungen für den Schutz -->
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
-   <application
-    android:allowBackup="true"
-    android:label="@string/app_name"
-    android:icon="@mipmap/julias_icon"
-    android:roundIcon="@mipmap/julias_icon"
-    android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
-      <receiver 
-    android:name=".sms.SmsFilterReceiver"
-    android:exported="true"
-    android:permission="android.permission.BROADCAST_SMS">
-    <intent-filter android:priority="999">
-        <action android:name="android.provider.Telephony.SMS_RECEIVED" />
-    </intent-filter>
-</receiver>
+    <application
+        android:allowBackup="true"
+        android:label="Juaris Security"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Material3.DayNight.NoActionBar">
 
- <!-- Das neue High-End Dashboard als Start-Bildschirm -->
-        <activity 
-            android:name=".ui.DashboardActivity"
+        <!-- Das Haupt-Dashboard als Start-Bildschirm (Jetpack Compose) -->
+        <activity
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,11 +24,15 @@
             </intent-filter>
         </activity>
 
-        <!-- Die alte MainActivity läuft im Hintergrund weiter -->
-        <activity
-            android:name=".MainActivity"
-            android:exported="true" />
-    </activity>
-</application>
+        <!-- Der SMS-Filter für eingehende Nachrichten -->
+        <receiver
+            android:name=".sms.SmsFilterReceiver"
+            android:exported="true"
+            android:permission="android.permission.BROADCAST_SMS">
+            <intent-filter android:priority="999">
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
 
-</manifest> 
+    </application>
+</manifest>
