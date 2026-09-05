@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Juaris Security</string>
+    <string name="status_protected">Dispositivo totalmente protegido (Entrada e Saída)</string>
+    <string name="status_warning">Aviso de segurança detectado</string>
+    <string name="tab_logs">Registros de segurança</string>
+    <string name="tab_settings">Configurações</string>
+    <string name="call_protection_title">Proteção de chamadas</string>
+    <string name="log_call_incoming_blocked">Chamada recebida bloqueada: %1$s</string>
+    <string name="log_call_outgoing_blocked">Chamada de risco enviada interrompida: %1$s</string>
+    <string name="sms_protection_title">Filtro de Phishing de SMS</string>
+    <string name="log_sms_incoming_blocked">SMS de phishing recebido bloqueado: %1$s</string>
+    <string name="log_sms_outgoing_blocked">SMS malicioso enviado interrompido: %1$s</string>
+    <string name="email_protection_title">Segurança de e-mail</string>
+    <string name="log_email_incoming_blocked">E-mail malicioso recebido bloqueado: %1$s</string>
+    <string name="log_email_outgoing_blocked">E-mail enviado interrompido (Risco de segurança): %1$s</string>
+</resources>
