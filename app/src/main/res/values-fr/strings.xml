@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Juaris Security</string>
+    <string name="app_name">Juaris</string>
     <string name="status_protected">Appareil totalement protégé (Entrant &amp; Sortant)</string>
     <string name="status_warning">Alerte de sécurité détectée</string>
     <string name="tab_logs">Journaux de sécurité</string>
