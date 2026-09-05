@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Keamanan Juaris</string>
+    <string name="status_protected">Perangkat dilindungi penuh (Masuk & Keluar)</string>
+    <string name="status_warning">Peringatan keamanan terdeteksi</string>
+    <string name="tab_logs">Log Keamanan</string>
+    <string name="tab_settings">Pengaturan</string>
+    <string name="call_protection_title">Perlindungan Panggilan</string>
+    <string name="log_call_incoming_blocked">Panggilan masuk diblokir: %1$s</string>
+    <string name="log_call_outgoing_blocked">Panggilan keluar berisiko dihentikan: %1$s</string>
+    <string name="sms_protection_title">Filter Phishing SMS</string>
+    <string name="log_sms_incoming_blocked">SMS phishing masuk diblokir: %1$s</string>
+    <string name="log_sms_outgoing_blocked">SMS berbahaya keluar dihentikan: %1$s</string>
+    <string name="email_protection_title">Keamanan Email</string>
+    <string name="log_email_incoming_blocked">Email berbahaya masuk diblokir: %1$s</string>
+    <string name="log_email_outgoing_blocked">Email keluar dihentikan (Risiko Keamanan): %1$s</string>
+</resources>
