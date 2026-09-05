@@ -13,8 +13,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        txtLogList = findViewById(R.id.txtLogList)
         val txtSwarmStatus = findViewById<TextView>(R.id.txtSwarmStatus)
+        txtLogList = findViewById<TextView>(R.id.txtLogList)
 
         // Status für das lokale P2P-Schwarmnetzwerk unter Julias Design
         txtSwarmStatus.text = "Schwarm-Signaturen lokal: Aktiv (P2P-Mesh verbunden)"
@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
         logBuilder.append("[MONITOR] Aktive Schutzvektoren bereit...\n")
         txtLogList.text = logBuilder.toString()
 
-        // Live-Event-Brücke anbinden, damit gefangene Bedrohungen direkt ins Dashboard schreiben
+        // Live-Event-Brücke anbinden
         JuarisEventBus.register { eventMessage ->
             runOnUiThread {
                 logBuilder.append("$eventMessage\n")
