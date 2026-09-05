@@ -127,10 +127,7 @@ fun JuarisMainDashboard() {
         }
     }
 }
-
-data class TabItem(val title: String, val icon: ImageVector)
-data class SecurityLogEntity(val timestamp: Long, val module: String, val description: String, val status: String)
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardContent(
     logs: List<SecurityLogEntity>,
@@ -259,11 +256,11 @@ fun DashboardContent(
                         Text("Anruf-Schutz")
                         Switch(checked = callProtection, onCheckedChange = { callProtection = it })
                     }
-                    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Text("SMS-Filter")
                         Switch(checked = smsProtection, onCheckedChange = { smsProtection = it })
                     }
-                    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Text("E-Mail-Scan")
                         Switch(checked = emailProtection, onCheckedChange = { emailProtection = it })
                     }
