@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Juaris 安全</string>
+    <string name="app_name">Juaris</string>
     <string name="status_protected">设备已完全保护（进出双向）</string>
     <string name="status_warning">检测到安全警告</string>
     <string name="tab_logs">安全日志</string>
