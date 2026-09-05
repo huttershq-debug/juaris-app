@@ -1,6 +1,6 @@
 <resources>
     <!-- App General -->
-    <string name="app_name">Juaris Security</string>
+    <string name="app_name">Juaris</string>
     <string name="status_protected">Device is fully protected (In &amp; Out)</string>
     <string name="status_warning">Security warning detected</string>
 
