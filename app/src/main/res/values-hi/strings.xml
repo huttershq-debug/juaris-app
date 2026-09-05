@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Juaris सुरक्षा</string>
+    <string name="app_name">Juaris</string>
     <string name="status_protected">उपकरण पूरी तरह से सुरक्षित है (आने-जाने दोनों)</string>
     <string name="status_warning">सुरक्षा चेतावनी का पता चला</string>
     <string name="tab_logs">सुरक्षा लॉग</string>
