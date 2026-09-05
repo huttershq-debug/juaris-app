@@ -1,0 +1,21 @@
+
+Benedikt Wolfgang Hütter <hutters.hq@gmail.com>
+18:12 (vor 0 Minuten)
+an mich
+
+<resources>
+    <string name="app_name">Juaris Security</string>
+    <string name="status_protected">Appareil totalement protégé (Entrant & Sortant)</string>
+    <string name="status_warning">Alerte de sécurité détectée</string>
+    <string name="tab_logs">Journaux de sécurité</string>
+    <string name="tab_settings">Paramètres</string>
+    <string name="call_protection_title">Protection des appels</string>
+    <string name="log_call_incoming_blocked">Appel entrant bloqué : %1$s</string>
+    <string name="log_call_outgoing_blocked">Appel sortant à risques arrêté : %1$s</string>
+    <string name="sms_protection_title">Filtre SMS Phishing</string>
+    <string name="log_sms_incoming_blocked">SMS de phishing entrant bloqué : %1$s</string>
+    <string name="log_sms_outgoing_blocked">SMS malveillant sortant arrêté : %1$s</string>
+    <string name="email_protection_title">Sécurité des e-mails</string>
+    <string name="log_email_incoming_blocked">E-mail malveillant entrant bloqué : %1$s</string>
+    <string name="log_email_outgoing_blocked">E-mail sortant arrêté (Risque de sécurité) : %1$s</string>
+</resources>
