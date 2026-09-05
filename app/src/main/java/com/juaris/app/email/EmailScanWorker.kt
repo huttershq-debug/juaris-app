@@ -1,22 +1,14 @@
-package com.juaris.app.email
+package com.juaris.app
 
-import android.content.Context
-import android.util.Log
-import androidx.work.Worker
-import androidx.work.WorkerParameters
-import com.juaris.app.LocalPhishingAnalyzer
-
-class EmailScanWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
-    override fun doWork(): Result {
-        val sampleMessage = "Ihr Konto wurde temporär gesperrt. Klicken Sie hier für die Verifizierung."
-        val result = LocalPhishingAnalyzer.analyzeText(sampleMessage)
-
-        if (result.isSuspicious) {
-            Log.w("JuarisEmailScan", "Warnung: Verdächtiger Inhalt im Hintergrund erkannt! Score: ${result.riskScore}")
-        } else {
-            Log.i("JuarisEmailScan", "Hintergrund-Scan erfolgreich: Keine Bedrohung.")
+class EmailScanWorker {
+    fun scanLocalEmailContent(sender: String, subject: String): Boolean {
+        val hash = QuantumEngine.generateSecureHash(subject)
+        val isThreat = subject.contains("Invoice", ignoreCase = true) || subject.contains("Bank", ignoreCase = true)
+        
+        if (isThreat) {
+            JuarisEventBus.postEvent("[!] E-Mail-Bedrohung erkannt: $sender (Quantum-Hash: ${hash.take(8)})")
+            return true
         }
-
-        return Result.success()
+        return false
     }
 }
