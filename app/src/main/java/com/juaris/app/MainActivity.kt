@@ -1,6 +1,5 @@
-package com.juaris.app
-
 @file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+package com.juaris.app
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
