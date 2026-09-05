@@ -1,4 +1,4 @@
-package com.juaris.app
+package com.juaris.app.sms
 
 import android.content.BroadcastReceiver
 import android.content.Context
