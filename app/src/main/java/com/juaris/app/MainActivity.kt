@@ -42,6 +42,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+data class TabItem(val title: String, val icon: ImageVector)
 fun JuarisMainDashboard() {
     val context = LocalContext.current
     var selectedTab by remember { mutableStateOf(0) }
