@@ -32,13 +32,6 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import java.security.MessageDigest
 
-// Datenmodell für Sicherheits-Logs
-data class SecurityLogEntity(
-    val timestamp: Long,
-    val module: String,
-    val description: String,
-    val status: String
-)
 
 class MainActivity : ComponentActivity() {
 
