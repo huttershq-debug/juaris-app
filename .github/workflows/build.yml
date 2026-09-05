@@ -27,7 +27,7 @@ jobs:
 
       - name: Generate Project & Build with AndroidX Support
         run: |
-          mkdir -p app/src/main/java/com/example/localshield
+          mkdir -p app/src/main/java/com/juaris/app
 
           # 1. SDK-Pfad für Gradle hinterlegen
           echo "sdk.dir=$ANDROID_HOME" > local.properties
@@ -43,7 +43,7 @@ jobs:
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <application 
-                  android:label="LocalShield"
+                  android:label="Juaris"
                   android:icon="@mipmap/julias_icon"
                   android:roundIcon="@mipmap/julias_icon">
                   <service
@@ -59,8 +59,8 @@ jobs:
           EOF
 
           # 4. ScamCallScreeningService.kt
-          cat << 'EOF' > app/src/main/java/com/example/localshield/ScamCallScreeningService.kt
-          package com.example.localshield
+          cat << 'EOF' > app/src/main/java/com/juaris/app/ScamCallScreeningService.kt
+          package com.juaris.app
 
           import android.telecom.Call
           import android.telecom.CallScreeningService
@@ -99,7 +99,7 @@ jobs:
                   mavenCentral()
               }
           }
-          rootProject.name = "LocalShield"
+          rootProject.name = "Juaris"
           include(":app")
           EOF
 
@@ -119,11 +119,11 @@ jobs:
           }
 
           android {
-              namespace = "com.example.localshield"
+              namespace = "com.juaris.app"
               compileSdk = 34
 
               defaultConfig {
-                  applicationId = "com.example.localshield"
+                  applicationId = "com.juaris.app"
                   minSdk = 24
                   targetSdk = 34
                   versionCode = 5
