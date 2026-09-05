@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Juaris Sicherheit</string>
+    <string name="status_protected">Gerät ist voll geschützt (Ein & Aus)</string>
+    <string name="status_warning">Sicherheitswarnung erkannt</string>
+    <string name="tab_logs">Sicherheits-Protokolle</string>
+    <string name="tab_settings">Einstellungen</string>
+    <string name="call_protection_title">Anrufschutz</string>
+    <string name="log_call_incoming_blocked">Eingehender Anruf blockiert: %1$s</string>
+    <string name="log_call_outgoing_blocked">Ausgehender Risiko-Anruf gestoppt: %1$s</string>
+    <string name="sms_protection_title">SMS-Phishing-Filter</string>
+    <string name="log_sms_incoming_blocked">Eingehende Phishing-SMS blockiert: %1$s</string>
+    <string name="log_sms_outgoing_blocked">Ausgehende schädliche SMS gestoppt: %1$s</string>
+    <string name="email_protection_title">E-Mail-Sicherheit</string>
+    <string name="log_email_incoming_blocked">Eingehende schädliche E-Mail blockiert: %1$s</string>
+    <string name="log_email_outgoing_blocked">Ausgehende E-Mail gestoppt (Sicherheitsrisiko): %1$s</string>
+</resources>
