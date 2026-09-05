@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">جوارس سیکیورٹی</string>
+    <string name="status_protected">آلہ مکمل طور پر محفوظ ہے (آنے اور جانے والا)</string>
+    <string name="status_warning">سیکیورٹی کی تنبیہ کا پتہ چلا</string>
+    <string name="tab_logs">سیکیورٹی لاگز</string>
+    <string name="tab_settings">ترتیبات</string>
+    <string name="call_protection_title">کال پروٹیکشن</string>
+    <string name="log_call_incoming_blocked">آنے والی کال مسدود کر دی گئی: %1$s</string>
+    <string name="log_call_outgoing_blocked">خطرناک جانے والی کال روک دی گئی: %1$s</string>
+    <string name="sms_protection_title">ایس ایم ایس فشنگ فلٹر</string>
+    <string name="log_sms_incoming_blocked">آنے والا فشنگ ایس ایم ایس مسدود کر دیا گیا: %1$s</string>
+    <string name="log_sms_outgoing_blocked">جانے والا نقصان دہ ایس ایم ایس روک دیا گیا: %1$s</string>
+    <string name="email_protection_title">ای میل سیکیورٹی</string>
+    <string name="log_email_incoming_blocked">آنے والا نقصان دہ ای میل مسدود کر دیا گیا: %1$s</string>
+    <string name="log_email_outgoing_blocked">جانے والا ای میل روک دیا گیا (سیکیورٹی رسک): %1$s</string>
+</resources>
