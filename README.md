@@ -1,1 +1,1 @@
-# localshield-app
+# juaris-app
