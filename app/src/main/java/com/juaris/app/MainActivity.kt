@@ -24,6 +24,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import java.security.MessageDigest
 
+// Hier sauber als Top-Level-Klasse definiert:
+data class TabItem(val title: String, val icon: ImageVector)
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +45,6 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-data class TabItem(val title: String, val icon: ImageVector)
 fun JuarisMainDashboard() {
     val context = LocalContext.current
     var selectedTab by remember { mutableStateOf(0) }
