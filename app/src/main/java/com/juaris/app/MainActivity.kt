@@ -1,6 +1,7 @@
 package com.juaris.app
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -13,8 +14,11 @@ import androidx.compose.ui.unit.dp
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Testlauf der heiligen Dreifaltigkeit beim Start im Hintergrund
+        testSecurityEngine()
+
         setContent {
-            // Nutzen direkt das eingebaute MaterialTheme, damit keine Extrafdatei fehlt
             MaterialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -24,6 +28,20 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun testSecurityEngine() {
+        // 1. Test Anruf
+        val callTest = SecurityEngine.analyzeIncomingCall("+43123456789")
+        Log.d("JuarisTest", "Call Result: $callTest")
+
+        // 2. Test SMS
+        val smsTest = SecurityEngine.analyzeIncomingSms("+43660123456", "Dein Konto gesperrt!")
+        Log.d("JuarisTest", "SMS Result: $smsTest")
+
+        // 3. Test E-Mail
+        val emailTest = SecurityEngine.analyzeIncomingEmail("info@bank.com", "Gewinn!", "Du hast gewonnen")
+        Log.d("JuarisTest", "Email Result: $emailTest")
     }
 }
 
@@ -35,16 +53,12 @@ fun JuarisMainScreen() {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // App-Titel
         Text(
             text = stringResource(R.string.app_name),
             style = MaterialTheme.typography.headlineLarge
         )
 
-        // Status-Anzeige (Live-Schutz)
-        Card(
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Card(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     text = stringResource(R.string.status_protected),
@@ -54,7 +68,6 @@ fun JuarisMainScreen() {
             }
         }
 
-        // Sektionen für die Schutzbereiche (In & Out)
         ProtectionItem(title = stringResource(R.string.call_protection_title))
         ProtectionItem(title = stringResource(R.string.sms_protection_title))
         ProtectionItem(title = stringResource(R.string.email_protection_title))
@@ -63,14 +76,9 @@ fun JuarisMainScreen() {
 
 @Composable
 fun ProtectionItem(title: String) {
-    Card(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium
-            )
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier.padding(12.dp)) {
+            Text(text = title, style = MaterialTheme.typography.titleMedium)
         }
     }
 }
