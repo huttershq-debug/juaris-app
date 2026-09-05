@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Keamanan Juaris</string>
+    <string name="app_name">Keamanan</string>
     <string name="status_protected">Perangkat dilindungi penuh (Masuk &amp; Keluar)</string>
     <string name="status_warning">Peringatan keamanan terdeteksi</string>
     <string name="tab_logs">Log Keamanan</string>
