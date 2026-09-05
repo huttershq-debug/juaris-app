@@ -10,8 +10,8 @@
 
     <application
         android:allowBackup="false"
-        android:icon="@miomap/julias_icon"
-        android:roundIcon="@mipmap/julias_icon"
+        android:icon="@miomap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:label="Juaris Security"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
