@@ -77,7 +77,8 @@ fun JuarisMainScreen() {
 @Composable
 fun ProtectionItem(title: String) {
     Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier.padding(12.dp)) {
+        // HIER WAR DER FEHLER: modifier.padding -> Korrigiert zu Modifier.padding
+        Column(modifier = Modifier.padding(12.dp)) {
             Text(text = title, style = MaterialTheme.typography.titleMedium)
         }
     }
