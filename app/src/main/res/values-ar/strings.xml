@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">أمان جواريس</string>
+    <string name="status_protected">الجهاز محمي بالكامل (وارد وصادر)</string>
+    <string name="status_warning">تم اكتشاف تحذير أمني</string>
+    <string name="tab_logs">سجلات الأمان</string>
+    <string name="tab_settings">الإعدادات</string>
+    <string name="call_protection_title">حماية المكالمات</string>
+    <string name="log_call_incoming_blocked">تم حظر المكالمة الواردة: %1$s</string>
+    <string name="log_call_outgoing_blocked">تم إيقاف المكالمة الصادرة الخطرة: %1$s</string>
+    <string name="sms_protection_title">مرشح التصيد الاحتيالي للرسائل القصيرة</string>
+    <string name="log_sms_incoming_blocked">تم حظر رسالة التصيد الواردة: %1$s</string>
+    <string name="log_sms_outgoing_blocked">تم إيقاف الرسالة الضارة الصادرة: %1$s</string>
+    <string name="email_protection_title">أمان البريد الإلكتروني</string>
+    <string name="log_email_incoming_blocked">تم حظر البريد الإلكتروني الضار الوارد: %1$s</string>
+    <string name="log_email_outgoing_blocked">تم إيقاف البريد الإلكتروني الصادر (خطر أمني): %1$s</string>
+</resources>
