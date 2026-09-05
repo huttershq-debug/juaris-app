@@ -1,4 +1,4 @@
-package com.localshield.v5
+package com.juaris.app
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
