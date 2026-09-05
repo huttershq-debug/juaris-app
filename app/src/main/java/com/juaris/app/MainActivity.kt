@@ -1,5 +1,7 @@
 package com.juaris.app
 
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
@@ -31,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import java.security.MessageDigest
+import androidx.compose.material3.ExperimentalMaterial3Api
 
 
 class MainActivity : ComponentActivity() {
