@@ -1,25 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    package="com.juaris.app"
 
-    <!-- Notwendige Berechtigungen für den Schutz -->
+    <!-- Die heilige Dreifaltigkeit: Berechtigungen für lokale Überwachung -->
+    <!-- 1. Anruf-Überwachung -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_CALL_LOG" />
+
+    <!-- 2. SMS-Überwachung -->
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
-    <uses-permission android:name="android.permission.INTERNET" />
-<uses-permission android:name="android.permission.READ_PHONE_STATE" />
-<uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" />
-<uses-permission android:name="android.permission.READ_CALL_LOG" />
-<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <!-- 3. E-Mail & Lokaler Speicher -->
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
 
     <application
         android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:icon="@mipmap/julias_icon"
-        android:roundIcon="@mipmap/julias_icon"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
-
-        <!-- Das Haupt-Dashboard als Start-Bildschirm (Jetpack Compose) -->
+        android:theme="@style/Theme.Material3.DayNight.NoActionBar">
+        
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -29,24 +30,6 @@
             </intent-filter>
         </activity>
 
-        <!-- Der SMS-Filter für eingehende Nachrichten -->
-        <receiver
-            android:name=".sms.SmsFilterReceiver"
-            android:exported="true"
-            android:permission="android.permission.BROADCAST_SMS">
-            <intent-filter android:priority="999">
-                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
-            </intent-filter>
-        </receiver>
- <!-- Der Anrufschutz-Dienst (CallScreeningService) -->
-        <service
-            android:name=".ScamCallScreeningService"
-            android:permission="android.permission.BIND_SCREENING_SERVICE"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.telecom.CallScreeningService" />
-            </intent-filter>
-        </service>
-
     </application>
+
 </manifest>
