@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">জুয়ারিস সিকিউরিটি</string>
+    <string name="app_name">জুয়ারিস</string>
     <string name="status_protected">ডিভাইস সম্পূর্ণ সুরক্ষিত (আসা ও যাওয়া)</string>
     <string name="status_warning">নিরাপত্তা সতর্কতা সনাক্ত করা হয়েছে</string>
     <string name="tab_logs">সিকিউরিটি লগ</string>
