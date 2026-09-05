@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "LocalShield"
+rootProject.name = "Juaris"
 include ':app'
