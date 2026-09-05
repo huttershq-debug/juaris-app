@@ -3,6 +3,7 @@ package com.juaris.app
 import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.juaris.app.R
 
 class MainActivity : AppCompatActivity() {
 
@@ -17,17 +18,15 @@ class MainActivity : AppCompatActivity() {
         txtSwarmStatus.text = "Schwarm-Signaturen lokal: Aktiv (P2P-Mesh verbunden)"
         
         // Fester, transparenter System-Log für alle drei Überwachungsvektoren
-        val systemLog = StringBuilder().apply {
-            append("[*] Juaris Sovereign Engine gestartet.\n")
-            append("[*] 100% Offline-Schutz aktiv (Keine Cloud-Anbindung).\n")
-            append("----------------------------------------\n")
-            append("[MONITOR] Aktive Schutzvektoren:\n")
-            append(" [+] Anruf-Filter (Call Blocking)\n")
-            append(" [+] SMS-Filter (Phishing/Spam)\n")
-            append(" [+] E-Mail-Filter (Lokal geparst)\n")
-            append("----------------------------------------\n")
-            append("[LIVE-LOG] System bereit. Warte auf Ereignisse...\n")
-        }.toString()
+        val systemLog = "[*] Juaris Sovereign Engine gestartet.\n" +
+                "[*] 100% Offline-Schutz aktiv (Keine Cloud-Anbindung).\n" +
+                "----------------------------------------\n" +
+                "[MONITOR] Aktive Schutzvektoren:\n" +
+                " [+] Anruf-Filter (Call Blocking)\n" +
+                " [+] SMS-Filter (Phishing/Spam)\n" +
+                " [+] E-Mail-Filter (Lokal geparst)\n" +
+                "----------------------------------------\n" +
+                "[LIVE-LOG] System bereit. Warte auf Ereignisse...\n"
 
         txtLogList.text = systemLog
     }
