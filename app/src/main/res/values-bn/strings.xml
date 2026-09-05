@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">জুয়ারিস সিকিউরিটি</string>
+    <string name="status_protected">ডিভাইস সম্পূর্ণ সুরক্ষিত (আসা ও যাওয়া)</string>
+    <string name="status_warning">নিরাপত্তা সতর্কতা সনাক্ত করা হয়েছে</string>
+    <string name="tab_logs">সিকিউরিটি লগ</string>
+    <string name="tab_settings">সেটিংস</string>
+    <string name="call_protection_title">কল সুরক্ষা</string>
+    <string name="log_call_incoming_blocked">আটকানো ইনকামিং কল: %1$s</string>
+    <string name="log_call_outgoing_blocked">আটকানো ঝুঁকিপূর্ণ আউটগোয়িং কল: %1$s</string>
+    <string name="sms_protection_title">এসএমএস ফিশিং ফিল্টার</string>
+    <string name="log_sms_incoming_blocked">আটকানো ইনকামিং ফিশিং এসএমএস: %1$s</string>
+    <string name="log_sms_outgoing_blocked">আটকানো ক্ষতিকর আউটগোয়িং এসএমএস: %1$s</string>
+    <string name="email_protection_title">ইমেল সুরক্ষা</string>
+    <string name="log_email_incoming_blocked">আটকানো ক্ষতিকর ইনকামিং ইমেল: %1$s</string>
+    <string name="log_email_outgoing_blocked">আটকানো আউটগোয়িং ইমেল (নিরাপত্তা ঝুঁকি): %1$s</string>
+</resources>
