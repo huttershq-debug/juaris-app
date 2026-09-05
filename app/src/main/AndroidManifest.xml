@@ -1,16 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Die heilige Dreifaltigkeit: Berechtigungen für lokale Überwachung -->
-    <!-- 1. Anruf-Überwachung -->
+    <!-- Die heilige Dreifaltigkeit: Berechtigungen -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
-
-    <!-- 2. SMS-Überwachung -->
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
-
-    <!-- 3. E-Mail & Lokaler Speicher -->
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
 
     <application
@@ -29,6 +24,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Der Hintergrund-Wächter für Anrufe und SMS -->
+        <receiver
+            android:name=".JuarisReceiver"
+            android:exported="true"
+            android:permission="android.permission.BROADCAST_SMS">
+            <intent-filter>
+                <action android:name="android.intent.action.PHONE_STATE" />
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
 
     </application>
 
