@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import com.localshield.v5.LocalPhishingAnalyzer
+import com.juaris.app.LocalPhishingAnalyzer
 
 class EmailScanWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
     override fun doWork(): Result {
