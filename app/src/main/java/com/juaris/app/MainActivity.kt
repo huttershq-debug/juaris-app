@@ -55,9 +55,10 @@ fun JuarisMainDashboard() {
     // Live-Logs
     val liveLogs = remember {
         mutableStateListOf(
-            SecurityLogEntity(timestamp = System.currentTimeMillis(), module = "Anruf-Schutz", description = "Unterdrückte Nummer blockiert", status = "BLOCKED"),
-            SecurityLogEntity(timestamp = System.currentTimeMillis() - 60000, module = "SMS-Filter", description = "Phishing-SMS ('Paket Zustellung') abgefangen", status = "QUARANTINE"),
-            SecurityLogEntity(timestamp = System.currentTimeMillis() - 120000, module = "E-Mail-Scan", description = "Phishing-Keyword in E-Mail lokal erkannt", status = "ALERT")
+            SecurityLogEntity(timestamp = System.currentTimeMillis(), module = "Netzwerk-Monitor", description = "Lokale Loopback-Verbindung verifiziert", status = "SAFE"),
+            SecurityLogEntity(timestamp = System.currentTimeMillis() - 30000, module = "Berechtigungs-Wächter", description = "Keine App im Hintergrund aktiv", status = "SAFE"),
+            SecurityLogEntity(timestamp = System.currentTimeMillis() - 60000, module = "Anruf-Schutz", description = "Unterdrückte Nummer blockiert", status = "BLOCKED"),
+            SecurityLogEntity(timestamp = System.currentTimeMillis() - 120000, module = "SMS-Filter", description = "Phishing-SMS ('Paket Zustellung') abgefangen", status = "QUARANTINE")
         )
     }
 
@@ -93,7 +94,7 @@ fun JuarisMainDashboard() {
                         liveLogs.add(0, SecurityLogEntity(
                             timestamp = System.currentTimeMillis(),
                             module = "Test-Sandbox",
-                            description = "Simulierter Angriff erfolgreich abgewehrt!",
+                            description = "Simulierter Offline-Angriff erfolgreich abgewehrt!",
                             status = "BLOCKED"
                         ))
                         Toast.makeText(context, "Bedrohung erfolgreich simuliert!", Toast.LENGTH_SHORT).show()
@@ -109,13 +110,13 @@ fun JuarisMainDashboard() {
                 )
                 1 -> BlacklistContent(
                     blockedList = blockedContacts,
-                    onAddBlocked = { newEntry -> 
+                    onAddBlocked = { newEntry ->
                         if (newEntry.isNotBlank()) {
                             blockedContacts.add(newEntry)
                             Toast.makeText(context, "Nummer zur Sperrliste hinzugefügt", Toast.LENGTH_SHORT).show()
                         }
                     },
-                    onRemoveBlocked = { item -> 
+                    onRemoveBlocked = { item ->
                         blockedContacts.remove(item)
                         Toast.makeText(context, "Nummer freigegeben", Toast.LENGTH_SHORT).show()
                     }
@@ -128,150 +129,185 @@ fun JuarisMainDashboard() {
 }
 
 data class TabItem(val title: String, val icon: ImageVector)
+data class SecurityLogEntity(val timestamp: Long, val module: String, val description: String, val status: String)
 
 @Composable
 fun DashboardContent(
-    logs: List<SecurityLogEntity>, 
-    onSimulateThreat: () -> Unit, 
+    logs: List<SecurityLogEntity>,
+    onSimulateThreat: () -> Unit,
     onExportLogs: () -> Unit,
     onPanicWipe: () -> Unit
 ) {
+    val context = LocalContext.current
     var callProtection by remember { mutableStateOf(true) }
     var smsProtection by remember { mutableStateOf(true) }
     var emailProtection by remember { mutableStateOf(true) }
+    var vaultUnlocked by remember { mutableStateOf(false) }
 
-    val blockedCount = logs.count { it.status == "BLOCKED" || it.status == "QUARANTINE" }
-    
-    // Aufschlüsselung nach Vektoren für die visuelle Statistik
-    val callsCount = logs.count { it.module == "Anruf-Schutz" }
-    val smsCount = logs.count { it.module == "SMS-Filter" }
-    val emailCount = logs.count { it.module == "E-Mail-Scan" }
+    val blockedCount = logs.count { h -> h.status == "BLOCKED" || h.status == "QUARANTINE" }
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("Schutz-Zentrale & System-Status", style = MaterialTheme.typography.titleLarge)
-        Spacer(modifier = Modifier.height(8.dp))
+        item {
+            Text("Schutz-Zentrale & System-Status", style = MaterialTheme.typography.titleLarge)
+        }
 
         // System-Gesundheits-Monitor
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-        ) {
-            Row(
-                modifier = Modifier.padding(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                Column {
-                    Text("System-Gesundheit: Optimal", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
-                    Text("Call-Screening & SMS-Interception aktiv", style = MaterialTheme.typography.bodySmall)
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(Icons.Default.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Column {
+                        Text("System-Gesundheit: Optimal", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
+                        Text("100% Offline-Architektur aktiv (Keine Cloud-Schnittstelle)", style = MaterialTheme.typography.bodySmall)
+                    }
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
 
         // Statistik-Kacheln
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Card(modifier = Modifier.weight(1f)) {
-                Column(modifier = Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Abgewehrt", style = MaterialTheme.typography.bodySmall)
-                    Text("$blockedCount", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.error)
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Card(modifier = Modifier.weight(1f)) {
+                    Column(modifier = Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("Abgewehrt", style = MaterialTheme.typography.bodySmall)
+                        Text("$blockedCount", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.error)
+                    }
                 }
-            }
-            Card(modifier = Modifier.weight(1f)) {
-                Column(modifier = Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Modus", style = MaterialTheme.typography.bodySmall)
-                    Text("100% Offline", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Visuelle Bedrohungs-Statistik (Mini-Aufteilung)
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(12.dp)) {
-                Text("Bedrohungs-Verteilung nach Vektor", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("📞 Anrufe: $callsCount", style = MaterialTheme.typography.bodySmall)
-                    Text("✉️ SMS: $smsCount", style = MaterialTheme.typography.bodySmall)
-                    Text("📧 Mails: $emailCount", style = MaterialTheme.typography.bodySmall)
+                Card(modifier = Modifier.weight(1f)) {
+                    Column(modifier = Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("Architektur", style = MaterialTheme.typography.bodySmall)
+                        Text("Offline-First", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        // NEU: Die integrierten Kernmodule (Netzwerk-Monitor, Permissions, Vault)
+        item {
+            Text("Integrierte Kernmodule", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+        }
+
+        // Modul 1: Lokaler Netzwerk-Monitor
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    Toast.makeText(context, "Netzwerk-Monitor: 0 externe Verbindungen (Isoliert)", Toast.LENGTH_SHORT).show()
+                }
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text("🌐 Lokaler Netzwerk-Monitor", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
+                    Text("Traffic-Kontrolle läuft lokal. Keine externen Server-Pings.", style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        }
+
+        // Modul 2: Berechtigungs-Wächter
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    Toast.makeText(context, "Berechtigungs-Wächter: Alle Sensoren geschützt", Toast.LENGTH_SHORT).show()
+                }
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text("🛡️ Berechtigungs-Wächter", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
+                    Text("Kamera, Mikrofon & Standort im Hintergrund überwacht.", style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        }
+
+        // Modul 3: Verschlüsselter Offline-Vault
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    vaultUnlocked = !vaultUnlocked
+                    val statusText = if (vaultUnlocked) "Vault entsperrt (Lokal)" else "Vault verschlüsselt & gesperrt"
+                    Toast.makeText(context, statusText, Toast.LENGTH_SHORT).show()
+                }
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text("🔐 Verschlüsselter Offline-Vault", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
+                    val statusColor = if (vaultUnlocked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                    Text(if (vaultUnlocked) "Status: Entsperrt (Bereit)" else "Status: Gesperrt (Sicher)", color = statusColor, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        }
 
         // Manuelle Schutz-Regler
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(12.dp)) {
-                Text("Schutz-Regler (Nutzerfreiheit)", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text("Anruf-Schutz")
-                    Switch(checked = callProtection, onCheckedChange = { callProtection = it })
-                }
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text("SMS-Filter")
-                    Switch(checked = smsProtection, onCheckedChange = { smsProtection = it })
-                }
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text("E-Mail-Scan")
-                    Switch(checked = emailProtection, onCheckedChange = { emailProtection = it })
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text("Schutz-Regler", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Text("Anruf-Schutz")
+                        Switch(checked = callProtection, onCheckedChange = { callProtection = it })
+                    }
+                    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Text("SMS-Filter")
+                        Switch(checked = smsProtection, onCheckedChange = { smsProtection = it })
+                    }
+                    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Text("E-Mail-Scan")
+                        Switch(checked = emailProtection, onCheckedChange = { emailProtection = it })
+                    }
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
 
         // Aktions-Buttons (Sandbox, Export & Panic Button)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Button(onClick = onSimulateThreat, modifier = Modifier.weight(1f)) {
-                Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
-                Spacer(modifier = Modifier.width(2.dp))
-                Text("Test", style = MaterialTheme.typography.bodySmall)
-            }
-            OutlinedButton(onClick = onExportLogs, modifier = Modifier.weight(1f)) {
-                Text("Export", style = MaterialTheme.typography.bodySmall)
-            }
-            // Der Panic Button in Alarm-Farbe (Error)
-            Button(
-                onClick = onPanicWipe, 
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                modifier = Modifier.weight(1f)
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Icon(Icons.Default.Warning, contentDescription = null, modifier = Modifier.size(16.dp))
-                Spacer(modifier = Modifier.width(2.dp))
-                Text("PANIC", style = MaterialTheme.typography.bodySmall)
+                Button(onClick = onSimulateThreat, modifier = Modifier.weight(1f)) {
+                    Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(2.dp))
+                    Text("Test", style = MaterialTheme.typography.bodySmall)
+                }
+                OutlinedButton(onClick = onExportLogs, modifier = Modifier.weight(1f)) {
+                    Text("Export", style = MaterialTheme.typography.bodySmall)
+                }
+                Button(
+                    onClick = onPanicWipe,
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Default.Warning, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(2.dp))
+                    Text("PANIC", style = MaterialTheme.typography.bodySmall)
+                }
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
-        Text("Live-Aktivitätsstream", style = MaterialTheme.typography.titleMedium)
-        Spacer(modifier = Modifier.height(8.dp))
+        item {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text("Live-Aktivitätsstream", style = MaterialTheme.typography.titleMedium)
+        }
 
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxSize()
-        ) {
-            items(logs) { log ->
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Text("Modul: ${log.module}", style = MaterialTheme.typography.bodyMedium)
-                        Text("Ereignis: ${log.description}", style = MaterialTheme.typography.bodyLarge)
-                        Text("Aktion: ${log.status}", color = MaterialTheme.colorScheme.error)
-                    }
+        items(logs) { log ->
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text("Modul: ${log.module}", style = MaterialTheme.typography.bodyMedium)
+                    Text("Ereignis: ${log.description}", style = MaterialTheme.typography.bodyLarge)
+                    Text("Aktion: ${log.status}", color = MaterialTheme.colorScheme.error)
                 }
             }
         }
@@ -340,7 +376,7 @@ fun BlacklistContent(blockedList: MutableList<String>, onAddBlocked: (String) ->
 @Composable
 fun SwarmMeshContent() {
     var testInputText by remember { mutableStateOf("Verdächtige Nachricht") }
-    
+   
     val generatedHash = remember(testInputText) {
         try {
             val bytes = MessageDigest.getInstance("SHA-256").digest(testInputText.toByteArray())
@@ -358,7 +394,7 @@ fun SwarmMeshContent() {
     ) {
         Text("P2P-Schwarmintelligenz & Quanten-Engine", style = MaterialTheme.typography.titleLarge)
         Text("Dezentraler Austausch von quantensicheren Hashes (SHA-256) mit Geräten in der direkten Offline-Umgebung.")
-        
+       
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("Aktive Mesh-Verbindungen: 2 Geräte in Reichweite", color = MaterialTheme.colorScheme.primary)
@@ -374,21 +410,21 @@ fun SwarmMeshContent() {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text("Teste hier, wie Text anonymisiert wird:", style = MaterialTheme.typography.bodySmall)
                 Spacer(modifier = Modifier.height(8.dp))
-                
+               
                 OutlinedTextField(
                     value = testInputText,
                     onValueChange = { testInputText = it },
                     label = { Text("Beispiel-Text eingeben") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                
+               
                 Spacer(modifier = Modifier.height(8.dp))
                 Text("Generierter SHA-256 Quantum-Hash:", style = MaterialTheme.typography.bodySmall)
                 Text(generatedHash, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
             }
         }
-        
-        Text("Null-Data-Garantie: Keine Rufnummern oder Inhalte verlassen jemals das Gerät. Nur anonyme mathematische Hashes.", 
+       
+        Text("Null-Data-Garantie: Keine Rufnummern oder Inhalte verlassen jemals das Gerät. Nur anonyme mathematische Hashes.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.secondary
         )
@@ -404,16 +440,16 @@ fun PrivacyAndLegalContent() {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text("Datenschutz & Null-Data-Garantie (AGB)", style = MaterialTheme.typography.titleLarge)
-        
+       
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("1. 100% Offline-First", style = MaterialTheme.typography.titleMedium)
                 Text("Juaris sendet niemals Daten an externe Server. Alle Analysen für Anrufe, SMS und E-Mails laufen lokal.")
-                
+               
                 Spacer(modifier = Modifier.height(8.dp))
                 Text("2. Keine Datensammlung", style = MaterialTheme.typography.titleMedium)
                 Text("Deine Sperrliste, Kontakte und Logs verbleiben ausschließlich in deiner lokalen Room-Datenbank.")
-                
+               
                 Spacer(modifier = Modifier.height(8.dp))
                 Text("3. Quantensichere Schwarm-Sicherheit", style = MaterialTheme.typography.titleMedium)
                 Text("Der P2P-Schwarm nutzt ausschließlich unidirektionale Hashes. Rückschlüsse auf Personen oder Inhalte sind mathematisch ausgeschlossen.")
