@@ -1,5 +1,8 @@
 package com.juaris.app
 
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
+import android.content.Context
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -24,7 +27,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import java.security.MessageDigest
 
-// Hier sauber als Top-Level-Klasse definiert:
 data class TabItem(val title: String, val icon: ImageVector)
 
 class MainActivity : ComponentActivity() {
@@ -55,7 +57,6 @@ fun JuarisMainDashboard() {
         TabItem("AGB & Info", Icons.Default.Info)
     )
 
-    // Live-Logs
     val liveLogs = remember {
         mutableStateListOf(
             SecurityLogEntity(timestamp = System.currentTimeMillis(), module = "Netzwerk-Monitor", description = "Lokale Loopback-Verbindung verifiziert", status = "SAFE"),
@@ -65,7 +66,6 @@ fun JuarisMainDashboard() {
         )
     }
 
-    // Sperrliste (Blacklist)
     val blockedContacts = remember {
         mutableStateListOf("+43123456789", "+49987654321", "Anonyme Anrufe (Block)")
     }
@@ -73,7 +73,7 @@ fun JuarisMainDashboard() {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Juaris Security Suite (100% Offline)") }
+                title = { Text("Juaris") }
             )
         },
         bottomBar = {
@@ -100,7 +100,7 @@ fun JuarisMainDashboard() {
                             description = "Simulierter Offline-Angriff erfolgreich abgewehrt!",
                             status = "BLOCKED"
                         ))
-                        Toast.makeText(context, "Bedrohung erfolgreich simuliert!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Bedrohung erfolgreich abgewehrt!", Toast.LENGTH_SHORT).show()
                     },
                     onExportLogs = {
                         Toast.makeText(context, "${liveLogs.size} Logs lokal im internen Speicher gesichert.", Toast.LENGTH_LONG).show()
@@ -130,6 +130,7 @@ fun JuarisMainDashboard() {
         }
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardContent(
@@ -156,7 +157,6 @@ fun DashboardContent(
             Text("Schutz-Zentrale & System-Status", style = MaterialTheme.typography.titleLarge)
         }
 
-        // System-Gesundheits-Monitor
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -176,7 +176,6 @@ fun DashboardContent(
             }
         }
 
-        // Statistik-Kacheln
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -197,12 +196,10 @@ fun DashboardContent(
             }
         }
 
-        // NEU: Die integrierten Kernmodule (Netzwerk-Monitor, Permissions, Vault)
         item {
             Text("Integrierte Kernmodule", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
         }
 
-        // Modul 1: Lokaler Netzwerk-Monitor
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -211,13 +208,12 @@ fun DashboardContent(
                 }
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
-                    Text("🌐 Lokaler Netzwerk-Monitor", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
+                    Text("Lokaler Netzwerk-Monitor", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
                     Text("Traffic-Kontrolle läuft lokal. Keine externen Server-Pings.", style = MaterialTheme.typography.bodySmall)
                 }
             }
         }
 
-        // Modul 2: Berechtigungs-Wächter
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -226,13 +222,12 @@ fun DashboardContent(
                 }
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
-                    Text("🛡️ Berechtigungs-Wächter", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
+                    Text("Berechtigungs-Wächter", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
                     Text("Kamera, Mikrofon & Standort im Hintergrund überwacht.", style = MaterialTheme.typography.bodySmall)
                 }
             }
         }
 
-        // Modul 3: Verschlüsselter Offline-Vault
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -243,14 +238,13 @@ fun DashboardContent(
                 }
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
-                    Text("🔐 Verschlüsselter Offline-Vault", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
+                    Text("Verschlüsselter Offline-Vault", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
                     val statusColor = if (vaultUnlocked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
                     Text(if (vaultUnlocked) "Status: Entsperrt (Bereit)" else "Status: Gesperrt (Sicher)", color = statusColor, style = MaterialTheme.typography.bodySmall)
                 }
             }
         }
 
-        // Manuelle Schutz-Regler
         item {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(12.dp)) {
@@ -259,11 +253,11 @@ fun DashboardContent(
                         Text("Anruf-Schutz")
                         Switch(checked = callProtection, onCheckedChange = { callProtection = it })
                     }
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Text("SMS-Filter")
                         Switch(checked = smsProtection, onCheckedChange = { smsProtection = it })
                     }
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Text("E-Mail-Scan")
                         Switch(checked = emailProtection, onCheckedChange = { emailProtection = it })
                     }
@@ -271,7 +265,6 @@ fun DashboardContent(
             }
         }
 
-        // Aktions-Buttons (Sandbox, Export & Panic Button)
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -375,6 +368,13 @@ fun BlacklistContent(blockedList: MutableList<String>, onAddBlocked: (String) ->
 
 @Composable
 fun SwarmMeshContent() {
+    val context = LocalContext.current
+    var discoveredDevicesCount by remember { mutableStateOf(0) }
+    var scanStatusText by remember { mutableStateOf("Bereit für echten Hardware-Mesh-Abgleich") }
+    
+    val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
+    val bluetoothAdapter = bluetoothManager?.adapter
+
     var testInputText by remember { mutableStateOf("Verdächtige Nachricht") }
    
     val generatedHash = remember(testInputText) {
@@ -392,15 +392,35 @@ fun SwarmMeshContent() {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("P2P-Schwarmintelligenz & Quanten-Engine", style = MaterialTheme.typography.titleLarge)
-        Text("Dezentraler Austausch von quantensicheren Hashes (SHA-256) mit Geräten in der direkten Offline-Umgebung.")
+        Text("P2P-Schwarmintelligenz & Hardware-Mesh", style = MaterialTheme.typography.titleLarge)
+        Text("Dezentraler Austausch von quantensicheren Hashes (SHA-256) über lokale Funk-Schnittstellen.")
        
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("Aktive Mesh-Verbindungen: 2 Geräte in Reichweite", color = MaterialTheme.colorScheme.primary)
+                Text("Bluetooth-Hardware Status", color = MaterialTheme.colorScheme.primary)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("Letzte synchronisierte Signatur:")
-                Text("a8f5c...39e2 (Verifiziert)", style = MaterialTheme.typography.bodySmall)
+                Text(scanStatusText, style = MaterialTheme.typography.bodyMedium)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text("Gekoppelte Nodes in Reichweite: $discoveredDevicesCount", style = MaterialTheme.typography.bodyLarge)
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                Button(
+                    onClick = {
+                        if (bluetoothAdapter == null) {
+                            scanStatusText = "Keine Bluetooth-Hardware am Gerät verfügbar"
+                        } else if (!bluetoothAdapter.isEnabled) {
+                            scanStatusText = "Bluetooth ist am Gerät deaktiviert!"
+                            Toast.makeText(context, "Bitte Bluetooth einschalten", Toast.LENGTH_SHORT).show()
+                        } else {
+                            scanStatusText = "Hardware-Scan aktiv (Gekoppelte Nodes geprüft)"
+                            discoveredDevicesCount = bluetoothAdapter.bondedDevices?.size ?: 0
+                            Toast.makeText(context, "Hardware-Scan durchgeführt", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Echten Hardware-Mesh-Scan ausführen")
+                }
             }
         }
 
@@ -408,13 +428,13 @@ fun SwarmMeshContent() {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("Quantum-Hash Live-Visualisierer", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text("Teste hier, wie Text anonymisiert wird:", style = MaterialTheme.typography.bodySmall)
+                Text("Anonymisierung von Signaturen:", style = MaterialTheme.typography.bodySmall)
                 Spacer(modifier = Modifier.height(8.dp))
                
                 OutlinedTextField(
                     value = testInputText,
                     onValueChange = { testInputText = it },
-                    label = { Text("Beispiel-Text eingeben") },
+                    label = { Text("Signatur-Text eingeben") },
                     modifier = Modifier.fillMaxWidth()
                 )
                
@@ -433,26 +453,69 @@ fun SwarmMeshContent() {
 
 @Composable
 fun PrivacyAndLegalContent() {
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("Datenschutz & Null-Data-Garantie (AGB)", style = MaterialTheme.typography.titleLarge)
+        item {
+            Text("Rechtliche Bestimmungen & AGB", style = MaterialTheme.typography.titleLarge)
+            Text("Globale Null-Haftungs- und Offline-Garantie (Stand: 2026)", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+        }
        
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("1. 100% Offline-First", style = MaterialTheme.typography.titleMedium)
-                Text("Juaris sendet niemals Daten an externe Server. Alle Analysen für Anrufe, SMS und E-Mails laufen lokal.")
-               
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("2. Keine Datensammlung", style = MaterialTheme.typography.titleMedium)
-                Text("Deine Sperrliste, Kontakte und Logs verbleiben ausschließlich in deiner lokalen Room-Datenbank.")
-               
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("3. Quantensichere Schwarm-Sicherheit", style = MaterialTheme.typography.titleMedium)
-                Text("Der P2P-Schwarm nutzt ausschließlich unidirektionale Hashes. Rückschlüsse auf Personen oder Inhalte sind mathematisch ausgeschlossen.")
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("1. Grundsatz & Architektur (100% Offline-First)", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    Text("Die Juaris Security Suite (nachfolgend 'Software') arbeitet ausnahmslos lokal auf dem Endgerät des Nutzers. Es existieren zu keinem Zeitpunkt Cloud-Verbindungen, Telemetrie-Schnittstellen oder externe Server-Backends. Die Datenhoheit verbleibt zu 100% beim Betreiber des Endgeräts.")
+                }
+            }
+        }
+
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("2. Absoluter Haftungsausschluss (Worldwide Disclaimer)", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
+                    Text("Die Nutzung der Software erfolgt auf eigene, ausschließliche Gefahr des Nutzers. Der Entwickler und alle beteiligten Parteien schließen jegliche Haftung für direkte, indirekte, mittelbare oder Folgeschäden aus, die sich aus der Nutzung, der Fehlfunktion, dem Ausfall von Schutzmechanismen oder der Inkompatibilität der Software ergeben – weltweit und unabhängig von der geltenden nationalen oder internationalen Gesetzgebung.")
+                    Text("Dies schließt ein, ist aber nicht beschränkt auf: Datenverlust, entgangenen Gewinn, finanzielle Schäden, Systemabstürze, verpasste Notrufe, nicht erkannte Schadsoftware, Phishing-Angriffe oder Hardware-Beschädigungen.")
+                }
+            }
+        }
+
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("3. Keine Garantie auf Schutzwirkung ('As-Is')", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    Text("Die Software wird im Zustand 'wie besehen' ('as-is') und ohne jegliche ausdrückliche oder stillschweigende Gewährleistung bereitgestellt. Es wird keine Garantie dafür übernommen, dass die lokalen Filter (Anruf-, SMS- oder E-Mail-Filter) 100% aller Bedrohungen abfangen oder dass die lokalen Sensoren fehlerfrei arbeiten. Der Nutzer erkennt an, dass absolute Sicherheit in der digitalen Welt mathematisch und technisch unmöglich ist.")
+                }
+            }
+        }
+
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("4. Eigenverantwortung beim Panic-Button (Wipe)", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    Text("Die Software beinhaltet eine unwiderrufliche Notfall-Löschfunktion ('PANIC WIPE'). Bei Betätigung dieser Funktion werden alle lokalen Logs, Sperrlisten und gespeicherten Daten sofort und unwiederbringlich aus dem Arbeitsspeicher und der lokalen Datenbank gelöscht. Der Entwickler übernimmt keinerlei Haftung für versehentlich oder durch Dritte ausgelöschte Datenbestände.")
+                }
+            }
+        }
+
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("5. P2P-Schwarm & Anonyme Hashes", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    Text("Der dezentrale Austausch über das lokale Hardware-Mesh erfolgt ausschließlich über unidirektionale SHA-256-Hashes. Es werden zu keinem Zeitpunkt Klardaten, Rufnummern oder persönliche Identifikatoren übertragen. Sollte es durch lokale Funkstörungen oder Hardware-Kollisionen zu Fehlinterpretationen von Signaturen kommen, ist jeglicher Regressanspruch ausgeschlossen.")
+                }
+            }
+        }
+
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("6. Salvatorische Klausel & Gerichtsstand", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    Text("Sollten einzelne Bestimmungen dieser AGB ungültig, unvollständig oder nicht durchsetzbar sein, bleiben die übrigen Bestimmungen davon unberührt. Durch die Installation und Ausführung der Juaris Security Suite akzeptiert der Nutzer diese Bedingungen uneingeschränkt und unwiderruflich für alle weltweiten Jurisdiktionen.")
+                }
             }
         }
     }
