@@ -33,7 +33,7 @@ fun DashboardScreen() {
             .padding(16.dp)
     ) {
         Text(
-            text = "LocalShield Security",
+            text = "Juaris Security",
             style = MaterialTheme.typography.headlineMedium
         )
         Spacer(modifier = Modifier.height(16.dp))
