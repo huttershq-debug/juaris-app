@@ -3,7 +3,6 @@ package com.juaris.app
 import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.juaris.app.R
 
 class MainActivity : AppCompatActivity() {
 
@@ -14,7 +13,7 @@ class MainActivity : AppCompatActivity() {
         val txtLogList = findViewById<TextView>(R.id.txtLogList)
         val txtSwarmStatus = findViewById<TextView>(R.id.txtSwarmStatus)
 
-        // Fester Status für das lokale P2P-Schwarmnetzwerk
+        // Fester Status für das lokale P2P-Schwarmnetzwerk unter Julias Design
         txtSwarmStatus.text = "Schwarm-Signaturen lokal: Aktiv (P2P-Mesh verbunden)"
         
         // Fester, transparenter System-Log für alle drei Überwachungsvektoren
@@ -31,3 +30,4 @@ class MainActivity : AppCompatActivity() {
         txtLogList.text = systemLog
     }
 }
+
