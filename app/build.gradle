@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace 'com.localshield.v5'
+    namespace 'com.juaris.app'
     compileSdk 34
 
     defaultConfig {
