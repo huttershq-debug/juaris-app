@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Juaris सुरक्षा</string>
+    <string name="status_protected">उपकरण पूरी तरह से सुरक्षित है (आने-जाने दोनों)</string>
+    <string name="status_warning">सुरक्षा चेतावनी का पता चला</string>
+    <string name="tab_logs">सुरक्षा लॉग</string>
+    <string name="tab_settings">सेटिंग्स</string>
+    <string name="call_protection_title">कॉल सुरक्षा</string>
+    <string name="log_call_incoming_blocked">आने वाली कॉल अवरुद्ध: %1$s</string>
+    <string name="log_call_outgoing_blocked">बाहर जाने वाली जोखिम भरी कॉल रोकी गई: %1$s</string>
+    <string name="sms_protection_title">एसएमएस फ़िशिंग फ़िल्टर</string>
+    <string name="log_sms_incoming_blocked">आने वाला फ़िशिंग एसएमएस अवरुद्ध: %1$s</string>
+    <string name="log_sms_outgoing_blocked">बाहर जाने वाला हानिकारक एसएमएस रोका गया: %1$s</string>
+    <string name="email_protection_title">ईमेल सुरक्षा</string>
+    <string name="log_email_incoming_blocked">आने वाला हानिकारक ईमेल अवरुद्ध: %1$s</string>
+    <string name="log_email_outgoing_blocked">बाहर जाने वाला ईमेल रोका गया (सुरक्षा जोखिम): %1$s</string>
+</resources>
