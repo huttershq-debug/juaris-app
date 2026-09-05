@@ -1,11 +1,6 @@
-
-Benedikt Wolfgang Hütter <hutters.hq@gmail.com>
-18:12 (vor 0 Minuten)
-an mich
-
 <resources>
     <string name="app_name">Juaris Security</string>
-    <string name="status_protected">Appareil totalement protégé (Entrant & Sortant)</string>
+    <string name="status_protected">Appareil totalement protégé (Entrant &amp; Sortant)</string>
     <string name="status_warning">Alerte de sécurité détectée</string>
     <string name="tab_logs">Journaux de sécurité</string>
     <string name="tab_settings">Paramètres</string>
