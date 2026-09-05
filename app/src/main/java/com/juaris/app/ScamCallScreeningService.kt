@@ -64,7 +64,7 @@ class ScamCallScreeningService : CallScreeningService() {
         }
 
         // B) Abgleich mit dem dauerhaften lokalen Speicher des Handys
-        val prefs = getSharedPreferences("LocalShieldPrefs", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("JuarisPrefs", Context.MODE_PRIVATE)
         val blockedSet = prefs.getStringSet("blocked_numbers", mutableSetOf()) ?: mutableSetOf()
 
         return blockedSet.contains(number)
