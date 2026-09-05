@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.juaris.app">
 
-    <!-- Berechtigungen für die heilige Dreifaltigkeit -->
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.READ_CALL_LOG" />
+    <!-- 100% Offline-Sicherheitsberechtigungen für die Schutzvektoren -->
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
-    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" />
+    <uses-permission android:name="android.permission.READ_CALL_LOG" />
 
     <application
-        android:allowBackup="true"
-        android:label="@string/app_name"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="Juaris Security"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
-        
+        android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
+
+        <!-- Haupt-Dashboard (UI) -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -23,13 +27,21 @@
             </intent-filter>
         </activity>
 
-        <!-- Der Hintergrund-Wächter für Anrufe und SMS -->
-        <receiver
-            android:name=".JuarisReceiver"
-            android:exported="true"
-            android:permission="android.permission.BROADCAST_SMS">
+        <!-- Vektor 1: Call-Screening-Service für Anrufe -->
+        <service
+            android:name=".ScamCallScreeningService"
+            android:permission="android.permission.BIND_SCREENING_SERVICE"
+            android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.PHONE_STATE" />
+                <action android:name="android.telecom.CallScreeningService" />
+            </intent-filter>
+        </service>
+
+        <!-- Vektor 2: SMS-Filter-Receiver für Textnachrichten (mit hoher Priorität) -->
+        <receiver
+            android:name=".sms.SmsFilterReceiver"
+            android:exported="true">
+            <intent-filter android:priority="999">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
