@@ -1,8 +1,10 @@
-package com.juaris.app
+package com.juaris.security
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -10,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -18,13 +21,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MaterialTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    JuarisDashboard()
-                }
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = Color(0xFFF8F9FA)
+            ) {
+                JuarisDashboard()
             }
         }
     }
@@ -32,83 +33,117 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun JuarisDashboard() {
-    var isSmsActive by remember { mutableStateOf(true) }
-    var isCallActive by remember { mutableStateOf(true) }
-    var isEmailActive by remember { mutableStateOf(true) }
+    val context = LocalContext.current
+    val sharedPrefs = remember {
+        context.getSharedPreferences("juaris_prefs", Context.MODE_PRIVATE)
+    }
+
+    // Zustände aus dem lokalen Speicher laden (Standard ist 'true')
+    var smsFilterEnabled by remember { 
+        mutableStateOf(sharedPrefs.getBoolean("sms_filter", true)) 
+    }
+    var callProtectionEnabled by remember { 
+        mutableStateOf(sharedPrefs.getBoolean("call_protection", true)) 
+    }
+    var emailProtectionEnabled by remember { 
+        mutableStateOf(sharedPrefs.getBoolean("email_protection", true)) 
+    }
+
+    // Berechnen, ob das System insgesamt aktiv ist
+    val isSystemActive = smsFilterEnabled || callProtectionEnabled || emailProtectionEnabled
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        // App Titel
         Text(
             text = "Juaris Security",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
+            color = Color(0xFF1A1A1A),
             modifier = Modifier.padding(top = 24.dp, bottom = 8.dp)
         )
 
+        // Status Karte
         Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(
-                containerColor = if (isSmsActive || isCallActive || isEmailActive) 
-                    Color(0xFFE8DEF8) else Color(0xFFE0E0E0)
-            )
+                containerColor = if (isSystemActive) Color(0xFFEFE7FC) else Color(0xFFFFEEEE)
+            ),
+            modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "Status: " + if (isSmsActive || isCallActive || isEmailActive) "Aktiv & Geschützt" else "Pausiert",
+                    text = if (isSystemActive) "Status: Aktiv & Geschützt" else "Status: Pausiert",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
-                )
+                    fontSize = 16.sp,
+                    color = if (isSystemActive) Color(0xFF4A148C) else Color(0xFFC62828)
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Hintergrund-Dienste laufen lokal",
-                    fontSize = 14.sp,
-                    color = Color.DarkGray
+                    text = if (isSystemActive) "Lokale Schutz-Dienste laufen fehlerfrei" else "Alle Module sind aktuell deaktiviert",
+                    fontSize = 13.sp,
+                    color = Color(0xFF555555)
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
         Text(
             text = "Schutzmodule steuern",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 16.sp,
+            color = Color(0xFF333333),
+            modifier = Modifier.padding(top = 8.dp)
         )
 
-        ControlCard(
+        // Modul 1: SMS-Filter
+        ModuleControlCard(
             title = "SMS-Filter",
             subtitle = "Priorität 999 (Eingehende Nachrichten)",
-            isActive = isSmsActive,
-            onToggle = { isSmsActive = it }
+            checked = smsFilterEnabled,
+            onCheckedChange = { newState ->
+                smsFilterEnabled = newState
+                sharedPrefs.edit().putBoolean("sms_filter", newState).apply()
+            }
         )
 
-        ControlCard(
+        // Modul 2: Anruf-Schutz
+        ModuleControlCard(
             title = "Anruf-Schutz",
             subtitle = "Erkennung von Scam & Spam-Anrufen",
-            isActive = isCallActive,
-            onToggle = { isCallActive = it }
+            checked = callProtectionEnabled,
+            onCheckedChange = { newState ->
+                callProtectionEnabled = newState
+                sharedPrefs.edit().putBoolean("call_protection", newState).apply()
+            }
         )
 
-        ControlCard(
+        // Modul 3: E-Mail-Schutz
+        ModuleControlCard(
             title = "E-Mail-Schutz",
             subtitle = "Phishing & Spam-Analyse im Hintergrund",
-            isActive = isEmailActive,
-            onToggle = { isEmailActive = it }
+            checked = emailProtectionEnabled,
+            onCheckedChange = { newState ->
+                emailProtectionEnabled = newState
+                sharedPrefs.edit().putBoolean("email_protection", newState).apply()
+            }
         )
     }
 }
 
 @Composable
-fun ControlCard(title: String, subtitle: String, isActive: Boolean, onToggle: (Boolean) -> Unit) {
+fun ModuleControlCard(
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFEFE7FC)),
+        modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
@@ -118,15 +153,27 @@ fun ControlCard(title: String, subtitle: String, isActive: Boolean, onToggle: (B
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(
+                    text = title,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp,
+                    color = Color(0xFF1A1A1A)
+                )
                 Spacer(modifier = Modifier.height(2.dp))
-                Text(text = subtitle, fontSize = 12.sp, color = Color.Gray)
+                Text(
+                    text = subtitle,
+                    fontSize = 12.sp,
+                    color = Color(0xFF666666)
+                )
             }
             Switch(
-                checked = isActive,
-                onCheckedChange = onToggle
+                checked = checked,
+                onCheckedChange = onCheckedChange,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = Color.White,
+                    checkedTrackColor = Color(0xFF6750A4)
+                )
             )
         }
     }
 }
-
