@@ -81,6 +81,7 @@ fun JuarisDashboard() {
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     color = if (isSystemActive) Color(0xFF4A148C) else Color(0xFFC62828)
+                ) // <--- HIER HAT DIE KLAMMER GEFEHLT!
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = if (isSystemActive) "Lokale Schutz-Dienste laufen fehlerfrei" else "Alle Module sind aktuell deaktiviert",
