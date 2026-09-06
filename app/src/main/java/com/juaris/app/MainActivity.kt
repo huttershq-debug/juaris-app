@@ -151,7 +151,7 @@ fun WelcomeScreen(onContinueClicked: () -> Unit) {
             Button(
                 onClick = {
                     // Für den lokalen Test direkt weiterleiten:
-                    onLoginSuccess()
+                    onContinueClicked()
                     
                     // Später für den Store-Release wieder aktivieren:
                     // val activity = context as? Activity
