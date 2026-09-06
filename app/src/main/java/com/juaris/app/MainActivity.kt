@@ -176,10 +176,11 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
     
     // Google Play Billing Manager initialisieren
     val billingManager = remember {
-        BillingManager(context, productID = "juaris_monats_abo", onPurchased = {
-            onLoginSuccess()
-        })
-    }
+    BillingManager(context, productId = "juaris_monats_abo", onPurchased = {
+        onLoginSuccess()
+    })
+}
+  
 
     LaunchedEffect(Unit) {
         billingManager.startConnection {
@@ -598,8 +599,9 @@ fun LogsPage(logs: List<SecurityLogEntity>) {
         item {
             Spacer(modifier = Modifier.height(16.dp))
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
-            }
+    Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+}
+
         }
     }
 }
