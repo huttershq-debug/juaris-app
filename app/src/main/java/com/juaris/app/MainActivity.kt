@@ -173,7 +173,7 @@ fun WelcomeScreen(onContinueClicked: () -> Unit) {
 fun LoginScreen(onLoginSuccess: () -> Unit) {
     val context = LocalContext.current
     val toxicGreen = Color(0xFF00FF66)
-    
+   
     // Google Play Billing Manager initialisieren
    val billingManager = remember {
     BillingManager(context, "juaris_monats_abo") {
@@ -181,7 +181,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
     }
 }
 
-  
+ 
 
     LaunchedEffect(Unit) {
         billingManager.startConnection {
@@ -805,4 +805,3 @@ fun PrivacyAndLegalContent() {
        }
     }
  }
-
