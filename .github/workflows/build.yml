@@ -128,34 +128,24 @@ jobs:
               implementation("androidx.core:core-ktx:1.12.0")
           }
           EOF
-            # Keystore einmalig generieren und ausgeben
-      - name: Generate Signing Keystore (One-Time)
+      - name: Decode Keystore
         run: |
-          keytool -genkeypair -v -keystore juaris-release-key.jks \
-            -keyalg RSA -keysize 2048 -validity 10000 \
-            -alias juaris-key \
-            -storepass "HutterJuaris2026!" \
-            -keypass "HutterJuaris2026!" \
-            -dname "CN=Benedikt Wolfgang Hütter, OU=Hutter's IT-Solutions, O=Hutter's IT-Solutions, L=Wiener Neustadt, C=AT"
-          
-          echo "=== HIER IST DEIN BASE64 SCHLÜSSEL: ==="
-          base64 -w 0 juaris-release-key.jks
-          echo ""
-          echo "========================================="
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > juaris-release-key.jks
+
+      - name: Build Signed Release Bundle (AAB)
+        run: |
+          ./gradlew bundleRelease \
+            -Pandroid.injected.signing.store.file=juaris-release-key.jks \
+            -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
+            -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
+            -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}"
 
 
-          # 8. Gradle 8.4 herunterladen und starten
-          echo "Lade Gradle 8.4 herunter..."
-          wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
-          unzip -q gradle-8.2-bin.zip 2>/dev/null || unzip -q gradle-8.4-bin.zip
          
-          echo "Starte Build..."
-          ./gradle-8.4/bin/gradle clean assembleDebug --stacktrace
-
-      - name: Release APK veröffentlichen
+      - name: Release ABB veröffentlichen
         uses: softprops/action-gh-release@v1
         with:
-          files: app/build/outputs/apk/debug/app-debug.apk
+          files: app/build/outputs/bundle/release/app-release.aab
           tag_name: v1.0.0-${{ github.run_number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
