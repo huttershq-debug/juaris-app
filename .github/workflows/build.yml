@@ -1,18 +1,22 @@
-name: Build Android APK
+name: Build and Release Juaris AAB
 
-on: [push]
+on:
+  push:
+    branches: [ main ]
+
 permissions:
-   contents: write
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -25,145 +29,32 @@ jobs:
       - name: Accept Android SDK Licenses
         run: yes | sdkmanager --licenses || true
 
-      - name: Generate Project & Build with AndroidX Support
+      - name: Setup Gradle Cache
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Decode Keystore
         run: |
-          mkdir -p app/src/main/java/com/juaris/app
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > juaris-release-key.jks
 
-          # 1. SDK-Pfad für Gradle hinterlegen
-          echo "sdk.dir=$ANDROID_HOME" > local.properties
+      - name: Build Signed Release Bundle (AAB)
+        run: |
+          echo "Lade Gradle 8.4 herunter..."
+          wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
+          unzip -q gradle-8.4-bin.zip 2>/dev/null || unzip -q gradle-8.4-bin.zip
+          
+          echo "Starte Release Build..."
+          ./gradle-8.4/bin/gradle bundleRelease \
+            -Pandroid.injected.signing.store.file=juaris-release-key.jks \
+            -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
+            -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
+            -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}"
 
-          # 2. WICHTIG: AndroidX und Jetifier aktivieren
-          cat << 'EOF' > gradle.properties
-          android.useAndroidX=true
-          android.enableJetifier=true
-          EOF
-
-          # 4. ScamCallScreeningService.kt
-          cat << 'EOF' > app/src/main/java/com/juaris/app/ScamCallScreeningService.kt
-          package com.juaris.app
-
-          import android.telecom.Call
-          import android.telecom.CallScreeningService
-
-          class ScamCallScreeningService : CallScreeningService() {
-              override fun onScreenCall(callDetails: Call.Details) {
-                  if (callDetails.callDirection == Call.Details.DIRECTION_INCOMING) {
-                      val phoneNumber = callDetails.handle?.schemeSpecificPart ?: ""
-                      val isScam = phoneNumber.startsWith("+4399") || phoneNumber.startsWith("+4999")
-
-                      val response = CallScreeningService.CallResponse.Builder()
-                          .setDisallowCall(isScam)
-                          .setRejectCall(isScam)
-                          .setSkipCallLog(isScam)
-                          .setSkipNotification(isScam)
-                          .build()
-                      respondToCall(callDetails, response)
-                  }
-              }
-          }
-          EOF
-
-          # 5. Settings
-          cat << 'EOF' > settings.gradle.kts
-          pluginManagement {
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
-          }
-          dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-              repositories {
-                  google()
-                  mavenCentral()
-              }
-          }
-          rootProject.name = "Juaris"
-          include(":app")
-          EOF
-
-          # 6. Root Build
-          cat << 'EOF' > build.gradle.kts
-          plugins {
-              id("com.android.application") version "8.2.0" apply false
-              id("org.jetbrains.kotlin.android") version "1.9.20" apply false
-          }
-          EOF
-
-          # 7. App Build (JETZT MIT VERSIONCODE 5!)
-          cat << 'EOF' > app/build.gradle.kts
-          plugins {
-              id("com.android.application")
-              id("org.jetbrains.kotlin.android")
-          }
-
-          android {
-              namespace = "com.juaris.app"
-              compileSdk = 34
-
-              defaultConfig {
-                  applicationId = "com.juaris.app"
-                  minSdk = 24
-                  targetSdk = 34
-                  versionCode = 5
-                  versionName = "5.0"
-              }
-
-              compileOptions {
-                  sourceCompatibility = JavaVersion.VERSION_17
-                  targetCompatibility = JavaVersion.VERSION_17
-              }
-              kotlinOptions {
-                  jvmTarget = "17"
-              }
-
-              lint {
-                  abortOnError = false
-                  checkReleaseBuilds = false
-              }
-          }
-
-          dependencies {
-              implementation("androidx.core:core-ktx:1.12.0")
-          }
-          EOF
-      steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3
-
-    - name: Decode Keystore
-      run: |
-        echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > juaris-release-key.jks
-
-    - name: Build Signed Release Bundle (AAB)
-      run: |
-        echo "Lade Gradle 8.4 herunter..."
-        wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
-        unzip -q gradle-8.4-bin.zip 2>/dev/null || unzip -q gradle-8.4-bin.zip
-        
-        echo "Starte Release Build..."
-        ./gradle-8.4/bin/gradle bundleRelease \
-          -Pandroid.injected.signing.store.file=juaris-release-key.jks \
-          -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
-          -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
-          -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}"
-
-    - name: Release AAB veröffentlichen
-      uses: softprops/action-gh-release@v1
-      with:
-        files: app/build/outputs/bundle/release/app-release.aab
-        tag_name: v1.0.0-${{ github.run_number }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUBA_TOKEN || secrets.GITHUB_TOKEN }}
-
-
+      - name: Release AAB veröffentlichen
+        uses: softprops/action-gh-release@v1
+        with:
+          files: app/build/outputs/bundle/release/app-release.aab
+          tag_name: v1.0.0-${{ github.run_number }}
+          name: "Juaris Release v1.0.0-${{ github.run_number }}"
+          body: "Automatisches Produktions-Release der Juaris-App inkl. aller geschützten Module, Datenbanken und Filter."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
