@@ -1,4 +1,4 @@
-name: Build and Release Juaris AAB
+name: Build and Release AAB & APK
 
 on:
   push:
@@ -42,26 +42,27 @@ jobs:
           mkdir -p app
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "$GITHUB_WORKSPACE/app/juaris-release-key.jks"
 
-      - name: Build Signed Release Bundle (AAB)
+      - name: Build Both AAB and APK
         run: |
           echo "Lade Gradle 8.4 herunter..."
           wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
           unzip -q gradle-8.4-bin.zip 2>/dev/null || unzip -q gradle-8.4-bin.zip
           
-          echo "Starte Release Build..."
-          ./gradle-8.4/bin/gradle bundleRelease \
+          echo "Starte Build für AAB und APK..."
+          ./gradle-8.4/bin/gradle bundleRelease assembleRelease \
             -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/app/juaris-release-key.jks" \
             -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
             -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
             -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}"
 
-      - name: Release AAB veröffentlichen
+      - name: Release Both Files veröffentlichen
         uses: softprops/action-gh-release@v1
         with:
-          files: app/build/outputs/bundle/release/app-release.aab
+          files: |
+            app/build/outputs/bundle/release/app-release.aab
+            app/build/outputs/apk/release/app-release.apk
           tag_name: v1.0.0-${{ github.run_number }}
-          name: "Juaris Release v1.0.0-${{ github.run_number }}"
-          body: "Automatisches Produktions-Release der Juaris-App."
+          name: "Juaris Release v1.0.0-${{ github.run_number }} (AAB & APK)"
+          body: "Dieses Release enthält sowohl die .aab-Datei für den Google Play Store als auch die .apk-Datei zum direkten Installieren auf dem Handy."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
