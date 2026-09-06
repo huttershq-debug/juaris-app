@@ -175,11 +175,12 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
     val toxicGreen = Color(0xFF00FF66)
     
     // Google Play Billing Manager initialisieren
-    val billingManager = remember {
-    BillingManager(context, productId = "juaris_monats_abo", onPurchased = {
+   val billingManager = remember {
+    BillingManager(context, "juaris_monats_abo") {
         onLoginSuccess()
-    })
+    }
 }
+
   
 
     LaunchedEffect(Unit) {
