@@ -804,4 +804,5 @@ fun PrivacyAndLegalContent() {
         }
     }
 }
+}
 
