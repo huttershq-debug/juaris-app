@@ -599,8 +599,8 @@ fun LogsPage(logs: List<SecurityLogEntity>) {
         }
         item {
             Spacer(modifier = Modifier.height(16.dp))
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-    Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) 
+    
 }
 
         }
