@@ -4,11 +4,14 @@ package com.juaris.app
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -28,12 +31,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import java.security.MessageDigest
-import androidx.compose.material3.ExperimentalMaterial3Api
-
 
 class MainActivity : ComponentActivity() {
 
@@ -75,32 +79,157 @@ class MainActivity : ComponentActivity() {
                 error = Color(0xFFFF3333)
             )
 
+            // States aus dem sicheren Speicher laden
+            var isFirstRun by remember { mutableStateOf(securePrefs.getBoolean("is_first_run", true)) }
+            var isLoggedIn by remember { mutableStateOf(securePrefs.getBoolean("is_logged_in", false)) }
+
             MaterialTheme(colorScheme = hackerGreenColorScheme) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    JuarisMainDashboard(securePrefs)
+                    when {
+                        // 1. Allerster Start nach Download -> Willkommen
+                        isFirstRun -> {
+                            WelcomeScreen(
+                                onContinueClicked = {
+                                    securePrefs.edit().putBoolean("is_first_run", false).apply()
+                                    isFirstRun = false
+                                }
+                            )
+                        }
+                        // 2. Zweiter Schritt -> Abo / Aktivierung (1,99 €)
+                        !isLoggedIn -> {
+                            LoginScreen(
+                                onLoginSuccess = {
+                                    securePrefs.edit().putBoolean("is_logged_in", true).apply()
+                                    isLoggedIn = true
+                                }
+                            )
+                        }
+                        // 3. Ab dann immer direkt ins Haupt-Dashboard!
+                        else -> {
+                            JuarisMainDashboard(securePrefs)
+                        }
+                    }
                 }
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun WelcomeScreen(onContinueClicked: () -> Unit) {
+    val toxicGreen = Color(0xFF00FF66)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(32.dp)
+        ) {
+            Text(
+                text = "WILLKOMMEN BEI JUARIS",
+                color = toxicGreen,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Dein Zuhause, deine Regeln, 100% sicher.",
+                color = Color.White,
+                fontSize = 16.sp,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(64.dp))
+            Button(
+                onClick = onContinueClicked,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = toxicGreen,
+                    contentColor = Color.Black
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp)
+            ) {
+                Text(
+                    text = "Weiter",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = Color.Black
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun LoginScreen(onLoginSuccess: () -> Unit) {
+    val toxicGreen = Color(0xFF00FF66)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(32.dp)
+        ) {
+            Text(
+                text = "AKTIVIERUNG",
+                color = toxicGreen,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Bitte aktiviere dein Juaris Abo (1,99 €/Monat), um den lokalen Schutz zu starten.",
+                color = Color.Gray,
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(64.dp))
+            Button(
+                onClick = onLoginSuccess,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = toxicGreen,
+                    contentColor = Color.Black
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp)
+            ) {
+                Text(
+                    text = "Abo starten / Anmelden",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = Color.Black
+                )
+            }
+        }
+    }
+}
+
 @Composable
 fun JuarisMainDashboard(prefs: SharedPreferences) {
     val context = LocalContext.current
     var selectedTab by remember { mutableStateOf(0) }
-    
+   
     val tabs = listOf(
-        "Status", 
-        "Schutz", 
-        "Sperren", 
-        "Logs", 
-        "Clipboard", 
-        "Rechte", 
-        "Schwarm", 
+        "Status",
+        "Schutz",
+        "Sperren",
+        "Logs",
+        "Clipboard",
+        "Rechte",
+        "Schwarm",
         "Info"
     )
 
@@ -172,17 +301,17 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                 )
                 1 -> ProtectionModulesPage(
                     callProtection = callProtection,
-                    onCallChange = { 
+                    onCallChange = {
                         callProtection = it
                         prefs.edit().putBoolean("call_prot", it).apply()
                     },
                     smsProtection = smsProtection,
-                    onSmsChange = { 
+                    onSmsChange = {
                         smsProtection = it
                         prefs.edit().putBoolean("sms_prot", it).apply()
                     },
                     emailProtection = emailProtection,
-                    onEmailChange = { 
+                    onEmailChange = {
                         emailProtection = it
                         prefs.edit().putBoolean("email_prot", it).apply()
                     },
@@ -207,14 +336,14 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                 3 -> LogsPage(logs = liveLogs)
                 4 -> ClipboardProtectionPage(
                     autoClearEnabled = clipboardAutoClear,
-                    onAutoClearChange = { 
+                    onAutoClearChange = {
                         clipboardAutoClear = it
                         prefs.edit().putBoolean("clip_auto", it).apply()
                     }
                 )
                 5 -> PermissionsAuditPage()
                 6 -> SwarmMeshPage()
-                7 -> PrivacyAndLegalContent()
+                7 -> PrivacyAndLegalContent() // Letzte Seite: Datenschutzerklärung & Impressum
             }
         }
     }
@@ -584,17 +713,47 @@ fun SwarmMeshPage() {
 
 @Composable
 fun PrivacyAndLegalContent() {
+    val context = LocalContext.current
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
-            Text("Rechtliche Bestimmungen", style = MaterialTheme.typography.titleLarge)
-            Text("Null-Haftungs- und Offline-Garantie", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+            Text("Datenschutzerklärung & Impressum", style = MaterialTheme.typography.titleLarge)
+            Text("Rechtliche Bestimmungen von Juaris", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
         }
         item {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("1. Datenschutz", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-                    Text("Sämtliche Daten verbleiben ausnahmslos auf dem lokalen Endgerät des Nutzers.")
+                    Text("1. Grundsatz", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    Text("Juaris wurde entwickelt, um die Privatsphäre der Nutzer maximal zu schützen. Der Schutz deiner persönlichen Daten hat für uns oberste Priorität.")
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text("2. Keine Datenerhebung", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    Text("Juaris arbeitet strikt nach dem Local-First-Prinzip. Sämtliche App-Daten, Logs und Einstellungen werden ausschließlich lokal auf deinem Endgerät in einer verschlüsselten Datenbank gespeichert. Es werden keine persönlichen Daten, Standortdaten oder Nutzungsprofile an uns oder Dritte übertragen.")
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text("3. In-App-Abonnements", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    Text("Für die Abwicklung des monatlichen Abonnements (1,99 €/Monat) nutzen wir den offiziellen Google Play Billing Service. Wir selbst erhalten keine Kreditkarten- oder Bankdaten.")
                 }
+            }
+        }
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Impressum", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    Text("Angaben gemäß § 5 TMG / ECG:")
+                    Text("Entwickler: Benedikt Wolfgang Hütter")
+                    Text("Anschrift: Schulgasse 4/15, 2700 Wiener Neustadt, Österreich")
+                    Text("Kontakt: hutters.hq@gmail.com")
+                    Text("Verantwortlich für den Inhalt: Benedikt Wolfgang Hütter")
+                }
+            }
+        }
+        item {
+            OutlinedButton(
+                onClick = {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://hutterschq-debug.github.io/juaris-app/privacy.md"))
+                    context.startActivity(intent)
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Online-Dokumentation im Browser öffnen")
             }
         }
         item {
@@ -612,3 +771,10 @@ fun PrivacyAndLegalContent() {
         }
     }
 }
+
+data class SecurityLogEntity(
+    val timestamp: Long,
+    val module: String,
+    val description: String,
+    val status: String
+)
