@@ -149,7 +149,18 @@ fun WelcomeScreen(onContinueClicked: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(64.dp))
             Button(
-                onClick = onContinueClicked,
+                onClick = {
+                    // Für den lokalen Test direkt weiterleiten:
+                    onLoginSuccess()
+                    
+                    // Später für den Store-Release wieder aktivieren:
+                    // val activity = context as? Activity
+                    // if (activity != null) {
+                    // billingManager.launchBillingFlow(activity)
+                    // } else {
+                    // onLoginSuccess()
+                    // }
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = toxicGreen,
                     contentColor = Color.Black
@@ -159,12 +170,13 @@ fun WelcomeScreen(onContinueClicked: () -> Unit) {
                     .height(54.dp)
             ) {
                 Text(
-                    text = "Weiter",
+                    text = "Abo starten / Anmelden (Test-Bypass)",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     color = Color.Black
                 )
             }
+
         }
     }
 }
