@@ -32,6 +32,11 @@ jobs:
       - name: Setup Gradle Cache
         uses: gradle/actions/setup-gradle@v3
 
+      - name: Configure AndroidX in gradle.properties
+        run: |
+          echo "android.useAndroidX=true" > gradle.properties
+          echo "android.enableJetifier=true" >> gradle.properties
+
       - name: Decode Keystore
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > juaris-release-key.jks
@@ -55,6 +60,7 @@ jobs:
           files: app/build/outputs/bundle/release/app-release.aab
           tag_name: v1.0.0-${{ github.run_number }}
           name: "Juaris Release v1.0.0-${{ github.run_number }}"
-          body: "Automatisches Produktions-Release der Juaris-App inkl. aller geschützten Module, Datenbanken und Filter."
+          body: "Automatisches Produktions-Release der Juaris-App inkl. AndroidX-Unterstützung."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
