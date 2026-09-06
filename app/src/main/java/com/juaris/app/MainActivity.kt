@@ -227,32 +227,24 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(64.dp))
             Button(
-                onClick = {
-                    val activity = context as? Activity
-                    if (activity != null) {
-                        billingManager.launchBillingFlow(activity)
-                    } else {
-                        // Fallback für Testzwecke, falls kein Activity-Kontext vorliegt
-                        onLoginSuccess()
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = toxicGreen,
-                    contentColor = Color.Black
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(54.dp)
-            ) {
-                Text(
-                    text = "Abo starten / Anmelden",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    color = Color.Black
-                )
-            }
-        }
-    }
+    onClick = {
+        // Direkt den Bypass triggern, damit es sofort weitergeht:
+        onLoginSuccess()
+    },
+    colors = ButtonDefaults.buttonColors(
+        containerColor = toxicGreen,
+        contentColor = Color.Black
+    ),
+    modifier = Modifier
+        .fillMaxWidth()
+        .height(54.dp)
+) {
+    Text(
+        text = "Abo starten / Anmelden",
+        fontWeight = FontWeight.Bold,
+        fontSize = 16.sp,
+        color = Color.Black
+    )
 }
 
 @Composable
