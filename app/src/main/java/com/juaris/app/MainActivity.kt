@@ -181,19 +181,18 @@ fun WelcomeScreen(onContinueClicked: () -> Unit) {
     }
 }
 
+
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit) {
     val context = LocalContext.current
     val toxicGreen = Color(0xFF00FF66)
-   
-    // Google Play Billing Manager initialisieren
-   val billingManager = remember {
-    BillingManager(context, "juaris_monats_abo") {
-        onLoginSuccess()
-    }
-}
 
- 
+    // Google Play Billing Manager initialisieren
+    val billingManager = remember {
+        BillingManager(context, "juaris_monats_abo") {
+            onLoginSuccess()
+        }
+    }
 
     LaunchedEffect(Unit) {
         billingManager.startConnection {
@@ -227,24 +226,27 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(64.dp))
             Button(
-    onClick = {
-        // Direkt den Bypass triggern, damit es sofort weitergeht:
-        onLoginSuccess()
-    },
-    colors = ButtonDefaults.buttonColors(
-        containerColor = toxicGreen,
-        contentColor = Color.Black
-    ),
-    modifier = Modifier
-        .fillMaxWidth()
-        .height(54.dp)
-) {
-    Text(
-        text = "Abo starten / Anmelden",
-        fontWeight = FontWeight.Bold,
-        fontSize = 16.sp,
-        color = Color.Black
-    )
+                onClick = {
+                    // Test-Bypass aktiv: Springt direkt ins Dashboard
+                    onLoginSuccess()
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = toxicGreen,
+                    contentColor = Color.Black
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp)
+            ) {
+                Text(
+                    text = "Abo starten / Anmelden",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = Color.Black
+                )
+            }
+        }
+    }
 }
 
 @Composable
