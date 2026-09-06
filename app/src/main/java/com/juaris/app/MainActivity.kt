@@ -601,11 +601,11 @@ fun LogsPage(logs: List<SecurityLogEntity>) {
             Spacer(modifier = Modifier.height(16.dp))
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) 
     
-}
 
-        }
+
+        
     }
-}
+
 
 @Composable
 fun ClipboardProtectionPage(autoClearEnabled: Boolean, onAutoClearChange: (Boolean) -> Unit) {
