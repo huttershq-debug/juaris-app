@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.juaris.app.email.EmailScanWorker
 import java.security.MessageDigest
 
 class MainActivity : ComponentActivity() {
@@ -280,14 +281,24 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                 0 -> StatusPage(
                     logs = liveLogs,
                     onSimulateThreat = {
+                        // E-Mail-Heuristik über den Worker einbinden (Heilige Dreifaltigkeit komplett!)
+                        val emailWorker = EmailScanWorker()
+                        val isEmailThreat = emailWorker.scanLocalEmailContent("fraud@fake-bank.com", "Urgent Invoice Verification Required")
+
+                        val threatDescription = if (isEmailThreat) {
+                            "E-Mail-Phishing & Live-Sandbox Vektor erfolgreich isoliert!"
+                        } else {
+                            "Echtzeit-Angriffsvektor erfolgreich isoliert!"
+                        }
+
                         val newLog = SecurityLogEntity(
                             timestamp = System.currentTimeMillis(),
-                            module = "Live-Sandbox",
-                            description = "Echtzeit-Angriffsvektor erfolgreich isoliert!",
+                            module = if (isEmailThreat) "E-Mail-Heuristik" else "Live-Sandbox",
+                            description = threatDescription,
                             status = "BLOCKED"
                         )
                         liveLogs.add(0, newLog)
-                        Toast.makeText(context, "Bedrohung lokal abgewehrt & protokolliert!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Heilige Dreifaltigkeit: Bedrohung lokal abgewehrt!", Toast.LENGTH_SHORT).show()
                     },
                     onExportLogs = {
                         Toast.makeText(context, "${liveLogs.size} Logs sicher in den verschlüsselten Vault geschrieben.", Toast.LENGTH_LONG).show()
@@ -771,6 +782,3 @@ fun PrivacyAndLegalContent() {
         }
     }
 }
-
-
-
