@@ -800,9 +800,9 @@ fun PrivacyAndLegalContent() {
                 Text("Hutter IT Solutions", style = MaterialTheme.typography.titleMedium)
                 Text("Copyright Benedikt Wolfgang Hütter", style = MaterialTheme.typography.bodySmall)
                 Text("Design Julia Kerschhofer", style = MaterialTheme.typography.bodySmall)
-            }
-        }
+             }
+          }
+       }
     }
-}
-}
+ }
 
