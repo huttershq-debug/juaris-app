@@ -1,8 +1,7 @@
 @file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 package com.juaris.app
 
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothManager
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -37,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.android.billingclient.api.*
 import com.juaris.app.email.EmailScanWorker
 import java.security.MessageDigest
 
@@ -99,7 +99,7 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                         }
-                        // 2. Zweiter Schritt -> Abo / Aktivierung (1,99 €)
+                        // 2. Zweiter Schritt -> Abo / Aktivierung (1,99 €) über Google Play Billing
                         !isLoggedIn -> {
                             LoginScreen(
                                 onLoginSuccess = {
@@ -171,7 +171,22 @@ fun WelcomeScreen(onContinueClicked: () -> Unit) {
 
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit) {
+    val context = LocalContext.current
     val toxicGreen = Color(0xFF00FF66)
+    
+    // Google Play Billing Manager initialisieren
+    val billingManager = remember {
+        BillingManager(context, productID = "juaris_monats_abo", onPurchased = {
+            onLoginSuccess()
+        })
+    }
+
+    LaunchedEffect(Unit) {
+        billingManager.startConnection {
+            // Verbindung mit Google Play Service steht bereit
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -198,7 +213,15 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(64.dp))
             Button(
-                onClick = onLoginSuccess,
+                onClick = {
+                    val activity = context as? Activity
+                    if (activity != null) {
+                        billingManager.launchBillingFlow(activity)
+                    } else {
+                        // Fallback für Testzwecke, falls kein Activity-Kontext vorliegt
+                        onLoginSuccess()
+                    }
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = toxicGreen,
                     contentColor = Color.Black
@@ -281,7 +304,6 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                 0 -> StatusPage(
                     logs = liveLogs,
                     onSimulateThreat = {
-                        // E-Mail-Heuristik über den Worker einbinden (Heilige Dreifaltigkeit komplett!)
                         val emailWorker = EmailScanWorker()
                         val isEmailThreat = emailWorker.scanLocalEmailContent("fraud@fake-bank.com", "Urgent Invoice Verification Required")
 
@@ -354,7 +376,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                 )
                 5 -> PermissionsAuditPage()
                 6 -> SwarmMeshPage()
-                7 -> PrivacyAndLegalContent() // Letzte Seite: Datenschutzerklärung & Impressum
+                7 -> PrivacyAndLegalContent()
             }
         }
     }
@@ -778,6 +800,76 @@ fun PrivacyAndLegalContent() {
                     Text("Copyright Benedikt Wolfgang Hütter", style = MaterialTheme.typography.bodySmall)
                     Text("Design Julia Kerschhofer", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
                 }
+            }
+        }
+    }
+}
+
+/**
+ * Google Play Billing Manager für die Abwicklung des 1,99 € Abos
+ */
+class BillingManager(
+    private val context: Context,
+    private val productID: String = "juaris_monats_abo",
+    private val onPurchased: () -> Unit
+) {
+    private lateinit var billingClient: BillingClient
+
+    fun startConnection(onReady: () -> Unit) {
+        billingClient = BillingClient.newBuilder(context)
+            .setListener { billingResult, purchases ->
+                if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
+                    for (purchase in purchases) {
+                        if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
+                            onPurchased()
+                        }
+                    }
+                }
+            }
+            .enablePendingPurchases(
+                PendingPurchasesParams.newBuilder().enableOneTimeProducts().build()
+            )
+            .build()
+
+        billingClient.startConnection(object : BillingClientStateListener {
+            override fun onBillingSetupFinished(billingResult: BillingResult) {
+                if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                    onReady()
+                }
+            }
+            override fun onBillingServiceDisconnected() {
+                // Verbindung wird bei Bedarf neu aufgebaut
+            }
+        })
+    }
+
+    fun launchBillingFlow(activity: Activity) {
+        val productList = listOf(
+            QueryProductDetailsParams.Product.newBuilder()
+                .setProductId(productID)
+                .setProductType(BillingClient.ProductType.SUBS)
+                .build()
+        )
+
+        val params = QueryProductDetailsParams.newBuilder().setProductList(productList).build()
+
+        billingClient.queryProductDetailsAsync(params) { billingResult, productDetailsList ->
+            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && !productDetailsList.isNullOrEmpty()) {
+                val productDetails = productDetailsList[0]
+                val offerToken = productDetails.subscriptionOfferDetails?.firstOrNull()?.offerToken ?: return@queryProductDetailsAsync
+
+                val productDetailsParamsList = listOf(
+                    BillingFlowParams.ProductDetailsParams.newBuilder()
+                        .setProductDetails(productDetails)
+                        .setOfferToken(offerToken)
+                        .build()
+                )
+
+                val billingFlowParams = BillingFlowParams.newBuilder()
+                    .setProductDetailsParamsList(productDetailsParamsList)
+                    .build()
+
+                billingClient.launchBillingFlow(activity, billingFlowParams)
             }
         }
     }
