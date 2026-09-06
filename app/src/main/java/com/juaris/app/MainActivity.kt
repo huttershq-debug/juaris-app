@@ -604,6 +604,7 @@ fun LogsPage(logs: List<SecurityLogEntity>) {
             }
         }
     }
+}
 
 @Composable
 fun ClipboardProtectionPage(autoClearEnabled: Boolean, onAutoClearChange: (Boolean) -> Unit) {
@@ -683,7 +684,7 @@ fun SwarmMeshPage() {
     val context = LocalContext.current
     var discoveredDevicesCount by remember { mutableStateOf(0) }
     var scanStatusText by remember { mutableStateOf("Bereit für Hardware-Abgleich") }
-    val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
+    val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as? android.bluetooth.BluetoothManager
     val bluetoothAdapter = bluetoothManager?.adapter
     var testInputText by remember { mutableStateOf("Juaris Secure Node") }
     val generatedHash = remember(testInputText) {
@@ -746,26 +747,62 @@ fun SwarmMeshPage() {
 }
 
 @Composable
-fun LogsPage(logs: List<SecurityLogEntity>) {
+fun PrivacyAndLegalContent() {
+    val context = LocalContext.current
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
-            Text("Live-Aktivitätsstream", style = MaterialTheme.typography.titleLarge)
-            Text("Protokoll aller lokalen Systemereignisse.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+            Text("Datenschutzerklärung & Impressum", style = MaterialTheme.typography.titleLarge)
+            Text("Rechtliche Bestimmungen von Juaris", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
         }
-        items(logs) { log ->
+        item {
             Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("Modul: ${log.module}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
-                    Text("Ereignis: ${log.description}", style = MaterialTheme.typography.bodyLarge)
-                    Text("Status: ${log.status}", color = MaterialTheme.colorScheme.error)
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("1. Grundsatz", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    Text("Juaris wurde entwickelt, um die Privatsphäre der Nutzer maximal zu schützen. Der Schutz deiner persönlichen Daten hat für uns oberste Priorität.")
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text("2. Keine Datenerhebung", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    Text("Juaris arbeitet strikt nach dem Local-First-Prinzip. Sämtliche App-Daten, Logs und Einstellungen werden ausschließlich lokal auf deinem Endgerät in einer verschlüsselten Datenbank gespeichert. Es werden keine persönlichen Daten, Standortdaten oder Nutzungsprofile an uns oder Dritte übertragen.")
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text("3. In-App-Abonnements", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    Text("Für die Abwicklung des monatlichen Abonnements (1,99 €/Monat) nutzen wir den offiziellen Google Play Billing Service. Wir selbst erhalten keine Kreditkarten- oder Bankdaten.")
                 }
             }
         }
         item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Impressum", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    Text("Angaben gemäß § 5 TMG / ECG:")
+                    Text("Entwickler: Benedikt Wolfgang Hütter")
+                    Text("Anschrift: Schulgasse 4/15, 2700 Wiener Neustadt, Österreich")
+                    Text("Kontakt: hutters.hq@gmail.com")
+                    Text("Verantwortlich für den Inhalt: Benedikt Wolfgang Hütter")
+                }
+            }
+        }
+        item {
+            OutlinedButton(
+                onClick = {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://hutterschq-debug.github.io/juaris-app/privacy.md"))
+                    context.startActivity(intent)
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Online-Dokumentation im Browser öffnen")
+            }
+        }
+        item {
             Spacer(modifier = Modifier.height(16.dp))
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("Hutter IT Solutions", style = MaterialTheme.typography.titleMedium)
+                    Text("Copyright Benedikt Wolfgang Hütter", style = MaterialTheme.typography.bodySmall)
+                    Text("Design Julia Kerschhofer", style = MaterialTheme.typography.bodySmall)
+                }
             }
         }
     }
-} // <-- HIER FEHLTE DIE KLAMMER!
+}
