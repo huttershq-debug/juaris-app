@@ -39,7 +39,7 @@ jobs:
 
       - name: Decode Keystore
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > juaris-release-key.jks
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/juaris-release-key.jks
 
       - name: Build Signed Release Bundle (AAB)
         run: |
@@ -49,7 +49,7 @@ jobs:
           
           echo "Starte Release Build..."
           ./gradle-8.4/bin/gradle bundleRelease \
-            -Pandroid.injected.signing.store.file=juaris-release-key.jks \
+            -Pandroid.injected.signing.store.file=app/juaris-release-key.jks \
             -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
             -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
             -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}"
@@ -60,7 +60,7 @@ jobs:
           files: app/build/outputs/bundle/release/app-release.aab
           tag_name: v1.0.0-${{ github.run_number }}
           name: "Juaris Release v1.0.0-${{ github.run_number }}"
-          body: "Automatisches Produktions-Release der Juaris-App inkl. AndroidX-Unterstützung."
+          body: "Automatisches Produktions-Release der Juaris-App."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
