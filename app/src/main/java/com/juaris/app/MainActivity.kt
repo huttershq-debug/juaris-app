@@ -772,9 +772,5 @@ fun PrivacyAndLegalContent() {
     }
 }
 
-data class SecurityLogEntity(
-    val timestamp: Long,
-    val module: String,
-    val description: String,
-    val status: String
-)
+
+
