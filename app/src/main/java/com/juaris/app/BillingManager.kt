@@ -4,8 +4,11 @@ import android.app.Activity
 import android.content.Context
 import com.android.billingclient.api.*
 
-class BillingManager(private val context: Context, private val productID: String = "juaris_monats_abo") {
-
+class BillingManager(
+    private val context: Context,
+    private val productID: String = "juaris_monats_abo",
+    private val onPurchased: () -> Unit = {}
+) {
     private lateinit var billingClient: BillingClient
 
     fun startConnection(onReady: () -> Unit) {
@@ -67,8 +70,8 @@ class BillingManager(private val context: Context, private val productID: String
 
     private fun handlePurchase(purchase: Purchase) {
         if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
-            // Hier wird das Abo erfolgreich verarbeitet
+            // Abo erfolgreich erworben, Callback triggern
+            onPurchased()
         }
     }
 }
-
