@@ -38,10 +38,11 @@ jobs:
           echo "android.enableJetifier=true" >> gradle.properties
 
       - name: Decode Keystore
-        run: mkdir -p juaris-app && echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "$GITHUB_WORKSPACE/juaris-app/juaris-release-key.jks"
+        run: mkdir -p juaris-app && echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "$GITHUB_WORKSPACE/juaris-release-key.jks"
 
       - name: Build Both AAB and APK
         run: |
+         cd juaris-app
          echo "Lade Gradle 8.4 herunter..."
          wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
          unzip -q gradle-8.4-bin.zip
