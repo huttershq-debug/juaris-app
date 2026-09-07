@@ -48,8 +48,6 @@ import com.juaris.app.ui.SecurityLogsPage
 class MainActivity : ComponentActivity() {
 
     private lateinit var securePrefs: SharedPreferences
-    private val airGestureCore = AirGestureCore
-    private val airGestureCore by lazy { AirGestureCore(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
