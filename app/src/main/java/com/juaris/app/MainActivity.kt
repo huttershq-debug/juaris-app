@@ -287,7 +287,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                 0 -> StatusPage(
                     logs = liveLogs,
                     onSimulateThreat = {
-                        val emailWorker = EmailScanWorker()
+                        val emailWorker = EmailScanWorker(context)
                         val isEmailThreat = emailWorker.scanLocalEmailContent("fraud@fake-bank.com", "Urgent Invoice verification")
                        
                         val threatDescription = if (isEmailThreat) {
