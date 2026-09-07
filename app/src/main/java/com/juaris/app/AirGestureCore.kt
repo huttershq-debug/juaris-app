@@ -26,8 +26,9 @@ class AirGestureCore(private val context: Context) {
     val lastAction: StateFlow<GestureAction> = _lastAction
 
     private lateinit var cameraExecutor: ExecutorService
-    private var prevLeftAvg: Double = 0.0
-    private var prevRightAvg: Double = 0.0
+    private var previousByteArray: ByteArray? = null
+    private var lastCenterX: Double = 0.0
+    private var frameCounter: Long = 0
 
     fun startGestureDetection(lifecycleOwner: LifecycleOwner, onActionDetected: (GestureAction) -> Unit) {
         cameraExecutor = Executors.newSingleThreadExecutor()
@@ -55,7 +56,7 @@ class AirGestureCore(private val context: Context) {
                     cameraSelector,
                     imageAnalysis
                 )
-                _gestureState.value = "Kamera scharf – Hand bewegen"
+                _gestureState.value = "Kamera aktiv – Hand bewegen"
             } catch (exc: Exception) {
                 _gestureState.value = "Fehler: ${exc.localizedMessage}"
             }
@@ -63,63 +64,72 @@ class AirGestureCore(private val context: Context) {
     }
 
     private fun processImageFrame(imageProxy: ImageProxy, onActionDetected: (GestureAction) -> Unit) {
-        val plane = imageProxy.planes[0]
-        val buffer = plane.buffer
-        val width = imageProxy.width
-        val height = imageProxy.height
-        val rowStride = plane.rowStride
+        try {
+            frameCounter++
+            val plane = imageProxy.planes[0]
+            val buffer = plane.buffer
+            
+            // WICHTIG: Buffer-Position auf 0 zurücksetzen, sonst liest er keine Daten!
+            buffer.rewind()
+            
+            val rowStride = plane.rowStride
+            val width = imageProxy.width
+            val height = imageProxy.height
 
-        var leftSum = 0L
-        var rightSum = 0L
-        var count = 0L
+            val currentBytes = ByteArray(buffer.remaining())
+            buffer.get(currentBytes)
 
-        val step = 32 // Schnell und ressourcenschonend
-        val midX = width / 2
+            val prev = previousByteArray
+            if (prev != null && prev.size == currentBytes.size) {
+                var totalX = 0L
+                var motionPixels = 0L
+                val step = 16 // Feinerer Raster-Scan für sichere Erkennung
 
-        // Zonen-Scan: Trennt linke und rechte Bildhälfte
-        for (y in 0 until height step step) {
-            for (x in 0 until width step step) {
-                val index = y * rowStride + x
-                if (index < buffer.capacity()) {
-                    val pixel = buffer.get(index).toInt() and 0xFF
-                    if (x < midX) {
-                        leftSum += pixel
-                    } else {
-                        rightSum += pixel
+                for (y in 0 until height step step) {
+                    for (x in 0 until width step step) {
+                        val index = y * rowStride + x
+                        if (index < currentBytes.size && index < prev.size) {
+                            val currVal = currentBytes[index].toInt() and 0xFF
+                            val prevVal = prev[index].toInt() and 0xFF
+                            val diffVal = abs(currVal - prevVal)
+
+                            if (diffVal > 15) { // Sensibler Schwellenwert für Bewegung
+                                totalX += x
+                                motionPixels++
+                            }
+                        }
                     }
-                    count++
                 }
-            }
-        }
 
-        if (count > 0) {
-            val currentLeftAvg = leftSum.toDouble() / (count / 2)
-            val currentRightAvg = rightSum.toDouble() / (count / 2)
+                if (motionPixels > 15) {
+                    val currentCenterX = totalX.toDouble() / motionPixels
+                    if (lastCenterX > 0.0) {
+                        val deltaX = currentCenterX - lastCenterX
+                        _gestureState.value = "Motion: $motionPixels | Delta: ${String.format("%.1f", deltaX)}"
 
-            if (prevLeftAvg > 0.0 && prevRightAvg > 0.0) {
-                val leftDelta = currentLeftAvg - prevLeftAvg
-                val rightDelta = currentRightAvg - prevRightAvg
-
-                // Live-Werte direkt auf dem Display sichtbar machen
-                _gestureState.value = "Aktiv | L: ${String.format("%.1f", leftDelta)} R: ${String.format("%.1f", rightDelta)}"
-
-                val threshold = 3.5 // Extrem feinfühlig
-
-                // Richtungs-Erkennung über Energieverschiebung
-                if (leftDelta > threshold && rightDelta < -threshold) {
-                    _lastAction.value = GestureAction.SWIPE_RIGHT
-                    onActionDetected(GestureAction.SWIPE_RIGHT)
-                } else if (leftDelta < -threshold && rightDelta > threshold) {
-                    _lastAction.value = GestureAction.SWIPE_LEFT
-                    onActionDetected(GestureAction.SWIPE_LEFT)
+                        val swipeThreshold = 4.0
+                        if (deltaX > swipeThreshold) {
+                            _lastAction.value = GestureAction.SWIPE_RIGHT
+                            onActionDetected(GestureAction.SWIPE_RIGHT)
+                        } else if (deltaX < -swipeThreshold) {
+                            _lastAction.value = GestureAction.SWIPE_LEFT
+                            onActionDetected(GestureAction.SWIPE_LEFT)
+                        }
+                    }
+                    lastCenterX = currentCenterX
+                } else {
+                    _gestureState.value = "Bereit (#$frameCounter) – warte auf Swipe"
                 }
+            } else {
+                _gestureState.value = "Kalibriere Sensor (#$frameCounter)..."
             }
 
-            prevLeftAvg = currentLeftAvg
-            prevRightAvg = currentRightAvg
+            previousByteArray = currentBytes
+        } catch (e: Exception) {
+            _gestureState.value = "Fehler: ${e.localizedMessage}"
+        } finally {
+            imageProxy.close()
         }
-
-        imageProxy.close()
     }
 
     fun stopGestureDetection() {
