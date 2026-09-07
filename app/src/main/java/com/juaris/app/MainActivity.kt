@@ -131,6 +131,15 @@ fun WelcomeScreen(onContinueClicked: () -> Unit) {
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.padding(32.dp)
         ) {
+            Image(
+                painter = painterResource(id = R.drawable.hologram_avatar),
+                contentDescription = "Juaris KI Hologramm",
+                modifier = Modifier
+                    .size(200.dp)
+                    .padding(bottom = 24.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
             Text(
                 text = "WILLKOMMEN BEI JUARIS",
                 color = NeonGiftgruen,
