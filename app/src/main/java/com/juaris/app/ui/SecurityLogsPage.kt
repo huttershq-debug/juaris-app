@@ -16,17 +16,17 @@ fun SecurityLogsPage(logDao: SecurityLogDao) {
     // Falls Flow genutzt wird, hier sicher einbinden:
     // val logs by logDao.getAllLogs().collectAsState(initial = emptyList())
     
-    // Fallback-Liste falls DAO direkt abgefragt wird oder als Platzhalter:
-    var logs by remember { mutableStateOf(listOf<SecurityLogEntity>()) }
-    
+     // Korrekter Jetpack Compose State für die Logs
+    var logs by remember { mutableStateOf(emptyList<SecurityLogEntity>()) }
+
     LaunchedEffect(Unit) {
         try {
-            logs = logDao.getAllLogsList() // Passe dies an deine DAO-Methode an (z.B. getAllLogs())
+            logs = logDao.getAllLogsList() // Holt die Daten asynchron aus der Room-DB
         } catch (e: Exception) {
-            // Fallback bei leerer DB
+            logs = emptyList()
         }
     }
-
+    
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
