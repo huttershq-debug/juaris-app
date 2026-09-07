@@ -783,14 +783,19 @@ fun PrivacyAndLegalContent() {
         }
         item {
             OutlinedButton(
-                onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://hutterschq-debug.github.io/juaris-app/privacy.md"))
-                    context.startActivity(intent)
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Online-Dokumentation im Browser öffnen")
-            }
+               onClick = {
+                       try {
+                           val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://hutterschq-debug.github.io/juaris-app/privacy.md"))
+                           context.startActivity(intent)
+                       } catch (e: Exception) {
+                            // Fängt den Fehler ab, falls kein Browser verfügbar ist
+                       }
+              },
+              modifier = Modifier.fillMaxWidth()
+          ) {
+              Text("Online-Dokumentation im Browser öffnen")
+          }
+
         }
         item {
             Spacer(modifier = Modifier.height(16.dp))
