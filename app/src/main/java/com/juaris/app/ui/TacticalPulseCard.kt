@@ -2,6 +2,7 @@ package com.juaris.app.ui
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -35,46 +36,31 @@ fun TacticalPulseCard(
 
     val activeGlowColor = NeonGiftgruen.copy(alpha = pulseAlpha)
 
-    if (onClick != null) {
-        Card(
-            onClick = onClick,
-            modifier = modifier
-                .fillMaxWidth()
-                .shadow(
-                    elevation = (10 * pulseAlpha).dp,
-                    shape = RoundedCornerShape(4.dp),
-                    ambientColor = activeGlowColor,
-                    spotColor = activeGlowColor
-                ),
+    val baseModifier = modifier
+        .fillMaxWidth()
+        .shadow(
+            elevation = (10 * pulseAlpha).dp,
             shape = RoundedCornerShape(4.dp),
-            border = BorderStroke(1.5.dp, activeGlowColor),
-            colors = CardDefaults.cardColors(
-                containerColor = Color(0xFF030503).copy(alpha = 0.95f)
-            )
-        ) {
-            Box(modifier = Modifier.padding(16.dp)) {
-                content()
-            }
-        }
+            ambientColor = activeGlowColor,
+            spotColor = activeGlowColor
+        )
+
+    val cardModifier = if (onClick != null) {
+        baseModifier.clickable(onClick = onClick)
     } else {
-        Card(
-            modifier = modifier
-                .fillMaxWidth()
-                .shadow(
-                    elevation = (10 * pulseAlpha).dp,
-                    shape = RoundedCornerShape(4.dp),
-                    ambientColor = activeGlowColor,
-                    spotColor = activeGlowColor
-                ),
-            shape = RoundedCornerShape(4.dp),
-            border = BorderStroke(1.5.dp, activeGlowColor),
-            colors = CardDefaults.cardColors(
-                containerColor = Color(0xFF030503).copy(alpha = 0.95f)
-            )
-        ) {
-            Box(modifier = Modifier.padding(16.dp)) {
-                content()
-            }
+        baseModifier
+    }
+
+    Card(
+        modifier = cardModifier,
+        shape = RoundedCornerShape(4.dp),
+        border = BorderStroke(1.5.dp, activeGlowColor),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF030503).copy(alpha = 0.95f)
+        )
+    ) {
+        Box(modifier = Modifier.padding(16.dp)) {
+            content()
         }
     }
 }
