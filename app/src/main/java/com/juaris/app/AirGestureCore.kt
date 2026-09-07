@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.math.abs
 
 class AirGestureCore(private val context: Context) {
 
@@ -18,7 +19,7 @@ class AirGestureCore(private val context: Context) {
         NONE, SWIPE_LEFT, SWIPE_RIGHT
     }
 
-    private val _gestureState = MutableStateFlow("Aktiv: Frontkamera überwacht Luftgesten")
+    private val _gestureState = MutableStateFlow("Initialisiere Kamera...")
     val gestureState: StateFlow<String> = _gestureState
 
     private val _lastAction = MutableStateFlow<GestureAction>(GestureAction.NONE)
@@ -53,7 +54,7 @@ class AirGestureCore(private val context: Context) {
                     cameraSelector,
                     imageAnalysis
                 )
-                _gestureState.value = "Aktiv: Frontkamera überwacht Luftgesten"
+                _gestureState.value = "Kamera aktiv – bitte Hand bewegen"
             } catch (exc: Exception) {
                 _gestureState.value = "Fehler: ${exc.localizedMessage}"
             }
@@ -64,21 +65,20 @@ class AirGestureCore(private val context: Context) {
         val plane = imageProxy.planes[0]
         val buffer = plane.buffer
         val rowStride = plane.rowStride
-        val pixelStride = plane.pixelStride
         val width = imageProxy.width
         val height = imageProxy.height
 
         var totalX = 0L
         var pixelCount = 0L
-        val step = 40 // Effizientes Abtastgitter
+        val step = 20 // Feineres Abtasten
 
+        // Wir scannen das Bild nach hellen Konturen (Hand/Haut)
         for (y in 0 until height step step) {
             for (x in 0 until width step step) {
-                val bufferIndex = y * rowStride + x * pixelStride
-                if (bufferIndex < buffer.capacity()) {
-                    val pixelValue = buffer.get(bufferIndex).toInt() and 0xFF
-                    // Helle Bereiche (z. B. Hand/Haut vor der Kamera)
-                    if (pixelValue > 110) {
+                val index = y * rowStride + x
+                if (index < buffer.capacity()) {
+                    val pixelValue = buffer.get(index).toInt() and 0xFF
+                    if (pixelValue > 90) { // Helligkeitsschwelle für Hand
                         totalX += x
                         pixelCount++
                     }
@@ -86,11 +86,16 @@ class AirGestureCore(private val context: Context) {
             }
         }
 
-        if (pixelCount > 25) {
+        if (pixelCount > 10) {
             val currentAverageX = totalX.toDouble() / pixelCount
             if (lastAverageX > 0.0) {
                 val diff = currentAverageX - lastAverageX
-                val threshold = 8.0 // Feine Schwelle für direkte Wischreaktion
+                
+                // Live-Feedback direkt auf dem Bildschirm sichtbar machen!
+                _gestureState.value = "Pixel: $pixelCount | Diff: ${String.format("%.1f", diff)}"
+
+                // Sehr niedrige Schwelle, damit es sofort auslöst
+                val threshold = 3.0 
 
                 if (diff > threshold) {
                     _lastAction.value = GestureAction.SWIPE_RIGHT
@@ -99,8 +104,12 @@ class AirGestureCore(private val context: Context) {
                     _lastAction.value = GestureAction.SWIPE_LEFT
                     onActionDetected(GestureAction.SWIPE_LEFT)
                 }
+            } else {
+                _gestureState.value = "Bereit (Pixel: $pixelCount)"
             }
             lastAverageX = currentAverageX
+        } else {
+            _gestureState.value = "Keine Hand erkannt (Pixel: $pixelCount)"
         }
 
         imageProxy.close()
