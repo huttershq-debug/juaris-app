@@ -2,6 +2,7 @@
 package com.juaris.app
 
 import com.juaris.app.ui.AIPage
+import com.juaris.app.ui.AirGesturePage
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
