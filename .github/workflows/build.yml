@@ -42,18 +42,20 @@ jobs:
           mkdir -p app
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "$GITHUB_WORKSPACE/app/juaris-release-key.jks"
 
-      - name: Build Both AAB and APK
-        run: |
-          echo "Lade Gradle 8.4 herunter..."
-          wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
-          unzip -q gradle-8.4-bin.zip 2>/dev/null || unzip -q gradle-8.4-bin.zip
-          
-          echo "Starte Build für AAB und APK..."
-          ./gradle-8.4/bin/gradle bundleRelease assembleRelease \
-            -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/app/juaris-release-key.jks" \
-            -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
-            -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
-            -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}"
+          - name: Build Both AAB and APK
+            run: |
+            cd juaris-app
+            echo "Lade Gradle 8.4 herunter..."
+            wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
+            unzip -q gradle-8.4-bin.zip
+        
+             echo "Starte Build für AAB und APK..."
+           ./gradle-8.4/bin/gradle assembleRelease \
+          -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/juaris-app/juaris-release-key.jks" \
+          -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
+          -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
+          -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}"
+
 
       - name: Release Both Files veröffentlichen
         uses: softprops/action-gh-release@v1
