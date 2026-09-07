@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Juaris</string>
+    <string name="status_protected">Устройство полностью защищено (Вкл. &amp; Выкл.)</string>
+    <string name="status_warning">Обнаружено предупреждение безопасности</string>
+    <string name="tab_logs">Журналы безопасности</string>
+    <string name="tab_settings">Настройки</string>
+    <string name="call_protection_title">Защита вызовов</string>
+    <string name="log_call_incoming_blocked">Заблокирован входящий вызов: %1$s</string>
+    <string name="log_call_outgoing_blocked">Остановлен исходящий рискованный вызов: %1$s</string>
+    <string name="sms_protection_title">Фильтр SMS-фишинга</string>
+    <string name="log_sms_incoming_blocked">Заблокировано входящее фишинговое SMS: %1$s</string>
+    <string name="log_sms_outgoing_blocked">Остановлено исходящее вредоносное SMS: %1$s</string>
+    <string name="email_protection_title">Безопасность электронной почты</string>
+    <string name="log_email_incoming_blocked">Заблокировано входящее вредоносное письмо: %1$s</string>
+    <string name="log_email_outgoing_blocked">Исходящее письмо остановлено (угроза безопасности): %1$s</string>
+</resources>
