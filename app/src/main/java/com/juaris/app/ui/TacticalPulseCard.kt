@@ -14,15 +14,14 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-// Das exklusive Juaris-Giftgrün (Laser-Green)
 val NeonGiftgruen = Color(0xFF00FF66)
 
 @Composable
 fun TacticalPulseCard(
     modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
-    // Sanfter, automatischer Puls-Effekt für den Hologramm-Glow und Rahmen
     val infiniteTransition = rememberInfiniteTransition(label = "tactical_pulse")
     val pulseAlpha by infiniteTransition.animateFloat(
         initialValue = 0.5f,
@@ -36,26 +35,46 @@ fun TacticalPulseCard(
 
     val activeGlowColor = NeonGiftgruen.copy(alpha = pulseAlpha)
 
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            // Lebendiger Schatten, der im Takt des Pulsierens mitleuchtet
-            .shadow(
-                elevation = (10 * pulseAlpha).dp,
-                shape = RoundedCornerShape(4.dp), // Eckiger, militärischer Look
-                ambientColor = activeGlowColor,
-                spotColor = activeGlowColor
-            ),
-        shape = RoundedCornerShape(4.dp),
-        // Gestochen scharfer, pulsierender Giftgrün-Rahmen
-        border = BorderStroke(1.5.dp, activeGlowColor),
-        colors = CardDefaults.cardColors(
-            // Tiefschwarzer Glassmorphism-Hintergrund mit dezenter Transparenz
-            containerColor = Color(0xFF030503).copy(alpha = 0.95f)
-        )
-    ) {
-        Box(modifier = Modifier.padding(16.dp)) {
-            content()
+    if (onClick != null) {
+        Card(
+            onClick = onClick,
+            modifier = modifier
+                .fillMaxWidth()
+                .shadow(
+                    elevation = (10 * pulseAlpha).dp,
+                    shape = RoundedCornerShape(4.dp),
+                    ambientColor = activeGlowColor,
+                    spotColor = activeGlowColor
+                ),
+            shape = RoundedCornerShape(4.dp),
+            border = BorderStroke(1.5.dp, activeGlowColor),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFF030503).copy(alpha = 0.95f)
+            )
+        ) {
+            Box(modifier = Modifier.padding(16.dp)) {
+                content()
+            }
+        }
+    } else {
+        Card(
+            modifier = modifier
+                .fillMaxWidth()
+                .shadow(
+                    elevation = (10 * pulseAlpha).dp,
+                    shape = RoundedCornerShape(4.dp),
+                    ambientColor = activeGlowColor,
+                    spotColor = activeGlowColor
+                ),
+            shape = RoundedCornerShape(4.dp),
+            border = BorderStroke(1.5.dp, activeGlowColor),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFF030503).copy(alpha = 0.95f)
+            )
+        ) {
+            Box(modifier = Modifier.padding(16.dp)) {
+                content()
+            }
         }
     }
 }
