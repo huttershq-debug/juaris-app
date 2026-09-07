@@ -1,41 +1,33 @@
-package com.juaris.app.ui
+package com.juaris.app.ui // Passe das Package an dein Projekt an, falls es direkt in com.juaris.app liegt
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.LifecycleOwner
 import com.juaris.app.AirGestureCore
 
 @Composable
-fun AirGesturePage(
-    airGestureCore: AirGestureCore,
-    onSwipeNavigation: (Boolean) -> Unit
-) {
+fun AirGesturePage() {
     val context = LocalContext.current
-    val lifecycleOwner = context as? LifecycleOwner
-    val gestureState by airGestureCore.gestureState.collectAsState()
-    val lastAction by airGestureCore.lastAction.collectAsState()
+    val lifecycleOwner = LocalLifecycleOwner.current
+    
+    // Core-Instanz merken, damit sie bei Neuladen nicht neu erstellt wird
+    val gestureCore = remember { AirGestureCore(context) }
+    
+    // Live-Daten aus der Core abgreifen
+    val gestureState by gestureCore.gestureState.collectAsState()
+    val lastAction by gestureCore.lastAction.collectAsState()
 
-    // Startet die Gestensteuerung vollautomatisch und permanent im Hintergrund
-    LaunchedEffect(Unit) {
-        if (lifecycleOwner != null) {
-            airGestureCore.startGestureDetection(lifecycleOwner) { action ->
-                when (action) {
-                    AirGestureCore.GestureAction.SWIPE_RIGHT -> {
-                        onSwipeNavigation(true) // Tab vorwärts
-                    }
-                    AirGestureCore.GestureAction.SWIPE_LEFT -> {
-                        onSwipeNavigation(false) // Tab rückwärts
-                    }
-                    AirGestureCore.GestureAction.NONE -> {}
-                }
-            }
+    // Gestenerkennung beim Betreten der Seite starten und beim Verlassen stoppen
+    DisposableEffect(lifecycleOwner) {
+        gestureCore.startGestureDetection(lifecycleOwner) { action ->
+            // Hier kannst du bei Bedarf Code ausführen, wenn eine Geste erkannt wird
+        }
+        onDispose {
+            gestureCore.stopGestureDetection()
         }
     }
 
@@ -64,32 +56,30 @@ fun AirGesturePage(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(10.dp)
-                            .background(MaterialTheme.colorScheme.primary, CircleShape)
-                    )
-                    Text(
-                        text = "Kamera-Schutz aktiv (Permanent)",
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
+                Text(
+                    text = "🟢 Kamera-Schutz aktiv (Permanent)",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                
+                // Hier wird der Live-Feed aus der Core angezeigt!
                 Text(
                     text = "Sensor-Feed: $gestureState",
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                
+                // Hier springt die Anzeige von NONE auf SWIPE_LEFT / SWIPE_RIGHT
                 Text(
                     text = "Letzte Aktion: $lastAction",
+                    style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.secondary
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+
+                Spacer(modifier = Modifier.height(8.dp))
+
                 Text(
-                    text = "Hinweis: Es werden zu keiner Zeit Bilder oder Videos gespeichert oder an Server gesendet. Die Analyse erfolgt ausschließlich im Arbeitsspeicher deines Geräts – genau wie eine native Smartphone-Funktion.",
+                    text = "Hinweis: Es werden zu keiner Zeit Bilder oder Videos gespeichert oder an Server gesendet. Die Analyse erfolgt ausschließlich im Arbeitsspeicher deines Geräts.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -97,4 +87,5 @@ fun AirGesturePage(
         }
     }
 }
+
 
