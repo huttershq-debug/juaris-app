@@ -49,7 +49,7 @@ jobs:
           unzip -q gradle-8.4-bin.zip
           
           echo "Kompiliere APK und AAB mit 3GB Heap..."
-          ./gradle-8.4/bin/gradle assembleRelease bundleRelease \
+          ./gradle-8.4/bin/gradle assembleRelease bundleRelease --stacktrace \
             -Dorg.gradle.jvmargs="-Xmx3g" \
             -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/juaris-release-key.jks" \
             -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
