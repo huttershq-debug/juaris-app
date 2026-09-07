@@ -42,7 +42,6 @@ jobs:
 
       - name: Build Both AAB and APK
         run: |
-         cd juaris-app
          echo "Lade Gradle 8.4 herunter..."
          wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
          unzip -q gradle-8.4-bin.zip
