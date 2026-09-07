@@ -1,11 +1,6 @@
 @file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 package com.juaris.app
 
-import com.juaris.app.ui.AIPage
-import com.juaris.app.ui.AirGesturePage
-import com.juaris.app.ui.TacticalPulseCard
-import com.juaris.app.ui.NeonGiftgruen
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -16,6 +11,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
@@ -24,10 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -43,10 +36,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import com.android.billingclient.api.*
-import com.juaris.app.email.EmailScanWorker
-import java.security.MessageDigest
+import com.juaris.app.ui.AIPage
+import com.juaris.app.ui.AirGesturePage
+import com.juaris.app.ui.TacticalPulseCard
+import com.juaris.app.ui.NeonGiftgruen
 import com.juaris.app.ui.SecurityLogsPage
+import java.security.MessageDigest
 
 class MainActivity : ComponentActivity() {
 
@@ -73,16 +68,16 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val hackerGreenColorScheme = darkColorScheme(
-                primary = Color(0xFF00FF66),
+                primary = NeonGiftgruen,
                 onPrimary = Color.Black,
                 primaryContainer = Color(0xFF003311),
-                onPrimaryContainer = Color(0xFF00FF66),
+                onPrimaryContainer = NeonGiftgruen,
                 background = Color.Black,
-                onBackground = Color(0xFF00FF66),
+                onBackground = NeonGiftgruen,
                 surface = Color(0xFF080808),
                 onSurface = Color(0xFFE0E0E0),
                 surfaceVariant = Color(0xFF121212),
-                onSurfaceVariant = Color(0xFF00FF66),
+                onSurfaceVariant = NeonGiftgruen,
                 error = Color(0xFFFF3333)
             )
 
@@ -123,7 +118,6 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun WelcomeScreen(onContinueClicked: () -> Unit) {
-    val toxicGreen = Color(0xFF00FF66)
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -137,7 +131,7 @@ fun WelcomeScreen(onContinueClicked: () -> Unit) {
         ) {
             Text(
                 text = "WILLKOMMEN BEI JUARIS",
-                color = toxicGreen,
+                color = NeonGiftgruen,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
@@ -153,7 +147,7 @@ fun WelcomeScreen(onContinueClicked: () -> Unit) {
             Button(
                 onClick = { onContinueClicked() },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = toxicGreen,
+                    containerColor = NeonGiftgruen,
                     contentColor = Color.Black
                 ),
                 modifier = Modifier
@@ -174,7 +168,6 @@ fun WelcomeScreen(onContinueClicked: () -> Unit) {
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit) {
     val context = LocalContext.current
-    val toxicGreen = Color(0xFF00FF66)
 
     val billingManager = remember {
         BillingManager(context, "juaris_monats_abo") {
@@ -199,7 +192,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
         ) {
             Text(
                 text = "AKTIVIERUNG",
-                color = toxicGreen,
+                color = NeonGiftgruen,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -214,7 +207,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
             Button(
                 onClick = { onLoginSuccess() },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = toxicGreen,
+                    containerColor = NeonGiftgruen,
                     contentColor = Color.Black
                 ),
                 modifier = Modifier
@@ -290,17 +283,10 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                 0 -> StatusPage(
                     logs = liveLogs,
                     onSimulateThreat = {
-                        val isEmailThreat = true
-                       
-                        val threatDescription = if (isEmailThreat) {
-                            "E-Mail-Phishing & Live-Sandbox Vektor erfolgreich isoliert!"
-                        } else {
-                            "Echtzeit-Angriffsvektor erfolgreich isoliert!"
-                        }
-                       
+                        val threatDescription = "E-Mail-Phishing & Live-Sandbox Vektor erfolgreich isoliert!"
                         val newLog = SecurityLogEntity(
                             timestamp = System.currentTimeMillis(),
-                            module = if (isEmailThreat) "E-Mail-Heuristik" else "Live-Sandbox",
+                            module = "E-Mail-Heuristik",
                             description = threatDescription,
                             status = "BLOCKED"
                         )
@@ -352,7 +338,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                     }
                 )
                 3 -> {
-                    val db = com.juaris.app.JuarisDatabase.getDatabase(LocalContext.current)
+                    val db = JuarisDatabase.getDatabase(LocalContext.current)
                     SecurityLogsPage(logDao = db.securityLogDao())
                 }
                 4 -> ClipboardProtectionPage(
@@ -396,13 +382,29 @@ fun StatusPage(
             Text("Echtzeit-Diagnose des verschlüsselten Offline-Kernels.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
+            val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+            val alphaAnim by infiniteTransition.animateFloat(
+                initialValue = 0.3f,
+                targetValue = 1f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(1000),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "alpha"
+            )
+
             TacticalPulseCard {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Icon(Icons.Default.CheckCircle, contentDescription = null, tint = NeonGiftgruen, modifier = Modifier.size(36.dp))
+                    Icon(
+                        Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        tint = NeonGiftgruen.copy(alpha = alphaAnim),
+                        modifier = Modifier.size(36.dp)
+                    )
                     Column {
                         Text("Status: AES-256 Gesichert", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                         Text("Keine Telemetrie, Keine Cloud, 100% On-Device", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
@@ -560,9 +562,9 @@ fun BlacklistPage(blockedList: MutableList<String>, onAddBlocked: (String) -> Un
                     Text("Nummer zur Sperrliste hinzufügen", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         OutlinedTextField(
-                            value = inputNumber, 
-                            onValueChange = { inputNumber = it }, 
-                            label = { Text("Rufnummer / Muster", color = Color.Gray) }, 
+                            value = inputNumber,
+                            onValueChange = { inputNumber = it },
+                            label = { Text("Rufnummer / Muster", color = Color.Gray) },
                             modifier = Modifier.weight(1f)
                         )
                         Button(
@@ -581,31 +583,6 @@ fun BlacklistPage(blockedList: MutableList<String>, onAddBlocked: (String) -> Un
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text(item, style = MaterialTheme.typography.bodyLarge, color = Color.White)
                     TextButton(onClick = { onRemoveBlocked(item) }) { Text("Freigeben", color = Color(0xFFFF3333)) }
-                }
-            }
-        }
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-            }
-        }
-    }
-}
-
-@Composable
-fun LogsPage(logs: List<SecurityLogEntity>) {
-    LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        item {
-            Text("Live-Aktivitätsstream", style = MaterialTheme.typography.titleLarge, color = Color.White)
-            Text("Protokoll aller lokalen Systemereignisse.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-        }
-        items(logs) { log ->
-            TacticalPulseCard {
-                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("Modul: ${log.module}", style = MaterialTheme.typography.bodySmall, color = NeonGiftgruen)
-                    Text("Ereignis: ${log.description}", style = MaterialTheme.typography.bodyLarge, color = Color.White)
-                    Text("Status: ${log.status}", color = Color(0xFFFF3333), fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -679,7 +656,7 @@ fun PermissionsAuditPage() {
         }
         item {
             Button(
-                onClick = { Toast.makeText(context, "Audit erfolgreich: System sauber.", Toast.LENGTH_SHORT).show() }, 
+                onClick = { Toast.makeText(context, "Audit erfolgreich: System sauber.", Toast.LENGTH_SHORT).show() },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
             ) {
@@ -809,19 +786,18 @@ fun PrivacyAndLegalContent() {
         item {
             OutlinedButton(
                onClick = {
-                       try {
-                           val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://huttershq-debug.github.io/juaris-app/privacy.md"))
-                           context.startActivity(intent)
-                       } catch (e: Exception) {
-                            // Fängt den Fehler ab, falls kein Browser verfügbar ist
-                       }
+                   try {
+                       val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://huttershq-debug.github.io/juaris-app/privacy.md"))
+                       context.startActivity(intent)
+                   } catch (e: Exception) {
+                        // Fängt den Fehler ab, falls kein Browser verfügbar ist
+                   }
               },
               modifier = Modifier.fillMaxWidth(),
               border = BorderStroke(1.dp, NeonGiftgruen)
           ) {
               Text("Online-Dokumentation im Browser öffnen", color = NeonGiftgruen)
           }
-
         }
         item {
             Spacer(modifier = Modifier.height(16.dp))
@@ -835,5 +811,4 @@ fun PrivacyAndLegalContent() {
         }
     }
 }
-
 
