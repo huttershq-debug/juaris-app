@@ -39,8 +39,8 @@ jobs:
 
       - name: Decode Keystore
         run: |
-          mkdir -p app
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "$GITHUB_WORKSPACE/app/juaris-release-key.jks"
+          mkdir -p juaris-app
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "$GITHUB_WORKSPACE/juaris-app/juaris-release-key.jks"
 
           - name: Build Both AAB and APK
             run: |
