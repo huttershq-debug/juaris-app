@@ -9,5 +9,7 @@ data class SecurityLogEntity(
     val timestamp: Long,
     val module: String,
     val description: String,
-    val status: String
+    val status: String,
+    val details: String = "" // Das hat im Worker gefehlt und wird hier ergänzt
 )
+
