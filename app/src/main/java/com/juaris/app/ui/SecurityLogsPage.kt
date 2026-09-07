@@ -13,19 +13,28 @@ import com.juaris.app.SecurityLogEntity
 
 @Composable
 fun SecurityLogsPage(logDao: SecurityLogDao) {
-    // Falls Flow genutzt wird, hier sicher einbinden:
-    // val logs by logDao.getAllLogs().collectAsState(initial = emptyList())
-    
-     // Korrekter Jetpack Compose State für die Logs
-    var logs by remember { mutableStateOf(emptyList<SecurityLogEntity>()) }
+    // Holt die Logs reaktiv und automatisch aktualisiert über den Flow aus der Room-DB
+    val logs by logDao.getAllLogs().collectAsState(initial = emptyList())
 
-    LaunchedEffect(Unit) {
-        try {
-            logs = logDao.getAllLogsList() // Holt die Daten asynchron aus der Room-DB
-        } catch (e: Exception) {
-            logs = emptyList()
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        item {
+            Text(
+                text = "Datenbank-Sicherheitslogs",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+        items(logs) { log ->
+            // Hier folgt deine Log-Item-Anzeige...
         }
     }
+}
+
     
     LazyColumn(
         modifier = Modifier
