@@ -64,10 +64,10 @@ jobs:
          uses: softprops/action-gh-release@v1
          with:
          files: |
-          juaris-app/app/build/outputs/bundle/release/app-release.aab
-          juaris-app/app/build/outputs/apk/release/app-release.apk
-          tag_name: v1.0.0-${{ github.run_number }}
-          name: "Juaris Release v1.0.0-${{ github.run_number }} (AAB & APK)"
-          body: "Dieses Release enthält sowohl die .aab-Datei für den Google Play Store als auch die .apk-Datei zum direkten Installieren auf dem Handy."
-          env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+           juaris-app/app/build/outputs/bundle/release/app-release.aab
+           juaris-app/app/build/outputs/apk/release/app-release.apk
+         tag_name: v1.0.0-${{ github.run_number }}
+         name: "Juaris Release v1.0.0-${{ github.run_number }} (AAB & APK)"
+         body: "Dieses Release enthält sowohl die .aab-Datei für den Google Play Store als auch die .apk-Datei zum direkten Installieren auf dem Handy."
+        env:
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
