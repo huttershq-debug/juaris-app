@@ -58,20 +58,45 @@ fun SecurityLogsPage(logDao: SecurityLogDao) {
                             modifier = Modifier.padding(16.dp),
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
+                            // Kopfzeile: Modul & Status
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = "Modul: ${log.module}",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = log.status,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = if (log.status == "BLOCKED" || log.status == "QUARANTINE") 
+                                        MaterialTheme.colorScheme.error 
+                                    else 
+                                        MaterialTheme.colorScheme.secondary
+                                )
+                            }
+
+                            // Hauptbeschreibung
                             Text(
-                                text = "Status: ${log.status}",
-                                color = if (log.status == "BLOCKED" || log.status == "QUARANTINE") 
-                                    MaterialTheme.colorScheme.error 
-                                else 
-                                    MaterialTheme.colorScheme.primary,
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                text = "Meldung: ${log.message}",
+                                text = log.description,
+                                style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
+
+                            // Zusätzliche Details (falls vorhanden)
+                            if (!log.details.isNullOrBlank()) {
+                                Text(
+                                    text = "Details: ${log.details}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            // Zeitstempel am Ende
                             Text(
-                                text = "Zeit: ${SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault()).format(Date(log.timestamp))}",
+                                text = SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault()).format(Date(log.timestamp)),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
