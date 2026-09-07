@@ -391,74 +391,85 @@ fun StatusPage(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            Text("System-Gesundheit & Status", style = MaterialTheme.typography.titleLarge)
-            Text("Echtzeit-Diagnose des verschlüsselten Offline-Kernels.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+            Text("System-Gesundheit & Status", style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text("Echtzeit-Diagnose des verschlüsselten Offline-Kernels.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
-           item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-            ) {
+        item {
+            TacticalPulseCard {
                 Row(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Icon(Icons.Default.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(36.dp))
+                    Icon(Icons.Default.CheckCircle, contentDescription = null, tint = NeonGiftgruen, modifier = Modifier.size(36.dp))
                     Column {
-                        Text("Status: AES-256 Gesichert", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-                        Text("Keine Telemetrie, Keine Cloud, 100% On-Device", style = MaterialTheme.typography.bodySmall)
+                        Text("Status: AES-256 Gesichert", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                        Text("Keine Telemetrie, Keine Cloud, 100% On-Device", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                     }
                 }
             }
         }
         item {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Card(modifier = Modifier.weight(1f)) {
-                    Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Abgewehrt", style = MaterialTheme.typography.bodySmall)
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text("$blockedCount", style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.error)
+                Box(modifier = Modifier.weight(1f)) {
+                    TacticalPulseCard {
+                        Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("ABGEWEHRT", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text("$blockedCount", style = MaterialTheme.typography.headlineLarge, color = Color(0xFFFF3333))
+                        }
                     }
                 }
-                Card(modifier = Modifier.weight(1f)) {
-                    Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Verschlüsselung", style = MaterialTheme.typography.bodySmall)
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text("Aktiv", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                Box(modifier = Modifier.weight(1f)) {
+                    TacticalPulseCard {
+                        Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("VERSCHLÜSSELUNG", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text("AKTIV", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                        }
                     }
                 }
             }
         }
         item {
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Echtzeit-Aktionen", style = MaterialTheme.typography.titleMedium)
+            Text("Echtzeit-Aktionen", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
         }
         item {
-            Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = onSimulateThreat, modifier = Modifier.fillMaxWidth()) {
-                    Icon(Icons.Default.Refresh, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Echtzeit-Angriff abwehren & testen")
-                }
-                OutlinedButton(onClick = onExportLogs, modifier = Modifier.fillMaxWidth()) {
-                    Text("Logs im verschlüsselten Vault sichern")
-                }
-                Button(
-                    onClick = onPanicWipe,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF3333)),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(Icons.Default.Warning, contentDescription = null, tint = Color.Black)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("PANIC WIPE (Alle Daten löschen)", color = Color.Black)
+            TacticalPulseCard {
+                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = onSimulateThreat,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
+                    ) {
+                        Icon(Icons.Default.Refresh, contentDescription = null, tint = Color.Black)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Echtzeit-Angriff abwehren & testen", color = Color.Black, fontWeight = FontWeight.Bold)
+                    }
+                    OutlinedButton(
+                        onClick = onExportLogs,
+                        modifier = Modifier.fillMaxWidth(),
+                        border = BorderStroke(1.dp, NeonGiftgruen)
+                    ) {
+                        Text("Logs im verschlüsselten Vault sichern", color = NeonGiftgruen)
+                    }
+                    Button(
+                        onClick = onPanicWipe,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF3333)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.Warning, contentDescription = null, tint = Color.Black)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("PANIC WIPE (Alle Daten löschen)", color = Color.Black, fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         }
         item {
             Spacer(modifier = Modifier.height(24.dp))
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
             }
         }
     }
@@ -474,33 +485,33 @@ fun ProtectionModulesPage(
     val context = LocalContext.current
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
-            Text("Kernmodule & Schutz-Regler", style = MaterialTheme.typography.titleLarge)
-            Text("Aktive Hintergrund-Wächter auf Device-Ebene.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+            Text("Kernmodule & Schutz-Regler", style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text("Aktive Hintergrund-Wächter auf Device-Ebene.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("System-Filter", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+            TacticalPulseCard {
+                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("System-Filter", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("Anruf-Schutz", style = MaterialTheme.typography.bodyLarge)
-                            Text("Blockiert Spam & unterdrückte Nummern", style = MaterialTheme.typography.bodySmall)
+                            Text("Anruf-Schutz", style = MaterialTheme.typography.bodyLarge, color = Color.White)
+                            Text("Blockiert Spam & unterdrückte Nummern", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                         }
                         Switch(checked = callProtection, onCheckedChange = onCallChange)
                     }
-                    Divider(color = MaterialTheme.colorScheme.surfaceVariant)
+                    Divider(color = Color(0xFF112211))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("SMS-Filter", style = MaterialTheme.typography.bodyLarge)
-                            Text("Erkennt Phishing & Malware-Links", style = MaterialTheme.typography.bodySmall)
+                            Text("SMS-Filter", style = MaterialTheme.typography.bodyLarge, color = Color.White)
+                            Text("Erkennt Phishing & Malware-Links", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                         }
                         Switch(checked = smsProtection, onCheckedChange = onSmsChange)
                     }
-                    Divider(color = MaterialTheme.colorScheme.surfaceVariant)
+                    Divider(color = Color(0xFF112211))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("E-Mail-Scan", style = MaterialTheme.typography.bodyLarge)
-                            Text("Lokale Postfach-Heuristik", style = MaterialTheme.typography.bodySmall)
+                            Text("E-Mail-Scan", style = MaterialTheme.typography.bodyLarge, color = Color.White)
+                            Text("Lokale Postfach-Heuristik", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                         }
                         Switch(checked = emailProtection, onCheckedChange = onEmailChange)
                     }
@@ -508,28 +519,27 @@ fun ProtectionModulesPage(
             }
         }
         item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
+            TacticalPulseCard(
                 onClick = {
                     onVaultToggle(!vaultUnlocked)
                     val statusText = if (!vaultUnlocked) "Vault sicher entsperrt" else "Vault verschlüsselt"
                     Toast.makeText(context, statusText, Toast.LENGTH_SHORT).show()
                 }
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Verschlüsselter Offline-Vault", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                Column {
+                    Text("Verschlüsselter Offline-Vault", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text("AES-256 geschützter Speicher für sensible Notizen.", style = MaterialTheme.typography.bodySmall)
+                    Text("AES-256 geschützter Speicher für sensible Notizen.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                     Spacer(modifier = Modifier.height(8.dp))
-                    val statusColor = if (vaultUnlocked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-                    Text(if (vaultUnlocked) "Status: Entsperrt" else "Status: Gesperrt", color = statusColor, style = MaterialTheme.typography.bodyMedium)
+                    val statusColor = if (vaultUnlocked) NeonGiftgruen else Color(0xFFFF3333)
+                    Text(if (vaultUnlocked) "Status: Entsperrt" else "Status: Gesperrt", color = statusColor, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
                 }
             }
         }
         item {
             Spacer(modifier = Modifier.height(16.dp))
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
             }
         }
     }
@@ -540,35 +550,43 @@ fun BlacklistPage(blockedList: MutableList<String>, onAddBlocked: (String) -> Un
     var inputNumber by remember { mutableStateOf("") }
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
-            Text("Sperrliste & Blockaden", style = MaterialTheme.typography.titleLarge)
-            Text("Persistente Rufnummern- und Muster-Filter.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+            Text("Sperrliste & Blockaden", style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text("Persistente Rufnummern- und Muster-Filter.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Nummer zur Sperrliste hinzufügen", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+            TacticalPulseCard {
+                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Nummer zur Sperrliste hinzufügen", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                        OutlinedTextField(value = inputNumber, onValueChange = { inputNumber = it }, label = { Text("Rufnummer / Muster") }, modifier = Modifier.weight(1f))
-                        Button(onClick = { onAddBlocked(inputNumber); inputNumber = "" }) {
-                            Icon(Icons.Default.Add, contentDescription = "Hinzufügen")
+                        OutlinedTextField(
+                            value = inputNumber, 
+                            onValueChange = { inputNumber = it }, 
+                            label = { Text("Rufnummer / Muster", color = Color.Gray) }, 
+                            modifier = Modifier.weight(1f)
+                        )
+                        Button(
+                            onClick = { onAddBlocked(inputNumber); inputNumber = "" },
+                            colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = "Hinzufügen", tint = Color.Black)
                         }
                     }
                 }
             }
         }
-        item { Text("Aktive Sperrlisteneinträge (${blockedList.size})", style = MaterialTheme.typography.titleMedium) }
+        item { Text("Aktive Sperrlisteneinträge (${blockedList.size})", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen) }
         items(blockedList) { item ->
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Row(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text(item, style = MaterialTheme.typography.bodyLarge)
-                    TextButton(onClick = { onRemoveBlocked(item) }) { Text("Freigeben", color = MaterialTheme.colorScheme.error) }
+            TacticalPulseCard {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Text(item, style = MaterialTheme.typography.bodyLarge, color = Color.White)
+                    TextButton(onClick = { onRemoveBlocked(item) }) { Text("Freigeben", color = Color(0xFFFF3333)) }
                 }
             }
         }
         item {
             Spacer(modifier = Modifier.height(16.dp))
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
             }
         }
     }
@@ -578,22 +596,22 @@ fun BlacklistPage(blockedList: MutableList<String>, onAddBlocked: (String) -> Un
 fun LogsPage(logs: List<SecurityLogEntity>) {
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
-            Text("Live-Aktivitätsstream", style = MaterialTheme.typography.titleLarge)
-            Text("Protokoll aller lokalen Systemereignisse.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+            Text("Live-Aktivitätsstream", style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text("Protokoll aller lokalen Systemereignisse.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         items(logs) { log ->
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("Modul: ${log.module}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
-                    Text("Ereignis: ${log.description}", style = MaterialTheme.typography.bodyLarge)
-                    Text("Status: ${log.status}", color = MaterialTheme.colorScheme.error)
+            TacticalPulseCard {
+                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("Modul: ${log.module}", style = MaterialTheme.typography.bodySmall, color = NeonGiftgruen)
+                    Text("Ereignis: ${log.description}", style = MaterialTheme.typography.bodyLarge, color = Color.White)
+                    Text("Status: ${log.status}", color = Color(0xFFFF3333), fontWeight = FontWeight.Bold)
                 }
             }
         }
         item {
             Spacer(modifier = Modifier.height(16.dp))
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
             }
         }
     }
@@ -605,17 +623,17 @@ fun ClipboardProtectionPage(autoClearEnabled: Boolean, onAutoClearChange: (Boole
     val clipboardManager = LocalClipboardManager.current
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
-            Text("Zwischenablage-Wächter", style = MaterialTheme.typography.titleLarge)
-            Text("Schützt sensible Daten vor Hintergrund-Spyware.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+            Text("Zwischenablage-Wächter", style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text("Schützt sensible Daten vor Hintergrund-Spyware.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("Clipboard-Sicherheit", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+            TacticalPulseCard {
+                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("Clipboard-Sicherheit", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("Automatisches Leeren", style = MaterialTheme.typography.bodyLarge)
-                            Text("Säubert den Puffer bei Inaktivität", style = MaterialTheme.typography.bodySmall)
+                            Text("Automatisches Leeren", style = MaterialTheme.typography.bodyLarge, color = Color.White)
+                            Text("Säubert den Puffer bei Inaktivität", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                         }
                         Switch(checked = autoClearEnabled, onCheckedChange = onAutoClearChange)
                     }
@@ -626,9 +644,9 @@ fun ClipboardProtectionPage(autoClearEnabled: Boolean, onAutoClearChange: (Boole
                             Toast.makeText(context, "Zwischenablage komplett geleert!", Toast.LENGTH_SHORT).show()
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                        colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
                     ) {
-                        Text("Zwischenablage jetzt leeren", color = MaterialTheme.colorScheme.primary)
+                        Text("Zwischenablage jetzt leeren", color = Color.Black, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -636,7 +654,7 @@ fun ClipboardProtectionPage(autoClearEnabled: Boolean, onAutoClearChange: (Boole
         item {
             Spacer(modifier = Modifier.height(16.dp))
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
             }
         }
     }
@@ -647,26 +665,30 @@ fun PermissionsAuditPage() {
     val context = LocalContext.current
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
-            Text("Berechtigungs-Auditor", style = MaterialTheme.typography.titleLarge)
-            Text("Prüft das System auf kritische Sonderrechte.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+            Text("Berechtigungs-Auditor", style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text("Prüft das System auf kritische Sonderrechte.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Accessibility & Overlays", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-                    Text("Status: Keine unautorisierten Screen-Reader aktiv.", style = MaterialTheme.typography.bodyMedium)
+            TacticalPulseCard {
+                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Accessibility & Overlays", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text("Status: Keine unautorisierten Screen-Reader aktiv.", style = MaterialTheme.typography.bodyMedium, color = Color.White)
                 }
             }
         }
         item {
-            Button(onClick = { Toast.makeText(context, "Audit erfolgreich: System sauber.", Toast.LENGTH_SHORT).show() }, modifier = Modifier.fillMaxWidth()) {
-                Text("Vollständigen Audit-Scan starten")
+            Button(
+                onClick = { Toast.makeText(context, "Audit erfolgreich: System sauber.", Toast.LENGTH_SHORT).show() }, 
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
+            ) {
+                Text("Vollständigen Audit-Scan starten", color = Color.Black, fontWeight = FontWeight.Bold)
             }
         }
         item {
             Spacer(modifier = Modifier.height(16.dp))
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
             }
         }
     }
@@ -701,15 +723,15 @@ fun SwarmMeshPage() {
 
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
-            Text("P2P-Schwarm & Mesh", style = MaterialTheme.typography.titleLarge)
-            Text("Dezentraler Austausch von SHA-256 Hashes.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+            Text("P2P-Schwarm & Mesh", style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text("Dezentraler Austausch von SHA-256 Hashes.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Bluetooth-Hardware Status", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-                    Text(scanStatusText, style = MaterialTheme.typography.bodyMedium)
-                    Text("Gekoppelte Nodes: $discoveredDevicesCount", style = MaterialTheme.typography.bodyLarge)
+            TacticalPulseCard {
+                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Bluetooth-Hardware Status", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text(scanStatusText, style = MaterialTheme.typography.bodyMedium, color = Color.White)
+                    Text("Gekoppelte Nodes: $discoveredDevicesCount", style = MaterialTheme.typography.bodyLarge, color = Color.White)
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
                         onClick = {
@@ -721,28 +743,29 @@ fun SwarmMeshPage() {
                                 )
                             )
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
                     ) {
-                        Text("Hardware-Mesh-Scan ausführen")
+                        Text("Hardware-Mesh-Scan ausführen", color = Color.Black, fontWeight = FontWeight.Bold)
                     }
                 }
             }
         }
         item {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Quantum-Hash Generator", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-                    OutlinedTextField(value = testInputText, onValueChange = { testInputText = it }, label = { Text("Signatur-Text") }, modifier = Modifier.fillMaxWidth())
+            TacticalPulseCard {
+                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Quantum-Hash Generator", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    OutlinedTextField(value = testInputText, onValueChange = { testInputText = it }, label = { Text("Signatur-Text", color = Color.Gray) }, modifier = Modifier.fillMaxWidth())
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text("SHA-256 Hash:", style = MaterialTheme.typography.bodySmall)
-                    Text(generatedHash, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
+                    Text("SHA-256 Hash:", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    Text(generatedHash, style = MaterialTheme.typography.bodyMedium, color = NeonGiftgruen)
                 }
             }
         }
         item {
             Spacer(modifier = Modifier.height(16.dp))
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
             }
         }
     }
@@ -753,32 +776,32 @@ fun PrivacyAndLegalContent() {
     val context = LocalContext.current
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
-            Text("Datenschutzerklärung & Impressum", style = MaterialTheme.typography.titleLarge)
-            Text("Rechtliche Bestimmungen von Juaris", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+            Text("Datenschutzerklärung & Impressum", style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text("Rechtliche Bestimmungen von Juaris", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("1. Grundsatz", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-                    Text("Juaris wurde entwickelt, um die Privatsphäre der Nutzer maximal zu schützen. Der Schutz deiner persönlichen Daten hat für uns oberste Priorität.")
+            TacticalPulseCard {
+                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("1. Grundsatz", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text("Juaris wurde entwickelt, um die Privatsphäre der Nutzer maximal zu schützen. Der Schutz deiner persönlichen Daten hat für uns oberste Priorität.", color = Color.White)
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text("2. Keine Datenerhebung", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-                    Text("Juaris arbeitet strikt nach dem Local-First-Prinzip. Sämtliche App-Daten, Logs und Einstellungen werden ausschließlich lokal auf deinem Endgerät in einer verschlüsselten Datenbank gespeichert. Es werden keine persönlichen Daten, Standortdaten oder Nutzungsprofile an uns oder Dritte übertragen.")
+                    Text("2. Keine Datenerhebung", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text("Juaris arbeitet strikt nach dem Local-First-Prinzip. Sämtliche App-Daten, Logs und Einstellungen werden ausschließlich lokal auf deinem Endgerät in einer verschlüsselten Datenbank gespeichert. Es werden keine persönlichen Daten, Standortdaten oder Nutzungsprofile an uns oder Dritte übertragen.", color = Color.White)
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text("3. In-App-Abonnements", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-                    Text("Für die Abwicklung des monatlichen Abonnements (1,99 €/Monat) nutzen wir den offiziellen Google Play Billing Service. Wir selbst erhalten keine Kreditkarten- oder Bankdaten.")
+                    Text("3. In-App-Abonnements", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text("Für die Abwicklung des monatlichen Abonnements (1,99 €/Monat) nutzen wir den offiziellen Google Play Billing Service. Wir selbst erhalten keine Kreditkarten- oder Bankdaten.", color = Color.White)
                 }
             }
         }
         item {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Impressum", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-                    Text("Angaben gemäß § 5 TMG / ECG:")
-                    Text("Entwickler: Benedikt Wolfgang Hütter")
-                    Text("Anschrift: Schulgasse 4/15, 2700 Wiener Neustadt, Österreich")
-                    Text("Kontakt: hutters.hq@gmail.com")
-                    Text("Verantwortlich für den Inhalt: Benedikt Wolfgang Hütter")
+            TacticalPulseCard {
+                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Impressum", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text("Angaben gemäß § 5 TMG / ECG:", color = Color.White)
+                    Text("Entwickler: Benedikt Wolfgang Hütter", color = Color.White)
+                    Text("Anschrift: Schulgasse 4/15, 2700 Wiener Neustadt, Österreich", color = Color.White)
+                    Text("Kontakt: hutters.hq@gmail.com", color = Color.White)
+                    Text("Verantwortlich für den Inhalt: Benedikt Wolfgang Hütter", color = Color.White)
                 }
             }
         }
@@ -792,25 +815,24 @@ fun PrivacyAndLegalContent() {
                             // Fängt den Fehler ab, falls kein Browser verfügbar ist
                        }
               },
-              modifier = Modifier.fillMaxWidth()
+              modifier = Modifier.fillMaxWidth(),
+              border = BorderStroke(1.dp, NeonGiftgruen)
           ) {
-              Text("Online-Dokumentation im Browser öffnen")
+              Text("Online-Dokumentation im Browser öffnen", color = NeonGiftgruen)
           }
 
         }
         item {
             Spacer(modifier = Modifier.height(16.dp))
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Hutter IT Solutions", style = MaterialTheme.typography.titleMedium)
-                    Text("Copyright Benedikt Wolfgang Hütter", style = MaterialTheme.typography.bodySmall)
-                    Text("Design Julia Kerschhofer", style = MaterialTheme.typography.bodySmall)
+            TacticalPulseCard {
+                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("Hutter IT Solutions", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text("Copyright Benedikt Wolfgang Hütter", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    Text("Design Julia Kerschhofer", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                 }
             }
         }
     }
 }
+
 
