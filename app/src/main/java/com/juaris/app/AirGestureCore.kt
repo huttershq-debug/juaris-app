@@ -26,7 +26,8 @@ class AirGestureCore(private val context: Context) {
     val lastAction: StateFlow<GestureAction> = _lastAction
 
     private lateinit var cameraExecutor: ExecutorService
-    private var lastAverageX: Double = 0.0
+    private var previousByteArray: ByteArray? = null
+    private var lastCenterX: Double = 0.0
 
     fun startGestureDetection(lifecycleOwner: LifecycleOwner, onActionDetected: (GestureAction) -> Unit) {
         cameraExecutor = Executors.newSingleThreadExecutor()
@@ -34,7 +35,7 @@ class AirGestureCore(private val context: Context) {
 
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
-            
+           
             val cameraSelector = CameraSelector.Builder()
                 .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
                 .build()
@@ -68,50 +69,54 @@ class AirGestureCore(private val context: Context) {
         val width = imageProxy.width
         val height = imageProxy.height
 
-        var totalX = 0L
-        var pixelCount = 0L
-        val step = 20 // Feineres Abtasten
+        val currentBytes = ByteArray(buffer.remaining())
+        buffer.get(currentBytes)
 
-        // Wir scannen das Bild nach hellen Konturen (Hand/Haut)
-        for (y in 0 until height step step) {
-            for (x in 0 until width step step) {
-                val index = y * rowStride + x
-                if (index < buffer.capacity()) {
-                    val pixelValue = buffer.get(index).toInt() and 0xFF
-                    if (pixelValue > 90) { // Helligkeitsschwelle für Hand
-                        totalX += x
-                        pixelCount++
+        val prev = previousByteArray
+        if (prev != null && prev.size == currentBytes.size) {
+            var totalX = 0L
+            var motionPixels = 0L
+            val step = 16 // Optimierte Abtastrate für flüssige Performance
+
+            // Frame-Differenz-Analyse: Erkennt Pixel-Änderungen durch Bewegung
+            for (y in 0 until height step step) {
+                for (x in 0 until width step step) {
+                    val index = y * rowStride + x
+                    if (index < currentBytes.size && index < prev.size) {
+                        val currVal = currentBytes[index].toInt() and 0xFF
+                        val prevVal = prev[index].toInt() and 0xFF
+                        val diffVal = abs(currVal - prevVal)
+
+                        if (diffVal > 25) { // Bewegungsschwelle
+                            totalX += x
+                            motionPixels++
+                        }
                     }
                 }
             }
-        }
 
-        if (pixelCount > 10) {
-            val currentAverageX = totalX.toDouble() / pixelCount
-            if (lastAverageX > 0.0) {
-                val diff = currentAverageX - lastAverageX
-                
-                // Live-Feedback direkt auf dem Bildschirm sichtbar machen!
-                _gestureState.value = "Pixel: $pixelCount | Diff: ${String.format("%.1f", diff)}"
+            if (motionPixels > 40) {
+                val currentCenterX = totalX.toDouble() / motionPixels
+                if (lastCenterX > 0.0) {
+                    val deltaX = currentCenterX - lastCenterX
+                    _gestureState.value = "Bewegung erkannt! Delta: ${String.format("%.1f", deltaX)}"
 
-                // Sehr niedrige Schwelle, damit es sofort auslöst
-                val threshold = 3.0 
-
-                if (diff > threshold) {
-                    _lastAction.value = GestureAction.SWIPE_RIGHT
-                    onActionDetected(GestureAction.SWIPE_RIGHT)
-                } else if (diff < -threshold) {
-                    _lastAction.value = GestureAction.SWIPE_LEFT
-                    onActionDetected(GestureAction.SWIPE_LEFT)
+                    val swipeThreshold = 10.0 // Sehr reaktiv für sofortiges Swipen
+                    if (deltaX > swipeThreshold) {
+                        _lastAction.value = GestureAction.SWIPE_RIGHT
+                        onActionDetected(GestureAction.SWIPE_RIGHT)
+                    } else if (deltaX < -swipeThreshold) {
+                        _lastAction.value = GestureAction.SWIPE_LEFT
+                        onActionDetected(GestureAction.SWIPE_LEFT)
+                    }
                 }
+                lastCenterX = currentCenterX
             } else {
-                _gestureState.value = "Bereit (Pixel: $pixelCount)"
+                _gestureState.value = "Bereit – warte auf Hand-Swipe"
             }
-            lastAverageX = currentAverageX
-        } else {
-            _gestureState.value = "Keine Hand erkannt (Pixel: $pixelCount)"
         }
 
+        previousByteArray = currentBytes
         imageProxy.close()
     }
 
