@@ -34,7 +34,6 @@ class AirGestureCore(private val context: Context) {
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
             
-            // Frontkamera explizit auswählen
             val cameraSelector = CameraSelector.Builder()
                 .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
                 .build()
@@ -62,24 +61,24 @@ class AirGestureCore(private val context: Context) {
     }
 
     private fun processImageFrame(imageProxy: ImageProxy, onActionDetected: (GestureAction) -> Unit) {
-        val buffer = imageProxy.planes[0].buffer
-        val bytes = ByteArray(buffer.remaining())
-        buffer.get(bytes)
-
-        // Helligkeitsschwerpunkt (einfache, schnelle Spalten-Analyse für Wischgesten)
-        var totalX = 0L
-        var pixelCount = 0L
+        val plane = imageProxy.planes[0]
+        val buffer = plane.buffer
+        val rowStride = plane.rowStride
+        val pixelStride = plane.pixelStride
         val width = imageProxy.width
         val height = imageProxy.height
-        val step = 30 // Effizientes Abtasten
+
+        var totalX = 0L
+        var pixelCount = 0L
+        val step = 40 // Effizientes Abtastgitter
 
         for (y in 0 until height step step) {
             for (x in 0 until width step step) {
-                val pixelIndex = y * width + x
-                if (pixelIndex < bytes.size) {
-                    val pixelValue = bytes[pixelIndex].toInt() and 0xFF
-                    // Wir werten helle Bereiche (Hand/Haut) aus
-                    if (pixelValue > 100) {
+                val bufferIndex = y * rowStride + x * pixelStride
+                if (bufferIndex < buffer.capacity()) {
+                    val pixelValue = buffer.get(bufferIndex).toInt() and 0xFF
+                    // Helle Bereiche (z. B. Hand/Haut vor der Kamera)
+                    if (pixelValue > 110) {
                         totalX += x
                         pixelCount++
                     }
@@ -87,19 +86,16 @@ class AirGestureCore(private val context: Context) {
             }
         }
 
-        if (pixelCount > 50) {
+        if (pixelCount > 25) {
             val currentAverageX = totalX.toDouble() / pixelCount
             if (lastAverageX > 0.0) {
                 val diff = currentAverageX - lastAverageX
-                // Empfindlichkeitsschwelle (niedriger = reagiert schneller auf Wischen)
-                val threshold = 15.0 
+                val threshold = 8.0 // Feine Schwelle für direkte Wischreaktion
 
                 if (diff > threshold) {
-                    // Wischbewegung nach rechts
                     _lastAction.value = GestureAction.SWIPE_RIGHT
                     onActionDetected(GestureAction.SWIPE_RIGHT)
                 } else if (diff < -threshold) {
-                    // Wischbewegung nach links
                     _lastAction.value = GestureAction.SWIPE_LEFT
                     onActionDetected(GestureAction.SWIPE_LEFT)
                 }
