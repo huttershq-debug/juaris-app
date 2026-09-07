@@ -49,6 +49,7 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var securePrefs: SharedPreferences
     private val airGestureCore = AirGestureCore
+    private val airGestureCore by lazy { AirGestureCore(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -233,15 +234,14 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 @Composable
 fun JuarisMainDashboard(prefs: SharedPreferences) {
     val context = LocalContext.current
+    val aiCore = remember { LocalAICore(context) }
+    val airGestureCore = remember { AirGestureCore(context) }
     var selectedTab by remember { mutableStateOf(0) }
    
     val tabs = listOf(
         "Status", "Schutz", "Sperren", "Logs", "Clipboard",
         "Rechte", "Schwarm", "KI", "Gesten", "Info"
     )
-
-    val airGestureCore = remember { AirGestureCore(context) }
-    val aiCore = remember { LocalAICore(context) }
 
     val liveLogs = remember {
         mutableStateListOf(
