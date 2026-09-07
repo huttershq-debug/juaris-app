@@ -17,7 +17,7 @@ fun AirGesturePage(
     
     // Live-Daten sicher aus der Core abgreifen
     val gestureState by airGestureCore.gestureState.collectAsState()
-    val lastAction by airgestureCore.lastAction.collectAsState()
+    val lastAction by airGestureCore.lastAction.collectAsState()
 
     // Kamera-Erkennung beim Betreten der Seite starten und beim Verlassen stoppen
     DisposableEffect(lifecycleOwner) {
