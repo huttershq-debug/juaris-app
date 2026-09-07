@@ -43,6 +43,7 @@ jobs:
           
           echo "Starte Build für AAB und APK..."
           ./gradle-8.4/bin/gradle assembleRelease \
+            -Dorg.gradle.jvmargs="-Xmx3g" \
             -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/juaris-release-key.jks" \
             -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
             -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
