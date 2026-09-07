@@ -1,6 +1,5 @@
 package com.juaris.app.ui
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -8,28 +7,34 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.LifecycleOwner
 import com.juaris.app.AirGestureCore
 
 @Composable
-fun AirGesturePage(context: Context) {
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val airGestureCore = remember { AirGestureCore(context) }
+fun AirGesturePage(
+    airGestureCore: AirGestureCore,
+    onSwipeNavigation: (Boolean) -> Unit
+) {
+    val context = LocalContext.current
+    val lifecycleOwner = context as? LifecycleOwner
     val gestureState by airGestureCore.gestureState.collectAsState()
     val lastAction by airGestureCore.lastAction.collectAsState()
 
-    // Startet die Gestensteuerung vollautomatisch, permanent und ohne manuellen Button
+    // Startet die Gestensteuerung vollautomatisch und permanent im Hintergrund
     LaunchedEffect(Unit) {
-        airGestureCore.startGestureDetection(lifecycleOwner) { action ->
-            when (action) {
-                AirGestureCore.GestureAction.SWIPE_LEFT -> {
-                    // Hier greifst du das Wischen nach links ab (z.B. für Navigation)
+        if (lifecycleOwner != null) {
+            airGestureCore.startGestureDetection(lifecycleOwner) { action ->
+                when (action) {
+                    AirGestureCore.GestureAction.SWIPE_RIGHT -> {
+                        onSwipeNavigation(true) // Tab vorwärts
+                    }
+                    AirGestureCore.GestureAction.SWIPE_LEFT -> {
+                        onSwipeNavigation(false) // Tab rückwärts
+                    }
+                    AirGestureCore.GestureAction.NONE -> {}
                 }
-                AirGestureCore.GestureAction.SWIPE_RIGHT -> {
-                    // Hier greifst du das Wischen nach rechts ab (z.B. für Navigation)
-                }
-                AirGestureCore.GestureAction.NONE -> {}
             }
         }
     }
@@ -51,7 +56,6 @@ fun AirGesturePage(context: Context) {
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        // Status-Card & Privacy Badge (Permanent aktiv, transparent & sicher)
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -64,7 +68,6 @@ fun AirGesturePage(context: Context) {
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Optischer Datenschutz-Indikator (grüner Punkt)
                     Box(
                         modifier = Modifier
                             .size(10.dp)
@@ -94,5 +97,4 @@ fun AirGesturePage(context: Context) {
         }
     }
 }
-
 
