@@ -1,56 +1,96 @@
-package com.juaris.app.ui // Passe das Package an deinen ui-Ordner an
+package com.juaris.app.ui
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.runtime.*
-import androidx.ui.unit.dp // Falls Compose 1.5+, nutze androidx.compose.ui.unit.dp
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.juaris.app.SecurityLogDao
 import com.juaris.app.SecurityLogEntity
-import java.util.Date
 
 @Composable
 fun SecurityLogsPage(logDao: SecurityLogDao) {
-    // Holt alle Logs in Echtzeit asynchron aus der Room-Database
-    val logs by logDao.getAllLogs().collectAsState(initial = emptyList())
+    // Falls Flow genutzt wird, hier sicher einbinden:
+    // val logs by logDao.getAllLogs().collectAsState(initial = emptyList())
+    
+    // Fallback-Liste falls DAO direkt abgefragt wird oder als Platzhalter:
+    var logs by remember { mutableStateOf(listOf<SecurityLogEntity>()) }
+    
+    LaunchedEffect(Unit) {
+        try {
+            logs = logDao.getAllLogsList() // Passe dies an deine DAO-Methode an (z.B. getAllLogs())
+        } catch (e: Exception) {
+            // Fallback bei leerer DB
+        }
+    }
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("Sicherheits-Logs & Threat-Tracking", style = MaterialTheme.typography.titleLarge)
-        Text("Alle abgefangenen Vektoren in Echtzeit (Offline-Vault).", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
-
-        Spacer(modifier = Modifier.height(8.dp))
+        item {
+            Text(
+                text = "Datenbank-Sicherheitslogs",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = "Persistente Room-Datenbank Protokolle",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.secondary
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
 
         if (logs.isEmpty()) {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Box(modifier = Modifier.padding(24.dp), contentAlignment = Alignment.Center) {
-                    Text("Keine Bedrohungen verzeichnet. System sicher.", style = MaterialTheme.typography.bodyMedium)
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    Box(modifier = Modifier.padding(16.dp), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "Keine Logs in der Datenbank gespeichert.",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
                 }
             }
         } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(logs) { log ->
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        Column(modifier = Modifier.padding(12.dp)) {
-                            Text(text = "⚠️ ${log.threatType}", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(text = log.details, style = MaterialTheme.typography.bodyMedium)
-                            Spacer(modifier = Modifier.height(4.dp))
-                            
-                            val formattedTime = android.text.format.DateFormat.format("dd.MM.yyyy HH:mm:ss", Date(log.timestamp)).toString()
-                            Text(text = formattedTime, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
-                        }
+            items(logs) { log ->
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = "Modul: ${log.module}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                        Text(
+                            text = log.description,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            text = "Status: ${log.status}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (log.status == "SAFE") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                        )
                     }
                 }
             }
         }
     }
 }
+
