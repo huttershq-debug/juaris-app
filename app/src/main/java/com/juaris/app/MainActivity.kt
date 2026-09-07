@@ -1,6 +1,7 @@
 @file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 package com.juaris.app
 
+import com.juaris.app.ui.AIPage
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -262,8 +263,12 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
         "Clipboard",
         "Rechte",
         "Schwarm",
+        "KI",
         "Info"
     )
+
+    //Lokalen KI-Kern initialisieren
+    val aiCore = remember { LocalAICore(context) }
 
     // Echte persistente Zustände laden
     val liveLogs = remember {
@@ -384,7 +389,8 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                 )
                 5 -> PermissionsAuditPage()
                 6 -> SwarmMeshPage()
-                7 -> PrivacyAndLegalContent()
+                7 -> AIPage(aiCore = aiCore, logs = liveLogs)
+                8 -> PrivacyAndLegalContent()
             }
         }
     }
