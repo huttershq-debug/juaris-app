@@ -108,5 +108,6 @@ class AirGestureCore(private val context: Context) {
         // Sorgt dafür, dass der Kamera-Stream NIEMALS stoppt und permanent aktiv bleibt
         imageProxy.close()
     }
+  }
 }
 
