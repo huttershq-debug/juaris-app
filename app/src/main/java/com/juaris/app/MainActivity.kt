@@ -784,7 +784,7 @@ fun PrivacyAndLegalContent() {
             OutlinedButton(
                onClick = {
                        try {
-                           val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://hutterschq-debug.github.io/juaris-app/privacy.md"))
+                           val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://huttershq-debug.github.io/juaris-app/privacy.md"))
                            context.startActivity(intent)
                        } catch (e: Exception) {
                             // Fängt den Fehler ab, falls kein Browser verfügbar ist
