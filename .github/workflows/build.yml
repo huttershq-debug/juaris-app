@@ -53,9 +53,16 @@ jobs:
           -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
           -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}"
 
-      - name: Release Both Files veröffentlichen
-        uses: softprops/action-gh-release@v1
-        with:
+             - name: Create and Push Tag
+         run: |
+         git config --global user.name "github-actions[bot]"
+         git config --global user.email "github-actions[bot]@users.noreply.github.com"
+         git tag v1.0.0-${{ github.run_number }}
+         git push origin v1.0.0-${{ github.run_number }}
+
+         - name: Release Both Files veröffentlichen
+         uses: softprops/action-gh-release@v1
+         with:
          files: |
           juaris-app/app/build/outputs/bundle/release/app-release.aab
           juaris-app/app/build/outputs/apk/release/app-release.apk
