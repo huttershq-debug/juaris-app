@@ -53,7 +53,7 @@ jobs:
           -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
           -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}"
 
-      - name: Release Both Files veröffentlichen
+        - name: Release Both Files veröffentlichen
       uses: softprops/action-gh-release@v1
       with:
         files: |
@@ -62,5 +62,7 @@ jobs:
         tag_name: v1.0.0-${{ github.run_number }}
         name: "Juaris Release v1.0.0-${{ github.run_number }} (AAB & APK)"
         body: "Dieses Release enthält sowohl die .aab-Datei für den Google Play Store als auch die .apk-Datei zum direkten Installieren auf dem Handy."
-       env:
+      env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
