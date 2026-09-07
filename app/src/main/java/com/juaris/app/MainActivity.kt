@@ -705,6 +705,19 @@ fun PermissionsAuditPage() {
 @Composable
 fun SwarmMeshPage() {
     val context = LocalContext.current
+     val bluetoothPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.values.all { it }
+        if (allGranted) {
+            scanStatusText = "Hardware-Scan aktiv"
+            Toast.makeText(context, "Bluetooth-Mesh-Scan gestartet...", Toast.LENGTH_SHORT).show()
+        } else {
+            scanStatusText = "Berechtigungen fehlen!"
+            Toast.makeText(context, "Bluetooth-Berechtigungen werden für den Schwarm benötigt!", Toast.LENGTH_LONG).show()
+        }
+    }
+
     var discoveredDevicesCount by remember { mutableStateOf(0) }
     var scanStatusText by remember { mutableStateOf("Bereit für Hardware-Abgleich") }
     val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as? android.bluetooth.BluetoothManager
@@ -729,26 +742,22 @@ fun SwarmMeshPage() {
                     Text(scanStatusText, style = MaterialTheme.typography.bodyMedium)
                     Text("Gekoppelte Nodes: $discoveredDevicesCount", style = MaterialTheme.typography.bodyLarge)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Button(
-                        onClick = {
-                            if (bluetoothAdapter == null) {
-                                scanStatusText = "Keine Bluetooth-Hardware"
-                            } else if (!bluetoothAdapter.isEnabled) {
-                                scanStatusText = "Bluetooth ist deaktiviert!"
-                                Toast.makeText(context, "Bitte Bluetooth aktivieren", Toast.LENGTH_SHORT).show()
-                            } else {
-                                scanStatusText = "Hardware-Scan aktiv"
-                                discoveredDevicesCount = bluetoothAdapter.bondedDevices?.size ?: 0
-                                Toast.makeText(context, "Scan abgeschlossen", Toast.LENGTH_SHORT).show()
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Hardware-Mesh-Scan ausführen")
-                    }
-                }
-            }
+                   Button(
+            onClick = {
+                // Berechtigungen vor dem Scan anfordern, um Abstürze zu verhindern
+                bluetoothPermissionLauncher.launch(
+                    arrayOf(
+                        android.Manifest.permission.BLUETOOTH_SCAN,
+                        android.Manifest.permission.BLUETOOTH_CONNECT,
+                        android.Manifest.permission.ACCESS_FINE_LOCATION
+                    )
+                )
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Hardware-Mesh-Scan ausführen")
         }
+
         item {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
