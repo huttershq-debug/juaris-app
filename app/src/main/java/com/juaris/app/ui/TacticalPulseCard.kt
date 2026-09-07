@@ -21,47 +21,26 @@ val NeonGiftgruen = Color(0xFF00FF66)
 fun TacticalPulseCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
-    content: @Composable () -> Unit
+    content: @Composable ColumnScope.() -> Unit
 ) {
-    val infiniteTransition = rememberInfiniteTransition(label = "tactical_pulse")
-    val pulseAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.5f,
-        targetValue = 1.0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1400, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "pulse_alpha"
-    )
-
-    val activeGlowColor = NeonGiftgruen.copy(alpha = pulseAlpha)
-
-    val baseModifier = modifier
-        .fillMaxWidth()
-        .shadow(
-            elevation = (10 * pulseAlpha).dp,
-            shape = RoundedCornerShape(4.dp),
-            ambientColor = activeGlowColor,
-            spotColor = activeGlowColor
-        )
-
     val cardModifier = if (onClick != null) {
-        baseModifier.clickable(onClick = onClick)
+        modifier.fillMaxWidth().clickable { onClick() }
     } else {
-        baseModifier
+        modifier.fillMaxWidth()
     }
 
     Card(
-        modifier = cardModifier,
-        shape = RoundedCornerShape(4.dp),
-        border = BorderStroke(1.5.dp, activeGlowColor),
+        shape = RoundedCornerShape(4.dp), // Eckiger, technischer Look statt zu runden Ecken
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF030503).copy(alpha = 0.95f)
-        )
+            containerColor = Color(0xFF020804) // Tieftiefes Schwarz mit minimalem Grünstich (Hologramm-Basis)
+        ),
+        border = BorderStroke(1.dp, Color(0xFF00FF66).copy(alpha = 0.6f)), // Leuchtender Neon-Rahmen
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        modifier = cardModifier
     ) {
-        Box(modifier = Modifier.padding(16.dp)) {
-            content()
-        }
+        Column(
+            modifier = Modifier.padding(16.dp),
+            content = content
+        )
     }
 }
-
