@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
+
 class AirGestureCore(private val context: Context) {
     private val _gestureState = MutableStateFlow("Gesten-Steuerung im Standby")
     val gestureState: StateFlow<String> = _gestureState
