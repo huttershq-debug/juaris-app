@@ -38,7 +38,7 @@ jobs:
           echo "android.enableJetifier=true" >> gradle.properties
 
       - name: Decode Keystore
-        run: mkdir -p juaris-app && echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "$GITHUB_WORKSPACE/juaris-release-key.jks"
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "$GITHUB_WORKSPACE/juaris-release-key.jks"
 
       - name: Build Both AAB and APK
         run: |
@@ -53,16 +53,14 @@ jobs:
           -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
           -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}"
 
-        - name: Release Both Files veröffentlichen
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
+      - name: Release Both Files veröffentlichen
+        uses: softprops/action-gh-release@v1
+        with:
+         files: |
           juaris-app/app/build/outputs/bundle/release/app-release.aab
           juaris-app/app/build/outputs/apk/release/app-release.apk
-        tag_name: v1.0.0-${{ github.run_number }}
-        name: "Juaris Release v1.0.0-${{ github.run_number }} (AAB & APK)"
-        body: "Dieses Release enthält sowohl die .aab-Datei für den Google Play Store als auch die .apk-Datei zum direkten Installieren auf dem Handy."
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
+          tag_name: v1.0.0-${{ github.run_number }}
+          name: "Juaris Release v1.0.0-${{ github.run_number }} (AAB & APK)"
+          body: "Dieses Release enthält sowohl die .aab-Datei für den Google Play Store als auch die .apk-Datei zum direkten Installieren auf dem Handy."
+          env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
