@@ -264,8 +264,11 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
         "Rechte",
         "Schwarm",
         "KI",
+        "Gesten",
         "Info"
     )
+
+    val airGestureCore = remember { AirGestureCore(context) }
 
     //Lokalen KI-Kern initialisieren
     val aiCore = remember { LocalAICore(context) }
@@ -390,7 +393,15 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                 5 -> PermissionsAuditPage()
                 6 -> SwarmMeshPage()
                 7 -> AIPage(aiCore = aiCore, logs = liveLogs)
-                8 -> PrivacyAndLegalContent()
+                8 -> AirGesturePage(airGestureCore = airGestureCore) { forward ->
+         // Automatisch Tabs weiterschalten per Handbewegung
+         selectedTab = if (forward) {
+             (selectedTab + 1) % tabs.size
+         } else {
+             if (selectedTab - 1 < 0) tabs.size - 1 else selectedTab - 1
+         }
+     }
+                9 -> PrivacyAndLegalContent()
             }
         }
     }
