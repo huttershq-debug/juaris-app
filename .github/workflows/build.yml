@@ -20,8 +20,6 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
-        with:
-          items: platforms;android-34,build-tools;34.0.0
 
       - name: Accept Android SDK Licenses
         run: yes | sdkmanager --licenses || true
@@ -39,32 +37,34 @@ jobs:
 
       - name: Build Both AAB and APK
         run: |
-         echo "Lade Gradle 8.4 herunter..."
-         wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
-         unzip -q gradle-8.4-bin.zip
-        
-         echo "Starte Build für AAB und APK..."
-         ./gradle-8.4/bin/gradle assembleRelease \
-          -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/juaris-release-key.jks" \
-          -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
-          -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
-          -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}"
+          echo "Lade Gradle 8.4 herunter..."
+          wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
+          unzip -q gradle-8.4-bin.zip
+          
+          echo "Starte Build für AAB und APK..."
+          ./gradle-8.4/bin/gradle assembleRelease \
+            -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/juaris-release-key.jks" \
+            -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
+            -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
+            -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}"
 
       - name: Create and Push Tag
         run: |
-         git config --global user.name "github-actions[bot]"
-         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-         git tag v1.0.0-${{ github.run_number }}
-         git push origin v1.0.0-${{ github.run_number }}
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git tag v1.0.0-${{ github.run_number }}
+          git push origin v1.0.0-${{ github.run_number }}
 
       - name: Release Both Files veröffentlichen
         uses: softprops/action-gh-release@v1
         with:
-        files: |
-          juaris-app/app/build/outputs/bundle/release/app-release.aab
-          juaris-app/app/build/outputs/apk/release/app-release.apk
-        tag_name: v1.0.0-${{ github.run_number }}
-        name: "Juaris Release v1.0.0-${{ github.run_number }} (AAB & APK)"
-        body: "Dieses Release enthält sowohl die .aab-Datei für den Google Play Store als auch die .apk-Datei zum direkten Installieren auf dem Handy."
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          files: |
+            juaris-app/app/build/outputs/bundle/release/app-release.aab
+            juaris-app/app/build/outputs/apk/release/app-release.apk
+          tag_name: v1.0.0-${{ github.run_number }}
+          name: "Juaris Release v1.0.0-${{ github.run_number }} (AAB & APK)"
+          body: "Dieses Release enthält sowohl die .aab-Datei für den Google Play Store als auch die .apk-Datei zum direkten Installieren auf dem Handy."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
