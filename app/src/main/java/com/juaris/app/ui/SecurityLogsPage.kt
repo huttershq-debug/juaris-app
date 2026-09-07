@@ -1,37 +1,20 @@
 package com.juaris.app.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.LifecycleOwner
-import com.juaris.app.AirGestureCore
+import com.juaris.app.SecurityLogDao
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
-fun AirGesturePage() {
-    val context = LocalContext.current
-    val lifecycleOwner = context as? LifecycleOwner
-    val airGestureCore = remember { AirGestureCore(context) }
-    val gestureState by airGestureCore.gestureState.collectAsState()
-    val lastAction by airGestureCore.lastAction.collectAsState()
-
-    // Startet die Gestensteuerung vollautomatisch und permanent im Hintergrund
-    LaunchedEffect(Unit) {
-        if (lifecycleOwner != null) {
-            airGestureCore.startGestureDetection(lifecycleOwner) { action ->
-                when (action) {
-                    AirGestureCore.GestureAction.SWIPE_LEFT -> {}
-                    AirGestureCore.GestureAction.SWIPE_RIGHT -> {}
-                    AirGestureCore.GestureAction.NONE -> {}
-                }
-            }
-        }
-    }
+fun SecurityLogsPage(logDao: SecurityLogDao) {
+    val logs by logDao.getAllLogs().collectAsState(initial = emptyList())
 
     Column(
         modifier = Modifier
@@ -40,55 +23,64 @@ fun AirGesturePage() {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "Air-Swiping Gesten-Steuerung",
+            text = "Sicherheits-Logs & Ereignisse",
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.primary
         )
         Text(
-            text = "Bediene Juaris berührungslos über die Frontkamera. Läuft permanent im Hintergrund (100% lokal & offline).",
+            text = "Hier siehst du alle protokollierten Sicherheitsvorfälle und Blockierungen deines Geräts (100% lokal).",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+        if (logs.isEmpty()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(10.dp)
-                            .background(MaterialTheme.colorScheme.primary, CircleShape)
-                    )
-                    Text(
-                        text = "Kamera-Schutz aktiv (Permanent)",
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
                 Text(
-                    text = "Sensor-Feed: $gestureState",
+                    text = "Keine Sicherheits-Ereignisse protokolliert. Dein Gerät ist sicher!",
+                    modifier = Modifier.padding(16.dp),
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                Text(
-                    text = "Letzte Aktion: $lastAction",
-                    color = MaterialTheme.colorScheme.secondary
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Hinweis: Es werden zu keiner Zeit Bilder oder Videos gespeichert oder an Server gesendet. Die Analyse erfolgt ausschließlich im Arbeitsspeicher deines Geräts – genau wie eine native Smartphone-Funktion.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(logs) { log ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = "Status: ${log.status}",
+                                color = if (log.status == "BLOCKED" || log.status == "QUARANTINE") 
+                                    MaterialTheme.colorScheme.error 
+                                else 
+                                    MaterialTheme.colorScheme.primary,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                text = "Meldung: ${log.message}",
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "Zeit: ${SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault()).format(Date(log.timestamp))}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
             }
         }
     }
 }
+
 
