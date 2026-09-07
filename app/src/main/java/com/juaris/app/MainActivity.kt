@@ -317,95 +317,95 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
-            when (selectedTab) {
-       0 -> StatusPage(
-                logs = livelogs,
-                onSimulateThreat = {
-                    val emailWorker = EmailScanWorker()
-                    val isEmailThreat = emailWorker.scanLocalEmailContent("fraud@fake-bank.com", "Urgent Invoice verification")
-                   
-                    val threatDescription = if (isEmailThreat) {
-                        "E-Mail-Phishing & Live-Sandbox Vektor erfolgreich isoliert!"
-                    } else {
-                        "Echtzeit-Angriffsvektor erfolgreich isoliert!"
-                    }
-                   
-                    val newLog = SecurityLogEntity(
-                        timestamp = System.currentTimeMillis(),
-                        module = if (isEmailThreat) "E-Mail-Heuristik" else "Live-Sandbox",
-                        description = threatDescription,
-                        status = "BLOCKED"
-                    )
-                    livelogs.add(0, newLog)
-                    Toast.makeText(context, "Heilige Dreifaltigkeit: Bedrohung lokal abgewehrt!", Toast.LENGTH_SHORT).show()
-                },
-                onExportLogs = {
-                    Toast.makeText(context, "${livelogs.size} Logs sicher in den verschlüsselten Vault geschrieben.", Toast.LENGTH_LONG).show()
-                },
-                onPanicWipe = {
-                    livelogs.clear()
-                    blockedContacts.clear()
-                    prefs.edit().clear().apply()
-                    Toast.makeText(context, "PANIC WIPE: Alle lokalen Daten unwiderruflich gelöscht!", Toast.LENGTH_LONG).show()
-                }
-            )
-            1 -> ProtectionModulesPage(
-                callProtection = callProtection,
-                onCallChange = {
-                    callProtection = it
-                    prefs.edit().putBoolean("call_prot", it).apply()
-                },
-                smsProtection = smsProtection,
-                onSmsChange = {
-                    smsProtection = it
-                    prefs.edit().putBoolean("sms_prot", it).apply()
-                },
-                emailProtection = emailProtection,
-                onEmailChange = {
-                    emailProtection = it
-                    prefs.edit().putBoolean("email_prot", it).apply()
-                },
-                vaultUnlocked = vaultUnlocked,
-                onVaultToggle = { vaultUnlocked = it }
-            )
-            2 -> BlacklistPage(
-                blockedList = blockedContacts,
-                onAddBlocked = { newEntry ->
-                    if (newEntry.isNotBlank() && !blockedContacts.contains(newEntry)) {
-                        blockedContacts.add(newEntry)
-                        prefs.edit().putStringSet("blocked_numbers", blockedContacts.toSet()).apply()
-                        Toast.makeText(context, "Nummer permanent gesperrt", Toast.LENGTH_SHORT).show()
-                    }
-                },
-                onRemoveBlocked = { item ->
-                    blockedContacts.remove(item)
-                    prefs.edit().putStringSet("blocked_numbers", blockedContacts.toSet()).apply()
-                    Toast.makeText(context, "Nummer freigegeben", Toast.LENGTH_SHORT).show()
-                }
-            )
-            3 -> {
-                val db = com.juaris.app.JuarisDatabase.getDatabase(LocalContext.current)
-                SecurityLogsPage(logDao = db.securityLogDao())
+       when (selectedTab) {
+    0 -> StatusPage(
+        logs = livelogs,
+        onSimulateThreat = {
+            val emailWorker = EmailScanWorker()
+            val isEmailThreat = emailWorker.scanLocalEmailContent("fraud@fake-bank.com", "Urgent Invoice verification")
+           
+            val threatDescription = if (isEmailThreat) {
+                "E-Mail-Phishing & Live-Sandbox Vektor erfolgreich isoliert!"
+            } else {
+                "Echtzeit-Angriffsvektor erfolgreich isoliert!"
             }
-            4 -> ClipboardProtectionPage(
-                autoClearEnabled = clipboardAutoClear,
-                onAutoClearChange = {
-                    clipboardAutoClear = it
-                    prefs.edit().putBoolean("clip_auto", it).apply()
-                }
+           
+            val newLog = SecurityLogEntity(
+                timestamp = System.currentTimeMillis(),
+                module = if (isEmailThreat) "E-Mail-Heuristik" else "Live-Sandbox",
+                description = threatDescription,
+                status = "BLOCKED"
             )
-            5 -> PermissionsAuditPage()
-            6 -> SwarmMeshPage()
-            7 -> AIPage(aiCore = aiCore, logs = livelogs)
-            8 -> AirGesturePage(airGestureCore = airGestureCore) { forward ->
-                selectedTab = if (forward) {
-                    (selectedTab + 1) % tabs.size
-                } else {
-                    if (selectedTab - 1 < 0) tabs.size - 1 else selectedTab - 1
-                }
+            livelogs.add(0, newLog)
+            Toast.makeText(context, "Heilige Dreifaltigkeit: Bedrohung lokal abgewehrt!", Toast.LENGTH_SHORT).show()
+        },
+        onExportLogs = {
+            Toast.makeText(context, "${livelogs.size} Logs sicher in den verschlüsselten Vault geschrieben.", Toast.LENGTH_LONG).show()
+        },
+        onPanicWipe = {
+            livelogs.clear()
+            blockedContacts.clear()
+            prefs.edit().clear().apply()
+            Toast.makeText(context, "PANIC WIPE: Alle lokalen Daten unwiderruflich gelöscht!", Toast.LENGTH_LONG).show()
+        }
+    )
+    1 -> ProtectionModulesPage(
+        callProtection = callProtection,
+        onCallChange = {
+            callProtection = it
+            prefs.edit().putBoolean("call_prot", it).apply()
+        },
+        smsProtection = smsProtection,
+        onSmsChange = {
+            smsProtection = it
+            prefs.edit().putBoolean("sms_prot", it).apply()
+        },
+        emailProtection = emailProtection,
+        onEmailChange = {
+            emailProtection = it
+            prefs.edit().putBoolean("email_prot", it).apply()
+        },
+        vaultUnlocked = vaultUnlocked,
+        onVaultToggle = { vaultUnlocked = it }
+    )
+    2 -> BlacklistPage(
+        blockedList = blockedContacts,
+        onAddBlocked = { newEntry ->
+            if (newEntry.isNotBlank() && !blockedContacts.contains(newEntry)) {
+                blockedContacts.add(newEntry)
+                prefs.edit().putStringSet("blocked_numbers", blockedContacts.toSet()).apply()
+                Toast.makeText(context, "Nummer permanent gesperrt", Toast.LENGTH_SHORT).show()
             }
-            9 -> PrivacyAndLegalContent()
-
+        },
+        onRemoveBlocked = { item ->
+            blockedContacts.remove(item)
+            prefs.edit().putStringSet("blocked_numbers", blockedContacts.toSet()).apply()
+            Toast.makeText(context, "Nummer freigegeben", Toast.LENGTH_SHORT).show()
+        }
+    )
+    3 -> {
+        val db = com.juaris.app.JuarisDatabase.getDatabase(LocalContext.current)
+        SecurityLogsPage(logDao = db.securityLogDao())
+    }
+    4 -> ClipboardProtectionPage(
+        autoClearEnabled = clipboardAutoClear,
+        onAutoClearChange = {
+            clipboardAutoClear = it
+            prefs.edit().putBoolean("clip_auto", it).apply()
+        }
+    )
+    5 -> PermissionsAuditPage()
+    6 -> SwarmMeshPage()
+    7 -> AIPage(aiCore = aiCore, logs = livelogs)
+    8 -> AirGesturePage(airGestureCore = airGestureCore) { forward ->
+        selectedTab = if (forward) {
+            (selectedTab + 1) % tabs.size
+        } else {
+            if (selectedTab - 1 < 0) tabs.size - 1 else selectedTab - 1
+        }
+    }
+    9 -> PrivacyAndLegalContent()
+}
 
 
 @Composable
