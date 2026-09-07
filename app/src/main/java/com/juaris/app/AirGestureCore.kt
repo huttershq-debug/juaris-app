@@ -54,61 +54,59 @@ class AirGestureCore(private val context: Context) {
     }
 
     private fun processImage(imageProxy: ImageProxy, onSwipe: (GestureAction) -> Unit) {
-        val currentTime = System.currentTimeMillis()
-        if (currentTime - lastAnalysisTime < 350) { // Throttling zur Performance-Schonung
-            imageProxy.close()
-            return
-        }
-        lastAnalysisTime = currentTime
-
-        try {
-            val buffer = imageProxy.planes[0].buffer
-            val width = imageProxy.width
-            val height = imageProxy.height
-            
-            var totalXSum = 0L
-            var pixelCount = 0L
-            
-            val step = 20 // Sampling für Echtzeit-Performance
-            for (y in 0 until height step step) {
-                for (x in 0 until width step step) {
-                    val pixelIndex = y * width + x
-                    if (pixelIndex < buffer.capacity()) {
-                        val luma = buffer.get(pixelIndex).toInt() and 0xFF
-                        if (luma > 140) { // Erfassung von Handkontrasten
-                            totalXSum += x
-                            pixelCount++
-                        }
-                    }
-                }
-            }
-
-            if (pixelCount > 40) {
-                val currentXCenter = totalXSum.toFloat() / pixelCount
-                if (lastXCenter != -1f) {
-                    val deltaX = currentXCenter - lastXCenter
-                    if (deltaX > 45f) {
-                        _lastAction.value = GestureAction.SWIPE_RIGHT
-                        _gestureState.value = "Geste erkannt: Nach Rechts wischen ➔"
-                        onSwipe(GestureAction.SWIPE_RIGHT)
-                    } else if (deltaX < -45f) {
-                        _lastAction.value = GestureAction.SWIPE_LEFT
-                        _gestureState.value = "Geste erkannt: Nach Links wischen ⬅"
-                        onSwipe(GestureAction.SWIPE_LEFT)
-                    }
-                }
-                lastXCenter = currentXCenter
-            }
-        } catch (e: Exception) {
-            // Frame-Ausnahme abfangen
-        } finally {
-            imageProxy.close()
-        }
+    val currentTime = System.currentTimeMillis()
+    // Throttling auf 400ms erhöht, damit Gesten nicht "doppelt" oder zu schnell hintereinander feuern
+    if (currentTime - lastAnalysistime < 400) { 
+        imageProxy.close()
+        return
     }
+    lastAnalysistime = currentTime
 
-    fun stop() {
-        try {
-            cameraExecutor.shutdown()
-        } catch (_: Exception) {}
+    try {
+        val buffer = imageProxy.planes[0].buffer
+        val width = imageProxy.width
+        val height = imageProxy.height
+
+        var totalsum = 0L
+        var pixelcount = 0L
+
+        val step = 20 // Sampling-Rate für optimale Performance
+        for (y in 0 until height step step) {
+            for (x in 0 until width step step) {
+                val pixelIndex = y * width + x
+                if (pixelIndex < buffer.capacity()) {
+                    val lum = buffer.get(pixelIndex).toInt() and 0xFF
+                    if (lum > 140) { // Kontrasterfassung der Hand
+                        totalsum += x
+                        pixelcount++
+                    }
+                }
+            }
+        }
+
+        if (pixelcount > 40) {
+            val currentXCenter = totalsum.toFloat() / pixelcount
+            if (lastXCenter != -1f) {
+                val deltax = currentXCenter - lastXCenter
+                
+                // Schwellenwert auf 75f erhöht -> macht die Erkennung "feiner" und weniger aggressiv (kein Wackeln)
+                if (deltax > 75f) {
+                    _lastAction.value = GestureAction.SWIPE_RIGHT
+                    _gesturestate.value = "Geste erkannt: Nach Rechts wischen"
+                    onSwipe(GestureAction.SWIPE_RIGHT)
+                } else if (deltax < -75f) {
+                    _lastAction.value = GestureAction.SWIPE_LEFT
+                    _gesturestate.value = "Geste erkannt: Nach Links wischen"
+                    onSwipe(GestureAction.SWIPE_LEFT)
+                }
+            }
+            lastXCenter = currentXCenter
+        }
+    } catch (e: Exception) {
+        // Frame-Ausnahmen abfangen, damit die App stabil bleibt
+    } finally {
+        // Sorgt dafür, dass der Kamera-Stream NIEMALS stoppt und permanent aktiv bleibt
+        imageProxy.close()
     }
 }
+
