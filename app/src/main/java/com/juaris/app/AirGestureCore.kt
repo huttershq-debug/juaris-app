@@ -26,8 +26,8 @@ class AirGestureCore(private val context: Context) {
     val lastAction: StateFlow<GestureAction> = _lastAction
 
     private lateinit var cameraExecutor: ExecutorService
-    private var previousByteArray: ByteArray? = null
-    private var lastCenterX: Double = 0.0
+    private var prevLeftAvg: Double = 0.0
+    private var prevRightAvg: Double = 0.0
 
     fun startGestureDetection(lifecycleOwner: LifecycleOwner, onActionDetected: (GestureAction) -> Unit) {
         cameraExecutor = Executors.newSingleThreadExecutor()
@@ -55,7 +55,7 @@ class AirGestureCore(private val context: Context) {
                     cameraSelector,
                     imageAnalysis
                 )
-                _gestureState.value = "Kamera aktiv – bitte Hand bewegen"
+                _gestureState.value = "Kamera scharf – Hand bewegen"
             } catch (exc: Exception) {
                 _gestureState.value = "Fehler: ${exc.localizedMessage}"
             }
@@ -65,58 +65,60 @@ class AirGestureCore(private val context: Context) {
     private fun processImageFrame(imageProxy: ImageProxy, onActionDetected: (GestureAction) -> Unit) {
         val plane = imageProxy.planes[0]
         val buffer = plane.buffer
-        val rowStride = plane.rowStride
         val width = imageProxy.width
         val height = imageProxy.height
+        val rowStride = plane.rowStride
 
-        val currentBytes = ByteArray(buffer.remaining())
-        buffer.get(currentBytes)
+        var leftSum = 0L
+        var rightSum = 0L
+        var count = 0L
 
-        val prev = previousByteArray
-        if (prev != null && prev.size == currentBytes.size) {
-            var totalX = 0L
-            var motionPixels = 0L
-            val step = 16 // Optimierte Abtastrate für flüssige Performance
+        val step = 32 // Schnell und ressourcenschonend
+        val midX = width / 2
 
-            // Frame-Differenz-Analyse: Erkennt Pixel-Änderungen durch Bewegung
-            for (y in 0 until height step step) {
-                for (x in 0 until width step step) {
-                    val index = y * rowStride + x
-                    if (index < currentBytes.size && index < prev.size) {
-                        val currVal = currentBytes[index].toInt() and 0xFF
-                        val prevVal = prev[index].toInt() and 0xFF
-                        val diffVal = abs(currVal - prevVal)
-
-                        if (diffVal > 25) { // Bewegungsschwelle
-                            totalX += x
-                            motionPixels++
-                        }
+        // Zonen-Scan: Trennt linke und rechte Bildhälfte
+        for (y in 0 until height step step) {
+            for (x in 0 until width step step) {
+                val index = y * rowStride + x
+                if (index < buffer.capacity()) {
+                    val pixel = buffer.get(index).toInt() and 0xFF
+                    if (x < midX) {
+                        leftSum += pixel
+                    } else {
+                        rightSum += pixel
                     }
+                    count++
                 }
-            }
-
-            if (motionPixels > 40) {
-                val currentCenterX = totalX.toDouble() / motionPixels
-                if (lastCenterX > 0.0) {
-                    val deltaX = currentCenterX - lastCenterX
-                    _gestureState.value = "Bewegung erkannt! Delta: ${String.format("%.1f", deltaX)}"
-
-                    val swipeThreshold = 10.0 // Sehr reaktiv für sofortiges Swipen
-                    if (deltaX > swipeThreshold) {
-                        _lastAction.value = GestureAction.SWIPE_RIGHT
-                        onActionDetected(GestureAction.SWIPE_RIGHT)
-                    } else if (deltaX < -swipeThreshold) {
-                        _lastAction.value = GestureAction.SWIPE_LEFT
-                        onActionDetected(GestureAction.SWIPE_LEFT)
-                    }
-                }
-                lastCenterX = currentCenterX
-            } else {
-                _gestureState.value = "Bereit – warte auf Hand-Swipe"
             }
         }
 
-        previousByteArray = currentBytes
+        if (count > 0) {
+            val currentLeftAvg = leftSum.toDouble() / (count / 2)
+            val currentRightAvg = rightSum.toDouble() / (count / 2)
+
+            if (prevLeftAvg > 0.0 && prevRightAvg > 0.0) {
+                val leftDelta = currentLeftAvg - prevLeftAvg
+                val rightDelta = currentRightAvg - prevRightAvg
+
+                // Live-Werte direkt auf dem Display sichtbar machen
+                _gestureState.value = "Aktiv | L: ${String.format("%.1f", leftDelta)} R: ${String.format("%.1f", rightDelta)}"
+
+                val threshold = 3.5 // Extrem feinfühlig
+
+                // Richtungs-Erkennung über Energieverschiebung
+                if (leftDelta > threshold && rightDelta < -threshold) {
+                    _lastAction.value = GestureAction.SWIPE_RIGHT
+                    onActionDetected(GestureAction.SWIPE_RIGHT)
+                } else if (leftDelta < -threshold && rightDelta > threshold) {
+                    _lastAction.value = GestureAction.SWIPE_LEFT
+                    onActionDetected(GestureAction.SWIPE_LEFT)
+                }
+            }
+
+            prevLeftAvg = currentLeftAvg
+            prevRightAvg = currentRightAvg
+        }
+
         imageProxy.close()
     }
 
