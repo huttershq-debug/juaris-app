@@ -42,23 +42,21 @@ jobs:
 
       - name: Build Both AAB and APK
         run: |
-             cd juaris-app
-             echo "Lade Gradle 8.4 herunter..."
-             wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
-             unzip -q gradle-8.4-bin.zip
+         echo "Lade Gradle 8.4 herunter..."
+         wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
+         unzip -q gradle-8.4-bin.zip
         
-             echo "Starte Build für AAB und APK..."
-             ./gradle-8.4/bin/gradle assembleRelease \
-             -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/juaris-app/juaris-release-key.jks" \
-             -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
-             -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
-             -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}"
+         echo "Starte Build für AAB und APK..."
+         ./gradle-8.4/bin/gradle assembleRelease \
+          -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/juaris-release-key.jks" \
+          -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
+          -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
+          -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}"
 
 
-
-      - name: Release Both Files veröffentlichen
-        uses: softprops/action-gh-release@v1
-        with:
+         - name: Release Both Files veröffentlichen
+         uses: softprops/action-gh-release@v1
+         with:
           files: |
             app/build/outputs/bundle/release/app-release.aab
             app/build/outputs/apk/release/app-release.apk
