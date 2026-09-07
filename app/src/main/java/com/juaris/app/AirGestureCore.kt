@@ -3,7 +3,6 @@ package com.juaris.app
 import android.content.Context
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.ImageProxy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
@@ -11,7 +10,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import kotlin.math.abs
 
 class AirGestureCore(private val context: Context) {
 
@@ -19,123 +17,107 @@ class AirGestureCore(private val context: Context) {
         NONE, SWIPE_LEFT, SWIPE_RIGHT
     }
 
-    private val _gestureState = MutableStateFlow("Initialisiere Kamera...")
+    private val _gestureState = MutableStateFlow("Kamera aktiv – Hand bewegen")
     val gestureState: StateFlow<String> = _gestureState
 
-    private val _lastAction = MutableStateFlow<GestureAction>(GestureAction.NONE)
-    val lastAction: StateFlow<GestureAction> = _lastAction
+    private val _lastAction = MutableStateFlow("KEINE")
+    val lastAction: StateFlow<String> = _lastAction
 
-    private lateinit var cameraExecutor: ExecutorService
-    private var previousByteArray: ByteArray? = null
-    private var lastCenterX: Double = 0.0
-    private var frameCounter: Long = 0
+    private var cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
+    private var cameraProvider: ProcessCameraProvider? = null
 
-    fun startGestureDetection(lifecycleOwner: LifecycleOwner, onActionDetected: (GestureAction) -> Unit) {
-        cameraExecutor = Executors.newSingleThreadExecutor()
+    // Cooldown-Variablen gegen zu schnelles Durchrasten und Feststecken
+    private var lastTriggerTime = 0L
+    private val cooldownMillis = 1200L // 1,2 Sekunden Pause zwischen Gesten für flüssige Bedienung
+
+    fun startGestureDetection(lifecycleOwner: LifecycleOwner, onGestureDetected: (GestureAction) -> Unit) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
 
         cameraProviderFuture.addListener({
-            val cameraProvider = cameraProviderFuture.get()
-           
-            val cameraSelector = CameraSelector.Builder()
-                .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
-                .build()
-
-            val imageAnalysis = ImageAnalysis.Builder()
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .build()
-
-            imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                processImageFrame(imageProxy, onActionDetected)
-            }
-
             try {
-                cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(
+                cameraProvider = cameraProviderFuture.get()
+                val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+
+                val imageAnalysis = ImageAnalysis.Builder()
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .build()
+
+                var previousBuffer: ByteArray? = null
+
+                imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
+                    val currentTime = System.currentTimeMillis()
+                    val plane = imageProxy.planes[0]
+                    val buffer = plane.buffer
+                    val data = ByteArray(buffer.remaining())
+                    buffer.get(data)
+
+                    if (previousBuffer != null && data.size == previousBuffer!!.size) {
+                        var leftSum = 0L
+                        var rightSum = 0L
+                        val width = imageProxy.width
+                        val height = imageProxy.height
+                        val step = 32 // Sampling-Schritt für Performance
+
+                        for (y in 0 until height step step) {
+                            for (x in 0 until width step step) {
+                                val index = y * width + x
+                                if (index < data.size) {
+                                    val diff = kotlin.math.abs(data[index].toInt() - previousBuffer!![index].toInt())
+                                    if (x < width / 2) {
+                                        leftSum += diff
+                                    } else {
+                                        rightSum += diff
+                                    }
+                                }
+                            }
+                        }
+
+                        // Prüfen, ob der Cooldown abgelaufen ist
+                        if (currentTime - lastTriggerTime > cooldownMillis) {
+                            val threshold = 60000L // Empfindlichkeits-Schwelle
+                            if (leftSum > threshold || rightSum > threshold) {
+                                lastTriggerTime = currentTime
+                                if (leftSum > rightSum) {
+                                    _gestureState.value = "Geste erkannt: Nach Rechts"
+                                    _lastAction.value = "SWIPE_RIGHT"
+                                    onGestureDetected(GestureAction.SWIPE_RIGHT)
+                                } else {
+                                    _gestureState.value = "Geste erkannt: Nach Links"
+                                    _lastAction.value = "SWIPE_LEFT"
+                                    onGestureDetected(GestureAction.SWIPE_LEFT)
+                                }
+                            } else {
+                                // Automatischer Reset in den Standby, wenn keine starke Bewegung da ist
+                                if (currentTime - lastTriggerTime > 900L) {
+                                    _gestureState.value = "Kamera aktiv – Hand bereit"
+                                }
+                            }
+                        }
+                    }
+                    previousBuffer = data
+                    imageProxy.close()
+                }
+
+                cameraProvider?.unbindAll()
+                cameraProvider?.bindToLifecycle(
                     lifecycleOwner,
                     cameraSelector,
                     imageAnalysis
                 )
-                _gestureState.value = "Kamera aktiv – Hand bewegen"
-            } catch (exc: Exception) {
-                _gestureState.value = "Fehler: ${exc.localizedMessage}"
+
+            } catch (e: Exception) {
+                _gestureState.value = "Fehler: ${e.localizedMessage}"
             }
         }, ContextCompat.getMainExecutor(context))
     }
 
-    private fun processImageFrame(imageProxy: ImageProxy, onActionDetected: (GestureAction) -> Unit) {
-        try {
-            frameCounter++
-            val plane = imageProxy.planes[0]
-            val buffer = plane.buffer
-            
-            // WICHTIG: Buffer-Position auf 0 zurücksetzen, sonst liest er keine Daten!
-            buffer.rewind()
-            
-            val rowStride = plane.rowStride
-            val width = imageProxy.width
-            val height = imageProxy.height
-
-            val currentBytes = ByteArray(buffer.remaining())
-            buffer.get(currentBytes)
-
-            val prev = previousByteArray
-            if (prev != null && prev.size == currentBytes.size) {
-                var totalX = 0L
-                var motionPixels = 0L
-                val step = 16 // Feinerer Raster-Scan für sichere Erkennung
-
-                for (y in 0 until height step step) {
-                    for (x in 0 until width step step) {
-                        val index = y * rowStride + x
-                        if (index < currentBytes.size && index < prev.size) {
-                            val currVal = currentBytes[index].toInt() and 0xFF
-                            val prevVal = prev[index].toInt() and 0xFF
-                            val diffVal = abs(currVal - prevVal)
-
-                            if (diffVal > 15) { // Sensibler Schwellenwert für Bewegung
-                                totalX += x
-                                motionPixels++
-                            }
-                        }
-                    }
-                }
-
-                if (motionPixels > 15) {
-                    val currentCenterX = totalX.toDouble() / motionPixels
-                    if (lastCenterX > 0.0) {
-                        val deltaX = currentCenterX - lastCenterX
-                        _gestureState.value = "Motion: $motionPixels | Delta: ${String.format("%.1f", deltaX)}"
-
-                        val swipeThreshold = 4.0
-                        if (deltaX > swipeThreshold) {
-                            _lastAction.value = GestureAction.SWIPE_RIGHT
-                            onActionDetected(GestureAction.SWIPE_RIGHT)
-                        } else if (deltaX < -swipeThreshold) {
-                            _lastAction.value = GestureAction.SWIPE_LEFT
-                            onActionDetected(GestureAction.SWIPE_LEFT)
-                        }
-                    }
-                    lastCenterX = currentCenterX
-                } else {
-                    _gestureState.value = "Bereit (#$frameCounter) – warte auf Swipe"
-                }
-            } else {
-                _gestureState.value = "Kalibriere Sensor (#$frameCounter)..."
-            }
-
-            previousByteArray = currentBytes
-        } catch (e: Exception) {
-            _gestureState.value = "Fehler: ${e.localizedMessage}"
-        } finally {
-            imageProxy.close()
-        }
-    }
-
     fun stopGestureDetection() {
-        if (::cameraExecutor.isInitialized) {
-            cameraExecutor.shutdown()
+        try {
+            cameraProvider?.unbindAll()
+        } catch (e: Exception) {
+            // Ignorieren bei Beendigung
         }
     }
 }
+
 
