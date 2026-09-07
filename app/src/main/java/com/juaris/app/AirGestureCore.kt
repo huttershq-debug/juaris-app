@@ -26,9 +26,9 @@ class AirGestureCore(private val context: Context) {
     private var cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     private var cameraProvider: ProcessCameraProvider? = null
 
-    // Cooldown-Variablen gegen zu schnelles Durchrasten und Feststecken
+    // Cooldown und angepasste Sensibilität
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 1200L // 1,2 Sekunden Pause zwischen Gesten für flüssige Bedienung
+    private val cooldownMillis = 1000L // 1 Sekunde Pause für saubere Erkennung
 
     fun startGestureDetection(lifecycleOwner: LifecycleOwner, onGestureDetected: (GestureAction) -> Unit) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
@@ -42,60 +42,67 @@ class AirGestureCore(private val context: Context) {
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                     .build()
 
-                var previousBuffer: ByteArray? = null
+                var previousData: ByteArray? = null
 
                 imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                    val currentTime = System.currentTimeMillis()
-                    val plane = imageProxy.planes[0]
-                    val buffer = plane.buffer
-                    val data = ByteArray(buffer.remaining())
-                    buffer.get(data)
-
-                    if (previousBuffer != null && data.size == previousBuffer!!.size) {
-                        var leftSum = 0L
-                        var rightSum = 0L
+                    try {
+                        val currentTime = System.currentTimeMillis()
+                        val plane = imageProxy.planes[0]
+                        val buffer = plane.buffer
+                        val rowStride = plane.rowStride
                         val width = imageProxy.width
                         val height = imageProxy.height
-                        val step = 32 // Sampling-Schritt für Performance
 
-                        for (y in 0 until height step step) {
-                            for (x in 0 until width step step) {
-                                val index = y * width + x
-                                if (index < data.size) {
-                                    val diff = kotlin.math.abs(data[index].toInt() - previousBuffer!![index].toInt())
-                                    if (x < width / 2) {
-                                        leftSum += diff
+                        val currentBytes = ByteArray(buffer.remaining())
+                        buffer.get(currentBytes)
+
+                        if (previousData != null && previousData!!.size == currentBytes.size) {
+                            var leftSum = 0L
+                            var rightSum = 0L
+                            val step = 16 // Präzisere Abtastung
+
+                            for (y in 0 until height step step) {
+                                for (x in 0 until width step step) {
+                                    val index = y * rowStride + x
+                                    if (index < currentBytes.size && index < previousData!!.size) {
+                                        val diff = kotlin.math.abs(currentBytes[index].toInt() - previousData!![index].toInt())
+                                        if (x < width / 2) {
+                                            leftSum += diff
+                                        } else {
+                                            rightSum += diff
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Prüfen, ob Cooldown abgelaufen ist
+                            if (currentTime - lastTriggerTime > cooldownMillis) {
+                                // Realistischer, direkt ansprechender Schwellenwert
+                                val threshold = 3500L 
+                                if (leftSum > threshold || rightSum > threshold) {
+                                    lastTriggerTime = currentTime
+                                    if (leftSum > rightSum) {
+                                        _gestureState.value = "Geste erkannt: Nach Rechts"
+                                        _lastAction.value = "SWIPE_RIGHT"
+                                        onGestureDetected(GestureAction.SWIPE_RIGHT)
                                     } else {
-                                        rightSum += diff
+                                        _gestureState.value = "Geste erkannt: Nach Links"
+                                        _lastAction.value = "SWIPE_LEFT"
+                                        onGestureDetected(GestureAction.SWIPE_LEFT)
+                                    }
+                                } else {
+                                    if (currentTime - lastTriggerTime > 800L) {
+                                        _gestureState.value = "Kamera aktiv – Hand bereit"
                                     }
                                 }
                             }
                         }
-
-                        // Prüfen, ob der Cooldown abgelaufen ist
-                        if (currentTime - lastTriggerTime > cooldownMillis) {
-                            val threshold = 60000L // Empfindlichkeits-Schwelle
-                            if (leftSum > threshold || rightSum > threshold) {
-                                lastTriggerTime = currentTime
-                                if (leftSum > rightSum) {
-                                    _gestureState.value = "Geste erkannt: Nach Rechts"
-                                    _lastAction.value = "SWIPE_RIGHT"
-                                    onGestureDetected(GestureAction.SWIPE_RIGHT)
-                                } else {
-                                    _gestureState.value = "Geste erkannt: Nach Links"
-                                    _lastAction.value = "SWIPE_LEFT"
-                                    onGestureDetected(GestureAction.SWIPE_LEFT)
-                                }
-                            } else {
-                                // Automatischer Reset in den Standby, wenn keine starke Bewegung da ist
-                                if (currentTime - lastTriggerTime > 900L) {
-                                    _gestureState.value = "Kamera aktiv – Hand bereit"
-                                }
-                            }
-                        }
+                        previousData = currentBytes
+                    } catch (e: Exception) {
+                        // Frame-Fehler abfangen
+                    } finally {
+                        imageProxy.close()
                     }
-                    previousBuffer = data
-                    imageProxy.close()
                 }
 
                 cameraProvider?.unbindAll()
@@ -115,9 +122,8 @@ class AirGestureCore(private val context: Context) {
         try {
             cameraProvider?.unbindAll()
         } catch (e: Exception) {
-            // Ignorieren bei Beendigung
+            // Ignorieren
         }
     }
 }
-
 
