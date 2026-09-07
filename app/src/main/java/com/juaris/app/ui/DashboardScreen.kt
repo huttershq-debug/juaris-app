@@ -7,7 +7,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -35,13 +34,21 @@ class DashboardActivity : ComponentActivity() {
 
 @Composable
 fun JuarisTheme(content: @Composable () -> Unit) {
-    val darkColorScheme = darkColorScheme(
-        primary = Color(0xFF6200EE),
-        surface = Color(0xFF1E1E1E),
-        background = Color(0xFF121212)
+    val hackerGreenColorScheme = darkColorScheme(
+        primary = NeonGiftgruen,
+        onPrimary = Color.Black,
+        primaryContainer = Color(0xFF003311),
+        onPrimaryContainer = NeonGiftgruen,
+        background = Color.Black,
+        onBackground = NeonGiftgruen,
+        surface = Color(0xFF080808),
+        onSurface = Color(0xFFE0E0E0),
+        surfaceVariant = Color(0xFF121212),
+        onSurfaceVariant = NeonGiftgruen,
+        error = Color(0xFFFF3333)
     )
     MaterialTheme(
-        colorScheme = darkColorScheme,
+        colorScheme = hackerGreenColorScheme,
         content = content
     )
 }
@@ -56,26 +63,21 @@ fun JuarisDashboardScreen() {
             .padding(16.dp)
     ) {
         Text(
-            text = "Juaris Security Dashboard",
+            text = "Juaris Security Command Center",
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.White
+            color = NeonGiftgruen
         )
         Spacer(modifier = Modifier.height(16.dp))
-        
+       
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.weight(1f)
         ) {
             items(auditLogs) { log ->
-                Card(
-                    shape = RoundedCornerShape(8.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF181616)),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                TacticalPulseCard {
                     Text(
                         text = log,
-                        modifier = Modifier.padding(12.dp),
                         color = Color(0xFFB0BEC5),
                         fontSize = 12.sp
                     )
@@ -87,15 +89,9 @@ fun JuarisDashboardScreen() {
 
 @Composable
 fun ControlToggleItem(title: String, description: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    Card(
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        modifier = Modifier.fillMaxWidth()
-    ) {
+    TacticalPulseCard {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -107,9 +103,11 @@ fun ControlToggleItem(title: String, description: String, checked: Boolean, onCh
                 checked = checked,
                 onCheckedChange = onCheckedChange,
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor = Color(0xFF4CAF50)
+                    checkedThumbColor = NeonGiftgruen,
+                    checkedTrackColor = Color(0xFF003311)
                 )
             )
         }
     }
 }
+
