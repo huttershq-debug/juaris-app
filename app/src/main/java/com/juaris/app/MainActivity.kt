@@ -3,6 +3,8 @@ package com.juaris.app
 
 import com.juaris.app.ui.AIPage
 import com.juaris.app.ui.AirGesturePage
+import com.juaris.app.ui.TacticalPulseCard
+import com.juaris.app.ui. NeonGiftgruen
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -392,7 +394,7 @@ fun StatusPage(
             Text("System-Gesundheit & Status", style = MaterialTheme.typography.titleLarge)
             Text("Echtzeit-Diagnose des verschlüsselten Offline-Kernels.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
         }
-        item {
+           item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
