@@ -14,32 +14,40 @@ import java.util.concurrent.Executors
 
 class AirGestureCore(private val context: Context) {
 
-    private val _gestureState = MutableStateFlow("Gesten-Steuerung im Standby")
+    enum class GestureAction {
+        NONE, SWIPE_LEFT, SWIPE_RIGHT
+    }
+
+    private val _gestureState = MutableStateFlow("Aktiv: Frontkamera überwacht Luftgesten")
     val gestureState: StateFlow<String> = _gestureState
 
-    private val _lastAction = MutableStateFlow(GestureAction.NONE)
+    private val _lastAction = MutableStateFlow<GestureAction>(GestureAction.NONE)
     val lastAction: StateFlow<GestureAction> = _lastAction
 
-    enum class GestureAction { NONE, SWIPE_LEFT, SWIPE_RIGHT }
+    private lateinit var cameraExecutor: ExecutorService
+    private var lastAverageX: Double = 0.0
 
-    private val cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
-    private var lastXCenter: Float = -1f
-    private var lastAnalysisTime: Long = 0L
-
-    fun startGestureDetection(lifecycleOwner: LifecycleOwner, onSwipe: (GestureAction) -> Unit) {
+    fun startGestureDetection(lifecycleOwner: LifecycleOwner, onActionDetected: (GestureAction) -> Unit) {
+        cameraExecutor = Executors.newSingleThreadExecutor()
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+
         cameraProviderFuture.addListener({
+            val cameraProvider = cameraProviderFuture.get()
+            
+            // Frontkamera explizit auswählen
+            val cameraSelector = CameraSelector.Builder()
+                .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
+                .build()
+
+            val imageAnalysis = ImageAnalysis.Builder()
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .build()
+
+            imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
+                processImageFrame(imageProxy, onActionDetected)
+            }
+
             try {
-                val cameraProvider = cameraProviderFuture.get()
-                val imageAnalysis = ImageAnalysis.Builder()
-                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                    .build()
-
-                imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                    processImage(imageProxy, onSwipe)
-                }
-
-                val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(
                     lifecycleOwner,
@@ -47,69 +55,65 @@ class AirGestureCore(private val context: Context) {
                     imageAnalysis
                 )
                 _gestureState.value = "Aktiv: Frontkamera überwacht Luftgesten"
-            } catch (e: Exception) {
-                _gestureState.value = "Kamera-Fehler: ${e.localizedMessage}"
+            } catch (exc: Exception) {
+                _gestureState.value = "Fehler: ${exc.localizedMessage}"
             }
         }, ContextCompat.getMainExecutor(context))
     }
 
-    private fun processImage(imageProxy: ImageProxy, onSwipe: (GestureAction) -> Unit) {
-        val currentTime = System.currentTimeMillis()
-        if (currentTime - lastAnalysisTime < 400) {
-            imageProxy.close()
-            return
-        }
-        lastAnalysisTime = currentTime
+    private fun processImageFrame(imageProxy: ImageProxy, onActionDetected: (GestureAction) -> Unit) {
+        val buffer = imageProxy.planes[0].buffer
+        val bytes = ByteArray(buffer.remaining())
+        buffer.get(bytes)
 
-        try {
-            val buffer = imageProxy.planes[0].buffer
-            val width = imageProxy.width
-            val height = imageProxy.height
+        // Helligkeitsschwerpunkt (einfache, schnelle Spalten-Analyse für Wischgesten)
+        var totalX = 0L
+        var pixelCount = 0L
+        val width = imageProxy.width
+        val height = imageProxy.height
+        val step = 30 // Effizientes Abtasten
 
-            var totalsum = 0L
-            var pixelcount = 0L
-
-            val step = 20
-            for (y in 0 until height step step) {
-                for (x in 0 until width step step) {
-                    val pixelIndex = y * width + x
-                    if (pixelIndex < buffer.capacity()) {
-                        val lum = buffer.get(pixelIndex).toInt() and 0xFF
-                        if (lum > 140) {
-                            totalsum += x
-                            pixelcount++
-                        }
+        for (y in 0 until height step step) {
+            for (x in 0 until width step step) {
+                val pixelIndex = y * width + x
+                if (pixelIndex < bytes.size) {
+                    val pixelValue = bytes[pixelIndex].toInt() and 0xFF
+                    // Wir werten helle Bereiche (Hand/Haut) aus
+                    if (pixelValue > 100) {
+                        totalX += x
+                        pixelCount++
                     }
                 }
             }
-
-            if (pixelcount > 40) {
-                val currentXCenter = totalsum.toFloat() / pixelcount
-                if (lastXCenter != -1f) {
-                    val deltax = currentXCenter - lastXCenter
-                    if (deltax > 75f) {
-                        _lastAction.value = GestureAction.SWIPE_RIGHT
-                        _gestureState.value = "Geste erkannt: Nach Rechts wischen"
-                        onSwipe(GestureAction.SWIPE_RIGHT)
-                    } else if (deltax < -75f) {
-                        _lastAction.value = GestureAction.SWIPE_LEFT
-                        _gestureState.value = "Geste erkannt: Nach Links wischen"
-                        onSwipe(GestureAction.SWIPE_LEFT)
-                    }
-                }
-                lastXCenter = currentXCenter
-            }
-        } catch (e: Exception) {
-            // Frame-Ausnahme abfangen
-        } finally {
-            imageProxy.close()
         }
+
+        if (pixelCount > 50) {
+            val currentAverageX = totalX.toDouble() / pixelCount
+            if (lastAverageX > 0.0) {
+                val diff = currentAverageX - lastAverageX
+                // Empfindlichkeitsschwelle (niedriger = reagiert schneller auf Wischen)
+                val threshold = 15.0 
+
+                if (diff > threshold) {
+                    // Wischbewegung nach rechts
+                    _lastAction.value = GestureAction.SWIPE_RIGHT
+                    onActionDetected(GestureAction.SWIPE_RIGHT)
+                } else if (diff < -threshold) {
+                    // Wischbewegung nach links
+                    _lastAction.value = GestureAction.SWIPE_LEFT
+                    onActionDetected(GestureAction.SWIPE_LEFT)
+                }
+            }
+            lastAverageX = currentAverageX
+        }
+
+        imageProxy.close()
     }
 
-    fun stop() {
-        try {
+    fun stopGestureDetection() {
+        if (::cameraExecutor.isInitialized) {
             cameraExecutor.shutdown()
-        } catch (_: Exception) {}
+        }
     }
 }
 
