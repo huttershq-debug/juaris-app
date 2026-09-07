@@ -204,8 +204,23 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(64.dp))
+            
+            // Hier greift die Unterscheidung zwischen Test-Build und Store-Release:
             Button(
-                onClick = { onLoginSuccess() },
+                onClick = { 
+                    if (BuildConfig.DEBUG) {
+                        // Lokal zum Testen: Sofortiger Bypass, du wirst nicht ausgesperrt
+                        onLoginSuccess() 
+                    } else {
+                        // Im finalen Play-Store-Build (AAB): Echter Google Play Billing Flow
+                        val activity = context as? Activity
+                        if (activity != null) {
+                            billingManager.launchBillingFlow(activity)
+                        } else {
+                            onLoginSuccess()
+                        }
+                    }
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = NeonGiftgruen,
                     contentColor = Color.Black
@@ -215,7 +230,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                     .height(54.dp)
             ) {
                 Text(
-                    text = "Abo starten / Anmelden",
+                    text = if (BuildConfig.DEBUG) "Abo starten / Anmelden (Test-Bypass)" else "Abo starten / Anmelden",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     color = Color.Black
@@ -224,6 +239,8 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
         }
     }
 }
+
+
 
 @Composable
 fun JuarisMainDashboard(prefs: SharedPreferences) {
