@@ -11,6 +11,8 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -44,7 +46,6 @@ import com.juaris.app.ui.SecurityLogsPage
 
 class MainActivity : ComponentActivity() {
 
-    // Verschlüsselter lokaler Speicher (AES-256 per Android Keystore)
     private lateinit var securePrefs: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,7 +64,6 @@ class MainActivity : ComponentActivity() {
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             )
         } catch (e: Exception) {
-            // Fallback falls Keystore auf sehr alten Geräten zickt
             securePrefs = getPreferences(Context.MODE_PRIVATE)
         }
 
@@ -82,7 +82,6 @@ class MainActivity : ComponentActivity() {
                 error = Color(0xFFFF3333)
             )
 
-            // States aus dem sicheren Speicher laden
             var isFirstRun by remember { mutableStateOf(securePrefs.getBoolean("is_first_run", true)) }
             var isLoggedIn by remember { mutableStateOf(securePrefs.getBoolean("is_logged_in", false)) }
 
@@ -92,7 +91,6 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     when {
-                        // 1. Allerster Start nach Download -> Willkommen
                         isFirstRun -> {
                             WelcomeScreen(
                                 onContinueClicked = {
@@ -101,7 +99,6 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                         }
-                        // 2. Zweiter Schritt -> Abo / Aktivierung (1,99 €) über Google Play Billing
                         !isLoggedIn -> {
                             LoginScreen(
                                 onLoginSuccess = {
@@ -110,7 +107,6 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                         }
-                        // 3. Ab dann immer direkt ins Haupt-Dashboard!
                         else -> {
                             JuarisMainDashboard(securePrefs)
                         }
@@ -151,18 +147,7 @@ fun WelcomeScreen(onContinueClicked: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(64.dp))
             Button(
-                onClick = {
-                    // Für den lokalen Test direkt weiterleiten:
-                    onContinueClicked()
-                    
-                    // Später für den Store-Release wieder aktivieren:
-                    // val activity = context as? Activity
-                    // if (activity != null) {
-                    // billingManager.launchBillingFlow(activity)
-                    // } else {
-                    // onLoginSuccess()
-                    // }
-                },
+                onClick = { onContinueClicked() },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = toxicGreen,
                     contentColor = Color.Black
@@ -178,18 +163,15 @@ fun WelcomeScreen(onContinueClicked: () -> Unit) {
                     color = Color.Black
                 )
             }
-
         }
     }
 }
-
 
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit) {
     val context = LocalContext.current
     val toxicGreen = Color(0xFF00FF66)
 
-    // Google Play Billing Manager initialisieren
     val billingManager = remember {
         BillingManager(context, "juaris_monats_abo") {
             onLoginSuccess()
@@ -197,9 +179,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
     }
 
     LaunchedEffect(Unit) {
-        billingManager.startConnection {
-            // Verbindung mit Google Play Service steht bereit
-        }
+        billingManager.startConnection {}
     }
 
     Box(
@@ -228,10 +208,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(64.dp))
             Button(
-                onClick = {
-                    // Test-Bypass aktiv: Springt direkt ins Dashboard
-                    onLoginSuccess()
-                },
+                onClick = { onLoginSuccess() },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = toxicGreen,
                     contentColor = Color.Black
@@ -257,24 +234,13 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
     var selectedTab by remember { mutableStateOf(0) }
    
     val tabs = listOf(
-        "Status",
-        "Schutz",
-        "Sperren",
-        "Logs",
-        "Clipboard",
-        "Rechte",
-        "Schwarm",
-        "KI",
-        "Gesten",
-        "Info"
+        "Status", "Schutz", "Sperren", "Logs", "Clipboard",
+        "Rechte", "Schwarm", "KI", "Gesten", "Info"
     )
 
     val airGestureCore = remember { AirGestureCore(context) }
-
-    //Lokalen KI-Kern initialisieren
     val aiCore = remember { LocalAICore(context) }
 
-    // Echte persistente Zustände laden
     val liveLogs = remember {
         mutableStateListOf(
             SecurityLogEntity(timestamp = System.currentTimeMillis(), module = "Netzwerk-Monitor", description = "Verschlüsselter Lokalspeicher initialisiert", status = "SAFE"),
@@ -317,96 +283,98 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
-       when (selectedTab) {
-    0 -> StatusPage(
-        logs = livelogs,
-        onSimulateThreat = {
-            val emailWorker = EmailScanWorker()
-            val isEmailThreat = emailWorker.scanLocalEmailContent("fraud@fake-bank.com", "Urgent Invoice verification")
-           
-            val threatDescription = if (isEmailThreat) {
-                "E-Mail-Phishing & Live-Sandbox Vektor erfolgreich isoliert!"
-            } else {
-                "Echtzeit-Angriffsvektor erfolgreich isoliert!"
+            when (selectedTab) {
+                0 -> StatusPage(
+                    logs = liveLogs,
+                    onSimulateThreat = {
+                        val emailWorker = EmailScanWorker()
+                        val isEmailThreat = emailWorker.scanLocalEmailContent("fraud@fake-bank.com", "Urgent Invoice verification")
+                       
+                        val threatDescription = if (isEmailThreat) {
+                            "E-Mail-Phishing & Live-Sandbox Vektor erfolgreich isoliert!"
+                        } else {
+                            "Echtzeit-Angriffsvektor erfolgreich isoliert!"
+                        }
+                       
+                        val newLog = SecurityLogEntity(
+                            timestamp = System.currentTimeMillis(),
+                            module = if (isEmailThreat) "E-Mail-Heuristik" else "Live-Sandbox",
+                            description = threatDescription,
+                            status = "BLOCKED"
+                        )
+                        liveLogs.add(0, newLog)
+                        Toast.makeText(context, "Heilige Dreifaltigkeit: Bedrohung lokal abgewehrt!", Toast.LENGTH_SHORT).show()
+                    },
+                    onExportLogs = {
+                        Toast.makeText(context, "${liveLogs.size} Logs sicher in den verschlüsselten Vault geschrieben.", Toast.LENGTH_LONG).show()
+                    },
+                    onPanicWipe = {
+                        liveLogs.clear()
+                        blockedContacts.clear()
+                        prefs.edit().clear().apply()
+                        Toast.makeText(context, "PANIC WIPE: Alle lokalen Daten unwiderruflich gelöscht!", Toast.LENGTH_LONG).show()
+                    }
+                )
+                1 -> ProtectionModulesPage(
+                    callProtection = callProtection,
+                    onCallChange = {
+                        callProtection = it
+                        prefs.edit().putBoolean("call_prot", it).apply()
+                    },
+                    smsProtection = smsProtection,
+                    onSmsChange = {
+                        smsProtection = it
+                        prefs.edit().putBoolean("sms_prot", it).apply()
+                    },
+                    emailProtection = emailProtection,
+                    onEmailChange = {
+                        emailProtection = it
+                        prefs.edit().putBoolean("email_prot", it).apply()
+                    },
+                    vaultUnlocked = vaultUnlocked,
+                    onVaultToggle = { vaultUnlocked = it }
+                )
+                2 -> BlacklistPage(
+                    blockedList = blockedContacts,
+                    onAddBlocked = { newEntry ->
+                        if (newEntry.isNotBlank() && !blockedContacts.contains(newEntry)) {
+                            blockedContacts.add(newEntry)
+                            prefs.edit().putStringSet("blocked_numbers", blockedContacts.toSet()).apply()
+                            Toast.makeText(context, "Nummer permanent gesperrt", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    onRemoveBlocked = { item ->
+                        blockedContacts.remove(item)
+                        prefs.edit().putStringSet("blocked_numbers", blockedContacts.toSet()).apply()
+                        Toast.makeText(context, "Nummer freigegeben", Toast.LENGTH_SHORT).show()
+                    }
+                )
+                3 -> {
+                    val db = com.juaris.app.JuarisDatabase.getDatabase(LocalContext.current)
+                    SecurityLogsPage(logDao = db.securityLogDao())
+                }
+                4 -> ClipboardProtectionPage(
+                    autoClearEnabled = clipboardAutoClear,
+                    onAutoClearChange = {
+                        clipboardAutoClear = it
+                        prefs.edit().putBoolean("clip_auto", it).apply()
+                    }
+                )
+                5 -> PermissionsAuditPage()
+                6 -> SwarmMeshPage()
+                7 -> AIPage(aiCore = aiCore, logs = liveLogs)
+                8 -> AirGesturePage(airGestureCore = airGestureCore) { forward ->
+                    selectedTab = if (forward) {
+                        (selectedTab + 1) % tabs.size
+                    } else {
+                        if (selectedTab - 1 < 0) tabs.size - 1 else selectedTab - 1
+                    }
+                }
+                9 -> PrivacyAndLegalContent()
             }
-           
-            val newLog = SecurityLogEntity(
-                timestamp = System.currentTimeMillis(),
-                module = if (isEmailThreat) "E-Mail-Heuristik" else "Live-Sandbox",
-                description = threatDescription,
-                status = "BLOCKED"
-            )
-            livelogs.add(0, newLog)
-            Toast.makeText(context, "Heilige Dreifaltigkeit: Bedrohung lokal abgewehrt!", Toast.LENGTH_SHORT).show()
-        },
-        onExportLogs = {
-            Toast.makeText(context, "${livelogs.size} Logs sicher in den verschlüsselten Vault geschrieben.", Toast.LENGTH_LONG).show()
-        },
-        onPanicWipe = {
-            livelogs.clear()
-            blockedContacts.clear()
-            prefs.edit().clear().apply()
-            Toast.makeText(context, "PANIC WIPE: Alle lokalen Daten unwiderruflich gelöscht!", Toast.LENGTH_LONG).show()
-        }
-    )
-    1 -> ProtectionModulesPage(
-        callProtection = callProtection,
-        onCallChange = {
-            callProtection = it
-            prefs.edit().putBoolean("call_prot", it).apply()
-        },
-        smsProtection = smsProtection,
-        onSmsChange = {
-            smsProtection = it
-            prefs.edit().putBoolean("sms_prot", it).apply()
-        },
-        emailProtection = emailProtection,
-        onEmailChange = {
-            emailProtection = it
-            prefs.edit().putBoolean("email_prot", it).apply()
-        },
-        vaultUnlocked = vaultUnlocked,
-        onVaultToggle = { vaultUnlocked = it }
-    )
-    2 -> BlacklistPage(
-        blockedList = blockedContacts,
-        onAddBlocked = { newEntry ->
-            if (newEntry.isNotBlank() && !blockedContacts.contains(newEntry)) {
-                blockedContacts.add(newEntry)
-                prefs.edit().putStringSet("blocked_numbers", blockedContacts.toSet()).apply()
-                Toast.makeText(context, "Nummer permanent gesperrt", Toast.LENGTH_SHORT).show()
-            }
-        },
-        onRemoveBlocked = { item ->
-            blockedContacts.remove(item)
-            prefs.edit().putStringSet("blocked_numbers", blockedContacts.toSet()).apply()
-            Toast.makeText(context, "Nummer freigegeben", Toast.LENGTH_SHORT).show()
-        }
-    )
-    3 -> {
-        val db = com.juaris.app.JuarisDatabase.getDatabase(LocalContext.current)
-        SecurityLogsPage(logDao = db.securityLogDao())
-    }
-    4 -> ClipboardProtectionPage(
-        autoClearEnabled = clipboardAutoClear,
-        onAutoClearChange = {
-            clipboardAutoClear = it
-            prefs.edit().putBoolean("clip_auto", it).apply()
-        }
-    )
-    5 -> PermissionsAuditPage()
-    6 -> SwarmMeshPage()
-    7 -> AIPage(aiCore = aiCore, logs = livelogs)
-    8 -> AirGesturePage(airGestureCore = airGestureCore) { forward ->
-        selectedTab = if (forward) {
-            (selectedTab + 1) % tabs.size
-        } else {
-            if (selectedTab - 1 < 0) tabs.size - 1 else selectedTab - 1
         }
     }
-    9 -> PrivacyAndLegalContent()
 }
-
 
 @Composable
 fun StatusPage(
@@ -706,7 +674,10 @@ fun PermissionsAuditPage() {
 @Composable
 fun SwarmMeshPage() {
     val context = LocalContext.current
-     val bluetoothPermissionLauncher = rememberLauncherForActivityResult(
+    var scanStatusText by remember { mutableStateOf("Bereit für Hardware-Abgleich") }
+    var discoveredDevicesCount by remember { mutableStateOf(0) }
+
+    val bluetoothPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         val allGranted = permissions.values.all { it }
@@ -719,10 +690,6 @@ fun SwarmMeshPage() {
         }
     }
 
-    var discoveredDevicesCount by remember { mutableStateOf(0) }
-    var scanStatusText by remember { mutableStateOf("Bereit für Hardware-Abgleich") }
-    val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as? android.bluetooth.BluetoothManager
-    val bluetoothAdapter = bluetoothManager?.adapter
     var testInputText by remember { mutableStateOf("Juaris Secure Node") }
     val generatedHash = remember(testInputText) {
         try {
@@ -743,22 +710,23 @@ fun SwarmMeshPage() {
                     Text(scanStatusText, style = MaterialTheme.typography.bodyMedium)
                     Text("Gekoppelte Nodes: $discoveredDevicesCount", style = MaterialTheme.typography.bodyLarge)
                     Spacer(modifier = Modifier.height(8.dp))
-                   Button(
-            onClick = {
-                // Berechtigungen vor dem Scan anfordern, um Abstürze zu verhindern
-                bluetoothPermissionLauncher.launch(
-                    arrayOf(
-                        android.Manifest.permission.BLUETOOTH_SCAN,
-                        android.Manifest.permission.BLUETOOTH_CONNECT,
-                        android.Manifest.permission.ACCESS_FINE_LOCATION
-                    )
-                )
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Hardware-Mesh-Scan ausführen")
+                    Button(
+                        onClick = {
+                            bluetoothPermissionLauncher.launch(
+                                arrayOf(
+                                    android.Manifest.permission.BLUETOOTH_SCAN,
+                                    android.Manifest.permission.BLUETOOTH_CONNECT,
+                                    android.Manifest.permission.ACCESS_FINE_LOCATION
+                                )
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Hardware-Mesh-Scan ausführen")
+                    }
+                }
+            }
         }
-
         item {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -839,3 +807,4 @@ fun PrivacyAndLegalContent() {
         }
     }
 }
+
