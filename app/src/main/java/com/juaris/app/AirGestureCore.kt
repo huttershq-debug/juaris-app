@@ -41,7 +41,8 @@ class AirGestureCore(private val context: Context) {
         cameraProviderFuture.addListener({
             try {
                 cameraProvider = cameraProviderFuture.get()
-                val cameraSelector = CameraSelector.DEFAULT_FRONT_CANVAS ?: CameraSelector.DEFAULT_FRONT_CAMERA
+                // Korrigiert: Nur noch die offizielle Kamera-Auswahl
+                val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
 
                 val imageAnalysis = ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
@@ -74,7 +75,7 @@ class AirGestureCore(private val context: Context) {
                                         val prev = previousBytes!![index].toInt() and 0xFF
                                         val delta = abs(curr - prev)
                                         
-                                        if (delta > 15) { // Extrem feinfühlig für leichte Handbewegungen
+                                        if (delta > 15) {
                                             massX += (x * delta)
                                             totalMass += delta
                                         }
@@ -82,22 +83,20 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            if (totalMass > 4000L) { // Reagiert sofort auf Handpräsenz
+                            if (totalMass > 4000L) {
                                 val currentCentroidX = massX.toFloat() / totalMass.toFloat()
 
                                 if (previousCentroidX != -1f) {
                                     val deltaX = currentCentroidX - previousCentroidX
 
                                     if (abs(deltaX) > 0.3f) {
-                                        // WICHTIG: Richtungswechsel-Blitzerkennung!
-                                        // Wenn die Hand die Richtung ändert, wird der Puffer sofort auf die neue Richtung umgelegt.
                                         if ((accumulatedDeltaX > 0f && deltaX < 0f) || (accumulatedDeltaX < 0f && deltaX > 0f)) {
                                             accumulatedDeltaX = deltaX
                                         } else {
                                             accumulatedDeltaX += deltaX
                                         }
 
-                                        val swipeThreshold = width * 0.035f // Ultra-reaktionsfreudig
+                                        val swipeThreshold = width * 0.035f
 
                                         if (abs(accumulatedDeltaX) > swipeThreshold) {
                                             if (currentTime - lastTriggerTime > cooldownMillis) {
@@ -139,7 +138,7 @@ class AirGestureCore(private val context: Context) {
                 cameraProvider?.unbindAll()
                 cameraProvider?.bindToLifecycle(
                     lifecycleOwner,
-                    CameraSelector.DEFAULT_FRONT_CAMERA,
+                    cameraSelector,
                     imageAnalysis
                 )
 
@@ -158,4 +157,5 @@ class AirGestureCore(private val context: Context) {
         }
     }
 }
+
 
