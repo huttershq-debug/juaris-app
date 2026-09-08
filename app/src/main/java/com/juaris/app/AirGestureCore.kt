@@ -55,8 +55,8 @@ class AirGestureCore(private val context: Context) {
 
                         val currentBytes = ByteArray(buffer.remaining())
                         buffer.get(currentBytes)
-
-                         if (previousData != null && previousData!!.size == currentBytes.size) {
+          
+                          if (previousData != null && previousData!!.size == currentBytes.size) {
                             var leftSum = 0L
                             var rightSum = 0L
                             var totalBrightness = 0L
@@ -84,47 +84,33 @@ class AirGestureCore(private val context: Context) {
                             val totalSum = leftSum + rightSum
                             val directionalDiff = kotlin.math.abs(leftSum - rightSum)
 
-                            // DYNAMISCHER SCHWELLENWERT: Passt sich automatisch an die Dunkelheit an!
-                            // Je dunkler der Raum (averageBrightness niedrig), desto sensibler reagiert der Algorithmus.
-                            val adaptiveThreshold = if (averageBrightness < 50) 3000L else 8000L
+                            // OPTIMIERTER SCHWELLENWERT: Realistisch für echte Handbewegungen
+                            val adaptiveThreshold = if (averageBrightness < 50) 1500L else 3000L
                             
-                            val isAsymmetric = directionalDiff > (totalSum * 0.30)
+                            // Asymmetrie-Prüfung (Lichtwechsel betrifft beide Seiten gleich -> Differenz muss da sein)
+                            val isAsymmetric = directionalDiff > (totalSum * 0.25)
 
+                            // Sofortige Erkennung bei echter, einseitiger Bewegung
                             if (totalSum > adaptiveThreshold && isAsymmetric) {
-                                if (leftSum > rightSum) {
-                                    consecutiveLeft++
-                                    consecutiveRight = 0
-                                } else {
-                                    consecutiveRight++
-                                    consecutiveLeft = 0
+                                if (currentTime - lastTriggerTime > cooldownMillis) {
+                                    lastTriggerTime = currentTime
+                                    if (leftSum > rightSum) {
+                                        _gestureState.value = "Geste erkannt: Nach Rechts"
+                                        _lastAction.value = "SWIPE_RIGHT"
+                                        onGestureDetected(GestureAction.SWIPE_RIGHT)
+                                    } else {
+                                        _gestureState.value = "Geste erkannt: Nach Links"
+                                        _lastAction.value = "SWIPE_LEFT"
+                                        onGestureDetected(GestureAction.SWIPE_LEFT)
+                                    }
                                 }
                             } else {
-                                consecutiveLeft = maxOf(0, consecutiveLeft - 1)
-                                consecutiveRight = maxOf(0, consecutiveRight - 1)
-                            }
-
-                            if (currentTime - lastTriggerTime > cooldownMillis) {
-                                if (consecutiveLeft >= 2) {
-                                    lastTriggerTime = currentTime
-                                    consecutiveLeft = 0
-                                    _gestureState.value = "Geste erkannt: Nach Links"
-                                    _lastAction.value = "SWIPE_LEFT"
-                                    onGestureDetected(GestureAction.SWIPE_LEFT)
-                                } else if (consecutiveRight >= 2) {
-                                    lastTriggerTime = currentTime
-                                    consecutiveRight = 0
-                                    _gestureState.value = "Geste erkannt: Nach Rechts"
-                                    _lastAction.value = "SWIPE_RIGHT"
-                                    onGestureDetected(GestureAction.SWIPE_RIGHT)
-                                } else {
-                                    if (currentTime - lastTriggerTime > 800L) {
-                                        _gestureState.value = "Kamera aktiv (Auto-Light)"
-                                    }
+                                if (currentTime - lastTriggerTime > 800L) {
+                                    _gestureState.value = "Kamera aktiv – Hand bereit"
                                 }
                             }
                         }
                         previousData = currentBytes
-
 
 
 
