@@ -28,7 +28,7 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
 
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 600L // Kurze Pause für zügiges Durchschalten
+    private val cooldownMillis = 650L // Kleine Atempause zwischen den Swipes
     
     private var previousCentroidY: Float = -1f
     private var accumulatedDeltaY = 0f
@@ -64,7 +64,7 @@ class AirGestureCore(private val context: Context) {
                         if (previousBytes != null && previousBytes!!.size == currentBytes.size) {
                             var massY = 0L
                             var totalMass = 0L
-                            val step = 8 // Feineres Raster für maximale Präzision
+                            val step = 8
 
                             for (y in 0 until height step step) {
                                 for (x in 0 until width step step) {
@@ -74,7 +74,6 @@ class AirGestureCore(private val context: Context) {
                                         val prev = previousBytes!![index].toInt() and 0xFF
                                         val delta = abs(curr - prev)
                                         
-                                        // Feines Delta für frühe Erkennung
                                         if (delta > 10) {
                                             massY += (y * delta)
                                             totalMass += delta
@@ -83,23 +82,22 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            // Niedrigere Masse-Schwelle, damit es sofort reagiert
-                            if (totalMass > 4000L) {
+                            // Etwas höhere Masse-Schwelle (5000L) gegen versehentliche Micro-Trigger
+                            if (totalMass > 5000L) {
                                 val currentCentroidY = massY.toFloat() / totalMass.toFloat()
 
                                 if (previousCentroidY != -1f) {
                                     val deltaY = currentCentroidY - previousCentroidY
 
-                                    // Winzige Micro-Wackler ignorieren
-                                    if (abs(deltaY) > 0.3f) {
+                                    if (abs(deltaY) > 0.4f) {
                                         if ((accumulatedDeltaY > 0f && deltaY < 0f) || (accumulatedDeltaY < 0f && deltaY > 0f)) {
                                             accumulatedDeltaY = deltaY
                                         } else {
                                             accumulatedDeltaY += deltaY
                                         }
 
-                                        // Sehr reaktionsfreudiger Schwellenwert (8% der Bildhöhe)
-                                        val swipeThreshold = height * 0.08f
+                                        // Ausgewogenerer Schwellenwert (12% der Bildhöhe) für einen sauberen, gewollten Wisch
+                                        val swipeThreshold = height * 0.12f
 
                                         if (abs(accumulatedDeltaY) > swipeThreshold) {
                                             if (currentTime - lastTriggerTime > cooldownMillis) {
