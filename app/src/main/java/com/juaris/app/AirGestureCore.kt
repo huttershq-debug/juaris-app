@@ -95,21 +95,22 @@ class AirGestureCore(private val context: Context) {
 
                                     val activationThreshold = width * 0.02f // Höchste Präzision
 
-                                    if (abs(velocityBuffer) > activationThreshold) {
-                                        if (currentTime - lastTriggerTime > cooldownMillis) {
-                                            lastTriggerTime = currentTime
-
-                                            if (velocityBuffer > 0) {
+                                     if (velocityBuffer > 0) {
                                                 _gestureState.value = "Neural: Swipe Rechts"
                                                 _lastAction.value = "SWIPE_RIGHT"
-                                                onGestureDetected(GestureAction.SWIPE_RIGHT)
+                                                // FIX: Zwingend auf den Main-Thread dispatchen für flüssiges UI-Update!
+                                                ContextCompat.getMainExecutor(context).execute {
+                                                    onGestureDetected(GestureAction.SWIPE_RIGHT)
+                                                }
                                             } else {
                                                 _gestureState.value = "Neural: Swipe Links"
                                                 _lastAction.value = "SWIPE_LEFT"
-                                                onGestureDetected(GestureAction.SWIPE_LEFT)
+                                                ContextCompat.getMainExecutor(context).execute {
+                                                    onGestureDetected(GestureAction.SWIPE_LEFT)
+                                                }
                                             }
 
-                                            // KRITISCH: Puffer sofort zurücksetzen für den nächsten Swipe!
+                                            // Puffer sofort zurücksetzen für den nächsten Endlos-Swipe
                                             previousCentroidX = -1f
                                             velocityBuffer = 0f
                                         }
