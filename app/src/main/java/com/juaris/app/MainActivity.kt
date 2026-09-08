@@ -85,36 +85,36 @@ class MainActivity : ComponentActivity() {
                 error = Color(0xFFFF3333)
             )
 
-            var isFirstRun by remember { mutableStateOf(securePrefs.getBoolean("is_first_run", true)) }
-            var isLoggedIn by remember { mutableStateOf(securePrefs.getBoolean("is_logged_in", false)) }
+           var showIntro by remember { mutableStateOf(true) }
+           var isLoggedIn by remember { mutableStateOf(securePrefs.getBoolean("is_logged_in", false)) }
 
-            MaterialTheme(colorScheme = hackerGreenColorScheme) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    when {
-                        isFirstRun -> {
-                            WelcomeScreen(
-                                onContinueClicked = {
-                                    securePrefs.edit().putBoolean("is_first_run", false).apply()
-                                    isFirstRun = false
-                                }
-                            )
-                        }
-                        !isLoggedIn -> {
-                            LoginScreen(
-                                onLoginSuccess = {
-                                    securePrefs.edit().putBoolean("is_logged_in", true).apply()
-                                    isLoggedIn = true
-                                }
-                            )
-                        }
-                        else -> {
-                            JuarisMainDashboard(securePrefs)
-                        }
+           MaterialTheme(colorscheme = hackerGreenColorScheme) {
+               Surface(
+                  modifier = Modifier.fillMaxSize(),
+                 color = MaterialTheme.colorScheme.background
+             ) {
+                 when {
+                     showIntro -> {
+                         Welcomescreen(
+                             onContinueClicked = {
+                                 // Schaltet das Intro für diesen Start weiter (wird beim nächsten App-Öffnen wieder angezeigt)
+                                 showIntro = false
+                            }
+                        )
                     }
-                }
+                    isLoggedIn -> {
+                        LoginScreen(
+                            onLoginSuccess = {
+                                securePrefs.edit().putBoolean("is_logged_in", true).apply()
+                                isLoggedIn = true
+                            }
+                        )
+                    }
+                    else -> {
+                         JuarisMainDashboard(securePrefs)
+                    }
+                 }
+              }
             }
         }
     }
