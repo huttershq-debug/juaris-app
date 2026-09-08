@@ -64,9 +64,8 @@ class AirGestureCore(private val context: Context) {
                         if (previousBytes != null && previousBytes!!.size == currentBytes.size) {
                             var massX = 0L
                             var totalMass = 0L
-                            val step = 10 // Feines Raster für optimale Erkennung
+                            val step = 10
 
-                            // Gesamtes Bild scannen
                             for (y in 0 until height step step) {
                                 for (x in 0 until width step step) {
                                     val index = y * rowStride + x
@@ -75,8 +74,7 @@ class AirGestureCore(private val context: Context) {
                                         val prev = previousBytes!![index].toInt() and 0xFF
                                         val delta = abs(curr - prev)
                                         
-                                        // Exaktes Delta auf 13 eingestellt
-                                        if (delta > 13) {
+                                        if (delta > 15) {
                                             massX += (x * delta)
                                             totalMass += delta
                                         }
@@ -84,22 +82,31 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            // Exakte Masse auf 7000L eingestellt
-                            if (totalMass > 7000L) {
-                                val currentCentroidX = massX.toFloat() / totalMass.toFloat()
+                            if (totalMass > 9000L) {
+                                val rawCentroidX = massX.toFloat() / totalMass.toFloat()
+
+                                // Sanfter Glättungs-Filter
+                                val currentCentroidX = if (previousCentroidX == -1f) {
+                                    rawCentroidX
+                                } else {
+                                    0.65f * rawCentroidX + 0.35f * previousCentroidX
+                                }
 
                                 if (previousCentroidX != -1f) {
                                     val deltaX = currentCentroidX - previousCentroidX
 
-                                    // Strikterer Sprung auf 0.5f eingestellt
-                                    if (abs(deltaX) > 0.5f) {
-                                        if ((accumulatedDeltaX > 0f && deltaX < 0f) || (accumulatedDeltaX < 0f && deltaX > 0f)) {
+                                    if (abs(deltaX) > 0.4f) {
+                                        // RICHTUNGS-MOMENTUM-GUARD: Verhindert falsche Richtungssprünge durch Rauschen
+                                        if (accumulatedDeltaX == 0f) {
                                             accumulatedDeltaX = deltaX
-                                        } else {
+                                        } else if ((accumulatedDeltaX > 0f && deltaX > 0f) || (accumulatedDeltaX < 0f && deltaX < 0f)) {
+                                            // Gleiche Richtung: normal aufaddieren
                                             accumulatedDeltaX += deltaX
+                                        } else {
+                                            // Gegenläufiges Rauschen abfangen (dämpfen statt übernehmen)
+                                            accumulatedDeltaX += (deltaX * 0.2f)
                                         }
 
-                                        // Schwellenwert exakt auf 0.15f belassen
                                         val swipeThreshold = width * 0.15f
 
                                         if (abs(accumulatedDeltaX) > swipeThreshold) {
@@ -161,4 +168,5 @@ class AirGestureCore(private val context: Context) {
         }
     }
 }
+
 
