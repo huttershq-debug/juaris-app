@@ -1,7 +1,12 @@
 package com.juaris.app
 
-import kotlin.math.abs
+import android.content.Context
 
+class LocalPhishingAnalyzer(private val context: Context) {
+    fun analyze(content: String): Boolean {
+        return false
+    }
+}
 class LocalPhishingAnalyzer {
 
     private val urgencyTriggers = listOf(
