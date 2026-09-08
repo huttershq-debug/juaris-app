@@ -28,8 +28,8 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
 
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 1100L
-    
+    private val cooldownMillis = 600L // Gesunder, flüssiger Cooldown
+   
     private var smoothedCentroidY: Float = -1f
     private var anchorY: Float = -1f
     private var isTracking = false
@@ -55,12 +55,11 @@ class AirGestureCore(private val context: Context) {
                 imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
                     try {
                         val currentTime = System.currentTimeMillis()
-                        
-                        // FIX: Hole dir das erste Plane [0] für die Helligkeits-Pixel (Y-Kanal)
+                       
                         val yPlane = imageProxy.planes[0]
                         val buffer = yPlane.buffer
                         val rowStride = yPlane.rowStride
-                        
+                       
                         val width = imageProxy.width
                         val height = imageProxy.height
                         val remaining = buffer.remaining()
@@ -73,7 +72,7 @@ class AirGestureCore(private val context: Context) {
                             return@setAnalyzer
                         }
 
-                        buffer.get(currentBytesBuffer!!)
+                        buffer.get(currentBytesBuffer!)
 
                         val currBytes = currentBytesBuffer!!
                         val prevBytes = previousBytesBuffer!!
@@ -86,18 +85,18 @@ class AirGestureCore(private val context: Context) {
 
                         var massY = 0L
                         var totalMass = 0L
-                        val step = 12
+                        val step = 8 // Wieder feinerer Raster-Schritt für perfekte Erkennung
 
-                        for (y in 12 until height - 12 step step) {
+                        for (y in 0 until height step step) {
                             val rowOffset = y * rowStride
-                            for (x in 12 until width - 12 step step) {
+                            for (x in 0 until width step step) {
                                 val index = rowOffset + x
                                 if (index < remaining) {
                                     val curr = currBytes[index].toInt() and 0xFF
                                     val prev = prevBytes[index].toInt() and 0xFF
                                     val delta = abs(curr - prev)
-                                    
-                                    if (delta > 15) { 
+                                   
+                                    if (delta > 10) { // Angenehme Sensibilität gegen Rauschen
                                         massY += (y * delta).toLong()
                                         totalMass += delta.toLong()
                                     }
@@ -105,8 +104,9 @@ class AirGestureCore(private val context: Context) {
                             }
                         }
 
-                        val massEnter = 3000L 
-                        val massExit = 1200L
+                        // Gesunde Hysterese-Schwellen
+                        val massEnter = 2000L
+                        val massExit = 800L
 
                         if (totalMass > (if (isTracking) massExit else massEnter)) {
                             val rawCentroidY = massY.toFloat() / totalMass.toFloat()
@@ -114,7 +114,7 @@ class AirGestureCore(private val context: Context) {
                             smoothedCentroidY = if (smoothedCentroidY == -1f) {
                                 rawCentroidY
                             } else {
-                                0.35f * rawCentroidY + 0.65f * smoothedCentroidY
+                                0.3f * rawCentroidY + 0.7f * smoothedCentroidY
                             }
 
                             if (!isTracking) {
@@ -123,39 +123,37 @@ class AirGestureCore(private val context: Context) {
                                 gestureStartTime = currentTime
                             } else {
                                 val totalDisplacement = smoothedCentroidY - anchorY
-                                val swipeThreshold = height.toFloat() * 0.18f 
-                                val duration = currentTime - gestureStartTime
+                                val swipeThreshold = height.toFloat() * 0.10f // 10% – natürlich und direkt
 
-                                if (duration > 1000L) {
+                                // Falls man den Wisch nach 1.2 Sekunden immer noch nicht beendet hat, Anker sanft aktualisieren
+                                if (currentTime - gestureStartTime > 1200L) {
                                     anchorY = smoothedCentroidY
                                     gestureStartTime = currentTime
                                 }
 
                                 if (abs(totalDisplacement) > swipeThreshold) {
-                                    if (duration in 80L..600L) {
-                                        lastTriggerTime = currentTime
+                                    lastTriggerTime = currentTime
 
-                                        val action = if (totalDisplacement < 0f) {
-                                            _gestureState.value = "Swipe: Rauf (Rechts)"
-                                            _lastAction.value = "SWIPE_RIGHT"
-                                            GestureAction.SWIPE_RIGHT
-                                        } else {
-                                            _gestureState.value = "Swipe: Runter (Links)"
-                                            _lastAction.value = "SWIPE_LEFT"
-                                            GestureAction.SWIPE_LEFT
-                                        }
-
-                                        ContextCompat.getMainExecutor(context).execute {
-                                            onGestureDetected(action)
-                                        }
-
-                                        isTracking = false
-                                        smoothedCentroidY = -1f
-                                        anchorY = -1f
+                                    // Bewegung nach OBEN (displacement < 0) -> Rechts (SWIPE_RIGHT / Nächster Tab)
+                                    // Bewegung nach UNTEN (displacement > 0) -> Links (SWIPE_LEFT / Vorheriger Tab)
+                                    val action = if (totalDisplacement < 0f) {
+                                        _gestureState.value = "Swipe: Rauf (Rechts)"
+                                        _lastAction.value = "SWIPE_RIGHT"
+                                        GestureAction.SWIPE_RIGHT
                                     } else {
-                                        anchorY = smoothedCentroidY
-                                        gestureStartTime = currentTime
+                                        _gestureState.value = "Swipe: Runter (Links)"
+                                        _lastAction.value = "SWIPE_LEFT"
+                                        GestureAction.SWIPE_LEFT
                                     }
+
+                                    ContextCompat.getMainExecutor(context).execute {
+                                        onGestureDetected(action)
+                                    }
+
+                                    // Sofortiger Reset für den nächsten flüssigen Wisch
+                                    isTracking = false
+                                    smoothedCentroidY = -1f
+                                    anchorY = -1f
                                 }
                             }
                         } else {
@@ -175,7 +173,7 @@ class AirGestureCore(private val context: Context) {
                     }
                 }
 
-                cameraProvider?.unbindAll()     
+                cameraProvider?.unbindAll()    
                 cameraProvider?.bindToLifecycle(
                     lifecycleOwner,
                     cameraSelector,
@@ -199,4 +197,5 @@ class AirGestureCore(private val context: Context) {
         }
     }
 }
+
 
