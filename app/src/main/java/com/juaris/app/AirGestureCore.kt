@@ -28,12 +28,10 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
 
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 600L 
+    private val cooldownMillis = 500L // Flotter Cooldown
     
-    // Variablen für das saubere Anker-Modell (verhindert Springen und Mehrfachtrigger)
     private var previousCentroidY: Float = -1f
-    private var startY: Float = -1f
-    private var hasTriggeredThisGesture = false
+    private var accumulatedDeltaY = 0f
 
     fun startGestureDetection(lifecycleOwner: LifecycleOwner, onGestureDetected: (GestureAction) -> Unit) {
         if (cameraProvider != null) return
@@ -57,7 +55,7 @@ class AirGestureCore(private val context: Context) {
                         val plane = imageProxy.planes[0]
                         val buffer = plane.buffer
                         val rowStride = plane.rowStride
-                        val width = imageProxy.width
+                        width = imageProxy.width
                         val height = imageProxy.height
 
                         val currentBytes = ByteArray(buffer.remaining())
@@ -76,7 +74,8 @@ class AirGestureCore(private val context: Context) {
                                         val prev = previousBytes!![index].toInt() and 0xFF
                                         val delta = abs(curr - prev)
                                         
-                                        if (delta > 10) {
+                                        // Extrem feinfühlig ab Masse 500L
+                                        if (delta > 8) {
                                             massY += (y * delta)
                                             totalMass += delta
                                         }
@@ -84,54 +83,63 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            // Niedrige Masse (1800L): Verhindert, dass Runterwischen am Körper abbricht
-                            if (totalMass > 1800L) {
+                            // Ultra-niedrige Masse (500L) - bricht nie wieder am Körper ab
+                            if (totalMass > 500L) {
                                 val rawCentroidY = massY.toFloat() / totalMass.toFloat()
 
                                 val currentCentroidY = if (previousCentroidY == -1f) {
                                     rawCentroidY
                                 } else {
-                                    0.4f * rawCentroidY + 0.6f * previousCentroidY
+                                    0.3f * rawCentroidY + 0.7f * previousCentroidY
                                 }
 
-                                if (startY == -1f) {
-                                    // Startpunkt (Anker) für diesen Wisch setzen
-                                    startY = currentCentroidY
-                                    hasTriggeredThisGesture = false
-                                } else if (!hasTriggeredThisGesture) {
-                                    // Gesamtweg exakt vom Startpunkt aus messen (kein Aufaddieren!)
-                                    val displacement = currentCentroidY - startY
-                                    val swipeThreshold = height.toFloat() * 0.10f // 10% der Bildhöhe
+                                if (previousCentroidY != -1f) {
+                                    val deltaY = currentCentroidY - previousCentroidY
 
-                                    if (abs(displacement) > swipeThreshold) {
-                                        if (currentTime - lastTriggerTime > cooldownMillis) {
-                                            lastTriggerTime = currentTime
-                                            hasTriggeredThisGesture = true // Sofortige Sperre: Verhindert 100%iges Tab-Überspringen
+                                    // Ganz feines Gate gegen Raum-Rauschen
+                                    if (abs(deltaY) > 0.1f) {
+                                        if (accumulatedDeltaY == 0f) {
+                                            accumulatedDeltaY = deltaY
+                                        } else if ((accumulatedDeltaY > 0f && deltaY > 0f) || (accumulatedDeltaY < 0f && deltaY < 0f)) {
+                                            accumulatedDeltaY += deltaY
+                                        } else {
+                                            // Richtungswechsel -> sofort übernehmen
+                                            accumulatedDeltaY = deltaY
+                                        }
 
-                                            // Negatives displacement = Rauf = Rechts (Nächster Tab)
-                                            // Positives displacement = Runter = Links (Vorheriger Tab)
-                                            val action = if (displacement < 0f) {
-                                                _gestureState.value = "Swipe: Rauf (Rechts)"
-                                                _lastAction.value = "SWIPE_RIGHT"
-                                                GestureAction.SWIPE_RIGHT
-                                            } else {
-                                                _gestureState.value = "Swipe: Runter (Links)"
-                                                _lastAction.value = "SWIPE_LEFT"
-                                                GestureAction.SWIPE_LEFT
-                                            }
+                                        // 8% der Bildhöhe als knackiger Schwellenwert
+                                        val swipeThreshold = height.toFloat() * 0.08f
 
-                                            ContextCompat.getMainExecutor(context).execute {
-                                                onGestureDetected(action)
+                                        if (abs(accumulatedDeltaY) > swipeThreshold) {
+                                            // Sofort den Akkumulator leeren, damit KEIN Überlaufen/Überspringen passiert!
+                                            val triggeredDelta = accumulatedDeltaY
+                                            accumulatedDeltaY = 0f
+
+                                            if (currentTime - lastTriggerTime > cooldownMillis) {
+                                                lastTriggerTime = currentTime
+
+                                                val action = if (triggeredDelta < 0f) {
+                                                    _gestureState.value = "Swipe: Rauf (Rechts)"
+                                                    _lastAction.value = "SWIPE_RIGHT"
+                                                    GestureAction.SWIPE_RIGHT
+                                                } else {
+                                                    _gestureState.value = "Swipe: Runter (Links)"
+                                                    _lastAction.value = "SWIPE_LEFT"
+                                                    GestureAction.SWIPE_LEFT
+                                                }
+
+                                                ContextCompat.getMainExecutor(context).execute {
+                                                    onGestureDetected(action)
+                                                }
                                             }
                                         }
                                     }
                                 }
                                 previousCentroidY = currentCentroidY
                             } else {
-                                // Hand weg oder außerhalb -> Anker komplett zurücksetzen
-                                startY = -1f
+                                // Hand komplett weg -> Werte sanft zurücksetzen
                                 previousCentroidY = -1f
-                                hasTriggeredThisGesture = false
+                                accumulatedDeltaY = 0f
                             }
                         }
                         previousBytes = currentBytes
@@ -165,5 +173,4 @@ class AirGestureCore(private val context: Context) {
         }
     }
 }
-
 
