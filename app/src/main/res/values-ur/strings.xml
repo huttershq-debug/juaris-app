@@ -13,4 +13,6 @@
     <string name="email_protection_title">ای میل سیکیورٹی</string>
     <string name="log_email_incoming_blocked">آنے والا نقصان دہ ای میل مسدود کر دیا گیا: %1$s</string>
     <string name="log_email_outgoing_blocked">جانے والا ای میل روک دیا گیا (سیکیورٹی رسک): %1$s</string>
+     <string name="juaris_app_welcome_text">جوارس (juaris) میں خوش آمدید، مستقبل کی آپ کی سیکیورٹی ایپ۔ %100 شفاف، %100 آپ کے فون پر۔ کوئی کلاؤڈ نہیں۔ آپ کی حفاظت، آپ کا گھر، آپ کے قوانین۔ جوارس کے ساتھ آپ کے पास दुनिया की सबसे ताकतवर निजी सुरक्षा है। جوارس، کیونکہ آپ اور آپ کی سیکیورٹی ہمارے لیے اہم ہیں۔</string>
+    <string name="juaris_app_welcome_audio_file">platzhalter_ur.m4a</string>
 </resources>
