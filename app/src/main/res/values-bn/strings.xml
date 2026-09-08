@@ -13,4 +13,6 @@
     <string name="email_protection_title">ইমেল সুরক্ষা</string>
     <string name="log_email_incoming_blocked">আটকানো ক্ষতিকর ইনকামিং ইমেল: %1$s</string>
     <string name="log_email_outgoing_blocked">আটকানো আউটগোয়িং ইমেল (নিরাপত্তা ঝুঁকি): %1$s</string>
+    <string name="juaris_app_welcome_text">জুয়ারিস-এ স্বাগতম, ভবিষ্যতের জন্য আপনার নিরাপত্তা অ্যাপ। ১০০% স্বচ্ছ, ১০০% আপনার ফোনে। কোনো ক্লাউড নেই। আপনার সুরক্ষা, আপনার বাড়ি, আপনার নিয়ম। জুয়ারিস-এর সাথে আপনার কাছে রয়েছে বিশ্বের সবচেয়ে শক্তিশালী ব্যক্তিগত সুরক্ষা। জুয়ারিস, কারণ আপনি এবং আপনার নিরাপত্তা আমাদের কাছে গুরুত্বপূর্ণ।</string>
+    <string name="juaris_app_welcome_audio_file">platzhalter_bn.m4a</string> 
 </resources>
