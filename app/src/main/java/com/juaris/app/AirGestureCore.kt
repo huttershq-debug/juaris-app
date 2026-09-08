@@ -68,96 +68,94 @@ class AirGestureCore(private val context: Context) {
                             currentBytesBuffer = ByteArray(remaining)
                             previousBytesBuffer = ByteArray(remaining)
                             buffer.get(currentBytesBuffer!)
-                            imageProxy.close()
-                            return@setAnalyzer
-                        }
-
-                        buffer.get(currentBytesBuffer!)
-
-                        val currBytes = currentBytesBuffer!!
-                        val prevBytes = previousBytesBuffer!!
-
-                        // Cooldown-Prüfung über if/else statt return@setAnalyzer gelöst
-                        if (currentTime - lastTriggerTime < cooldownMillis) {
-                            System.arraycopy(currBytes, 0, prevBytes, 0, remaining)
                         } else {
-                            var massY = 0L
-                            var totalMass = 0L
-                            val step = 8
+                            buffer.get(currentBytesBuffer!)
 
-                            for (y in 0 until height step step) {
-                                val rowOffset = y * rowStride
-                                for (x in 0 until width step step) {
-                                    val index = rowOffset + x
-                                    if (index < remaining) {
-                                        val curr = currBytes[index].toInt() and 0xFF
-                                        val prev = prevBytes[index].toInt() and 0xFF
-                                        val delta = abs(curr - prev)
-                                       
-                                        if (delta > 10) {
-                                            massY += (y * delta).toLong()
-                                            totalMass += delta.toLong()
+                            val currBytes = currentBytesBuffer!!
+                            val prevBytes = previousBytesBuffer!!
+
+                            if (currentTime - lastTriggerTime < cooldownMillis) {
+                                System.arraycopy(currBytes, 0, prevBytes, 0, remaining)
+                            } else {
+                                var massY = 0L
+                                var totalMass = 0L
+                                val step = 8
+
+                                for (y in 0 until height step step) {
+                                    val rowOffset = y * rowStride
+                                    for (x in 0 until width step step) {
+                                        val index = rowOffset + x
+                                        if (index < remaining) {
+                                            val curr = currBytes[index].toInt() and 0xFF
+                                            val prev = prevBytes[index].toInt() and 0xFF
+                                            val delta = abs(curr - prev)
+                                           
+                                            if (delta > 10) {
+                                                massY += (y * delta).toLong()
+                                                totalMass += delta.toLong()
+                                            }
                                         }
                                     }
                                 }
-                            }
 
-                            val massEnter = 2000L
-                            val massExit = 800L
+                                val massEnter = 2000L
+                                val massExit = 800L
 
-                            if (totalMass > (if (isTracking) massExit else massEnter)) {
-                                val rawCentroidY = massY.toFloat() / totalMass.toFloat()
+                                if (totalMass > (if (isTracking) massExit else massEnter)) {
+                                    val rawCentroidY = massY.toFloat() / totalMass.toFloat()
 
-                                smoothedCentroidY = if (smoothedCentroidY == -1f) {
-                                    rawCentroidY
-                                } else {
-                                    0.3f * rawCentroidY + 0.7f * smoothedCentroidY
-                                }
+                                    smoothedCentroidY = if (smoothedCentroidY == -1f) {
+                                        rawCentroidY
+                                    } else {
+                                        0.3f * rawCentroidY + 0.7f * smoothedCentroidY
+                                    }
 
-                                if (!isTracking) {
-                                    anchorY = smoothedCentroidY
-                                    isTracking = true
-                                    gestureStartTime = currentTime
-                                } else {
-                                    val totalDisplacement = smoothedCentroidY - anchorY
-                                    val swipeThreshold = height.toFloat() * 0.10f
-
-                                    if (currentTime - gestureStartTime > 1200L) {
+                                    if (!isTracking) {
                                         anchorY = smoothedCentroidY
+                                        isTracking = true
                                         gestureStartTime = currentTime
+                                    } else {
+                                        val totalDisplacement = smoothedCentroidY - anchorY
+                                        val swipeThreshold = height.toFloat() * 0.10f
+
+                                        if (currentTime - gestureStartTime > 1200L) {
+                                            anchorY = smoothedCentroidY
+                                            gestureStartTime = currentTime
+                                        }
+
+                                        if (abs(totalDisplacement) > swipeThreshold) {
+                                            lastTriggerTime = currentTime
+
+                                            val action = if (totalDisplacement < 0f) {
+                                                _gestureState.value = "Swipe: Rauf (Rechts)"
+                                                _lastAction.value = "SWIPE_RIGHT"
+                                                GestureAction.SWIPE_RIGHT
+                                            } else {
+                                                _gestureState.value = "Swipe: Runter (Links)"
+                                                _lastAction.value = "SWIPE_LEFT"
+                                                GestureAction.SWIPE_LEFT
+                                            }
+
+                                            ContextCompat.getMainExecutor(context).execute {
+                                                onGestureDetected(action)
+                                            }
+
+                                            isTracking = false
+                                            smoothedCentroidY = -1f
+                                            anchorY = -1f
+                                        }
                                     }
-
-                                    if (abs(totalDisplacement) > swipeThreshold) {
-                                        lastTriggerTime = currentTime
-
-                                        val action = if (totalDisplacement < 0f) {
-                                            _gestureState.value = "Swipe: Rauf (Rechts)"
-                                            _lastAction.value = "SWIPE_RIGHT"
-                                            GestureAction.SWIPE_RIGHT
-                                        } else {
-                                            _gestureState.value = "Swipe: Runter (Links)"
-                                            _lastAction.value = "SWIPE_LEFT"
-                                            GestureAction.SWIPE_LEFT
-                                        }
-
-                                        ContextCompat.getMainExecutor(context).execute {
-                                            onGestureDetected(action)
-                                        }
-
+                                } else {
+                                    if (totalMass < massExit) {
                                         isTracking = false
                                         smoothedCentroidY = -1f
                                         anchorY = -1f
                                     }
                                 }
-                            } else {
-                                if (totalMass < massExit) {
-                                    isTracking = false
-                                    smoothedCentroidY = -1f
-                                    anchorY = -1f
-                                }
+
+                                System.arraycopy(currBytes, 0, prevBytes, 0, remaining)
                             }
 
-                            System.arraycopy(currBytes, 0, prevBytes, 0, remaining)
                         }
 
                     } catch (e: Exception) {
