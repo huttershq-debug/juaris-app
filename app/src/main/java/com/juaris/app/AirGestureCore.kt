@@ -28,7 +28,7 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
 
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 900L // Erhöht auf 0.9s gegen Seiten-Überspringen
+    private val cooldownMillis = 1100L
     
     private var smoothedCentroidY: Float = -1f
     private var anchorY: Float = -1f
@@ -55,9 +55,12 @@ class AirGestureCore(private val context: Context) {
                 imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
                     try {
                         val currentTime = System.currentTimeMillis()
-                        val plane = imageProxy.planes[0]
-                        val buffer = plane.buffer
-                        val rowStride = plane.rowStride
+                        
+                        // Korrekter Zugriff auf das primäre Helligkeits-Plane (Y)
+                        val planes = imageProxy.planes
+                        val buffer = planes[0].buffer
+                        val rowStride = planes[0].rowStride
+                        
                         val width = imageProxy.width
                         val height = imageProxy.height
                         val remaining = buffer.remaining()
@@ -65,18 +68,16 @@ class AirGestureCore(private val context: Context) {
                         if (currentBytesBuffer == null || currentBytesBuffer!!.size != remaining) {
                             currentBytesBuffer = ByteArray(remaining)
                             previousBytesBuffer = ByteArray(remaining)
-                            buffer.get(currentBytesBuffer!)
+                            buffer.get(currentBytesBuffer)
                             imageProxy.close()
                             return@setAnalyzer
                         }
 
-                        buffer.get(currentBytesBuffer!)
+                        buffer.get(currentBytesBuffer)
 
-                        val currBytes = currentBytesBuffer!
-                        val prevBytes = previousBytesBuffer!
+                        val currBytes = currentBytesBuffer!!
+                        val prevBytes = previousBytesBuffer!!
 
-                        // RICHTUNGSSPERRE: Wenn wir im Cooldown sind, berechnen wir gar nichts.
-                        // Das verhindert, dass die App beim Zurückziehen der Hand "Geister-Gesten" erkennt.
                         if (currentTime - lastTriggerTime < cooldownMillis) {
                             System.arraycopy(currBytes, 0, prevBytes, 0, remaining)
                             imageProxy.close()
@@ -85,27 +86,26 @@ class AirGestureCore(private val context: Context) {
 
                         var massY = 0L
                         var totalMass = 0L
-                        val step = 8
+                        val step = 12
 
-                        for (y in 0 until height step step) {
-                            for (x in 0 until width step step) {
+                        for (y in 12 until height - 12 step step) {
+                            for (x in 12 until width - 12 step step) {
                                 val index = y * rowStride + x
                                 if (index < remaining) {
                                     val curr = currBytes[index].toInt() and 0xFF
                                     val prev = prevBytes[index].toInt() and 0xFF
                                     val delta = abs(curr - prev)
                                     
-                                    if (delta > 12) { // Rauschfilter leicht erhöht für stabilere Erkennung
-                                        massY += (y * delta)
-                                        totalMass += delta
+                                    if (delta > 15) { 
+                                        massY += (y * delta).toLong()
+                                        totalMass += delta.toLong()
                                     }
                                 }
                             }
                         }
 
-                        // Dynamische Schwellenwerte für Bewegungserkennung
-                        val massEnter = 2200L 
-                        val massExit = 900L
+                        val massEnter = 3000L 
+                        val massExit = 1200L
 
                         if (totalMass > (if (isTracking) massExit else massEnter)) {
                             val rawCentroidY = massY.toFloat() / totalMass.toFloat()
@@ -113,7 +113,7 @@ class AirGestureCore(private val context: Context) {
                             smoothedCentroidY = if (smoothedCentroidY == -1f) {
                                 rawCentroidY
                             } else {
-                                0.3f * rawCentroidY + 0.7f * smoothedCentroidY
+                                0.35f * rawCentroidY + 0.65f * smoothedCentroidY
                             }
 
                             if (!isTracking) {
@@ -122,38 +122,39 @@ class AirGestureCore(private val context: Context) {
                                 gestureStartTime = currentTime
                             } else {
                                 val totalDisplacement = smoothedCentroidY - anchorY
-                                // Schwellenwert auf 15% für präzisere Trennung erhöht
-                                val swipeThreshold = height.toFloat() * 0.15f 
+                                val swipeThreshold = height.toFloat() * 0.18f 
+                                val duration = currentTime - gestureStartTime
 
-                                if (currentTime - gestureStartTime > 1200L) {
+                                if (duration > 1000L) {
                                     anchorY = smoothedCentroidY
                                     gestureStartTime = currentTime
                                 }
 
                                 if (abs(totalDisplacement) > swipeThreshold) {
-                                    lastTriggerTime = currentTime
+                                    if (duration in 80L..600L) {
+                                        lastTriggerTime = currentTime
 
-                                    // Anpassung für deine vertikale Ausrichtung:
-                                    // Bewegung nach OBEN (displacement < 0) -> Rechts (SWIPE_RIGHT)
-                                    // Bewegung nach UNTEN (displacement > 0) -> Links (SWIPE_LEFT)
-                                    val action = if (totalDisplacement < 0f) {
-                                        _gestureState.value = "Swipe: Rauf (Rechts)"
-                                        _lastAction.value = "SWIPE_RIGHT"
-                                        GestureAction.SWIPE_RIGHT
+                                        val action = if (totalDisplacement < 0f) {
+                                            _gestureState.value = "Swipe: Rauf (Rechts)"
+                                            _lastAction.value = "SWIPE_RIGHT"
+                                            GestureAction.SWIPE_RIGHT
+                                        } else {
+                                            _gestureState.value = "Swipe: Runter (Links)"
+                                            _lastAction.value = "SWIPE_LEFT"
+                                            GestureAction.SWIPE_LEFT
+                                        }
+
+                                        ContextCompat.getMainExecutor(context).execute {
+                                            onGestureDetected(action)
+                                        }
+
+                                        isTracking = false
+                                        smoothedCentroidY = -1f
+                                        anchorY = -1f
                                     } else {
-                                        _gestureState.value = "Swipe: Runter (Links)"
-                                        _lastAction.value = "SWIPE_LEFT"
-                                        GestureAction.SWIPE_LEFT
+                                        anchorY = smoothedCentroidY
+                                        gestureStartTime = currentTime
                                     }
-
-                                    ContextCompat.getMainExecutor(context).execute {
-                                        onGestureDetected(action)
-                                    }
-
-                                    // Tracking nach dem Fund sofort zurücksetzen für absolute Bewegungstrennung
-                                    isTracking = false
-                                    smoothedCentroidY = -1f
-                                    anchorY = -1f
                                 }
                             }
                         } else {
@@ -197,4 +198,5 @@ class AirGestureCore(private val context: Context) {
         }
     }
 }
+
 
