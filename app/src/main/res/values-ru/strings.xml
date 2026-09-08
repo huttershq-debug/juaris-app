@@ -13,4 +13,7 @@
     <string name="email_protection_title">Безопасность электронной почты</string>
     <string name="log_email_incoming_blocked">Заблокировано входящее вредоносное письмо: %1$s</string>
     <string name="log_email_outgoing_blocked">Исходящее письмо остановлено (угроза безопасности): %1$s</string>
+     <string name="juaris_app_welcome_text">Добро пожаловать в juaris — ваше приложение безопасности будущего. 100% прозрачно, 100% на вашем телефоне. Никакого облака. Ваша защита, ваш дом, ваши правила. С juaris у вас есть самая мощная приватная защита в мире. juaris, потому что вы и ваша безопасность важны для нас.</string>
+    <string name="juaris_app_welcome_audio_file">platzhalter_ru.m4a</string>
+
 </resources>
