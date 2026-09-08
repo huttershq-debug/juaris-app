@@ -21,11 +21,15 @@ class AirGestureCore(private val context: Context) {
     private val _gestureState = MutableStateFlow("Juaris Kortex Bereit")
     val gestureState: StateFlow<String> = _gestureState
 
+    // Wiederhergestellt, damit AirGesturePage.kt darauf zugreifen kann!
+    private val _lastAction = MutableStateFlow("KEINE")
+    val lastAction: StateFlow<String> = _lastAction
+
     private var cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     private var cameraProvider: ProcessCameraProvider? = null
 
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 500L // Genug Puffer, um doppelte Auslösungen zu verhindern
+    private val cooldownMillis = 500L
     
     private var previousCentroidX: Float = -1f
     private var accumulatedDeltaX = 0f
@@ -59,7 +63,7 @@ class AirGestureCore(private val context: Context) {
                         if (previousBytes != null && previousBytes!!.size == currentBytes.size) {
                             var massX = 0L
                             var totalMass = 0L
-                            val step = 16 // Etwas gröberer Step eliminiert Mikro-Rauschen und Zittern
+                            val step = 16
 
                             for (y in 0 until height step step) {
                                 for (x in 0 until width step step) {
@@ -69,7 +73,6 @@ class AirGestureCore(private val context: Context) {
                                         val prev = previousBytes!![index].toInt() and 0xFF
                                         val delta = abs(curr - prev)
                                         
-                                        // Höherer Rauschfilter, damit Umgebungslicht ignoriert wird
                                         if (delta > 25) {
                                             massX += (x * delta)
                                             totalMass += delta
@@ -78,7 +81,6 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            // Erst ab einer echten Handmasse reagieren (verhindert wildes Herpringen bei leerem Bild)
                             if (totalMass > 8000L) {
                                 val currentCentroidX = massX.toFloat() / totalMass.toFloat()
 
@@ -86,7 +88,6 @@ class AirGestureCore(private val context: Context) {
                                     val deltaX = currentCentroidX - previousCentroidX
                                     accumulatedDeltaX += deltaX
 
-                                    // Benötigt einen klaren Wischweg (ca. 6% der Bildbreite), um auszulösen
                                     val swipeThreshold = width * 0.06f
 
                                     if (abs(accumulatedDeltaX) > swipeThreshold) {
@@ -95,9 +96,11 @@ class AirGestureCore(private val context: Context) {
 
                                             val action = if (accumulatedDeltaX > 0) {
                                                 _gestureState.value = "Swipe Rechts erkannt"
+                                                _lastAction.value = "SWIPE_RIGHT"
                                                 GestureAction.SWIPE_RIGHT
                                             } else {
                                                 _gestureState.value = "Swipe Links erkannt"
+                                                _lastAction.value = "SWIPE_LEFT"
                                                 GestureAction.SWIPE_LEFT
                                             }
 
@@ -106,13 +109,11 @@ class AirGestureCore(private val context: Context) {
                                                 onGestureDetected(action)
                                             }
                                         }
-                                        // Puffer nach Auslösung sofort komplett leeren
                                         accumulatedDeltaX = 0f
                                     }
                                 }
                                 previousCentroidX = currentCentroidX
                             } else {
-                                // Hand aus dem Bild -> Puffer sanft zurücksetzen
                                 previousCentroidX = -1f
                                 accumulatedDeltaX = 0f
                             }
@@ -147,5 +148,4 @@ class AirGestureCore(private val context: Context) {
         }
     }
 }
-
 
