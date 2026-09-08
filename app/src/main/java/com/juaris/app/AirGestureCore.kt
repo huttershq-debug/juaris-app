@@ -28,10 +28,11 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
 
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 750L // 750 ms Ruhepause
+    private val cooldownMillis = 750L // 750 ms Ruhepause nach jedem Trigger
     
     private var previousCentroidX: Float = -1f
-    private var accumulatedDeltaX = 0f
+    private var previousCentroidY: Float = -1f
+    private var accumulatedDeltaY = 0f
 
     fun startGestureDetection(lifecycleOwner: LifecycleOwner, onGestureDetected: (GestureAction) -> Unit) {
         if (cameraProvider != null) return
@@ -63,9 +64,11 @@ class AirGestureCore(private val context: Context) {
 
                         if (previousBytes != null && previousBytes!!.size == currentBytes.size) {
                             var massX = 0L
+                            var massY = 0L
                             var totalMass = 0L
                             val step = 10
 
+                            // Frame komplett abscannen
                             for (y in 0 until height step step) {
                                 for (x in 0 until width step step) {
                                     val index = y * rowStride + x
@@ -74,52 +77,59 @@ class AirGestureCore(private val context: Context) {
                                         val prev = previousBytes!![index].toInt() and 0xFF
                                         val delta = abs(curr - prev)
                                         
-                                        // Feines Delta für gute Erkennung
+                                        // Sauberes Delta gegen Hintergrundrauschen
                                         if (delta > 12) {
                                             massX += (x * delta)
+                                            massY += (y * delta)
                                             totalMass += delta
                                         }
                                     }
                                 }
                             }
 
-                            // Ausgewogene Masse für Nah- und Fernbereich
-                            if (totalMass > 5000L) {
+                            // Stabiler Massen-Schwellenwert für Nah- und Fernbereich
+                            if (totalMass > 6000L) {
                                 val rawCentroidX = massX.toFloat() / totalMass.toFloat()
+                                val rawCentroidY = massY.toFloat() / totalMass.toFloat()
 
-                                // Leichte Glättung, aber reaktionsfreudig
-                                val currentCentroidX = if (previousCentroidX == -1f) {
-                                    rawCentroidX
+                                // Butterweicher EMA-Glättungsfilter (verhindert jegliches Zittern)
+                                val currentCentroidY = if (previousCentroidY == -1f) {
+                                    rawCentroidY
                                 } else {
-                                    0.5f * rawCentroidX + 0.5f * previousCentroidX
+                                    0.65f * rawCentroidY + 0.35f * previousCentroidY
                                 }
 
-                                if (previousCentroidX != -1f) {
-                                    // RICHTUNGS-KORREKTUR: Vorzeichen umgedreht, damit Rechts = Rechts und Links = Links ist
-                                    val deltaX = -(currentCentroidX - previousCentroidX)
+                                if (previousCentroidX != -1f && previousCentroidY != -1f) {
+                                    val deltaX = rawCentroidX - previousCentroidX
+                                    val deltaY = currentCentroidY - previousCentroidY
 
-                                    if (abs(deltaX) > 0.2f) {
-                                        if (accumulatedDeltaX == 0f) {
-                                            accumulatedDeltaX = deltaX
-                                        } else if ((accumulatedDeltaX > 0f && deltaX > 0f) || (accumulatedDeltaX < 0f && deltaX > 0f)) {
-                                            accumulatedDeltaX += deltaX
+                                    // PERFEKTER VERTIKAL-GUARD: Muss klar vertikal sein (1.8x stärker als horizontal)
+                                    if (abs(deltaY) > abs(deltaX) * 1.8f && abs(deltaY) > 0.3f) {
+                                        
+                                        if (accumulatedDeltaY == 0f) {
+                                            accumulatedDeltaY = deltaY
+                                        } else if ((accumulatedDeltaY > 0f && deltaY > 0f) || (accumulatedDeltaY < 0f && deltaY > 0f)) {
+                                            accumulatedDeltaY += deltaY
                                         } else {
-                                            // Gegenrichtung dämpfen statt blockieren, damit es flüssig bleibt
-                                            accumulatedDeltaX += (deltaX * 0.5f)
+                                            // Gegenrichtung stark dämpfen, um Fehlzündungen zu verhindern
+                                            accumulatedDeltaY += (deltaY * 0.2f)
                                         }
 
-                                        val swipeThreshold = width * 0.15f
+                                        // Exakter Schwellenwert (15% der Bildhöhe) für einen sauberen, präzisen Swipe
+                                        val swipeThreshold = height * 0.15f
 
-                                        if (abs(accumulatedDeltaX) > swipeThreshold) {
+                                        if (abs(accumulatedDeltaY) > swipeThreshold) {
                                             if (currentTime - lastTriggerTime > cooldownMillis) {
                                                 lastTriggerTime = currentTime
 
-                                                val action = if (accumulatedDeltaX > 0f) {
-                                                    _gestureState.value = "Swipe: Rechts"
+                                                // Rauf (negatives DeltaY) = Rechts (Nächster Tab)
+                                                // Runter (positives DeltaY) = Links (Vorheriger Tab)
+                                                val action = if (accumulatedDeltaY < 0f) {
+                                                    _gestureState.value = "Swipe: Rauf (Rechts)"
                                                     _lastAction.value = "SWIPE_RIGHT"
                                                     GestureAction.SWIPE_RIGHT
                                                 } else {
-                                                    _gestureState.value = "Swipe: Links"
+                                                    _gestureState.value = "Swipe: Runter (Links)"
                                                     _lastAction.value = "SWIPE_LEFT"
                                                     GestureAction.SWIPE_LEFT
                                                 }
@@ -128,14 +138,16 @@ class AirGestureCore(private val context: Context) {
                                                     onGestureDetected(action)
                                                 }
                                             }
-                                            accumulatedDeltaX = 0f
+                                            accumulatedDeltaY = 0f
                                         }
                                     }
                                 }
-                                previousCentroidX = currentCentroidX
+                                previousCentroidX = rawCentroidX
+                                previousCentroidY = currentCentroidY
                             } else {
                                 previousCentroidX = -1f
-                                accumulatedDeltaX = 0f
+                                previousCentroidY = -1f
+                                accumulatedDeltaY = 0f
                             }
                         }
                         previousBytes = currentBytes
