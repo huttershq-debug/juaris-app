@@ -74,7 +74,8 @@ class AirGestureCore(private val context: Context) {
                                         val prev = previousBytes!![index].toInt() and 0xFF
                                         val delta = abs(curr - prev)
                                         
-                                        if (delta > 15) {
+                                        // Feineres Delta für Distanz (12)
+                                        if (delta > 12) {
                                             massX += (x * delta)
                                             totalMass += delta
                                         }
@@ -82,28 +83,29 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            if (totalMass > 9000L) {
+                            // Angepasste Masse für Distanz (5500L verhindert das ständige Abbrechen)
+                            if (totalMass > 5500L) {
                                 val rawCentroidX = massX.toFloat() / totalMass.toFloat()
 
-                                // Glättungs-Filter für butterweiche Übergänge
+                                // Glättungs-Filter
                                 val currentCentroidX = if (previousCentroidX == -1f) {
                                     rawCentroidX
                                 } else {
-                                    0.65f * rawCentroidX + 0.35f * previousCentroidX
+                                    0.6f * rawCentroidX + 0.4f * previousCentroidX
                                 }
 
                                 if (previousCentroidX != -1f) {
                                     val deltaX = currentCentroidX - previousCentroidX
 
-                                    if (abs(deltaX) > 0.4f) {
-                                        // ONE-WAY-LOCK: Gegenläufiges Rauschen auf Distanz komplett ignorieren
+                                    // Angepasster Frame-Sprung (0.25f), damit auch langsame/weit entfernte Swipes fließen
+                                    if (abs(deltaX) > 0.25f) {
+                                        // ONE-WAY-LOCK: Gegenläufiges Rauschen komplett ignorieren
                                         if (accumulatedDeltaX == 0f) {
                                             accumulatedDeltaX = deltaX
                                         } else if ((accumulatedDeltaX > 0f && deltaX > 0f) || (accumulatedDeltaX < 0f && deltaX < 0f)) {
-                                            // Gleiche Richtung: normal aufaddieren
                                             accumulatedDeltaX += deltaX
                                         } else {
-                                            // Gegenrichtung wird komplett ignoriert -> Verhindert das Hin- und Herspringen!
+                                            // Gegenrichtung wird ignoriert
                                         }
 
                                         val swipeThreshold = width * 0.15f
@@ -167,5 +169,4 @@ class AirGestureCore(private val context: Context) {
         }
     }
 }
-
 
