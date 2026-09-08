@@ -67,9 +67,9 @@ class AirGestureCore(private val context: Context) {
                         if (currentBytesBuffer == null || currentBytesBuffer!!.size != remaining) {
                             currentBytesBuffer = ByteArray(remaining)
                             previousBytesBuffer = ByteArray(remaining)
-                            buffer.get(currentBytesBuffer!)
+                            buffer.get(currentBytesBuffer!!, 0, remaining)
                         } else {
-                            buffer.get(currentBytesBuffer!)
+                            buffer.get(currentBytesBuffer!!, 0, remaining)
 
                             val currBytes = currentBytesBuffer!!
                             val prevBytes = previousBytesBuffer!!
