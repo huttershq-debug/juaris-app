@@ -18,7 +18,7 @@ class AirGestureCore(private val context: Context) {
         NONE, SWIPE_LEFT, SWIPE_RIGHT
     }
 
-    private val _gestureState = MutableStateFlow("KI-Kortex aktiv – Bereit")
+    private val _gestureState = MutableStateFlow("Kamera bereit – Hand swipen")
     val gestureState: StateFlow<String> = _gestureState
 
     private val _lastAction = MutableStateFlow("KEINE")
@@ -27,9 +27,8 @@ class AirGestureCore(private val context: Context) {
     private var cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     private var cameraProvider: ProcessCameraProvider? = null
 
-    // Zustandsvariablen für kinematische Vektor-Analyse
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 900L // Exakte taktile Pause
+    private val cooldownMillis = 600L // Schnelle Wiederholrate für flüssiges Durchswipen
     private var previousCentroidX: Float = -1f
 
     fun startGestureDetection(lifecycleOwner: LifecycleOwner, onGestureDetected: (GestureAction) -> Unit) {
@@ -61,9 +60,8 @@ class AirGestureCore(private val context: Context) {
                         if (previousBytes != null && previousBytes!!.size == currentBytes.size) {
                             var massX = 0L
                             var totalMass = 0L
-                            val step = 12 // Höchste Abtastpräzision für Konturen
+                            val step = 16 // Optimierte Abtastung für flüssige Performance
 
-                            // Erweiterter Edge-Gradient & Schwerpunkt-Detektor (Zentroid-Tracking)
                             for (y in 0 until height step step) {
                                 for (x in 0 until width step step) {
                                     val index = y * rowStride + x
@@ -72,8 +70,8 @@ class AirGestureCore(private val context: Context) {
                                         val prev = previousBytes!![index].toInt() and 0xFF
                                         val delta = abs(curr - prev)
 
-                                        // Nur echte physikalische Kontur-Bewegungen (Ignoriert globales Rauschen)
-                                        if (delta > 25) {
+                                        // Filter gegen Rauschen, registriert echte Handkonturen
+                                        if (delta > 20) {
                                             massX += (x * delta)
                                             totalMass += delta
                                         }
@@ -81,25 +79,24 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            if (totalMass > 15000L) { // Erforderliche kinetische Masse im Bild
+                            // Angepasster Schwellenwert für sofortige Erkennung auf dem S23
+                            if (totalMass > 5000L) {
                                 val currentCentroidX = massX.toFloat() / totalMass.toFloat()
 
                                 if (previousCentroidX != -1f) {
                                     val deltaX = currentCentroidX - previousCentroidX
-                                    val movementThreshold = width * 0.035f // 3.5% Bildbreiten-Vektor
+                                    val movementThreshold = width * 0.025f // 2.5% Bewegung reichen für einen Swipe
 
                                     if (abs(deltaX) > movementThreshold) {
                                         if (currentTime - lastTriggerTime > cooldownMillis) {
                                             lastTriggerTime = currentTime
 
                                             if (deltaX > 0) {
-                                                // Bewegung von links nach rechts -> Hand zieht nach rechts
-                                                _gestureState.value = "KI-Geste: Swipe Rechts"
+                                                _gestureState.value = "Geste: Swipe Rechts"
                                                 _lastAction.value = "SWIPE_RIGHT"
                                                 onGestureDetected(GestureAction.SWIPE_RIGHT)
                                             } else {
-                                                // Bewegung von rechts nach links -> Hand zieht nach links
-                                                _gestureState.value = "KI-Geste: Swipe Links"
+                                                _gestureState.value = "Geste: Swipe Links"
                                                 _lastAction.value = "SWIPE_LEFT"
                                                 onGestureDetected(GestureAction.SWIPE_LEFT)
                                             }
@@ -108,17 +105,13 @@ class AirGestureCore(private val context: Context) {
                                 }
                                 previousCentroidX = currentCentroidX
                             } else {
-                                // Kein massives Objekt im Bild -> Schwerpunkt zurücksetzen
                                 previousCentroidX = -1f
-                                if (currentTime - lastTriggerTime > 600L) {
-                                    _gestureState.value = "KI-Kortex aktiv – Warten auf Interaktion"
-                                }
                             }
                         }
                         previousBytes = currentBytes
 
                     } catch (e: Exception) {
-                        // Frame-Pipeline fehlerfrei absichern
+                        // Abfangen von Frame-Ausnahmen
                     } finally {
                         imageProxy.close()
                     }
@@ -132,7 +125,7 @@ class AirGestureCore(private val context: Context) {
                 )
 
             } catch (e: Exception) {
-                _gestureState.value = "Systemfehler: ${e.localizedMessage}"
+                _gestureState.value = "Fehler: ${e.localizedMessage}"
             }
         }, ContextCompat.getMainExecutor(context))
     }
@@ -145,4 +138,5 @@ class AirGestureCore(private val context: Context) {
         }
     }
 }
+
 
