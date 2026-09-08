@@ -18,10 +18,9 @@ class AirGestureCore(private val context: Context) {
         NONE, SWIPE_LEFT, SWIPE_RIGHT
     }
 
-    private val _gestureState = MutableStateFlow("Juaris Kortex Bereit")
+    private val _gestureState = MutableStateFlow("Juaris Gleit-Modus Aktiv")
     val gestureState: StateFlow<String> = _gestureState
 
-    // Wiederhergestellt, damit AirGesturePage.kt darauf zugreifen kann!
     private val _lastAction = MutableStateFlow("KEINE")
     val lastAction: StateFlow<String> = _lastAction
 
@@ -29,7 +28,7 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
 
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 500L
+    private val cooldownMillis = 250L // Perfekt für schnelles, flüssiges Gleiten ohne Verzögerung
     
     private var previousCentroidX: Float = -1f
     private var accumulatedDeltaX = 0f
@@ -63,7 +62,7 @@ class AirGestureCore(private val context: Context) {
                         if (previousBytes != null && previousBytes!!.size == currentBytes.size) {
                             var massX = 0L
                             var totalMass = 0L
-                            val step = 16
+                            val step = 14 // Fein genug für geschmeidige Erkennung, schnell genug für Realtime
 
                             for (y in 0 until height step step) {
                                 for (x in 0 until width step step) {
@@ -73,7 +72,7 @@ class AirGestureCore(private val context: Context) {
                                         val prev = previousBytes!![index].toInt() and 0xFF
                                         val delta = abs(curr - prev)
                                         
-                                        if (delta > 25) {
+                                        if (delta > 20) {
                                             massX += (x * delta)
                                             totalMass += delta
                                         }
@@ -81,30 +80,30 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            if (totalMass > 8000L) {
+                            if (totalMass > 6000L) {
                                 val currentCentroidX = massX.toFloat() / totalMass.toFloat()
 
                                 if (previousCentroidX != -1f) {
                                     val deltaX = currentCentroidX - previousCentroidX
                                     accumulatedDeltaX += deltaX
 
-                                    val swipeThreshold = width * 0.06f
+                                    // Etwas reaktionsfreudigerer Schwellenwert (5% der Breite)
+                                    val swipeThreshold = width * 0.05f
 
                                     if (abs(accumulatedDeltaX) > swipeThreshold) {
                                         if (currentTime - lastTriggerTime > cooldownMillis) {
                                             lastTriggerTime = currentTime
 
                                             val action = if (accumulatedDeltaX > 0) {
-                                                _gestureState.value = "Swipe Rechts erkannt"
+                                                _gestureState.value = "Gleiten: Rechts"
                                                 _lastAction.value = "SWIPE_RIGHT"
                                                 GestureAction.SWIPE_RIGHT
                                             } else {
-                                                _gestureState.value = "Swipe Links erkannt"
+                                                _gestureState.value = "Gleiten: Links"
                                                 _lastAction.value = "SWIPE_LEFT"
                                                 GestureAction.SWIPE_LEFT
                                             }
 
-                                            // Direkt auf dem Main-Thread an die UI übergeben
                                             ContextCompat.getMainExecutor(context).execute {
                                                 onGestureDetected(action)
                                             }
@@ -121,7 +120,7 @@ class AirGestureCore(private val context: Context) {
                         previousBytes = currentBytes
 
                     } catch (e: Exception) {
-                        // Frame abfangen
+                        // Frame-Sicherung
                     } finally {
                         imageProxy.close()
                     }
@@ -148,4 +147,5 @@ class AirGestureCore(private val context: Context) {
         }
     }
 }
+
 
