@@ -28,7 +28,7 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
 
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 180L // Rasant für flüssiges Gleiten
+    private val cooldownMillis = 900L // Exakt auf 900ms erhöht für maximale Entspannung nach jedem Swipe
     
     private var previousCentroidX: Float = -1f
     private var accumulatedDeltaX = 0f
@@ -41,7 +41,6 @@ class AirGestureCore(private val context: Context) {
         cameraProviderFuture.addListener({
             try {
                 cameraProvider = cameraProviderFuture.get()
-                // Korrigiert: Nur noch die offizielle Kamera-Auswahl
                 val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
 
                 val imageAnalysis = ImageAnalysis.Builder()
@@ -65,7 +64,7 @@ class AirGestureCore(private val context: Context) {
                         if (previousBytes != null && previousBytes!!.size == currentBytes.size) {
                             var massX = 0L
                             var totalMass = 0L
-                            val step = 12
+                            val step = 16
 
                             for (y in 0 until height step step) {
                                 for (x in 0 until width step step) {
@@ -75,7 +74,7 @@ class AirGestureCore(private val context: Context) {
                                         val prev = previousBytes!![index].toInt() and 0xFF
                                         val delta = abs(curr - prev)
                                         
-                                        if (delta > 15) {
+                                        if (delta > 25) {
                                             massX += (x * delta)
                                             totalMass += delta
                                         }
@@ -83,31 +82,31 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            if (totalMass > 4000L) {
+                            if (totalMass > 12500L) { // Exakt auf 12500L eingestellt (ignoriert Kopfbewegungen völlig)
                                 val currentCentroidX = massX.toFloat() / totalMass.toFloat()
 
                                 if (previousCentroidX != -1f) {
                                     val deltaX = currentCentroidX - previousCentroidX
 
-                                    if (abs(deltaX) > 0.3f) {
+                                    if (abs(deltaX) > 0.5f) {
                                         if ((accumulatedDeltaX > 0f && deltaX < 0f) || (accumulatedDeltaX < 0f && deltaX > 0f)) {
                                             accumulatedDeltaX = deltaX
                                         } else {
                                             accumulatedDeltaX += deltaX
                                         }
 
-                                        val swipeThreshold = width * 0.035f
+                                        val swipeThreshold = width * 0.19f // Exakt auf 0.19f angepasst
 
                                         if (abs(accumulatedDeltaX) > swipeThreshold) {
                                             if (currentTime - lastTriggerTime > cooldownMillis) {
                                                 lastTriggerTime = currentTime
 
                                                 val action = if (accumulatedDeltaX > 0f) {
-                                                    _gestureState.value = "Gleiten: Rechts"
+                                                    _gestureState.value = "Swipe: Rechts erkannt"
                                                     _lastAction.value = "SWIPE_RIGHT"
                                                     GestureAction.SWIPE_RIGHT
                                                 } else {
-                                                    _gestureState.value = "Gleiten: Links"
+                                                    _gestureState.value = "Swipe: Links erkannt"
                                                     _lastAction.value = "SWIPE_LEFT"
                                                     GestureAction.SWIPE_LEFT
                                                 }
@@ -157,5 +156,4 @@ class AirGestureCore(private val context: Context) {
         }
     }
 }
-
 
