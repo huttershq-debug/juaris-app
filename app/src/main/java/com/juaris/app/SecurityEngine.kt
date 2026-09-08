@@ -24,27 +24,25 @@ object SecurityEngine {
         }
     }
 
-    // 2. SMS-SCHUTZ
+     // Ersetze die alte fun analyzeIncomingSms durch diese Version:
     fun analyzeIncomingSms(sender: String, messageBody: String): SmsSecurityResult {
-        Log.d(TAG, "Prüfe SMS von $sender")
-        val lowercaseBody = messageBody.lowercase()
-        val containsThreat = maliciousKeywords.any { keyword -> lowercaseBody.contains(keyword) }
-        return if (containsThreat) {
-            Log.w(TAG, "WARNUNG: Phishing-SMS von $sender abgefangen!")
+        val analyzer = LocalPhishingAnalyzer()
+        val result = analyzer.analyzeText(messageBody)
+        
+        return if (result.isSuspicious) {
             SmsSecurityResult.QUARANTINE_AND_ALERT
         } else {
-            SmsSecurityResult.ALLOW
+            SmsSecurityResult.SAFE
         }
     }
 
-    // 3. E-MAIL-SCHUTZ
+    // Ersetze die alte fun analyzeIncomingEmail durch diese Version:
     fun analyzeIncomingEmail(sender: String, subject: String, body: String): EmailSecurityResult {
-        Log.d(TAG, "Prüfe E-Mail von $sender mit Betreff: $subject")
-        val combinedContent = "$subject $body".lowercase()
-        val containsThreat = maliciousKeywords.any { keyword -> combinedContent.contains(keyword) }
-        return if (containsThreat) {
-            Log.w(TAG, "WARNUNG: Gefährliche E-Mail erkannt von $sender!")
-            EmailSecurityResult.WARN_USER
+        val analyzer = LocalPhishingAnalyzer()
+        val result = analyzer.analyzeText("$subject $body")
+        
+        return if (result.isSuspicious) {
+            EmailSecurityResult.BLOCK
         } else {
             EmailSecurityResult.SAFE
         }
