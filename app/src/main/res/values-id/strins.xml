@@ -13,4 +13,6 @@
     <string name="email_protection_title">Keamanan Email</string>
     <string name="log_email_incoming_blocked">Email berbahaya masuk diblokir: %1$s</string>
     <string name="log_email_outgoing_blocked">Email keluar dihentikan (Risiko Keamanan): %1$s</string>
+    <string name="juaris_app_welcome_text">Selamat datang di juaris, aplikasi keamanan masa depan Anda. 100% transparan, 100% di ponsel Anda. Tanpa cloud. Perlindungan Anda, rumah Anda, aturan Anda. Bersama juaris, Anda memiliki perlindungan privasi paling kuat di dunia. juaris, karena Anda dan keamanan Anda penting bagi kami.</string>
+    <string name="juaris_app_welcome_audio_file">platzhalter_id.m4a</string>
 </resources>
