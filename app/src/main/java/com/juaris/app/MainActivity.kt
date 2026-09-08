@@ -276,7 +276,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
         }
     }
 
-    // Startet die Gestensteuerung autonom, sobald das Dashboard geladen und die Berechtigung da ist
+     // Autonomer Start direkt beim Laden des Dashboards (ohne Klicks notwendig)
     LaunchedEffect(hasCameraPermission, lifecycleOwner) {
         if (hasCameraPermission) {
             airGestureCore.startGestureDetection(lifecycleOwner) { action ->
@@ -287,7 +287,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                     AirGestureCore.GestureAction.SWIPE_LEFT -> {
                         selectedTab = if (selectedTab - 1 < 0) tabs.size - 1 else selectedTab - 1
                     }
-                    else -> {}
+                    AirGestureCore.GestureAction.NONE -> {}
                 }
             }
         }
@@ -298,6 +298,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
             airGestureCore.stopGestureDetection()
         }
     }
+
 
     val liveLogs = remember {
         mutableStateListOf(
