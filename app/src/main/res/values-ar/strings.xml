@@ -13,4 +13,7 @@
     <string name="email_protection_title">أمان البريد الإلكتروني</string>
     <string name="log_email_incoming_blocked">تم حظر البريد الإلكتروني الضار الوارد: %1$s</string>
     <string name="log_email_outgoing_blocked">تم إيقاف البريد الإلكتروني الصادر (خطر أمني): %1$s</string>
+    <string name="juaris_app_welcome_text">مرحباً بك في جواريس، تطبيق الأمان الخاص بك للمستقبل. 100% شفاف، 100% على هاتفك. لا توجد سحابة الكترونية. حمايتك، بيتك، قواعدك. مع جواريس، لديك أقوى حماية خاصة في العالم. جواريس، لأنك أنت وأمانك تهماننا.</string>
+    <string name="juaris_app_welcome_audio_file">platzhalter_ar.m4a</string>
+
 </resources>
