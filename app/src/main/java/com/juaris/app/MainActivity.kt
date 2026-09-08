@@ -244,7 +244,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 @Composable
 fun JuarisMainDashboard(prefs: SharedPreferences) {
     val context = LocalContext.current
-    val lifecycleOwner = androidx.compose.ui.platform.LocalLifecycleOwner.current
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     val aiCore = remember { LocalAICore(context) }
     val airGestureCore = remember { AirGestureCore(context) }
     var selectedTab by remember { mutableStateOf(0) }
@@ -254,37 +254,48 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
         "Rechte", "Schwarm", "KI", "Gesten", "Info"
     )
 
-    val hasCameraPermission = remember {
-        ContextCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED
+    // Automatische Kamera-Berechtigungs-Prüfung und Anforderung beim Start
+    var hasCameraPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        )
     }
 
-     // AUTOMATISCHER START: Wartet, bis die App aktiv ist, und startet die Kamera sofort global
-    DisposableEffect(lifecycleOwner, hasCameraPermission) {
-        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
-            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME && hasCameraPermission) {
-                airGestureCore.startGestureDetection(lifecycleOwner) { action ->
-                    when (action) {
-                        AirGestureCore.GestureAction.SWIPE_RIGHT -> {
-                            selectedTab = (selectedTab + 1) % tabs.size
-                        }
-                        AirGestureCore.GestureAction.SWIPE_LEFT -> {
-                            selectedTab = if (selectedTab - 1 < 0) tabs.size - 1 else selectedTab - 1
-                        }
-                        else -> {}
-                    }
-                }
-            } else if (event == androidx.lifecycle.Lifecycle.Event.ON_PAUSE) {
-                airGestureCore.stopGestureDetection()
-            }
-        }
-        
-        lifecycleOwner.lifecycle.addObserver(observer)
-        
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-            airGestureCore.stopGestureDetection()
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        hasCameraPermission = isGranted
+        if (isGranted) {
+            Toast.makeText(context, "Air-Gestenkern voll aktiviert!", Toast.LENGTH_SHORT).show()
         }
     }
+
+    LaunchedEffect(Unit) {
+        if (!hasCameraPermission) {
+            cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+        }
+    }
+
+    // Startet die Gestensteuerung autonom, sobald das Dashboard geladen und die Berechtigung da ist
+    LaunchedEffect(hasCameraPermission, lifecycleOwner) {
+        if (hasCameraPermission) {
+            airGestureCore.startGestureDetection(lifecycleOwner) { action ->
+                when (action) {
+                    AirGestureCore.GestureAction.SWIPE_RIGHT -> {
+                        selectedTab = (selectedTab + 1) % tabs.size
+                    }
+                    AirGestureCore.GestureAction.SWIPE_LEFT -> {
+                        selectedTab = if (selectedTab - 1 < 0) tabs.size - 1 else selectedTab - 1
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        onDispose {
+            airGestureCore.stopGestureDetection()
         }
     }
 
@@ -414,6 +425,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
         }
     }
 }
+
 
 @Composable
 fun StatusPage(
