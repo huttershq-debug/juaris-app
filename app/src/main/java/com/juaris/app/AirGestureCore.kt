@@ -85,26 +85,23 @@ class AirGestureCore(private val context: Context) {
                             if (totalMass > 5000L) {
                                 val rawCentroidY = massY.toFloat() / totalMass.toFloat()
 
-                                // GLÄTTUNGS-FILTER WIEDER DA: 60% neu, 40% alt -> eliminiert jegliches Zittern
+                                // STARKE, SAUBERE GLÄTTUNG (25% neu, 75% alt) -> Eliminiert jegliches Zucken/Sprunghaftigkeit
                                 val currentCentroidY = if (previousCentroidY == -1f) {
                                     rawCentroidY
                                 } else {
-                                    0.6f * rawCentroidY + 0.4f * previousCentroidY
+                                    0.25f * rawCentroidY + 0.75f * previousCentroidY
                                 }
 
                                 if (previousCentroidY != -1f) {
                                     val deltaY = currentCentroidY - previousCentroidY
 
-                                    if (abs(deltaY) > 0.35f) {
-                                        if ((accumulatedDeltaY > 0f && deltaY < 0f) || (accumulatedDeltaY < 0f && deltaY > 0f)) {
-                                            accumulatedDeltaY = deltaY
-                                        } else {
-                                            accumulatedDeltaY += deltaY
-                                        }
+                                    // Nur echte, fließende Bewegungen beachten
+                                    if (abs(deltaY) > 0.15f) {
+                                        // Sauberes Aufaddieren ohne blockierende Resets
+                                        accumulatedDeltaY += deltaY
 
-                                        // Flexible Schwellenwerte: Runter braucht etwas weniger Weg, um hakelfrei zu sein
-                                        val isMovingDown = accumulatedDeltaY > 0f
-                                        val swipeThreshold = if (isMovingDown) height * 0.10f else height * 0.12f
+                                        // Identische, faire Schwelle für beide Richtungen (10% der Bildhöhe)
+                                        val swipeThreshold = height * 0.10f
 
                                         if (abs(accumulatedDeltaY) > swipeThreshold) {
                                             if (currentTime - lastTriggerTime > cooldownMillis) {
@@ -167,5 +164,4 @@ class AirGestureCore(private val context: Context) {
         }
     }
 }
-
 
