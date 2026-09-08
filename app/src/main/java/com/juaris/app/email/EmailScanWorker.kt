@@ -1,10 +1,19 @@
 package com.juaris.app.email
 
 import android.content.Context
-import com.juaris.app.QuantumEngine
-import com.juaris.app.SecurityLogDao
-import com.juaris.app.SecurityLogEntity
-import java.util.Date
+import androidx.work.Worker
+import androidx.work.WorkerParameters
+import com.juaris.app.LocalPhishingAnalyzer
+
+class EmailScanWorker(appContext: Context, workerParams: WorkerParams) : Worker(appContext, workerParams) {
+    private val phishingAnalyzer = LocalPhishingAnalyzer(appContext)
+
+    override fun doWork(): Result {
+        // Scan logic using phishingAnalyzer
+        return Result.success()
+    }
+}
+
 
 class EmailScanWorker(private val context: Context, private val logDao: SecurityLogDao) {
 
