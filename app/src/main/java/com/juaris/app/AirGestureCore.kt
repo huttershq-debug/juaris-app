@@ -64,7 +64,7 @@ class AirGestureCore(private val context: Context) {
                         if (previousBytes != null && previousBytes!!.size == currentBytes.size) {
                             var massY = 0L
                             var totalMass = 0L
-                            val step = 8
+                            val step = 9
 
                             for (y in 0 until height step step) {
                                 for (x in 0 until width step step) {
@@ -74,7 +74,7 @@ class AirGestureCore(private val context: Context) {
                                         val prev = previousBytes!![index].toInt() and 0xFF
                                         val delta = abs(curr - prev)
                                         
-                                        if (delta > 10) {
+                                        if (delta > 15) {
                                             massY += (y * delta)
                                             totalMass += delta
                                         }
@@ -83,21 +83,21 @@ class AirGestureCore(private val context: Context) {
                             }
 
                             // Ausgewogene Masse-Schwelle (3000L), damit Rauf und Runter gleichermaßen greifen
-                            if (totalMass > 3000L) {
-                                val rawCentroidY = massY.toFloat() / totalMass.toFloat()
+                            if (totalMass > 7500L) {
+                                val rawCentrodY = massY.toFloat() / totalMass.toFloat()
 
                                 // Sanfte Glättung (40% neu, 60% alt) für ein ruhiges, stabiles Bild
                                 val currentCentroidY = if (previousCentroidY == -1f) {
                                     rawCentroidY
                                 } else {
-                                    0.4f * rawCentroidY + 0.6f * previousCentroidY
+                                    0.5f * rawCentroidY + 0.6f * previousCentroidY
                                 }
 
                                 if (previousCentroidY != -1f) {
                                     val deltaY = currentCentroidY - previousCentroidY
 
                                     // Feines Gate gegen Mikrorauschen
-                                    if (abs(deltaY) > 0.15f) {
+                                    if (abs(deltaY) > 0.13f) {
                                         if (accumulatedDeltaY == 0f) {
                                             accumulatedDeltaY = deltaY
                                         } else if ((accumulatedDeltaY > 0f && deltaY > 0f) || (accumulatedDeltaY < 0f && deltaY < 0f)) {
@@ -108,7 +108,7 @@ class AirGestureCore(private val context: Context) {
                                         }
 
                                         // Perfekter Schwellenwert (9% der Bildhöhe) für beide Richtungen
-                                        val swipeThreshold = height * 0.09f
+                                        val swipeThreshold = height * 0.085f
 
                                         if (abs(accumulatedDeltaY) > swipeThreshold) {
                                             if (currentTime - lastTriggerTime > cooldownMillis) {
@@ -172,4 +172,5 @@ class AirGestureCore(private val context: Context) {
         }
     }
 }
+
 
