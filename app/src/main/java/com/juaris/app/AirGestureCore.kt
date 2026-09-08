@@ -28,7 +28,7 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
 
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 600L // Gesunder, flüssiger Cooldown
+    private val cooldownMillis = 600L
    
     private var smoothedCentroidY: Float = -1f
     private var anchorY: Float = -1f
@@ -67,7 +67,7 @@ class AirGestureCore(private val context: Context) {
                         if (currentBytesBuffer == null || currentBytesBuffer!!.size != remaining) {
                             currentBytesBuffer = ByteArray(remaining)
                             previousBytesBuffer = ByteArray(remaining)
-                            buffer.get(currentBytesBuffer!!)
+                            buffer.get(currentBytesBuffer!)
                             imageProxy.close()
                             return@setAnalyzer
                         }
@@ -77,94 +77,88 @@ class AirGestureCore(private val context: Context) {
                         val currBytes = currentBytesBuffer!!
                         val prevBytes = previousBytesBuffer!!
 
+                        // Cooldown-Prüfung über if/else statt return@setAnalyzer gelöst
                         if (currentTime - lastTriggerTime < cooldownMillis) {
                             System.arraycopy(currBytes, 0, prevBytes, 0, remaining)
-                            imageProxy.close()
-                            return@setAnalyzer
-                        }
+                        } else {
+                            var massY = 0L
+                            var totalMass = 0L
+                            val step = 8
 
-                        var massY = 0L
-                        var totalMass = 0L
-                        val step = 8 // Wieder feinerer Raster-Schritt für perfekte Erkennung
-
-                        for (y in 0 until height step step) {
-                            val rowOffset = y * rowStride
-                            for (x in 0 until width step step) {
-                                val index = rowOffset + x
-                                if (index < remaining) {
-                                    val curr = currBytes[index].toInt() and 0xFF
-                                    val prev = prevBytes[index].toInt() and 0xFF
-                                    val delta = abs(curr - prev)
-                                   
-                                    if (delta > 10) { // Angenehme Sensibilität gegen Rauschen
-                                        massY += (y * delta).toLong()
-                                        totalMass += delta.toLong()
+                            for (y in 0 until height step step) {
+                                val rowOffset = y * rowStride
+                                for (x in 0 until width step step) {
+                                    val index = rowOffset + x
+                                    if (index < remaining) {
+                                        val curr = currBytes[index].toInt() and 0xFF
+                                        val prev = prevBytes[index].toInt() and 0xFF
+                                        val delta = abs(curr - prev)
+                                       
+                                        if (delta > 10) {
+                                            massY += (y * delta).toLong()
+                                            totalMass += delta.toLong()
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        // Gesunde Hysterese-Schwellen
-                        val massEnter = 2000L
-                        val massExit = 800L
+                            val massEnter = 2000L
+                            val massExit = 800L
 
-                        if (totalMass > (if (isTracking) massExit else massEnter)) {
-                            val rawCentroidY = massY.toFloat() / totalMass.toFloat()
+                            if (totalMass > (if (isTracking) massExit else massEnter)) {
+                                val rawCentroidY = massY.toFloat() / totalMass.toFloat()
 
-                            smoothedCentroidY = if (smoothedCentroidY == -1f) {
-                                rawCentroidY
-                            } else {
-                                0.3f * rawCentroidY + 0.7f * smoothedCentroidY
-                            }
+                                smoothedCentroidY = if (smoothedCentroidY == -1f) {
+                                    rawCentroidY
+                                } else {
+                                    0.3f * rawCentroidY + 0.7f * smoothedCentroidY
+                                }
 
-                            if (!isTracking) {
-                                anchorY = smoothedCentroidY
-                                isTracking = true
-                                gestureStartTime = currentTime
-                            } else {
-                                val totalDisplacement = smoothedCentroidY - anchorY
-                                val swipeThreshold = height.toFloat() * 0.10f // 10% – natürlich und direkt
-
-                                // Falls man den Wisch nach 1.2 Sekunden immer noch nicht beendet hat, Anker sanft aktualisieren
-                                if (currentTime - gestureStartTime > 1200L) {
+                                if (!isTracking) {
                                     anchorY = smoothedCentroidY
+                                    isTracking = true
                                     gestureStartTime = currentTime
+                                } else {
+                                    val totalDisplacement = smoothedCentroidY - anchorY
+                                    val swipeThreshold = height.toFloat() * 0.10f
+
+                                    if (currentTime - gestureStartTime > 1200L) {
+                                        anchorY = smoothedCentroidY
+                                        gestureStartTime = currentTime
+                                    }
+
+                                    if (abs(totalDisplacement) > swipeThreshold) {
+                                        lastTriggerTime = currentTime
+
+                                        val action = if (totalDisplacement < 0f) {
+                                            _gestureState.value = "Swipe: Rauf (Rechts)"
+                                            _lastAction.value = "SWIPE_RIGHT"
+                                            GestureAction.SWIPE_RIGHT
+                                        } else {
+                                            _gestureState.value = "Swipe: Runter (Links)"
+                                            _lastAction.value = "SWIPE_LEFT"
+                                            GestureAction.SWIPE_LEFT
+                                        }
+
+                                        ContextCompat.getMainExecutor(context).execute {
+                                            onGestureDetected(action)
+                                        }
+
+                                        isTracking = false
+                                        smoothedCentroidY = -1f
+                                        anchorY = -1f
+                                    }
                                 }
-
-                                if (abs(totalDisplacement) > swipeThreshold) {
-                                    lastTriggerTime = currentTime
-
-                                    // Bewegung nach OBEN (displacement < 0) -> Rechts (SWIPE_RIGHT / Nächster Tab)
-                                    // Bewegung nach UNTEN (displacement > 0) -> Links (SWIPE_LEFT / Vorheriger Tab)
-                                    val action = if (totalDisplacement < 0f) {
-                                        _gestureState.value = "Swipe: Rauf (Rechts)"
-                                        _lastAction.value = "SWIPE_RIGHT"
-                                        GestureAction.SWIPE_RIGHT
-                                    } else {
-                                        _gestureState.value = "Swipe: Runter (Links)"
-                                        _lastAction.value = "SWIPE_LEFT"
-                                        GestureAction.SWIPE_LEFT
-                                    }
-
-                                    ContextCompat.getMainExecutor(context).execute {
-                                        onGestureDetected(action)
-                                    }
-
-                                    // Sofortiger Reset für den nächsten flüssigen Wisch
+                            } else {
+                                if (totalMass < massExit) {
                                     isTracking = false
                                     smoothedCentroidY = -1f
                                     anchorY = -1f
                                 }
                             }
-                        } else {
-                            if (totalMass < massExit) {
-                                isTracking = false
-                                smoothedCentroidY = -1f
-                                anchorY = -1f
-                            }
-                        }
 
-                        System.arraycopy(currBytes, 0, prevBytes, 0, remaining)
+                            System.arraycopy(currBytes, 0, prevBytes, 0, remaining)
+                        }
 
                     } catch (e: Exception) {
                         // Frame abfangen
@@ -197,5 +191,4 @@ class AirGestureCore(private val context: Context) {
         }
     }
 }
-
 
