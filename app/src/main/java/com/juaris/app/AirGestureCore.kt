@@ -78,7 +78,7 @@ class AirGestureCore(private val context: Context) {
                                         val delta = abs(curr - prev)
                                         
                                         // Sauberes Delta gegen Hintergrundrauschen
-                                        if (delta > 12) {
+                                        if (delta > 10) {
                                             massX += (x * delta)
                                             massY += (y * delta)
                                             totalMass += delta
@@ -88,7 +88,7 @@ class AirGestureCore(private val context: Context) {
                             }
 
                             // Stabiler Massen-Schwellenwert für Nah- und Fernbereich
-                            if (totalMass > 6000L) {
+                            if (totalMass > 4000L) {
                                 val rawCentroidX = massX.toFloat() / totalMass.toFloat()
                                 val rawCentroidY = massY.toFloat() / totalMass.toFloat()
 
@@ -96,7 +96,7 @@ class AirGestureCore(private val context: Context) {
                                 val currentCentroidY = if (previousCentroidY == -1f) {
                                     rawCentroidY
                                 } else {
-                                    0.65f * rawCentroidY + 0.35f * previousCentroidY
+                                    0.55f * rawCentroidY + 0.45f * previousCentroidY
                                 }
 
                                 if (previousCentroidX != -1f && previousCentroidY != -1f) {
@@ -104,7 +104,7 @@ class AirGestureCore(private val context: Context) {
                                     val deltaY = currentCentroidY - previousCentroidY
 
                                     // PERFEKTER VERTIKAL-GUARD: Muss klar vertikal sein (1.8x stärker als horizontal)
-                                    if (abs(deltaY) > abs(deltaX) * 1.8f && abs(deltaY) > 0.3f) {
+                                    if (abs(deltaY) > abs(deltaX) * 0.8f && abs(deltaY) > 0.3f) {
                                         
                                         if (accumulatedDeltaY == 0f) {
                                             accumulatedDeltaY = deltaY
@@ -116,7 +116,7 @@ class AirGestureCore(private val context: Context) {
                                         }
 
                                         // Exakter Schwellenwert (15% der Bildhöhe) für einen sauberen, präzisen Swipe
-                                        val swipeThreshold = height * 0.15f
+                                        val swipeThreshold = height * 0.13f
 
                                         if (abs(accumulatedDeltaY) > swipeThreshold) {
                                             if (currentTime - lastTriggerTime > cooldownMillis) {
