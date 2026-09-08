@@ -28,7 +28,7 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
 
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 900L // Exakt auf 900ms erhöht für maximale Entspannung nach jedem Swipe
+    private val cooldownMillis = 750L // Exakt auf 750ms eingestellt
     
     private var previousCentroidX: Float = -1f
     private var accumulatedDeltaX = 0f
@@ -64,7 +64,7 @@ class AirGestureCore(private val context: Context) {
                         if (previousBytes != null && previousBytes!!.size == currentBytes.size) {
                             var massX = 0L
                             var totalMass = 0L
-                            val step = 16
+                            val step = 14 // Breiteres Sichtfeld im Kamerabereich
 
                             for (y in 0 until height step step) {
                                 for (x in 0 until width step step) {
@@ -74,7 +74,7 @@ class AirGestureCore(private val context: Context) {
                                         val prev = previousBytes!![index].toInt() and 0xFF
                                         val delta = abs(curr - prev)
                                         
-                                        if (delta > 25) {
+                                        if (delta > 20) {
                                             massX += (x * delta)
                                             totalMass += delta
                                         }
@@ -82,31 +82,31 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            if (totalMass > 12500L) { // Exakt auf 12500L eingestellt (ignoriert Kopfbewegungen völlig)
+                            if (totalMass > 10500L) { // Exakt auf 10500L angepasst
                                 val currentCentroidX = massX.toFloat() / totalMass.toFloat()
 
                                 if (previousCentroidX != -1f) {
                                     val deltaX = currentCentroidX - previousCentroidX
 
-                                    if (abs(deltaX) > 0.5f) {
+                                    if (abs(deltaX) > 0.4f) {
                                         if ((accumulatedDeltaX > 0f && deltaX < 0f) || (accumulatedDeltaX < 0f && deltaX > 0f)) {
                                             accumulatedDeltaX = deltaX
                                         } else {
                                             accumulatedDeltaX += deltaX
                                         }
 
-                                        val swipeThreshold = width * 0.19f // Exakt auf 0.19f angepasst
+                                        val swipeThreshold = width * 0.15f // Exakt auf 0.15f angepasst
 
                                         if (abs(accumulatedDeltaX) > swipeThreshold) {
                                             if (currentTime - lastTriggerTime > cooldownMillis) {
                                                 lastTriggerTime = currentTime
 
                                                 val action = if (accumulatedDeltaX > 0f) {
-                                                    _gestureState.value = "Swipe: Rechts erkannt"
+                                                    _gestureState.value = "Swipe: Rechts"
                                                     _lastAction.value = "SWIPE_RIGHT"
                                                     GestureAction.SWIPE_RIGHT
                                                 } else {
-                                                    _gestureState.value = "Swipe: Links erkannt"
+                                                    _gestureState.value = "Swipe: Links"
                                                     _lastAction.value = "SWIPE_LEFT"
                                                     GestureAction.SWIPE_LEFT
                                                 }
@@ -134,7 +134,7 @@ class AirGestureCore(private val context: Context) {
                     }
                 }
 
-                cameraProvider?.unbindAll()
+                cameraProvider?.unbindAll()     
                 cameraProvider?.bindToLifecycle(
                     lifecycleOwner,
                     cameraSelector,
