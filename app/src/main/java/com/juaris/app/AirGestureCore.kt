@@ -28,7 +28,7 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
 
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 650L 
+    private val cooldownMillis = 400L // Flotteres, direkteres Durchschalten
     
     private var previousCentroidY: Float = -1f
     private var accumulatedDeltaY = 0f
@@ -82,26 +82,33 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            if (totalMass > 5000L) {
+                            // Angenehme, leichtgängige Masse-Schwelle (4500L)
+                            if (totalMass > 4500L) {
                                 val rawCentroidY = massY.toFloat() / totalMass.toFloat()
 
-                                // STARKE, SAUBERE GLÄTTUNG (25% neu, 75% alt) -> Eliminiert jegliches Zucken/Sprunghaftigkeit
+                                // Ausgewogene Glättung (50% neu, 50% alt) -> Fühlt sich leicht und reaktionsschnell an
                                 val currentCentroidY = if (previousCentroidY == -1f) {
                                     rawCentroidY
                                 } else {
-                                    0.25f * rawCentroidY + 0.75f * previousCentroidY
+                                    0.5f * rawCentroidY + 0.5f * previousCentroidY
                                 }
 
                                 if (previousCentroidY != -1f) {
                                     val deltaY = currentCentroidY - previousCentroidY
 
-                                    // Nur echte, fließende Bewegungen beachten
-                                    if (abs(deltaY) > 0.15f) {
-                                        // Sauberes Aufaddieren ohne blockierende Resets
-                                        accumulatedDeltaY += deltaY
+                                    if (abs(deltaY) > 0.2f) {
+                                        // Verhindert das "Von-alleine-Springen": Rauschen summiert sich nicht endlos auf
+                                        if (accumulatedDeltaY == 0f) {
+                                            accumulatedDeltaY = deltaY
+                                        } else if ((accumulatedDeltaY > 0f && deltaY > 0f) || (accumulatedDeltaY < 0f && deltaY > 0f)) {
+                                            accumulatedDeltaY += deltaY
+                                        } else {
+                                            // Bei Richtungswechsel sofort sauber umschalten statt verzerren
+                                            accumulatedDeltaY = deltaY
+                                        }
 
-                                        // Identische, faire Schwelle für beide Richtungen (10% der Bildhöhe)
-                                        val swipeThreshold = height * 0.10f
+                                        // Angenehm erreichbare Schwelle (9% der Bildhöhe) für beide Richtungen
+                                        val swipeThreshold = height * 0.09f
 
                                         if (abs(accumulatedDeltaY) > swipeThreshold) {
                                             if (currentTime - lastTriggerTime > cooldownMillis) {
