@@ -28,7 +28,7 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
 
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 650L // Kleine Atempause zwischen den Swipes
+    private val cooldownMillis = 650L 
     
     private var previousCentroidY: Float = -1f
     private var accumulatedDeltaY = 0f
@@ -82,22 +82,29 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            // Etwas höhere Masse-Schwelle (5000L) gegen versehentliche Micro-Trigger
                             if (totalMass > 5000L) {
-                                val currentCentroidY = massY.toFloat() / totalMass.toFloat()
+                                val rawCentroidY = massY.toFloat() / totalMass.toFloat()
+
+                                // GLÄTTUNGS-FILTER WIEDER DA: 60% neu, 40% alt -> eliminiert jegliches Zittern
+                                val currentCentroidY = if (previousCentroidY == -1f) {
+                                    rawCentroidY
+                                } else {
+                                    0.6f * rawCentroidY + 0.4f * previousCentroidY
+                                }
 
                                 if (previousCentroidY != -1f) {
                                     val deltaY = currentCentroidY - previousCentroidY
 
-                                    if (abs(deltaY) > 0.4f) {
+                                    if (abs(deltaY) > 0.35f) {
                                         if ((accumulatedDeltaY > 0f && deltaY < 0f) || (accumulatedDeltaY < 0f && deltaY > 0f)) {
                                             accumulatedDeltaY = deltaY
                                         } else {
                                             accumulatedDeltaY += deltaY
                                         }
 
-                                        // Ausgewogenerer Schwellenwert (12% der Bildhöhe) für einen sauberen, gewollten Wisch
-                                        val swipeThreshold = height * 0.12f
+                                        // Flexible Schwellenwerte: Runter braucht etwas weniger Weg, um hakelfrei zu sein
+                                        val isMovingDown = accumulatedDeltaY > 0f
+                                        val swipeThreshold = if (isMovingDown) height * 0.10f else height * 0.12f
 
                                         if (abs(accumulatedDeltaY) > swipeThreshold) {
                                             if (currentTime - lastTriggerTime > cooldownMillis) {
@@ -160,4 +167,5 @@ class AirGestureCore(private val context: Context) {
         }
     }
 }
+
 
