@@ -244,7 +244,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 @Composable
 fun JuarisMainDashboard(prefs: SharedPreferences) {
     val context = LocalContext.current
-    val lifecycleOwner = androidx.LocalLifecycleOwner.current
+    val lifecycleOwner = context as androidx.LocalLifecycleOwner
     val aiCore = remember { LocalAICore(context) }
     val airGestureCore = remember { AirGestureCore(context) }
     var selectedTab by remember { mutableStateOf(0) }
