@@ -28,7 +28,7 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
 
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 750L // 750 ms Ruhepause nach jedem Swipe
+    private val cooldownMillis = 750L // 750 ms Ruhepause
     
     private var previousCentroidX: Float = -1f
     private var accumulatedDeltaX = 0f
@@ -64,9 +64,9 @@ class AirGestureCore(private val context: Context) {
                         if (previousBytes != null && previousBytes!!.size == currentBytes.size) {
                             var massX = 0L
                             var totalMass = 0L
-                            val step = 10 // Feines Raster beibehalten
+                            val step = 10 // Feines Raster für optimale Erkennung
 
-                            // Komplettes Bild scannen
+                            // Gesamtes Bild scannen
                             for (y in 0 until height step step) {
                                 for (x in 0 until width step step) {
                                     val index = y * rowStride + x
@@ -75,8 +75,8 @@ class AirGestureCore(private val context: Context) {
                                         val prev = previousBytes!![index].toInt() and 0xFF
                                         val delta = abs(curr - prev)
                                         
-                                        // Sweet Spot: Ignoriert leichtes Rauschen (delta > 12)
-                                        if (delta > 12) {
+                                        // Exaktes Delta auf 13 eingestellt
+                                        if (delta > 13) {
                                             massX += (x * delta)
                                             totalMass += delta
                                         }
@@ -84,21 +84,23 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            // Sweet Spot: Etwas höhere Masse (6000L) gegen Fehltrigger
-                            if (totalMass > 6000L) {
+                            // Exakte Masse auf 7000L eingestellt
+                            if (totalMass > 7000L) {
                                 val currentCentroidX = massX.toFloat() / totalMass.toFloat()
 
                                 if (previousCentroidX != -1f) {
                                     val deltaX = currentCentroidX - previousCentroidX
 
-                                    if (abs(deltaX) > 0.3f) {
+                                    // Strikterer Sprung auf 0.5f eingestellt
+                                    if (abs(deltaX) > 0.5f) {
                                         if ((accumulatedDeltaX > 0f && deltaX < 0f) || (accumulatedDeltaX < 0f && deltaX > 0f)) {
                                             accumulatedDeltaX = deltaX
                                         } else {
                                             accumulatedDeltaX += deltaX
                                         }
 
-                                        val swipeThreshold = width * 0.15f // Präziser Schwellenwert
+                                        // Schwellenwert exakt auf 0.15f belassen
+                                        val swipeThreshold = width * 0.15f
 
                                         if (abs(accumulatedDeltaX) > swipeThreshold) {
                                             if (currentTime - lastTriggerTime > cooldownMillis) {
