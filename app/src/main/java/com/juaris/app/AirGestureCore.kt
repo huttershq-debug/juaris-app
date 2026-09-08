@@ -28,7 +28,7 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
 
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 500L 
+    private val cooldownMillis = 500L // Flotter Cooldown für flüssiges Bedienen
     
     private var previousCentroidY: Float = -1f
     private var accumulatedDeltaY = 0f
@@ -64,7 +64,7 @@ class AirGestureCore(private val context: Context) {
                         if (previousBytes != null && previousBytes!!.size == currentBytes.size) {
                             var massY = 0L
                             var totalMass = 0L
-                            val step = 10
+                            val step = 8
 
                             for (y in 0 until height step step) {
                                 for (x in 0 until width step step) {
@@ -74,7 +74,7 @@ class AirGestureCore(private val context: Context) {
                                         val prev = previousBytes!![index].toInt() and 0xFF
                                         val delta = abs(curr - prev)
                                         
-                                        if (delta > 8) {
+                                        if (delta > 10) {
                                             massY += (y * delta)
                                             totalMass += delta
                                         }
@@ -82,31 +82,33 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            // Niedrigere Masse (2500L), damit Runterwischen am Körper nicht abbricht
-                            if (totalMass > 2500L) {
+                            // Ausgewogene Masse-Schwelle (3000L), damit Rauf und Runter gleichermaßen greifen
+                            if (totalMass > 3000L) {
                                 val rawCentroidY = massY.toFloat() / totalMass.toFloat()
 
+                                // Sanfte Glättung (40% neu, 60% alt) für ein ruhiges, stabiles Bild
                                 val currentCentroidY = if (previousCentroidY == -1f) {
                                     rawCentroidY
                                 } else {
-                                    0.5f * rawCentroidY + 0.5f * previousCentroidY
+                                    0.4f * rawCentroidY + 0.6f * previousCentroidY
                                 }
 
                                 if (previousCentroidY != -1f) {
                                     val deltaY = currentCentroidY - previousCentroidY
 
+                                    // Feines Gate gegen Mikrorauschen
                                     if (abs(deltaY) > 0.15f) {
                                         if (accumulatedDeltaY == 0f) {
                                             accumulatedDeltaY = deltaY
                                         } else if ((accumulatedDeltaY > 0f && deltaY > 0f) || (accumulatedDeltaY < 0f && deltaY < 0f)) {
                                             accumulatedDeltaY += deltaY
                                         } else {
+                                            // Bei Richtungswechsel sofort sauber neu anfangen
                                             accumulatedDeltaY = deltaY
                                         }
 
-                                        // ASYMMETRISCHE SCHWELLENWERTE: Runter braucht weniger Weg (8%), Rauf etwas mehr (11%)
-                                        val isMovingDown = accumulatedDeltaY > 0f
-                                        val swipeThreshold = if (isMovingDown) height * 0.08f else height * 0.11f
+                                        // Perfekter Schwellenwert (9% der Bildhöhe) für beide Richtungen
+                                        val swipeThreshold = height * 0.09f
 
                                         if (abs(accumulatedDeltaY) > swipeThreshold) {
                                             if (currentTime - lastTriggerTime > cooldownMillis) {
@@ -134,6 +136,7 @@ class AirGestureCore(private val context: Context) {
                                 }
                                 previousCentroidY = currentCentroidY
                             } else {
+                                // Hand weg -> Werte sauber zurücksetzen
                                 previousCentroidY = -1f
                                 accumulatedDeltaY = 0f
                             }
