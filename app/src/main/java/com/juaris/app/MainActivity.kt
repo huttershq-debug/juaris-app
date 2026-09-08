@@ -258,23 +258,33 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
         ContextCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED
     }
 
-    // GLOBALE GESTEN-ÜBERWACHUNG: Aktiviert Air-Swiping von jedem Tab aus
+     // AUTOMATISCHER START: Wartet, bis die App aktiv ist, und startet die Kamera sofort global
     DisposableEffect(lifecycleOwner, hasCameraPermission) {
-        if (hasCameraPermission) {
-            airGestureCore.startGestureDetection(lifecycleOwner) { action ->
-                when (action) {
-                    AirGestureCore.GestureAction.SWIPE_RIGHT -> {
-                        selectedTab = (selectedTab + 1) % tabs.size
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME && hasCameraPermission) {
+                airGestureCore.startGestureDetection(lifecycleOwner) { action ->
+                    when (action) {
+                        AirGestureCore.GestureAction.SWIPE_RIGHT -> {
+                            selectedTab = (selectedTab + 1) % tabs.size
+                        }
+                        AirGestureCore.GestureAction.SWIPE_LEFT -> {
+                            selectedTab = if (selectedTab - 1 < 0) tabs.size - 1 else selectedTab - 1
+                        }
+                        else -> {}
                     }
-                    AirGestureCore.GestureAction.SWIPE_LEFT -> {
-                        selectedTab = if (selectedTab - 1 < 0) tabs.size - 1 else selectedTab - 1
-                    }
-                    else -> {}
                 }
+            } else if (event == androidx.lifecycle.Lifecycle.Event.ON_PAUSE) {
+                airGestureCore.stopGestureDetection()
             }
         }
+        
+        lifecycleOwner.lifecycle.addObserver(observer)
+        
         onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
             airGestureCore.stopGestureDetection()
+        }
+    }
         }
     }
 
