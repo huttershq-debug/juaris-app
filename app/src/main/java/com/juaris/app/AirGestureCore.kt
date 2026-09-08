@@ -28,10 +28,13 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
 
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 500L 
+    private val cooldownMillis = 600L // 0.6 Sekunden sauberer Abstand
     
-    private var previousCentroidY: Float = -1f
-    private var accumulatedDeltaY = 0f
+    // Professionelle Zustandsvariablen
+    private var smoothedCentroidY: Float = -1f
+    private var anchorY: Float = -1f
+    private var isTracking = false
+    private var gestureStartTime = 0L
 
     fun startGestureDetection(lifecycleOwner: LifecycleOwner, onGestureDetected: (GestureAction) -> Unit) {
         if (cameraProvider != null) return
@@ -55,7 +58,7 @@ class AirGestureCore(private val context: Context) {
                         val plane = imageProxy.planes[0]
                         val buffer = plane.buffer
                         val rowStride = plane.rowStride
-                        val width = imageProxy.width // Korrekt deklariert
+                        val width = imageProxy.width
                         val height = imageProxy.height
 
                         val currentBytes = ByteArray(buffer.remaining())
@@ -82,57 +85,69 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            if (totalMass > 500L) {
+                            // Hysterese-Grenzen: Verhindert das lästige Abreißen mitten in der Bewegung
+                            val massEnter = 1800L
+                            val massExit = 700L
+
+                            if (totalMass > (if (isTracking) massExit else massEnter)) {
                                 val rawCentroidY = massY.toFloat() / totalMass.toFloat()
 
-                                val currentCentroidY = if (previousCentroidY == -1f) {
+                                // Seidenweiche Glättung gegen jegliches Zittern
+                                smoothedCentroidY = if (smoothedCentroidY == -1f) {
                                     rawCentroidY
                                 } else {
-                                    0.3f * rawCentroidY + 0.7f * previousCentroidY
+                                    0.25f * rawCentroidY + 0.75f * smoothedCentroidY
                                 }
 
-                                if (previousCentroidY != -1f) {
-                                    val deltaY = currentCentroidY - previousCentroidY
+                                if (!isTracking) {
+                                    // Startpunkt (Anker) absolut festlegen
+                                    anchorY = smoothedCentroidY
+                                    isTracking = true
+                                    gestureStartTime = currentTime
+                                } else {
+                                    // Gesamtweg exakt vom Anker messen
+                                    val totalDisplacement = smoothedCentroidY - anchorY
+                                    val swipeThreshold = height.toFloat() * 0.12f // 12% des Bildes
 
-                                    if (abs(deltaY) > 0.1f) {
-                                        if (accumulatedDeltaY == 0f) {
-                                            accumulatedDeltaY = deltaY
-                                        } else if ((accumulatedDeltaY > 0f && deltaY > 0f) || (accumulatedDeltaY < 0f && deltaY < 0f)) {
-                                            accumulatedDeltaY += deltaY
-                                        } else {
-                                            accumulatedDeltaY = deltaY
-                                        }
+                                    // Automatischer Reset, falls die Hand länger als 1.5s stillgehalten wird
+                                    if (currentTime - gestureStartTime > 1500L) {
+                                        anchorY = smoothedCentroidY
+                                        gestureStartTime = currentTime
+                                    }
 
-                                        val swipeThreshold = height.toFloat() * 0.08f
+                                    if (abs(totalDisplacement) > swipeThreshold) {
+                                        if (currentTime - lastTriggerTime > cooldownMillis) {
+                                            lastTriggerTime = currentTime
 
-                                        if (abs(accumulatedDeltaY) > swipeThreshold) {
-                                            val triggeredDelta = accumulatedDeltaY
-                                            accumulatedDeltaY = 0f
-
-                                            if (currentTime - lastTriggerTime > cooldownMillis) {
-                                                lastTriggerTime = currentTime
-
-                                                val action = if (triggeredDelta < 0f) {
-                                                    _gestureState.value = "Swipe: Rauf (Rechts)"
-                                                    _lastAction.value = "SWIPE_RIGHT"
-                                                    GestureAction.SWIPE_RIGHT
-                                                } else {
-                                                    _gestureState.value = "Swipe: Runter (Links)"
-                                                    _lastAction.value = "SWIPE_LEFT"
-                                                    GestureAction.SWIPE_LEFT
-                                                }
-
-                                                ContextCompat.getMainExecutor(context).execute {
-                                                    onGestureDetected(action)
-                                                }
+                                            // Negatives displacement = Rauf = Rechts (Nächster Tab)
+                                            // Positives displacement = Runter = Links (Vorheriger Tab)
+                                            val action = if (totalDisplacement < 0f) {
+                                                _gestureState.value = "Swipe: Rauf (Rechts)"
+                                                _lastAction.value = "SWIPE_RIGHT"
+                                                GestureAction.SWIPE_RIGHT
+                                            } else {
+                                                _gestureState.value = "Swipe: Runter (Links)"
+                                                _lastAction.value = "SWIPE_LEFT"
+                                                GestureAction.SWIPE_LEFT
                                             }
+
+                                            ContextCompat.getMainExecutor(context).execute {
+                                                onGestureDetected(action)
+                                            }
+
+                                            // Sofortiger Anker-Shift: Direkt bereit für den nächsten Wisch ohne Hand wegzuziehen
+                                            anchorY = smoothedCentroidY
+                                            gestureStartTime = currentTime
                                         }
                                     }
                                 }
-                                previousCentroidY = currentCentroidY
                             } else {
-                                previousCentroidY = -1f
-                                accumulatedDeltaY = 0f
+                                // Hand wurde wirklich entfernt
+                                if (totalMass < massExit) {
+                                    isTracking = false
+                                    smoothedCentroidY = -1f
+                                    anchorY = -1f
+                                }
                             }
                         }
                         previousBytes = currentBytes
@@ -166,4 +181,5 @@ class AirGestureCore(private val context: Context) {
         }
     }
 }
+
 
