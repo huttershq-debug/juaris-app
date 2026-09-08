@@ -18,7 +18,7 @@ class AirGestureCore(private val context: Context) {
         NONE, SWIPE_LEFT, SWIPE_RIGHT
     }
 
-    private val _gestureState = MutableStateFlow("Juaris Gleit-Modus Aktiv")
+    private val _gestureState = MutableStateFlow("Juaris Kortex Aktiv")
     val gestureState: StateFlow<String> = _gestureState
 
     private val _lastAction = MutableStateFlow("KEINE")
@@ -28,12 +28,15 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
 
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 250L // Perfekt für schnelles, flüssiges Gleiten ohne Verzögerung
+    private val cooldownMillis = 200L // Blitzschnell für butterweiches Durchgleiten
     
     private var previousCentroidX: Float = -1f
     private var accumulatedDeltaX = 0f
 
     fun startGestureDetection(lifecycleOwner: LifecycleOwner, onGestureDetected: (GestureAction) -> Unit) {
+        // Verhindert mehrfaches Starten der Pipeline
+        if (cameraProvider != null) return
+
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
 
         cameraProviderFuture.addListener({
@@ -62,7 +65,7 @@ class AirGestureCore(private val context: Context) {
                         if (previousBytes != null && previousBytes!!.size == currentBytes.size) {
                             var massX = 0L
                             var totalMass = 0L
-                            val step = 14 // Fein genug für geschmeidige Erkennung, schnell genug für Realtime
+                            val step = 12 // Noch feiner für flüssiges Ansprechen
 
                             for (y in 0 until height step step) {
                                 for (x in 0 until width step step) {
@@ -72,7 +75,7 @@ class AirGestureCore(private val context: Context) {
                                         val prev = previousBytes!![index].toInt() and 0xFF
                                         val delta = abs(curr - prev)
                                         
-                                        if (delta > 20) {
+                                        if (delta > 18) {
                                             massX += (x * delta)
                                             totalMass += delta
                                         }
@@ -80,15 +83,14 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            if (totalMass > 6000L) {
+                            if (totalMass > 5000L) {
                                 val currentCentroidX = massX.toFloat() / totalMass.toFloat()
 
                                 if (previousCentroidX != -1f) {
                                     val deltaX = currentCentroidX - previousCentroidX
                                     accumulatedDeltaX += deltaX
 
-                                    // Etwas reaktionsfreudigerer Schwellenwert (5% der Breite)
-                                    val swipeThreshold = width * 0.05f
+                                    val swipeThreshold = width * 0.04f // Extrem reaktionsfreudig
 
                                     if (abs(accumulatedDeltaX) > swipeThreshold) {
                                         if (currentTime - lastTriggerTime > cooldownMillis) {
@@ -142,10 +144,10 @@ class AirGestureCore(private val context: Context) {
     fun stopGestureDetection() {
         try {
             cameraProvider?.unbindAll()
+            cameraProvider = null
         } catch (e: Exception) {
             // Ignorieren
         }
     }
 }
-
 
