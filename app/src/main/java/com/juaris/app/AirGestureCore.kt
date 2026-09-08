@@ -28,13 +28,10 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
 
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 600L // Gesunde Pause, damit kein Tab doppelt springt
+    private val cooldownMillis = 500L 
     
     private var previousCentroidY: Float = -1f
-    
-    // Zähler für konsistente Bewegungen über mehrere Frames (eliminiert Rauschen & Springen)
-    private var consecutiveUpFrames = 0
-    private var consecutiveDownFrames = 0
+    private var accumulatedDeltaY = 0f
 
     fun startGestureDetection(lifecycleOwner: LifecycleOwner, onGestureDetected: (GestureAction) -> Unit) {
         if (cameraProvider != null) return
@@ -67,7 +64,7 @@ class AirGestureCore(private val context: Context) {
                         if (previousBytes != null && previousBytes!!.size == currentBytes.size) {
                             var massY = 0L
                             var totalMass = 0L
-                            val step = 8
+                            val step = 10
 
                             for (y in 0 until height step step) {
                                 for (x in 0 until width step step) {
@@ -77,7 +74,7 @@ class AirGestureCore(private val context: Context) {
                                         val prev = previousBytes!![index].toInt() and 0xFF
                                         val delta = abs(curr - prev)
                                         
-                                        if (delta > 12) { // Etwas strenger gegen Hintergrundrauschen
+                                        if (delta > 8) {
                                             massY += (y * delta)
                                             totalMass += delta
                                         }
@@ -85,8 +82,8 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            // Moderate Masse-Schwelle
-                            if (totalMass > 4000L) {
+                            // Niedrigere Masse (2500L), damit Runterwischen am Körper nicht abbricht
+                            if (totalMass > 2500L) {
                                 val rawCentroidY = massY.toFloat() / totalMass.toFloat()
 
                                 val currentCentroidY = if (previousCentroidY == -1f) {
@@ -98,54 +95,47 @@ class AirGestureCore(private val context: Context) {
                                 if (previousCentroidY != -1f) {
                                     val deltaY = currentCentroidY - previousCentroidY
 
-                                    // Mindest-Weg pro Frame, damit es eine echte Bewegung ist
-                                    if (abs(deltaY) > 0.4f) {
-                                        if (deltaY < 0f) {
-                                            // Bewegung nach oben
-                                            consecutiveUpFrames++
-                                            consecutiveDownFrames = 0
+                                    if (abs(deltaY) > 0.15f) {
+                                        if (accumulatedDeltaY == 0f) {
+                                            accumulatedDeltaY = deltaY
+                                        } else if ((accumulatedDeltaY > 0f && deltaY > 0f) || (accumulatedDeltaY < 0f && deltaY < 0f)) {
+                                            accumulatedDeltaY += deltaY
                                         } else {
-                                            // Bewegung nach unten
-                                            consecutiveDownFrames++
-                                            consecutiveUpFrames = 0
+                                            accumulatedDeltaY = deltaY
                                         }
 
-                                        // Wenn die Bewegung über 3 Frames hinweg konstant in dieselbe Richtung läuft -> Auslösen!
-                                        val requiredFrames = 3
+                                        // ASYMMETRISCHE SCHWELLENWERTE: Runter braucht weniger Weg (8%), Rauf etwas mehr (11%)
+                                        val isMovingDown = accumulatedDeltaY > 0f
+                                        val swipeThreshold = if (isMovingDown) height * 0.08f else height * 0.11f
 
-                                        if (consecutiveUpFrames >= requiredFrames) {
+                                        if (abs(accumulatedDeltaY) > swipeThreshold) {
                                             if (currentTime - lastTriggerTime > cooldownMillis) {
                                                 lastTriggerTime = currentTime
-                                                
-                                                _gestureState.value = "Swipe: Rauf (Rechts)"
-                                                _lastAction.value = "SWIPE_RIGHT"
-                                                
+
+                                                // Rauf (negatives DeltaY) = Rechts (Nächster Tab)
+                                                // Runter (positives DeltaY) = Links (Vorheriger Tab)
+                                                val action = if (accumulatedDeltaY < 0f) {
+                                                    _gestureState.value = "Swipe: Rauf (Rechts)"
+                                                    _lastAction.value = "SWIPE_RIGHT"
+                                                    GestureAction.SWIPE_RIGHT
+                                                } else {
+                                                    _gestureState.value = "Swipe: Runter (Links)"
+                                                    _lastAction.value = "SWIPE_LEFT"
+                                                    GestureAction.SWIPE_LEFT
+                                                }
+
                                                 ContextCompat.getMainExecutor(context).execute {
-                                                    onGestureDetected(GestureAction.SWIPE_RIGHT)
+                                                    onGestureDetected(action)
                                                 }
                                             }
-                                            consecutiveUpFrames = 0
-                                        } else if (consecutiveDownFrames >= requiredFrames) {
-                                            if (currentTime - lastTriggerTime > cooldownMillis) {
-                                                lastTriggerTime = currentTime
-                                                
-                                                _gestureState.value = "Swipe: Runter (Links)"
-                                                _lastAction.value = "SWIPE_LEFT"
-                                                
-                                                ContextCompat.getMainExecutor(context).execute {
-                                                    onGestureDetected(GestureAction.SWIPE_LEFT)
-                                                }
-                                            }
-                                            consecutiveDownFrames = 0
+                                            accumulatedDeltaY = 0f
                                         }
                                     }
                                 }
                                 previousCentroidY = currentCentroidY
                             } else {
-                                // Wenn keine Hand im Bild / Bewegung zu gering: Zähler sanft zurücksetzen
-                                consecutiveUpFrames = 0
-                                consecutiveDownFrames = 0
                                 previousCentroidY = -1f
+                                accumulatedDeltaY = 0f
                             }
                         }
                         previousBytes = currentBytes
