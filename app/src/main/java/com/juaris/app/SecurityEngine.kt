@@ -1,10 +1,20 @@
 package com.juaris.app
 
 import android.content.Context
+import android.util.Log
 
-class LocalPhishingAnalyzer(private val context: Context) {
-    // Füge hier die Logik zur lokalen Phishing-Analyse hinzu
+enum class SecurityStatus {
+    SAFE, BLOCK
 }
+
+class SecurityEngine(private val context: Context) {
+    fun evaluate(): SecurityStatus {
+        Log.d("SecurityEngine", "Evaluating security status")
+        return SecurityStatus.SAFE
+    }
+}
+
+
 /**
  * Juaris Security Engine
  * Lokale Offline-Überwachung für Anrufe, SMS und E-Mails.
