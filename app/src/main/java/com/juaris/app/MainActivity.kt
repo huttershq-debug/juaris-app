@@ -270,29 +270,34 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
         }
     }
 
+    LaunchedEffect(Unit) {
+        if (!hasCameraPermission) {
+            cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+        }
+    }
+
+    // Autonomer Start direkt beim Laden des Dashboards (ohne Klicks notwendig)
     LaunchedEffect(hasCameraPermission, lifecycleOwner) {
         if (hasCameraPermission) {
             airGestureCore.startGestureDetection(lifecycleOwner) { action ->
                 when (action) {
                     AirGestureCore.GestureAction.SWIPE_RIGHT -> {
-                        // Springt fliessend vorwärts (und beim letzten Tab automatisch auf 0 zurück)
                         selectedTab = (selectedTab + 1) % tabs.size
                     }
                     AirGestureCore.GestureAction.SWIPE_LEFT -> {
-                        // Springt fliessend rückwärts (und von 0 automatisch zum letzten Tab)
                         selectedTab = (selectedTab - 1 + tabs.size) % tabs.size
                     }
                     AirGestureCore.GestureAction.NONE -> {}
                 }
             }
         }
+    }
 
     DisposableEffect(lifecycleOwner) {
         onDispose {
             airGestureCore.stopGestureDetection()
         }
     }
-
 
     val liveLogs = remember {
         mutableStateListOf(
