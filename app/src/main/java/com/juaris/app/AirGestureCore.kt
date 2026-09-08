@@ -28,7 +28,7 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
 
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 400L // Flotteres, direkteres Durchschalten
+    private val cooldownMillis = 500L 
     
     private var previousCentroidY: Float = -1f
     private var accumulatedDeltaY = 0f
@@ -82,33 +82,33 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            // Angenehme, leichtgängige Masse-Schwelle (4500L)
-                            if (totalMass > 4500L) {
+                            // Erhöhte Masse-Schwelle (6000L) stoppt das eigenständige Springen durch Hintergrundrauschen
+                            if (totalMass > 6000L) {
                                 val rawCentroidY = massY.toFloat() / totalMass.toFloat()
 
-                                // Ausgewogene Glättung (50% neu, 50% alt) -> Fühlt sich leicht und reaktionsschnell an
+                                // Ausgewogene Glättung gegen Zittern (40% neu, 60% alt)
                                 val currentCentroidY = if (previousCentroidY == -1f) {
                                     rawCentroidY
                                 } else {
-                                    0.5f * rawCentroidY + 0.5f * previousCentroidY
+                                    0.4f * rawCentroidY + 0.6f * previousCentroidY
                                 }
 
                                 if (previousCentroidY != -1f) {
                                     val deltaY = currentCentroidY - previousCentroidY
 
                                     if (abs(deltaY) > 0.2f) {
-                                        // Verhindert das "Von-alleine-Springen": Rauschen summiert sich nicht endlos auf
+                                        // FEHLERFREIE RICHTUNGSPRÜFUNG: Korrekte Trennung von Rauf und Runter
                                         if (accumulatedDeltaY == 0f) {
                                             accumulatedDeltaY = deltaY
-                                        } else if ((accumulatedDeltaY > 0f && deltaY > 0f) || (accumulatedDeltaY < 0f && deltaY > 0f)) {
+                                        } else if ((accumulatedDeltaY > 0f && deltaY > 0f) || (accumulatedDeltaY < 0f && deltaY < 0f)) {
                                             accumulatedDeltaY += deltaY
                                         } else {
-                                            // Bei Richtungswechsel sofort sauber umschalten statt verzerren
+                                            // Bei Richtungswechsel sofort sauber zurücksetzen
                                             accumulatedDeltaY = deltaY
                                         }
 
-                                        // Angenehm erreichbare Schwelle (9% der Bildhöhe) für beide Richtungen
-                                        val swipeThreshold = height * 0.09f
+                                        // Ausgewogener Schwellenwert (11% der Bildhöhe) für beide Richtungen
+                                        val swipeThreshold = height * 0.11f
 
                                         if (abs(accumulatedDeltaY) > swipeThreshold) {
                                             if (currentTime - lastTriggerTime > cooldownMillis) {
