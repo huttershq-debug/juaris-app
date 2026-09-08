@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.juaris.app.ui.AIPage
@@ -242,6 +243,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 @Composable
 fun JuarisMainDashboard(prefs: SharedPreferences) {
     val context = LocalContext.current
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     val aiCore = remember { LocalAICore(context) }
     val airGestureCore = remember { AirGestureCore(context) }
     var selectedTab by remember { mutableStateOf(0) }
@@ -250,6 +252,30 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
         "Status", "Schutz", "Sperren", "Logs", "Clipboard",
         "Rechte", "Schwarm", "KI", "Gesten", "Info"
     )
+
+    val hasCameraPermission = remember {
+        ContextCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED
+    }
+
+    // GLOBALE GESTEN-ÜBERWACHUNG: Aktiviert Air-Swiping von jedem Tab aus
+    DisposableEffect(lifecycleOwner, hasCameraPermission) {
+        if (hasCameraPermission) {
+            airGestureCore.startGestureDetection(lifecycleOwner) { action ->
+                when (action) {
+                    AirGestureCore.GestureAction.SWIPE_RIGHT -> {
+                        selectedTab = (selectedTab + 1) % tabs.size
+                    }
+                    AirGestureCore.GestureAction.SWIPE_LEFT -> {
+                        selectedTab = if (selectedTab - 1 < 0) tabs.size - 1 else selectedTab - 1
+                    }
+                    else -> {}
+                }
+            }
+        }
+        onDispose {
+            airGestureCore.stopGestureDetection()
+        }
+    }
 
     val liveLogs = remember {
         mutableStateListOf(
