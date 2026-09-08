@@ -6,16 +6,12 @@ class LocalPhishingAnalyzer(private val context: Context) {
     fun analyze(content: String): Boolean {
         return false
     }
+
+    fun analyzeText(text: String): Boolean {
+        return false
+    }
 }
-class LocalPhishingAnalyzer {
 
-    private val urgencyTriggers = listOf(
-        "sofort", "24stunden", "kontogesperrt", "klicken", "verifizierung",
-        "rechnung", "ueberweisung", "sicherheitswarnung", "securityalert", "bank"
-    )
-
-    fun analyzeText(rawText: String): PhishingResult {
-        // 1. MUSTER-EROSION: Bereinigt den Text von Vertuschanreizen der Betrüger
         val cleanedText = erodeAndNormalizeText(rawText)
         
         var score = 0
