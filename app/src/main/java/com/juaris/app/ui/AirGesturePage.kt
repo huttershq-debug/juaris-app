@@ -10,7 +10,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.juaris.app.AirGestureCore
@@ -21,7 +20,6 @@ fun AirGesturePage(
     onNavigate: (Boolean) -> Unit
 ) {
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
    
     var hasCameraPermission by remember {
         mutableStateOf(
@@ -35,29 +33,8 @@ fun AirGesturePage(
         hasCameraPermission = granted
     }
 
-    LaunchedEffect(Unit) {
-        if (!hasCameraPermission) {
-            permissionLauncher.launch(Manifest.permission.CAMERA)
-        }
-    }
-
     val gestureState by airGestureCore.gestureState.collectAsState()
     val lastAction by airGestureCore.lastAction.collectAsState()
-
-    DisposableEffect(lifecycleOwner, hasCameraPermission) {
-        if (hasCameraPermission) {
-            airGestureCore.startGestureDetection(lifecycleOwner) { action ->
-                when (action) {
-                    AirGestureCore.GestureAction.SWIPE_RIGHT -> onNavigate(true)
-                    AirGestureCore.GestureAction.SWIPE_LEFT -> onNavigate(false)
-                    else -> {}
-                }
-            }
-        }
-        onDispose {
-            airGestureCore.stopGestureDetection()
-        }
-    }
 
     Column(
         modifier = Modifier
@@ -93,9 +70,9 @@ fun AirGesturePage(
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
                         onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) },
-                        colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                     ) {
-                        Text("Berechtigung erteilen", color = Color.Black)
+                        Text("Berechtigung erteilen", color = Color.White)
                     }
                 } else {
                     Text(
@@ -128,4 +105,5 @@ fun AirGesturePage(
         }
     }
 }
+
 
