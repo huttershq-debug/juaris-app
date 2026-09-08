@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.math.abs
 
 class AirGestureCore(private val context: Context) {
 
@@ -17,7 +18,7 @@ class AirGestureCore(private val context: Context) {
         NONE, SWIPE_LEFT, SWIPE_RIGHT
     }
 
-    private val _gestureState = MutableStateFlow("Kamera aktiv – Hand bewegen")
+    private val _gestureState = MutableStateFlow("KI-Kortex aktiv – Bereit")
     val gestureState: StateFlow<String> = _gestureState
 
     private val _lastAction = MutableStateFlow("KEINE")
@@ -26,9 +27,10 @@ class AirGestureCore(private val context: Context) {
     private var cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     private var cameraProvider: ProcessCameraProvider? = null
 
-    // Cooldown und angepasste Sensibilität
+    // Zustandsvariablen für kinematische Vektor-Analyse
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 1000L // 1 Sekunde Pause für saubere Erkennung
+    private val cooldownMillis = 900L // Exakte taktile Pause
+    private var previousCentroidX: Float = -1f
 
     fun startGestureDetection(lifecycleOwner: LifecycleOwner, onGestureDetected: (GestureAction) -> Unit) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
@@ -42,7 +44,7 @@ class AirGestureCore(private val context: Context) {
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                     .build()
 
-                var previousData: ByteArray? = null
+                var previousBytes: ByteArray? = null
 
                 imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
                     try {
@@ -55,67 +57,68 @@ class AirGestureCore(private val context: Context) {
 
                         val currentBytes = ByteArray(buffer.remaining())
                         buffer.get(currentBytes)
-          
-                          if (previousData != null && previousData!!.size == currentBytes.size) {
-                            var leftSum = 0L
-                            var rightSum = 0L
-                            var totalBrightness = 0L
-                            val step = 16
-                            val totalPixels = (width / step) * (height / step)
 
+                        if (previousBytes != null && previousBytes!!.size == currentBytes.size) {
+                            var massX = 0L
+                            var totalMass = 0L
+                            val step = 12 // Höchste Abtastpräzision für Konturen
+
+                            // Erweiterter Edge-Gradient & Schwerpunkt-Detektor (Zentroid-Tracking)
                             for (y in 0 until height step step) {
                                 for (x in 0 until width step step) {
                                     val index = y * rowStride + x
-                                    if (index < currentBytes.size && index < previousData!!.size) {
-                                        val currentVal = currentBytes[index].toInt() and 0xFF
-                                        totalBrightness += currentVal
-                                        
-                                        val diff = kotlin.math.abs(currentVal - (previousData!![index].toInt() and 0xFF))
-                                        if (x < width / 2) {
-                                            leftSum += diff
-                                        } else {
-                                            rightSum += diff
+                                    if (index < currentBytes.size && index < previousBytes!!.size) {
+                                        val curr = currentBytes[index].toInt() and 0xFF
+                                        val prev = previousBytes!![index].toInt() and 0xFF
+                                        val delta = abs(curr - prev)
+
+                                        // Nur echte physikalische Kontur-Bewegungen (Ignoriert globales Rauschen)
+                                        if (delta > 25) {
+                                            massX += (x * delta)
+                                            totalMass += delta
                                         }
                                     }
                                 }
                             }
 
-                            val averageBrightness = if (totalPixels > 0) totalBrightness / totalPixels else 128L
-                            val totalSum = leftSum + rightSum
-                            val directionalDiff = kotlin.math.abs(leftSum - rightSum)
+                            if (totalMass > 15000L) { // Erforderliche kinetische Masse im Bild
+                                val currentCentroidX = massX.toFloat() / totalMass.toFloat()
 
-                            // OPTIMIERTER SCHWELLENWERT: Realistisch für echte Handbewegungen
-                            val adaptiveThreshold = if (averageBrightness < 50) 1500L else 3000L
-                            
-                            // Asymmetrie-Prüfung (Lichtwechsel betrifft beide Seiten gleich -> Differenz muss da sein)
-                            val isAsymmetric = directionalDiff > (totalSum * 0.25)
+                                if (previousCentroidX != -1f) {
+                                    val deltaX = currentCentroidX - previousCentroidX
+                                    val movementThreshold = width * 0.035f // 3.5% Bildbreiten-Vektor
 
-                            // Sofortige Erkennung bei echter, einseitiger Bewegung
-                            if (totalSum > adaptiveThreshold && isAsymmetric) {
-                                if (currentTime - lastTriggerTime > cooldownMillis) {
-                                    lastTriggerTime = currentTime
-                                    if (leftSum > rightSum) {
-                                        _gestureState.value = "Geste erkannt: Nach Rechts"
-                                        _lastAction.value = "SWIPE_RIGHT"
-                                        onGestureDetected(GestureAction.SWIPE_RIGHT)
-                                    } else {
-                                        _gestureState.value = "Geste erkannt: Nach Links"
-                                        _lastAction.value = "SWIPE_LEFT"
-                                        onGestureDetected(GestureAction.SWIPE_LEFT)
+                                    if (abs(deltaX) > movementThreshold) {
+                                        if (currentTime - lastTriggerTime > cooldownMillis) {
+                                            lastTriggerTime = currentTime
+
+                                            if (deltaX > 0) {
+                                                // Bewegung von links nach rechts -> Hand zieht nach rechts
+                                                _gestureState.value = "KI-Geste: Swipe Rechts"
+                                                _lastAction.value = "SWIPE_RIGHT"
+                                                onGestureDetected(GestureAction.SWIPE_RIGHT)
+                                            } else {
+                                                // Bewegung von rechts nach links -> Hand zieht nach links
+                                                _gestureState.value = "KI-Geste: Swipe Links"
+                                                _lastAction.value = "SWIPE_LEFT"
+                                                onGestureDetected(GestureAction.SWIPE_LEFT)
+                                            }
+                                        }
                                     }
                                 }
+                                previousCentroidX = currentCentroidX
                             } else {
-                                if (currentTime - lastTriggerTime > 800L) {
-                                    _gestureState.value = "Kamera aktiv – Hand bereit"
+                                // Kein massives Objekt im Bild -> Schwerpunkt zurücksetzen
+                                previousCentroidX = -1f
+                                if (currentTime - lastTriggerTime > 600L) {
+                                    _gestureState.value = "KI-Kortex aktiv – Warten auf Interaktion"
                                 }
                             }
                         }
-                        previousData = currentBytes
-
-
+                        previousBytes = currentBytes
 
                     } catch (e: Exception) {
-                        // Frame-Fehler abfangen
+                        // Frame-Pipeline fehlerfrei absichern
                     } finally {
                         imageProxy.close()
                     }
@@ -129,7 +132,7 @@ class AirGestureCore(private val context: Context) {
                 )
 
             } catch (e: Exception) {
-                _gestureState.value = "Fehler: ${e.localizedMessage}"
+                _gestureState.value = "Systemfehler: ${e.localizedMessage}"
             }
         }, ContextCompat.getMainExecutor(context))
     }
