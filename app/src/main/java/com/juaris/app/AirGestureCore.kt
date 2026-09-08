@@ -28,7 +28,7 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
 
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 750L // Exakt auf 750ms eingestellt
+    private val cooldownMillis = 750L // 750 ms Ruhepause nach jedem Swipe
     
     private var previousCentroidX: Float = -1f
     private var accumulatedDeltaX = 0f
@@ -64,8 +64,9 @@ class AirGestureCore(private val context: Context) {
                         if (previousBytes != null && previousBytes!!.size == currentBytes.size) {
                             var massX = 0L
                             var totalMass = 0L
-                            val step = 14 // Breiteres Sichtfeld im Kamerabereich
+                            val step = 10 // Feineres Raster für erweiterte Reichweite
 
+                            // ÜBERALL SCANNEN: Das gesamte Bild von ganz oben (0) bis ganz unten (height)
                             for (y in 0 until height step step) {
                                 for (x in 0 until width step step) {
                                     val index = y * rowStride + x
@@ -74,7 +75,8 @@ class AirGestureCore(private val context: Context) {
                                         val prev = previousBytes!![index].toInt() and 0xFF
                                         val delta = abs(curr - prev)
                                         
-                                        if (delta > 20) {
+                                        // Erhöhte Sensibilität für entfernte oder schwächere Bewegungen
+                                        if (delta > 10) {
                                             massX += (x * delta)
                                             totalMass += delta
                                         }
@@ -82,20 +84,21 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            if (totalMass > 10500L) { // Exakt auf 10500L angepasst
+                            // Angepasste Masse für den Weit-Reichweiten-Modus
+                            if (totalMass > 4000L) {
                                 val currentCentroidX = massX.toFloat() / totalMass.toFloat()
 
                                 if (previousCentroidX != -1f) {
                                     val deltaX = currentCentroidX - previousCentroidX
 
-                                    if (abs(deltaX) > 0.4f) {
+                                    if (abs(deltaX) > 0.3f) {
                                         if ((accumulatedDeltaX > 0f && deltaX < 0f) || (accumulatedDeltaX < 0f && deltaX > 0f)) {
                                             accumulatedDeltaX = deltaX
                                         } else {
                                             accumulatedDeltaX += deltaX
                                         }
 
-                                        val swipeThreshold = width * 0.15f // Exakt auf 0.15f angepasst
+                                        val swipeThreshold = width * 0.15f // Dein präziser Schwellenwert
 
                                         if (abs(accumulatedDeltaX) > swipeThreshold) {
                                             if (currentTime - lastTriggerTime > cooldownMillis) {
