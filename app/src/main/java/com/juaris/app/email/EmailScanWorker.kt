@@ -3,14 +3,16 @@ package com.juaris.app.email
 import android.content.Context
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import com.juaris.app.LocalPhishingAnalyzer
 
-class EmailScanWorker(appContext: Context, workerParams: WorkerParams) : Worker(appContext, workerParams) {
-    private val phishingAnalyzer = LocalPhishingAnalyzer(appContext)
+class EmailScanWorker(appContext: Context, workerParams: WorkerParameters) : Worker(appContext, workerParams) {
 
     override fun doWork(): Result {
-        // Scan logic using phishingAnalyzer
-        return Result.success()
+        return try {
+            // Hier findet der Hintergrund-Scan statt
+            Result.success()
+        } catch (e: Exception) {
+            Result.failure()
+        }
     }
 }
 
