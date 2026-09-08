@@ -56,10 +56,10 @@ class AirGestureCore(private val context: Context) {
                     try {
                         val currentTime = System.currentTimeMillis()
                         
-                        // Korrekter Zugriff auf das primäre Helligkeits-Plane (Y)
-                        val planes = imageProxy.planes
-                        val buffer = planes[0].buffer
-                        val rowStride = planes[0].rowStride
+                        // FIX: Hole dir das erste Plane [0] für die Helligkeits-Pixel (Y-Kanal)
+                        val yPlane = imageProxy.planes[0]
+                        val buffer = yPlane.buffer
+                        val rowStride = yPlane.rowStride
                         
                         val width = imageProxy.width
                         val height = imageProxy.height
@@ -68,12 +68,12 @@ class AirGestureCore(private val context: Context) {
                         if (currentBytesBuffer == null || currentBytesBuffer!!.size != remaining) {
                             currentBytesBuffer = ByteArray(remaining)
                             previousBytesBuffer = ByteArray(remaining)
-                            buffer.get(currentBytesBuffer)
+                            buffer.get(currentBytesBuffer!!)
                             imageProxy.close()
                             return@setAnalyzer
                         }
 
-                        buffer.get(currentBytesBuffer)
+                        buffer.get(currentBytesBuffer!!)
 
                         val currBytes = currentBytesBuffer!!
                         val prevBytes = previousBytesBuffer!!
@@ -89,8 +89,9 @@ class AirGestureCore(private val context: Context) {
                         val step = 12
 
                         for (y in 12 until height - 12 step step) {
+                            val rowOffset = y * rowStride
                             for (x in 12 until width - 12 step step) {
-                                val index = y * rowStride + x
+                                val index = rowOffset + x
                                 if (index < remaining) {
                                     val curr = currBytes[index].toInt() and 0xFF
                                     val prev = prevBytes[index].toInt() and 0xFF
@@ -198,5 +199,4 @@ class AirGestureCore(private val context: Context) {
         }
     }
 }
-
 
