@@ -28,7 +28,7 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
 
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 500L // Flotter Cooldown
+    private val cooldownMillis = 500L 
     
     private var previousCentroidY: Float = -1f
     private var accumulatedDeltaY = 0f
@@ -55,7 +55,7 @@ class AirGestureCore(private val context: Context) {
                         val plane = imageProxy.planes[0]
                         val buffer = plane.buffer
                         val rowStride = plane.rowStride
-                        width = imageProxy.width
+                        val width = imageProxy.width // Korrekt deklariert
                         val height = imageProxy.height
 
                         val currentBytes = ByteArray(buffer.remaining())
@@ -74,7 +74,6 @@ class AirGestureCore(private val context: Context) {
                                         val prev = previousBytes!![index].toInt() and 0xFF
                                         val delta = abs(curr - prev)
                                         
-                                        // Extrem feinfühlig ab Masse 500L
                                         if (delta > 8) {
                                             massY += (y * delta)
                                             totalMass += delta
@@ -83,7 +82,6 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            // Ultra-niedrige Masse (500L) - bricht nie wieder am Körper ab
                             if (totalMass > 500L) {
                                 val rawCentroidY = massY.toFloat() / totalMass.toFloat()
 
@@ -96,22 +94,18 @@ class AirGestureCore(private val context: Context) {
                                 if (previousCentroidY != -1f) {
                                     val deltaY = currentCentroidY - previousCentroidY
 
-                                    // Ganz feines Gate gegen Raum-Rauschen
                                     if (abs(deltaY) > 0.1f) {
                                         if (accumulatedDeltaY == 0f) {
                                             accumulatedDeltaY = deltaY
                                         } else if ((accumulatedDeltaY > 0f && deltaY > 0f) || (accumulatedDeltaY < 0f && deltaY < 0f)) {
                                             accumulatedDeltaY += deltaY
                                         } else {
-                                            // Richtungswechsel -> sofort übernehmen
                                             accumulatedDeltaY = deltaY
                                         }
 
-                                        // 8% der Bildhöhe als knackiger Schwellenwert
                                         val swipeThreshold = height.toFloat() * 0.08f
 
                                         if (abs(accumulatedDeltaY) > swipeThreshold) {
-                                            // Sofort den Akkumulator leeren, damit KEIN Überlaufen/Überspringen passiert!
                                             val triggeredDelta = accumulatedDeltaY
                                             accumulatedDeltaY = 0f
 
@@ -137,7 +131,6 @@ class AirGestureCore(private val context: Context) {
                                 }
                                 previousCentroidY = currentCentroidY
                             } else {
-                                // Hand komplett weg -> Werte sanft zurücksetzen
                                 previousCentroidY = -1f
                                 accumulatedDeltaY = 0f
                             }
