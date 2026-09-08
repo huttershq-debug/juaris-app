@@ -74,7 +74,7 @@ class AirGestureCore(private val context: Context) {
                                         val prev = previousBytes!![index].toInt() and 0xFF
                                         val delta = abs(curr - prev)
                                         
-                                        // Feineres Delta für Distanz (12)
+                                        // Feines Delta für gute Erkennung
                                         if (delta > 12) {
                                             massX += (x * delta)
                                             totalMass += delta
@@ -83,29 +83,29 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            // Angepasste Masse für Distanz (5500L verhindert das ständige Abbrechen)
-                            if (totalMass > 5500L) {
+                            // Ausgewogene Masse für Nah- und Fernbereich
+                            if (totalMass > 5000L) {
                                 val rawCentroidX = massX.toFloat() / totalMass.toFloat()
 
-                                // Glättungs-Filter
+                                // Leichte Glättung, aber reaktionsfreudig
                                 val currentCentroidX = if (previousCentroidX == -1f) {
                                     rawCentroidX
                                 } else {
-                                    0.6f * rawCentroidX + 0.4f * previousCentroidX
+                                    0.5f * rawCentroidX + 0.5f * previousCentroidX
                                 }
 
                                 if (previousCentroidX != -1f) {
-                                    val deltaX = currentCentroidX - previousCentroidX
+                                    // RICHTUNGS-KORREKTUR: Vorzeichen umgedreht, damit Rechts = Rechts und Links = Links ist
+                                    val deltaX = -(currentCentroidX - previousCentroidX)
 
-                                    // Angepasster Frame-Sprung (0.25f), damit auch langsame/weit entfernte Swipes fließen
-                                    if (abs(deltaX) > 0.25f) {
-                                        // ONE-WAY-LOCK: Gegenläufiges Rauschen komplett ignorieren
+                                    if (abs(deltaX) > 0.2f) {
                                         if (accumulatedDeltaX == 0f) {
                                             accumulatedDeltaX = deltaX
-                                        } else if ((accumulatedDeltaX > 0f && deltaX > 0f) || (accumulatedDeltaX < 0f && deltaX < 0f)) {
+                                        } else if ((accumulatedDeltaX > 0f && deltaX > 0f) || (accumulatedDeltaX < 0f && deltaX > 0f)) {
                                             accumulatedDeltaX += deltaX
                                         } else {
-                                            // Gegenrichtung wird ignoriert
+                                            // Gegenrichtung dämpfen statt blockieren, damit es flüssig bleibt
+                                            accumulatedDeltaX += (deltaX * 0.5f)
                                         }
 
                                         val swipeThreshold = width * 0.15f
