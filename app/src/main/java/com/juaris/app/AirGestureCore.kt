@@ -85,7 +85,7 @@ class AirGestureCore(private val context: Context) {
                             if (totalMass > 9000L) {
                                 val rawCentroidX = massX.toFloat() / totalMass.toFloat()
 
-                                // Sanfter Glättungs-Filter
+                                // Glättungs-Filter für butterweiche Übergänge
                                 val currentCentroidX = if (previousCentroidX == -1f) {
                                     rawCentroidX
                                 } else {
@@ -96,15 +96,14 @@ class AirGestureCore(private val context: Context) {
                                     val deltaX = currentCentroidX - previousCentroidX
 
                                     if (abs(deltaX) > 0.4f) {
-                                        // RICHTUNGS-MOMENTUM-GUARD: Verhindert falsche Richtungssprünge durch Rauschen
+                                        // ONE-WAY-LOCK: Gegenläufiges Rauschen auf Distanz komplett ignorieren
                                         if (accumulatedDeltaX == 0f) {
                                             accumulatedDeltaX = deltaX
                                         } else if ((accumulatedDeltaX > 0f && deltaX > 0f) || (accumulatedDeltaX < 0f && deltaX < 0f)) {
                                             // Gleiche Richtung: normal aufaddieren
                                             accumulatedDeltaX += deltaX
                                         } else {
-                                            // Gegenläufiges Rauschen abfangen (dämpfen statt übernehmen)
-                                            accumulatedDeltaX += (deltaX * 0.2f)
+                                            // Gegenrichtung wird komplett ignoriert -> Verhindert das Hin- und Herspringen!
                                         }
 
                                         val swipeThreshold = width * 0.15f
