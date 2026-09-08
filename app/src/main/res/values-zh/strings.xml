@@ -13,4 +13,7 @@
     <string name="email_protection_title">电子邮件安全</string>
     <string name="log_email_incoming_blocked">已拦截恶意电子邮件：%1$s</string>
     <string name="log_email_outgoing_blocked">已阻止外发邮件（安全风险）：%1$s</string>
+    <string name="juaris_app_welcome_text">欢迎来到 Juaris——您面向未来的安全应用程序。100% 透明，100% 在您的手机上。无需云端。您的保护，您的家，您的规则。有了 Juaris，您就拥有了世界上最强大的隐私保护。Juaris，因为您和您的安全至关重要。</string>
+    <string name="juaris_app_welcome_audio_file">platzhalter_zh.m4a</string>
+
 </resources>
