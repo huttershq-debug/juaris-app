@@ -28,13 +28,12 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
 
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 200L // Blitzschnell für butterweiches Durchgleiten
+    private val cooldownMillis = 180L // Rasant für flüssiges Gleiten
     
     private var previousCentroidX: Float = -1f
     private var accumulatedDeltaX = 0f
 
     fun startGestureDetection(lifecycleOwner: LifecycleOwner, onGestureDetected: (GestureAction) -> Unit) {
-        // Verhindert mehrfaches Starten der Pipeline
         if (cameraProvider != null) return
 
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
@@ -42,7 +41,7 @@ class AirGestureCore(private val context: Context) {
         cameraProviderFuture.addListener({
             try {
                 cameraProvider = cameraProviderFuture.get()
-                val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+                val cameraSelector = CameraSelector.DEFAULT_FRONT_CANVAS ?: CameraSelector.DEFAULT_FRONT_CAMERA
 
                 val imageAnalysis = ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
@@ -65,7 +64,7 @@ class AirGestureCore(private val context: Context) {
                         if (previousBytes != null && previousBytes!!.size == currentBytes.size) {
                             var massX = 0L
                             var totalMass = 0L
-                            val step = 12 // Noch feiner für flüssiges Ansprechen
+                            val step = 12
 
                             for (y in 0 until height step step) {
                                 for (x in 0 until width step step) {
@@ -75,7 +74,7 @@ class AirGestureCore(private val context: Context) {
                                         val prev = previousBytes!![index].toInt() and 0xFF
                                         val delta = abs(curr - prev)
                                         
-                                        if (delta > 18) {
+                                        if (delta > 15) { // Extrem feinfühlig für leichte Handbewegungen
                                             massX += (x * delta)
                                             totalMass += delta
                                         }
@@ -83,34 +82,43 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            if (totalMass > 5000L) {
+                            if (totalMass > 4000L) { // Reagiert sofort auf Handpräsenz
                                 val currentCentroidX = massX.toFloat() / totalMass.toFloat()
 
                                 if (previousCentroidX != -1f) {
                                     val deltaX = currentCentroidX - previousCentroidX
-                                    accumulatedDeltaX += deltaX
 
-                                    val swipeThreshold = width * 0.04f // Extrem reaktionsfreudig
-
-                                    if (abs(accumulatedDeltaX) > swipeThreshold) {
-                                        if (currentTime - lastTriggerTime > cooldownMillis) {
-                                            lastTriggerTime = currentTime
-
-                                            val action = if (accumulatedDeltaX > 0) {
-                                                _gestureState.value = "Gleiten: Rechts"
-                                                _lastAction.value = "SWIPE_RIGHT"
-                                                GestureAction.SWIPE_RIGHT
-                                            } else {
-                                                _gestureState.value = "Gleiten: Links"
-                                                _lastAction.value = "SWIPE_LEFT"
-                                                GestureAction.SWIPE_LEFT
-                                            }
-
-                                            ContextCompat.getMainExecutor(context).execute {
-                                                onGestureDetected(action)
-                                            }
+                                    if (abs(deltaX) > 0.3f) {
+                                        // WICHTIG: Richtungswechsel-Blitzerkennung!
+                                        // Wenn die Hand die Richtung ändert, wird der Puffer sofort auf die neue Richtung umgelegt.
+                                        if ((accumulatedDeltaX > 0f && deltaX < 0f) || (accumulatedDeltaX < 0f && deltaX > 0f)) {
+                                            accumulatedDeltaX = deltaX
+                                        } else {
+                                            accumulatedDeltaX += deltaX
                                         }
-                                        accumulatedDeltaX = 0f
+
+                                        val swipeThreshold = width * 0.035f // Ultra-reaktionsfreudig
+
+                                        if (abs(accumulatedDeltaX) > swipeThreshold) {
+                                            if (currentTime - lastTriggerTime > cooldownMillis) {
+                                                lastTriggerTime = currentTime
+
+                                                val action = if (accumulatedDeltaX > 0f) {
+                                                    _gestureState.value = "Gleiten: Rechts"
+                                                    _lastAction.value = "SWIPE_RIGHT"
+                                                    GestureAction.SWIPE_RIGHT
+                                                } else {
+                                                    _gestureState.value = "Gleiten: Links"
+                                                    _lastAction.value = "SWIPE_LEFT"
+                                                    GestureAction.SWIPE_LEFT
+                                                }
+
+                                                ContextCompat.getMainExecutor(context).execute {
+                                                    onGestureDetected(action)
+                                                }
+                                            }
+                                            accumulatedDeltaX = 0f
+                                        }
                                     }
                                 }
                                 previousCentroidX = currentCentroidX
@@ -122,7 +130,7 @@ class AirGestureCore(private val context: Context) {
                         previousBytes = currentBytes
 
                     } catch (e: Exception) {
-                        // Frame-Sicherung
+                        // Frame abfangen
                     } finally {
                         imageProxy.close()
                     }
@@ -131,7 +139,7 @@ class AirGestureCore(private val context: Context) {
                 cameraProvider?.unbindAll()
                 cameraProvider?.bindToLifecycle(
                     lifecycleOwner,
-                    cameraSelector,
+                    CameraSelector.DEFAULT_FRONT_CAMERA,
                     imageAnalysis
                 )
 
