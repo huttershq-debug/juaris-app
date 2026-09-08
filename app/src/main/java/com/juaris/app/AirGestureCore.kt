@@ -18,7 +18,7 @@ class AirGestureCore(private val context: Context) {
         NONE, SWIPE_LEFT, SWIPE_RIGHT
     }
 
-    private val _gestureState = MutableStateFlow("Autonomer Neural-Kortex aktiv")
+    private val _gestureState = MutableStateFlow("Juaris Autonomous Core Aktiv")
     val gestureState: StateFlow<String> = _gestureState
 
     private val _lastAction = MutableStateFlow("KEINE")
@@ -28,7 +28,7 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
 
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 400L // Blitzschnell für flüssige Endlos-Swipes
+    private val cooldownMillis = 350L // Rasantes, flüssiges Durchswipen
     
     private var previousCentroidX: Float = -1f
     private var velocityBuffer = 0f
@@ -75,7 +75,7 @@ class AirGestureCore(private val context: Context) {
                                         totalBrightness += curr
                                         
                                         val delta = abs(curr - prev)
-                                        if (delta > 20) {
+                                        if (delta > 18) { // Ultra-sensibel für jede Handbewegung
                                             massX += (x * delta)
                                             totalMass += delta
                                         }
@@ -84,33 +84,37 @@ class AirGestureCore(private val context: Context) {
                             }
 
                             val avgBrightness = if (totalPixels > 0) totalBrightness / totalPixels else 128L
-                            val dynamicMassThreshold = if (avgBrightness < 40) 3000L else 8500L
+                            val dynamicMassThreshold = if (avgBrightness < 40) 2500L else 6000L
 
                             if (totalMass > dynamicMassThreshold) {
                                 val currentCentroidX = massX.toFloat() / totalMass.toFloat()
 
                                 if (previousCentroidX != -1f) {
                                     val deltaX = currentCentroidX - previousCentroidX
-                                    velocityBuffer = (velocityBuffer * 0.35f) + (deltaX * 0.65f)
+                                    velocityBuffer = (velocityBuffer * 0.3f) + (deltaX * 0.7f)
 
-                                    val activationThreshold = width * 0.02f // Höchste Präzision
+                                    val activationThreshold = width * 0.018f // Maximale Reichweite & Empfindlichkeit
 
-                                     if (velocityBuffer > 0) {
-                                                _gestureState.value = "Neural: Swipe Rechts"
+                                    if (abs(velocityBuffer) > activationThreshold) {
+                                        if (currentTime - lastTriggerTime > cooldownMillis) {
+                                            lastTriggerTime = currentTime
+
+                                            val action = if (velocityBuffer > 0) {
+                                                _gestureState.value = "Swipe Rechts erkannt"
                                                 _lastAction.value = "SWIPE_RIGHT"
-                                                // FIX: Zwingend auf den Main-Thread dispatchen für flüssiges UI-Update!
-                                                ContextCompat.getMainExecutor(context).execute {
-                                                    onGestureDetected(GestureAction.SWIPE_RIGHT)
-                                                }
+                                                GestureAction.SWIPE_RIGHT
                                             } else {
-                                                _gestureState.value = "Neural: Swipe Links"
+                                                _gestureState.value = "Swipe Links erkannt"
                                                 _lastAction.value = "SWIPE_LEFT"
-                                                ContextCompat.getMainExecutor(context).execute {
-                                                    onGestureDetected(GestureAction.SWIPE_LEFT)
-                                                }
+                                                GestureAction.SWIPE_LEFT
                                             }
 
-                                            // Puffer sofort zurücksetzen für den nächsten Endlos-Swipe
+                                            // Zwingend auf den UI-Thread dispatchen für sofortiges Umschalten
+                                            ContextCompat.getMainExecutor(context).execute {
+                                                onGestureDetected(action)
+                                            }
+
+                                            // Sofortiger Reset für den nächsten flüssigen Endlos-Swipe
                                             previousCentroidX = -1f
                                             velocityBuffer = 0f
                                         }
@@ -139,7 +143,7 @@ class AirGestureCore(private val context: Context) {
                 )
 
             } catch (e: Exception) {
-                _gestureState.value = "Fehler: ${e.localizedMessage}"
+                _gestureState.value = "Initialisierungsfehler: ${e.localizedMessage}"
             }
         }, ContextCompat.getMainExecutor(context))
     }
