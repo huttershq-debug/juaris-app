@@ -28,12 +28,13 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
 
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 750L // Saubere Pause gegen Mehrfachtrigger
+    private val cooldownMillis = 600L // Gesunde Pause, damit kein Tab doppelt springt
     
-    // Anker- und Zustandsvariablen für saubere Wegmessung statt Zählen
     private var previousCentroidY: Float = -1f
-    private var startY: Float = -1f
-    private var hasTriggeredThisGesture = false
+    
+    // Zähler für konsistente Bewegungen über mehrere Frames (eliminiert Rauschen & Springen)
+    private var consecutiveUpFrames = 0
+    private var consecutiveDownFrames = 0
 
     fun startGestureDetection(lifecycleOwner: LifecycleOwner, onGestureDetected: (GestureAction) -> Unit) {
         if (cameraProvider != null) return
@@ -76,7 +77,7 @@ class AirGestureCore(private val context: Context) {
                                         val prev = previousBytes!![index].toInt() and 0xFF
                                         val delta = abs(curr - prev)
                                         
-                                        if (delta > 10) {
+                                        if (delta > 12) { // Etwas strenger gegen Hintergrundrauschen
                                             massY += (y * delta)
                                             totalMass += delta
                                         }
@@ -84,55 +85,67 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            // Angepasste Masse (3500L), damit Runterwischen nicht am Körper/Kleidung abbricht
-                            if (totalMass > 3500L) {
+                            // Moderate Masse-Schwelle
+                            if (totalMass > 4000L) {
                                 val rawCentroidY = massY.toFloat() / totalMass.toFloat()
 
-                                // Sanfte Glättung gegen Zittern
                                 val currentCentroidY = if (previousCentroidY == -1f) {
                                     rawCentroidY
                                 } else {
                                     0.5f * rawCentroidY + 0.5f * previousCentroidY
                                 }
 
-                                if (startY == -1f) {
-                                    // Startpunkt des Swipes setzen
-                                    startY = currentCentroidY
-                                    hasTriggeredThisGesture = false
-                                } else if (!hasTriggeredThisGesture) {
-                                    // Gesamtweg vom Startpunkt aus messen
-                                    val displacement = currentCentroidY - startY
-                                    val swipeThreshold = height * 0.12f // 12% der Bildhöhe für einen klaren Wisch
+                                if (previousCentroidY != -1f) {
+                                    val deltaY = currentCentroidY - previousCentroidY
 
-                                    if (abs(displacement) > swipeThreshold) {
-                                        if (currentTime - lastTriggerTime > cooldownMillis) {
-                                            lastTriggerTime = currentTime
-                                            hasTriggeredThisGesture = true // Verhindert sofortiges Mehrfachtriggern (kein Tab-Überspringen mehr)
+                                    // Mindest-Weg pro Frame, damit es eine echte Bewegung ist
+                                    if (abs(deltaY) > 0.4f) {
+                                        if (deltaY < 0f) {
+                                            // Bewegung nach oben
+                                            consecutiveUpFrames++
+                                            consecutiveDownFrames = 0
+                                        } else {
+                                            // Bewegung nach unten
+                                            consecutiveDownFrames++
+                                            consecutiveUpFrames = 0
+                                        }
 
-                                            // Negatives displacement = Rauf = Rechts (Nächster Tab)
-                                            // Positives displacement = Runter = Links (Vorheriger Tab)
-                                            val action = if (displacement < 0f) {
+                                        // Wenn die Bewegung über 3 Frames hinweg konstant in dieselbe Richtung läuft -> Auslösen!
+                                        val requiredFrames = 3
+
+                                        if (consecutiveUpFrames >= requiredFrames) {
+                                            if (currentTime - lastTriggerTime > cooldownMillis) {
+                                                lastTriggerTime = currentTime
+                                                
                                                 _gestureState.value = "Swipe: Rauf (Rechts)"
                                                 _lastAction.value = "SWIPE_RIGHT"
-                                                GestureAction.SWIPE_RIGHT
-                                            } else {
+                                                
+                                                ContextCompat.getMainExecutor(context).execute {
+                                                    onGestureDetected(GestureAction.SWIPE_RIGHT)
+                                                }
+                                            }
+                                            consecutiveUpFrames = 0
+                                        } else if (consecutiveDownFrames >= requiredFrames) {
+                                            if (currentTime - lastTriggerTime > cooldownMillis) {
+                                                lastTriggerTime = currentTime
+                                                
                                                 _gestureState.value = "Swipe: Runter (Links)"
                                                 _lastAction.value = "SWIPE_LEFT"
-                                                GestureAction.SWIPE_LEFT
+                                                
+                                                ContextCompat.getMainExecutor(context).execute {
+                                                    onGestureDetected(GestureAction.SWIPE_LEFT)
+                                                }
                                             }
-
-                                            ContextCompat.getMainExecutor(context).execute {
-                                                onGestureDetected(action)
-                                            }
+                                            consecutiveDownFrames = 0
                                         }
                                     }
                                 }
                                 previousCentroidY = currentCentroidY
                             } else {
-                                // Hand weg oder außerhalb des Erfassungsbereichs -> Anker zurücksetzen
-                                startY = -1f
+                                // Wenn keine Hand im Bild / Bewegung zu gering: Zähler sanft zurücksetzen
+                                consecutiveUpFrames = 0
+                                consecutiveDownFrames = 0
                                 previousCentroidY = -1f
-                                hasTriggeredThisGesture = false
                             }
                         }
                         previousBytes = currentBytes
