@@ -13,4 +13,6 @@
     <string name="email_protection_title">Seguridad de correo electrónico</string>
     <string name="log_email_incoming_blocked">Correo electrónico malicioso entrante bloqueado: %1$s</string>
     <string name="log_email_outgoing_blocked">Correo electrónico saliente detenido (Riesgo de seguridad): %1$s</string>
+    <string name="juaris_app_welcome_text">Bienvenido a juaris, tu app de seguridad del futuro. 100% transparente, 100% en tu móvil. Sin nube. Tu protección, tu hogar, tus reglas. Con juaris tienes la protección privada más potente del mundo. juaris, porque tú y tu seguridad nos importan.</string>
+    <string name="juaris_app_welcome_audio_file">platzhalter_es.m4a</string>
 </resources>
