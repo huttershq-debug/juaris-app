@@ -8,14 +8,19 @@ enum class SecurityStatus {
 }
 
 class SecurityEngine(private val context: Context) {
+    private val phishingAnalyzer = LocalPhishingAnalyzer(context)
+
     fun evaluate(): SecurityStatus {
         Log.d("SecurityEngine", "Evaluating security status")
         return SecurityStatus.SAFE
     }
+
+    fun analyzeText(text: String): SecurityStatus {
+        val isPhishing = phishingAnalyzer.analyzeText(text)
+        return if (isPhishing) SecurityStatus.BLOCK else SecurityStatus.SAFE
+    }
 }
 
-
-/**
  * Juaris Security Engine
  * Lokale Offline-Überwachung für Anrufe, SMS und E-Mails.
  */
