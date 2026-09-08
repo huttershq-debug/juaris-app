@@ -13,15 +13,12 @@ class EmailScanWorker(private val context: Context, private val logDao: Security
         // Erzeugt eine lokale kryptografische Signatur (Quanten-Hash)
         val threatSignature = QuantumEngine.generateThreatSignature("$sender:$subject")
 
-        // Erweiterte Offline-Heuristik (Prüfung auf Betrugs- und Phishing-Muster)
-        val isPhishingThreat = subject.contains("Invoice", ignoreCase = true) ||
-                subject.contains("Bank", ignoreCase = true) ||
-                subject.contains("Rechnung", ignoreCase = true) ||
-                subject.contains("Konto", ignoreCase = true) ||
-                subject.contains("Überweisung", ignoreCase = true) ||
-                subject.contains("Security Alert", ignoreCase = true) ||
-                subject.contains("Sicherheitswarnung", ignoreCase = true) ||
-                bodySnippet.contains("http://", ignoreCase = true) // Unsicherer Link in Mail
+         // HIER DIE NEUE UNHACKBARE FUZZY-LOGIK EINBAUEN:
+        val phishingAnalyzer = LocalPhishingAnalyzer()
+        val textToAnalyze = "$subject $bodySnippet"
+        val analysisResult = phishingAnalyzer.analyzeText(textToAnalyze)
+        
+        val isPhishingThreat = analysisResult.isSuspicious
 
         if (isPhishingThreat) {
             // Sofortiger Eintrag in die lokale SQLite-Datenbank für den Logs-Tab
