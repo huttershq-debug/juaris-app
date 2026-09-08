@@ -55,12 +55,14 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Verhindert das Abdunkeln/Ausschalten des Bildschirms beim Gesten-Steuern:
+        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         try {
             val masterKey = MasterKey.Builder(this)
                 .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
                 .build()
-
             securePrefs = EncryptedSharedPreferences.create(
                 this,
                 "juaris_secure_vault",
