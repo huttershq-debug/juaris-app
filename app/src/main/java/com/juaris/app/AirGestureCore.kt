@@ -56,7 +56,7 @@ class AirGestureCore(private val context: Context) {
                         val currentBytes = ByteArray(buffer.remaining())
                         buffer.get(currentBytes)
 
-                        if (previousData != null && previousData!!.size == currentBytes.size) {
+                          if (previousData != null && previousData!!.size == currentBytes.size) {
                             var leftSum = 0L
                             var rightSum = 0L
                             val step = 16 // Präzisere Abtastung
@@ -75,11 +75,19 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
+                            val totalSum = leftSum + rightSum
+                            val directionalDiff = kotlin.math.abs(leftSum - rightSum)
+
+                            // WICHTIGER FILTER: 
+                            // 1. Mindest-Schwelle für echte Bewegung.
+                            // 2. Asymmetrie-Prüfung: Der Unterschied zwischen links und rechts muss 
+                            // mindestens 35% ausmachen. (Lichtwechsel verändert beide Seiten gleichmäßig -> wird ignoriert!)
+                            val minThreshold = 8000L
+                            val isAsymmetric = directionalDiff > (totalSum * 0.35)
+
                             // Prüfen, ob Cooldown abgelaufen ist
                             if (currentTime - lastTriggerTime > cooldownMillis) {
-                                // Realistischer, direkt ansprechender Schwellenwert
-                                val threshold = 3500L 
-                                if (leftSum > threshold || rightSum > threshold) {
+                                if (totalSum > minThreshold && isAsymmetric) {
                                     lastTriggerTime = currentTime
                                     if (leftSum > rightSum) {
                                         _gestureState.value = "Geste erkannt: Nach Rechts"
@@ -98,6 +106,7 @@ class AirGestureCore(private val context: Context) {
                             }
                         }
                         previousData = currentBytes
+
                     } catch (e: Exception) {
                         // Frame-Fehler abfangen
                     } finally {
