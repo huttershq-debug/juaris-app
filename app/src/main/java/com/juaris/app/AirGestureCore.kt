@@ -64,9 +64,9 @@ class AirGestureCore(private val context: Context) {
                         if (previousBytes != null && previousBytes!!.size == currentBytes.size) {
                             var massX = 0L
                             var totalMass = 0L
-                            val step = 10 // Feineres Raster für erweiterte Reichweite
+                            val step = 10 // Feines Raster beibehalten
 
-                            // ÜBERALL SCANNEN: Das gesamte Bild von ganz oben (0) bis ganz unten (height)
+                            // Komplettes Bild scannen
                             for (y in 0 until height step step) {
                                 for (x in 0 until width step step) {
                                     val index = y * rowStride + x
@@ -75,8 +75,8 @@ class AirGestureCore(private val context: Context) {
                                         val prev = previousBytes!![index].toInt() and 0xFF
                                         val delta = abs(curr - prev)
                                         
-                                        // Erhöhte Sensibilität für entfernte oder schwächere Bewegungen
-                                        if (delta > 10) {
+                                        // Sweet Spot: Ignoriert leichtes Rauschen (delta > 12)
+                                        if (delta > 12) {
                                             massX += (x * delta)
                                             totalMass += delta
                                         }
@@ -84,8 +84,8 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            // Angepasste Masse für den Weit-Reichweiten-Modus
-                            if (totalMass > 4000L) {
+                            // Sweet Spot: Etwas höhere Masse (6000L) gegen Fehltrigger
+                            if (totalMass > 6000L) {
                                 val currentCentroidX = massX.toFloat() / totalMass.toFloat()
 
                                 if (previousCentroidX != -1f) {
@@ -98,7 +98,7 @@ class AirGestureCore(private val context: Context) {
                                             accumulatedDeltaX += deltaX
                                         }
 
-                                        val swipeThreshold = width * 0.15f // Dein präziser Schwellenwert
+                                        val swipeThreshold = width * 0.15f // Präziser Schwellenwert
 
                                         if (abs(accumulatedDeltaX) > swipeThreshold) {
                                             if (currentTime - lastTriggerTime > cooldownMillis) {
