@@ -18,7 +18,7 @@ class AirGestureCore(private val context: Context) {
         NONE, SWIPE_LEFT, SWIPE_RIGHT
     }
 
-    private val _gestureState = MutableStateFlow("Juaris Neural-Kinetic Kortex Aktiv")
+    private val _gestureState = MutableStateFlow("Autonomer Neural-Kortex aktiv")
     val gestureState: StateFlow<String> = _gestureState
 
     private val _lastAction = MutableStateFlow("KEINE")
@@ -27,11 +27,9 @@ class AirGestureCore(private val context: Context) {
     private var cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     private var cameraProvider: ProcessCameraProvider? = null
 
-    // Präzisions-Steuerung für flüssiges Durchswipen
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 450L 
+    private val cooldownMillis = 400L // Blitzschnell für flüssige Endlos-Swipes
     
-    // Kinetischer Zustand für Trägheit und Vektor-Verifizierung
     private var previousCentroidX: Float = -1f
     private var velocityBuffer = 0f
 
@@ -65,7 +63,7 @@ class AirGestureCore(private val context: Context) {
                             var massX = 0L
                             var totalMass = 0L
                             var totalBrightness = 0L
-                            val step = 12 // Maximale Abtasttiefe für feine Konturen
+                            val step = 12
                             val totalPixels = (width / step) * (height / step)
 
                             for (y in 0 until height step step) {
@@ -77,8 +75,7 @@ class AirGestureCore(private val context: Context) {
                                         totalBrightness += curr
                                         
                                         val delta = abs(curr - prev)
-                                        // Dynamischer Rausch-Filter gegen Lichtflackern
-                                        if (delta > 22) {
+                                        if (delta > 20) {
                                             massX += (x * delta)
                                             totalMass += delta
                                         }
@@ -87,18 +84,16 @@ class AirGestureCore(private val context: Context) {
                             }
 
                             val avgBrightness = if (totalPixels > 0) totalBrightness / totalPixels else 128L
-                            // Adaptives Energiefenster: Passt sich automatisch von Nacht bis Flutlicht an
-                            val dynamicMassThreshold = if (avgBrightness < 40) 3500L else 10000L
+                            val dynamicMassThreshold = if (avgBrightness < 40) 3000L else 8500L
 
                             if (totalMass > dynamicMassThreshold) {
                                 val currentCentroidX = massX.toFloat() / totalMass.toFloat()
 
                                 if (previousCentroidX != -1f) {
                                     val deltaX = currentCentroidX - previousCentroidX
-                                    // Trägheits- geglättete Geschwindigkeit (Inertia Filter)
-                                    velocityBuffer = (velocityBuffer * 0.4f) + (deltaX * 0.6f)
+                                    velocityBuffer = (velocityBuffer * 0.35f) + (deltaX * 0.65f)
 
-                                    val activationThreshold = width * 0.022f // Ultra-feinfühlig, aber absolut stabil
+                                    val activationThreshold = width * 0.02f // Höchste Präzision
 
                                     if (abs(velocityBuffer) > activationThreshold) {
                                         if (currentTime - lastTriggerTime > cooldownMillis) {
@@ -113,12 +108,15 @@ class AirGestureCore(private val context: Context) {
                                                 _lastAction.value = "SWIPE_LEFT"
                                                 onGestureDetected(GestureAction.SWIPE_LEFT)
                                             }
+
+                                            // KRITISCH: Puffer sofort zurücksetzen für den nächsten Swipe!
+                                            previousCentroidX = -1f
+                                            velocityBuffer = 0f
                                         }
                                     }
                                 }
                                 previousCentroidX = currentCentroidX
                             } else {
-                                // Verlust des Objekts sanft auslaufen lassen
                                 previousCentroidX = -1f
                                 velocityBuffer = 0f
                             }
@@ -126,7 +124,7 @@ class AirGestureCore(private val context: Context) {
                         previousBytes = currentBytes
 
                     } catch (e: Exception) {
-                        // Frame-Pipeline fehlerfrei sichern
+                        // Frame-Sicherung
                     } finally {
                         imageProxy.close()
                     }
@@ -140,7 +138,7 @@ class AirGestureCore(private val context: Context) {
                 )
 
             } catch (e: Exception) {
-                _gestureState.value = "Kortex-Fehler: ${e.localizedMessage}"
+                _gestureState.value = "Fehler: ${e.localizedMessage}"
             }
         }, ContextCompat.getMainExecutor(context))
     }
