@@ -28,10 +28,12 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
 
     private var lastTriggerTime = 0L
-    private val cooldownMillis = 500L 
+    private val cooldownMillis = 600L 
     
+    // Variablen für das saubere Anker-Modell (verhindert Springen und Mehrfachtrigger)
     private var previousCentroidY: Float = -1f
-    private var accumulatedDeltaY = 0f
+    private var startY: Float = -1f
+    private var hasTriggeredThisGesture = false
 
     fun startGestureDetection(lifecycleOwner: LifecycleOwner, onGestureDetected: (GestureAction) -> Unit) {
         if (cameraProvider != null) return
@@ -82,7 +84,8 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            if (totalMass > 3000L) {
+                            // Niedrige Masse (1800L): Verhindert, dass Runterwischen am Körper abbricht
+                            if (totalMass > 1800L) {
                                 val rawCentroidY = massY.toFloat() / totalMass.toFloat()
 
                                 val currentCentroidY = if (previousCentroidY == -1f) {
@@ -91,47 +94,44 @@ class AirGestureCore(private val context: Context) {
                                     0.4f * rawCentroidY + 0.6f * previousCentroidY
                                 }
 
-                                if (previousCentroidY != -1f) {
-                                    val deltaY = currentCentroidY - previousCentroidY
+                                if (startY == -1f) {
+                                    // Startpunkt (Anker) für diesen Wisch setzen
+                                    startY = currentCentroidY
+                                    hasTriggeredThisGesture = false
+                                } else if (!hasTriggeredThisGesture) {
+                                    // Gesamtweg exakt vom Startpunkt aus messen (kein Aufaddieren!)
+                                    val displacement = currentCentroidY - startY
+                                    val swipeThreshold = height.toFloat() * 0.10f // 10% der Bildhöhe
 
-                                    if (abs(deltaY) > 0.15f) {
-                                        if (accumulatedDeltaY == 0f) {
-                                            accumulatedDeltaY = deltaY
-                                        } else if ((accumulatedDeltaY > 0f && deltaY > 0f) || (accumulatedDeltaY < 0f && deltaY < 0f)) {
-                                            accumulatedDeltaY += deltaY
-                                        } else {
-                                            accumulatedDeltaY = deltaY
-                                        }
+                                    if (abs(displacement) > swipeThreshold) {
+                                        if (currentTime - lastTriggerTime > cooldownMillis) {
+                                            lastTriggerTime = currentTime
+                                            hasTriggeredThisGesture = true // Sofortige Sperre: Verhindert 100%iges Tab-Überspringen
 
-                                        // Hier behoben: height.toFloat() erzwingt saubere Float-Multiplikation
-                                        val swipeThreshold = height.toFloat() * 0.09f
-
-                                        if (abs(accumulatedDeltaY) > swipeThreshold) {
-                                            if (currentTime - lastTriggerTime > cooldownMillis) {
-                                                lastTriggerTime = currentTime
-
-                                                val action = if (accumulatedDeltaY < 0f) {
-                                                    _gestureState.value = "Swipe: Rauf (Rechts)"
-                                                    _lastAction.value = "SWIPE_RIGHT"
-                                                    GestureAction.SWIPE_RIGHT
-                                                } else {
-                                                    _gestureState.value = "Swipe: Runter (Links)"
-                                                    _lastAction.value = "SWIPE_LEFT"
-                                                    GestureAction.SWIPE_LEFT
-                                                }
-
-                                                ContextCompat.getMainExecutor(context).execute {
-                                                    onGestureDetected(action)
-                                                }
+                                            // Negatives displacement = Rauf = Rechts (Nächster Tab)
+                                            // Positives displacement = Runter = Links (Vorheriger Tab)
+                                            val action = if (displacement < 0f) {
+                                                _gestureState.value = "Swipe: Rauf (Rechts)"
+                                                _lastAction.value = "SWIPE_RIGHT"
+                                                GestureAction.SWIPE_RIGHT
+                                            } else {
+                                                _gestureState.value = "Swipe: Runter (Links)"
+                                                _lastAction.value = "SWIPE_LEFT"
+                                                GestureAction.SWIPE_LEFT
                                             }
-                                            accumulatedDeltaY = 0f
+
+                                            ContextCompat.getMainExecutor(context).execute {
+                                                onGestureDetected(action)
+                                            }
                                         }
                                     }
                                 }
                                 previousCentroidY = currentCentroidY
                             } else {
+                                // Hand weg oder außerhalb -> Anker komplett zurücksetzen
+                                startY = -1f
                                 previousCentroidY = -1f
-                                accumulatedDeltaY = 0f
+                                hasTriggeredThisGesture = false
                             }
                         }
                         previousBytes = currentBytes
@@ -165,4 +165,5 @@ class AirGestureCore(private val context: Context) {
         }
     }
 }
+
 
