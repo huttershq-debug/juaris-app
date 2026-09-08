@@ -276,7 +276,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
         }
     }
 
-    // Autonomer Start direkt beim Laden des Dashboards (ohne Klicks notwendig)
+     // Autonomer Start – läuft stabil durch alle Tabs (inkl. Tab 9 Info)
     LaunchedEffect(hasCameraPermission, lifecycleOwner) {
         if (hasCameraPermission) {
             airGestureCore.startGestureDetection(lifecycleOwner) { action ->
