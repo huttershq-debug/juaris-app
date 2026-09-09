@@ -1,35 +1,30 @@
 package com.juaris.app
 
-import android.content.Context
 import android.util.Log
 
 enum class SecurityStatus {
     SAFE, BLOCK
 }
 
-class SecurityEngine(private val context: Context) {
-    private val phishingAnalyzer = LocalPhishingAnalyzer(context)
+enum class CallSecurityResult { ALLOW, BLOCK }
+enum class SmsSecurityResult { ALLOW, QUARANTINE_AND_ALERT }
+enum class EmailSecurityResult { SAFE, WARN_USER, BLOCK }
+
+object SecurityEngine {
+
+    private const val TAG = "JuarisSecurity"
+    private val blockedNumbers = setOf("+43123456789", "+49987654321")
 
     fun evaluate(): SecurityStatus {
-        Log.d("SecurityEngine", "Evaluating security status")
+        Log.d(TAG, "Evaluating security status")
         return SecurityStatus.SAFE
     }
 
     fun analyzeText(text: String): SecurityStatus {
-        val isPhishing = phishingAnalyzer.analyzeText(text)
-        return if (isPhishing) SecurityStatus.BLOCK else SecurityStatus.SAFE
+        val analyzer = LocalPhishingAnalyzer()
+        val result = analyzer.analyzeText(text)
+        return if (result.isSuspicious) SecurityStatus.BLOCK else SecurityStatus.SAFE
     }
-}
-
- * Juaris Security Engine
- * Lokale Offline-Überwachung für Anrufe, SMS und E-Mails.
- */
-object SecurityEngine {
-
-    private const val TAG = "JuarisSecurity"
-
-    private val blockedNumbers = setOf("+43123456789", "+49987654321")
-    private val maliciousKeywords = listOf("gewinn", "konto gesperrt", "krypto", "urgent", "phishing")
 
     // 1. ANRUF-SCHUTZ
     fun analyzeIncomingCall(phoneNumber: String): CallSecurityResult {
@@ -42,23 +37,23 @@ object SecurityEngine {
         }
     }
 
-     // Ersetze die alte fun analyzeIncomingSms durch diese Version:
+    // 2. SMS-SCHUTZ
     fun analyzeIncomingSms(sender: String, messageBody: String): SmsSecurityResult {
         val analyzer = LocalPhishingAnalyzer()
         val result = analyzer.analyzeText(messageBody)
-        
+       
         return if (result.isSuspicious) {
             SmsSecurityResult.QUARANTINE_AND_ALERT
         } else {
-            SmsSecurityResult.SAFE
+            SmsSecurityResult.ALLOW
         }
     }
 
-    // Ersetze die alte fun analyzeIncomingEmail durch diese Version:
+    // 3. E-MAIL-SCHUTZ
     fun analyzeIncomingEmail(sender: String, subject: String, body: String): EmailSecurityResult {
         val analyzer = LocalPhishingAnalyzer()
         val result = analyzer.analyzeText("$subject $body")
-        
+       
         return if (result.isSuspicious) {
             EmailSecurityResult.BLOCK
         } else {
@@ -67,6 +62,3 @@ object SecurityEngine {
     }
 }
 
-enum class CallSecurityResult { ALLOW, BLOCK }
-enum class SmsSecurityResult { ALLOW, QUARANTINE_AND_ALERT }
-enum class EmailSecurityResult { SAFE, WARN_USER }
