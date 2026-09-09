@@ -79,7 +79,8 @@ class AirGestureCore(private val context: Context) {
                             } else {
                                 var massY = 0L
                                 var totalMass = 0L
-                                val step = 8
+                                  // 1. Feinere Abtastung für größere Distanz (step 6 statt 8)
+                                val step = 6 
 
                                 for (y in 0 until height step step) {
                                     val rowOffset = y * rowStride
@@ -87,10 +88,11 @@ class AirGestureCore(private val context: Context) {
                                         val index = rowOffset + x
                                         if (index < remaining) {
                                             val curr = currBytes[index].toInt() and 0xFF
-                                            val prev = prevBytes[index].toInt() and 0xFF
+                                            val prev = previousBytesBuffer!![index].toInt() and 0xFF
                                             val delta = abs(curr - prev)
                                            
-                                            if (delta > 10) {
+                                            // Erhöhter Delta-Wert (15 statt 10) filtert Lichtflackern weg (verhindert Geister-Trigger)
+                                            if (delta > 15) {
                                                 massY += (y * delta).toLong()
                                                 totalMass += delta.toLong()
                                             }
@@ -98,8 +100,9 @@ class AirGestureCore(private val context: Context) {
                                     }
                                 }
 
-                                val massEnter = 2000L
-                                val massExit = 800L
+                                // Angepasste Schwellenwerte für mehr Reichweite / Distanz
+                                val massEnter = 1000L // Niedriger, damit Hand aus der Ferne erkannt wird
+                                val massExit = 400L
 
                                 if (totalMass > (if (isTracking) massExit else massEnter)) {
                                     val rawCentroidY = massY.toFloat() / totalMass.toFloat()
@@ -107,7 +110,7 @@ class AirGestureCore(private val context: Context) {
                                     smoothedCentroidY = if (smoothedCentroidY == -1f) {
                                         rawCentroidY
                                     } else {
-                                        0.3f * rawCentroidY + 0.7f * smoothedCentroidY
+                                        0.2f * rawCentroidY + 0.8f * smoothedCentroidY // Noch glatter gegen Zittern
                                     }
 
                                     if (!isTracking) {
@@ -116,9 +119,10 @@ class AirGestureCore(private val context: Context) {
                                         gestureStartTime = currentTime
                                     } else {
                                         val totalDisplacement = smoothedCentroidY - anchorY
-                                        val swipeThreshold = height.toFloat() * 0.10f
+                                        val swipeThreshold = height.toFloat() * 0.08f // Etwas reaktiver (8% statt 10%)
 
-                                        if (currentTime - gestureStartTime > 1200L) {
+                                        // Großzügigerer Timeout (2000ms statt 1200ms), damit langsame Gesten nicht abbrechen
+                                        if (currentTime - gestureStartTime > 2000L) {
                                             anchorY = smoothedCentroidY
                                             gestureStartTime = currentTime
                                         }
@@ -152,41 +156,4 @@ class AirGestureCore(private val context: Context) {
                                         anchorY = -1f
                                     }
                                 }
-
-                                System.arraycopy(currBytes, 0, prevBytes, 0, remaining)
-                            }
-
-                        }
-
-                    } catch (e: Exception) {
-                        // Frame abfangen
-                    } finally {
-                        imageProxy.close()
-                    }
-                }
-
-                cameraProvider?.unbindAll()    
-                cameraProvider?.bindToLifecycle(
-                    lifecycleOwner,
-                    cameraSelector,
-                    imageAnalysis
-                )
-
-            } catch (e: Exception) {
-                _gestureState.value = "Fehler: ${e.localizedMessage}"
-            }
-        }, ContextCompat.getMainExecutor(context))
-    }
-
-    fun stopGestureDetection() {
-        try {
-            cameraProvider?.unbindAll()
-            cameraProvider = null
-            currentBytesBuffer = null
-            previousBytesBuffer = null
-        } catch (e: Exception) {
-            // Ignorieren
-        }
-    }
-}
 
