@@ -2,18 +2,20 @@ package com.juaris.app
 
 import android.content.Context
 
-class LocalPhishingAnalyzer(private val context: Context) {
+class LocalPhishingAnalyzer(private val context: Context? = null) {
+
+    private val urgencyTriggers = listOf(
+        "konto gesperrt", "sofort handeln", "verifizierung", "aktualisieren",
+        "gewinn", "überweisung", "sicherheit", "warnung", "krypto"
+    )
+
     fun analyze(content: String): Boolean {
-        return false
+        return analyzeText(content).isSuspicious
     }
 
-    fun analyzeText(text: String): Boolean {
-        return false
-    }
-}
-
+    fun analyzeText(rawText: String): PhishingResult {
         val cleanedText = erodeAndNormalizeText(rawText)
-        
+       
         var score = 0
         val detectedTriggers = mutableListOf<String>()
 
@@ -48,7 +50,7 @@ class LocalPhishingAnalyzer(private val context: Context) {
 
     // Filtert Leetspeak (0 -> o, 4 -> a, @ -> a) und jegliche Sonderzeichen-Tricks heraus
     private fun erodeAndNormalizeText(text: String): String {
-        var normalized = text.lowercase()
+        val normalized = text.lowercase()
             .replace("0", "o")
             .replace("4", "a")
             .replace("3", "e")
@@ -57,7 +59,7 @@ class LocalPhishingAnalyzer(private val context: Context) {
             .replace("@", "a")
             .replace("$", "s")
             .replace("9", "g")
-            
+           
         // Entfernt alle Leerzeichen und Trennzeichen, um "k-o-n-t-o" zu "konto" zu verschmelzen
         return normalized.replace(Regex("[^a-z]"), "")
     }
@@ -85,4 +87,3 @@ class LocalPhishingAnalyzer(private val context: Context) {
         val recommendation: String
     )
 }
-
