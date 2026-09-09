@@ -26,22 +26,18 @@ object SecurityEngine {
         return if (result.isSuspicious) SecurityStatus.BLOCK else SecurityStatus.SAFE
     }
 
-    // 1. ANRUF-SCHUTZ
     fun analyzeIncomingCall(phoneNumber: String): CallSecurityResult {
         Log.d(TAG, "Prüfe Anruf von: $phoneNumber")
         return if (blockedNumbers.contains(phoneNumber)) {
-            Log.w(TAG, "WARNUNG: Gefährlicher Anruf blockiert: $phoneNumber")
             CallSecurityResult.BLOCK
         } else {
             CallSecurityResult.ALLOW
         }
     }
 
-    // 2. SMS-SCHUTZ
     fun analyzeIncomingSms(sender: String, messageBody: String): SmsSecurityResult {
         val analyzer = LocalPhishingAnalyzer()
         val result = analyzer.analyzeText(messageBody)
-       
         return if (result.isSuspicious) {
             SmsSecurityResult.QUARANTINE_AND_ALERT
         } else {
@@ -49,11 +45,9 @@ object SecurityEngine {
         }
     }
 
-    // 3. E-MAIL-SCHUTZ
     fun analyzeIncomingEmail(sender: String, subject: String, body: String): EmailSecurityResult {
         val analyzer = LocalPhishingAnalyzer()
         val result = analyzer.analyzeText("$subject $body")
-       
         return if (result.isSuspicious) {
             EmailSecurityResult.BLOCK
         } else {
