@@ -25,8 +25,11 @@ class AirGestureCore(private val context: Context) {
     private var lastBalance = 0.0
     private var frameCounter = 0
     
-    // Gleitendes Momentum
     private var gestureMomentum = 0.0
+
+    // NEU: Zähler für die Multi-Frame-Konsistenz (filtert Licht-Störsignale weg)
+    private var consecutiveUpCount = 0
+    private var consecutiveDownCount = 0
 
     var currentActionState: GestureAction = GestureAction.NONE
         private set
@@ -122,36 +125,49 @@ class AirGestureCore(private val context: Context) {
             val currentTime = System.currentTimeMillis()
             val timeSinceLastAction = currentTime - lastActionTime
 
-            // 7.0 Sekunden absolute Pause-Sperre nach jeder Aktion
-            if (timeSinceLastAction > 7000) {
+            if (timeSinceLastAction > 800) {
                 if (lastBalance != 0.0) {
                     val rawChange = currentBalance - lastBalance
 
-                    // Schutz vor ruckartigen Handy-Bewegungen (Erschütterungen abfangen)
+                    // Strenge Begrenzung gegen Erschütterungen
                     val balanceChange = rawChange.coerceIn(-0.12, 0.12)
 
-                    if (abs(balanceChange) > 0.02) {
-                        // Sofortiger Reset des Momentums bei Richtungswechsel
+                    if (abs(balanceChange) > 0.015) {
                         if (gestureMomentum * balanceChange < 0) {
                             gestureMomentum = 0.0
+                            consecutiveUpCount = 0
+                            consecutiveDownCount = 0
                         }
                         gestureMomentum = (gestureMomentum + balanceChange).coerceIn(-1.0, 1.0)
                     } else {
-                        // Optimierter Abklingfaktor (0.85) – kein Nachhängen mehr!
-                        gestureMomentum *= 0.85 
+                        gestureMomentum *= 0.80
                     }
 
-                    // Auslöser für Wisch rauf (Rechts) und Wisch runter (Links)
-                    if (gestureMomentum < -0.22) {
+                    // NEU: Erst auslösen, wenn die Richtung über mehrere Frames stabil bleibt (Licht-Filter)
+                    if (gestureMomentum < -0.18) {
+                        consecutiveUpCount++
+                        consecutiveDownCount = 0
+                    } else if (gestureMomentum > 0.18) {
+                        consecutiveDownCount++
+                        consecutiveUpCount = 0
+                    } else {
+                        consecutiveUpCount = maxOf(0, consecutiveUpCount - 1)
+                        consecutiveDownCount = maxOf(0, consecutiveDownCount - 1)
+                    }
+
+                    // Benötigt 2 stabile Frames am Stück in dieselbe Richtung -> Kein Licht-Flimmern triggert das mehr!
+                    if (consecutiveUpCount >= 2) {
                         lastActionTime = currentTime
                         gestureMomentum = 0.0
+                        consecutiveUpCount = 0
                         currentActionState = GestureAction.SWIPE_UP
                         CoroutineScope(Dispatchers.Main).launch {
                             onGestureDetected(GestureAction.SWIPE_UP)
                         }
-                    } else if (gestureMomentum > 0.22) {
+                    } else if (consecutiveDownCount >= 2) {
                         lastActionTime = currentTime
                         gestureMomentum = 0.0
+                        consecutiveDownCount = 0
                         currentActionState = GestureAction.SWIPE_DOWN
                         CoroutineScope(Dispatchers.Main).launch {
                             onGestureDetected(GestureAction.SWIPE_DOWN)
@@ -161,6 +177,8 @@ class AirGestureCore(private val context: Context) {
             } else {
                 currentActionState = GestureAction.NONE
                 gestureMomentum = 0.0
+                consecutiveUpCount = 0
+                consecutiveDownCount = 0
             }
 
             lastBalance = currentBalance
@@ -171,7 +189,7 @@ class AirGestureCore(private val context: Context) {
         }
     }
 
-    fun stopGestureDetection() {
+    fn stopGestureDetection() {
         try {
             cameraProvider?.unbindAll()
             cameraExecutor.shutdown()
