@@ -61,11 +61,11 @@ class AirGestureCore(private val context: Context) : ImageAnalysis.Analyzer {
             }
 
             val currentTime = System.currentTimeMillis()
-            // Reduzierte Sperrzeit für flüssigere Reaktionen
-            if (currentTime - lastTriggerTime > 600L) {
+            // Auf 1200ms erhöht für eine angenehme Pause zwischen den Gesten
+            if (currentTime - lastTriggerTime > 1200L) {
                 var massY = 0L
                 var totalMass = 0L
-                val step = 4 // Feinerer Raster-Scan für bessere Erkennung
+                val step = 4
 
                 for (y in 0 until height step step) {
                     val rowOffset = y * rowStride
@@ -76,7 +76,7 @@ class AirGestureCore(private val context: Context) : ImageAnalysis.Analyzer {
                             val prev = previousBytesBuffer!![index].toInt() and 0xFF
                             val delta = abs(curr - prev)
 
-                            if (delta > 10) { // Empfindlicherer Delta-Wert
+                            if (delta > 12) {
                                 massY += (y * delta).toLong()
                                 totalMass += delta.toLong()
                             }
@@ -84,9 +84,8 @@ class AirGestureCore(private val context: Context) : ImageAnalysis.Analyzer {
                     }
                 }
 
-                // Niedrigere Schwellenwerte für sofortige Handreaktion
-                val massEnter = 300L
-                val massExit = 100L
+                val massEnter = 400L
+                val massExit = 150L
 
                 if (totalMass > (if (isTracking) massExit else massEnter)) {
                     val rawCentroidY = massY.toFloat() / totalMass.toFloat()
@@ -104,9 +103,10 @@ class AirGestureCore(private val context: Context) : ImageAnalysis.Analyzer {
                         _gestureState.value = "Hand erkannt..."
                     } else {
                         val totalDisplacement = smoothedCentroidY - anchorY
-                        val swipeThreshold = height.toFloat() * 0.05f // Sehr reaktiver Schwellenwert
+                        // Auf 12% der Höhe erhöht, verhindert unbeabsichtigtes "von alleine weitergehen"
+                        val swipeThreshold = height.toFloat() * 0.12f
 
-                        if (currentTime - gestureStartTime > 1500L) {
+                        if (currentTime - gestureStartTime > 2000L) {
                             anchorY = smoothedCentroidY
                             gestureStartTime = currentTime
                         }
@@ -114,13 +114,13 @@ class AirGestureCore(private val context: Context) : ImageAnalysis.Analyzer {
                         if (abs(totalDisplacement) > swipeThreshold) {
                             lastTriggerTime = currentTime
 
-                            // Vertikale Steuerung: Rauf wischen = Rechts, Runter wischen = Links
+                            // Vertikale Steuerung: Rauf wischen = SWIPE_RIGHT, Runter wischen = SWIPE_LEFT
                             val action = if (totalDisplacement < 0f) {
-                                _gestureState.value = "Aktion: Rauf (Rechts)"
+                                _gestureState.value = "Aktion: Rauf (Nächster Tab)"
                                 _lastAction.value = "SWIPE_RIGHT"
                                 GestureAction.SWIPE_RIGHT
                             } else {
-                                _gestureState.value = "Aktion: Runter (Links)"
+                                _gestureState.value = "Aktion: Runter (Vorheriger Tab)"
                                 _lastAction.value = "SWIPE_LEFT"
                                 GestureAction.SWIPE_LEFT
                             }
