@@ -25,7 +25,7 @@ class AirGestureCore(private val context: Context) {
     private var lastBalance = 0.0
     private var frameCounter = 0
     
-    // Gleitendes Momentum mit extrem langlebiger Pufferung
+    // Gleitendes Momentum
     private var gestureMomentum = 0.0
 
     var currentActionState: GestureAction = GestureAction.NONE
@@ -125,13 +125,20 @@ class AirGestureCore(private val context: Context) {
             // 7.0 Sekunden absolute Pause-Sperre nach jeder Aktion
             if (timeSinceLastAction > 7000) {
                 if (lastBalance != 0.0) {
-                    val balanceChange = currentBalance - lastBalance
+                    val rawChange = currentBalance - lastBalance
 
-                    // Extrem feine Empfindlichkeit (0.02) & sehr langlebiges Momentum (0.99)
+                    // Schutz vor ruckartigen Handy-Bewegungen (Erschütterungen abfangen)
+                    val balanceChange = rawChange.coerceIn(-0.12, 0.12)
+
                     if (abs(balanceChange) > 0.02) {
+                        // Sofortiger Reset des Momentums bei Richtungswechsel
+                        if (gestureMomentum * balanceChange < 0) {
+                            gestureMomentum = 0.0
+                        }
                         gestureMomentum = (gestureMomentum + balanceChange).coerceIn(-1.0, 1.0)
                     } else {
-                        gestureMomentum *= 0.99 
+                        // Optimierter Abklingfaktor (0.85) – kein Nachhängen mehr!
+                        gestureMomentum *= 0.85 
                     }
 
                     // Auslöser für Wisch rauf (Rechts) und Wisch runter (Links)
