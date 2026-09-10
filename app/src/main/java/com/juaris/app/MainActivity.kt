@@ -8,7 +8,6 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
-import com.juaris.app.BuildConfig
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -55,7 +54,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+       
         // Verhindert das Abdunkeln/Ausschalten des Bildschirms beim Gesten-Steuern:
         window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
@@ -246,7 +245,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 @Composable
 fun JuarisMainDashboard(prefs: SharedPreferences) {
     val context = LocalContext.current
-    val lifecycleOwner = androidx.compose.ui.platform.LocalLifecycleOwner.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val aiCore = remember { LocalAICore(context) }
     val airGestureCore = remember { AirGestureCore(context) }
     var selectedTab by remember { mutableStateOf(0) }
@@ -278,7 +277,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
         }
     }
 
-     // Autonomer Start – läuft stabil durch alle Tabs (inkl. Tab 9 Info)
+    // Autonomer Start – bindet die Frontkamera und den Gesten-Kern an den Lifecycle
     LaunchedEffect(hasCameraPermission, lifecycleOwner) {
         if (hasCameraPermission) {
             airGestureCore.startGestureDetection(lifecycleOwner) { action ->
@@ -291,6 +290,30 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                     }
                     AirGestureCore.GestureAction.NONE -> {}
                 }
+            }
+
+            // CameraX Hardware-Verbindung für den Gesten-Stream
+            try {
+                val cameraProviderFuture = androidx.camera.lifecycle.ProcessCameraProvider.getInstance(context)
+                cameraProviderFuture.addListener({
+                    val cameraProvider = cameraProviderFuture.get()
+                    val imageAnalysis = androidx.camera.core.ImageAnalysis.Builder()
+                        .setBackpressureStrategy(androidx.camera.core.ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                        .build()
+                    
+                    val cameraExecutor = java.util.concurrent.Executors.newSingleThreadExecutor()
+                    imageAnalysis.setAnalyzer(cameraExecutor, airGestureCore)
+
+                    val cameraSelector = androidx.camera.core.CameraSelector.DEFAULT_FRONT_CAMERA
+                    cameraProvider.unbindAll()
+                    cameraProvider.bindToLifecycle(
+                        lifecycleOwner,
+                        cameraSelector,
+                        imageAnalysis
+                    )
+                }, ContextCompat.getMainExecutor(context))
+            } catch (e: Exception) {
+                // Kamera-Ausnahme abfangen
             }
         }
     }
