@@ -23,7 +23,10 @@ class AirGestureCore(private val context: Context) {
     private var lastActionTime = 0L
     private var lastBalance = 0.0
     private var frameCounter = 0
-    private var isCooldownActive = false
+    
+    // Zähler für die Multi-Frame-Bestätigung (verhindert das Herumspringen)
+    private var consecutiveUpFrames = 0
+    private var consecutiveDownFrames = 0
 
     var currentActionState: GestureAction = GestureAction.NONE
         private set
@@ -40,9 +43,9 @@ class AirGestureCore(private val context: Context) {
                     .build()
 
                 imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                    // Performance-Schonung: Jeden 2. Frame verarbeiten
+                    // Jeden 3. Frame analysieren für maximale Stabilität und Performance
                     frameCounter++
-                    if (frameCounter % 2 != 0) {
+                    if (frameCounter % 3 != 0) {
                         imageProxy.close()
                         return@setAnalyzer
                     }
@@ -78,8 +81,8 @@ class AirGestureCore(private val context: Context) {
 
             val isPortrait = rotation == 90 || rotation == 270
 
-            val yStep = (height / 14).coerceAtLeast(1)
-            val xStep = (width / 14).coerceAtLeast(1)
+            val yStep = (height / 12).coerceAtLeast(1)
+            val xStep = (width / 12).coerceAtLeast(1)
 
             for (y in 0 until height step yStep) {
                 for (x in 0 until width step xStep) {
@@ -104,7 +107,6 @@ class AirGestureCore(private val context: Context) {
             val avgTop = if (countTop > 0) topSum / countTop else 0.0
             val avgBottom = if (countBottom > 0) bottomSum / countBottom else 0.0
 
-            // Normierte Balance-Berechnung: Unempfindlich gegen globale Lichtschwankungen (Raumlicht)
             val totalLight = avgTop + avgBottom
             val currentBalance = if (totalLight > 1.0) {
                 (avgBottom - avgTop) / totalLight
@@ -114,31 +116,45 @@ class AirGestureCore(private val context: Context) {
 
             val currentTime = System.currentTimeMillis()
 
-            // Cooldown-Prüfung gegen mehrfaches Durchschalten / Tab-Überspringen
-            if (currentTime - lastActionTime > 1500) {
-                isCooldownActive = false
-                currentActionState = GestureAction.NONE
-            }
+            // 2.0 Sekunden absolute Sperre nach jeder Aktion (verhindert Überspringen und zu schnelles Schalten)
+            if (currentTime - lastActionTime > 2000) {
+                if (lastBalance != 0.0) {
+                    val balanceChange = currentBalance - lastBalance
 
-            if (!isCooldownActive && lastBalance != 0.0) {
-                val balanceChange = currentBalance - lastBalance
-
-                // Schwellenwert für stabile Erkennung bei gleichzeitiger Lichtunabhängigkeit
-                if (balanceChange > 0.15) {
-                    isCooldownActive = true
-                    lastActionTime = currentTime
-                    currentActionState = GestureAction.SWIPE_DOWN
-                    CoroutineScope(Dispatchers.Main).launch {
-                        onGestureDetected(GestureAction.SWIPE_DOWN)
+                    // Strikte Schwellenwerte gegen Lichtschwankungen
+                    if (balanceChange > 0.18) {
+                        consecutiveDownFrames++
+                        consecutiveUpFrames = 0
+                    } else if (balanceChange < -0.18) {
+                        consecutiveUpFrames++
+                        consecutiveDownFrames = 0
+                    } else {
+                        // Werte langsam abbauen, wenn keine Bewegung da ist
+                        consecutiveUpFrames = maxOf(0, consecutiveUpFrames - 1)
+                        consecutiveDownFrames = maxOf(0, consecutiveDownFrames - 1)
                     }
-                } else if (balanceChange < -0.15) {
-                    isCooldownActive = true
-                    lastActionTime = currentTime
-                    currentActionState = GestureAction.SWIPE_UP
-                    CoroutineScope(Dispatchers.Main).launch {
-                        onGestureDetected(GestureAction.SWIPE_UP)
+
+                    // Erst ab 3 stabilen Frames in Folge wird die Geste sicher ausgelöst (butterweich & fehlerfrei)
+                    if (consecutiveDownFrames >= 3) {
+                        lastActionTime = currentTime
+                        consecutiveDownFrames = 0
+                        currentActionState = GestureAction.SWIPE_DOWN
+                        CoroutineScope(Dispatchers.Main).launch {
+                            onGestureDetected(GestureAction.SWIPE_DOWN)
+                        }
+                    } else if (consecutiveUpFrames >= 3) {
+                        lastActionTime = currentTime
+                        consecutiveUpFrames = 0
+                        currentActionState = GestureAction.SWIPE_UP
+                        CoroutineScope(Dispatchers.Main).launch {
+                            onGestureDetected(GestureAction.SWIPE_UP)
+                        }
                     }
                 }
+            } else {
+                currentActionState = GestureAction.NONE
+                consecutiveUpFrames = 0
+                consecutiveDownFrames = 0
             }
 
             lastBalance = currentBalance
