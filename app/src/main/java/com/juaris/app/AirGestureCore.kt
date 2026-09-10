@@ -25,7 +25,7 @@ class AirGestureCore(private val context: Context) {
     private var lastBalance = 0.0
     private var frameCounter = 0
     
-    // Gleitendes Momentum mit strikter Begrenzung (verhindert das Festfahren)
+    // Gleitendes Momentum mit extrem langlebiger Pufferung
     private var gestureMomentum = 0.0
 
     var currentActionState: GestureAction = GestureAction.NONE
@@ -43,7 +43,6 @@ class AirGestureCore(private val context: Context) {
                     .build()
 
                 imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                    // Jeden 2. Frame analysieren für flüssige Performance
                     frameCounter++
                     if (frameCounter % 2 != 0) {
                         imageProxy.close()
@@ -123,27 +122,27 @@ class AirGestureCore(private val context: Context) {
             val currentTime = System.currentTimeMillis()
             val timeSinceLastAction = currentTime - lastActionTime
 
-            // 4.0 Sekunden Sperre nach jeder Aktion
-            if (timeSinceLastAction > 4000) {
+            // 7.0 Sekunden absolute Pause-Sperre nach jeder Aktion
+            if (timeSinceLastAction > 7000) {
                 if (lastBalance != 0.0) {
                     val balanceChange = currentBalance - lastBalance
 
-                    // Momentum mit strikter Begrenzung auf [-1.0, 1.0] gegen das Festfahren
-                    if (abs(balanceChange) > 0.04) {
+                    // Extrem feine Empfindlichkeit (0.02) & sehr langlebiges Momentum (0.99)
+                    if (abs(balanceChange) > 0.02) {
                         gestureMomentum = (gestureMomentum + balanceChange).coerceIn(-1.0, 1.0)
                     } else {
-                        gestureMomentum *= 0.60 // Schnelles Abklingen in den neutralen Zustand
+                        gestureMomentum *= 0.99 
                     }
 
-                    // Ausgelöste Aktionen mit sauberem Reset des Momentums
-                    if (gestureMomentum < -0.30) {
+                    // Auslöser für Wisch rauf (Rechts) und Wisch runter (Links)
+                    if (gestureMomentum < -0.22) {
                         lastActionTime = currentTime
                         gestureMomentum = 0.0
                         currentActionState = GestureAction.SWIPE_UP
                         CoroutineScope(Dispatchers.Main).launch {
                             onGestureDetected(GestureAction.SWIPE_UP)
                         }
-                    } else if (gestureMomentum > 0.30) {
+                    } else if (gestureMomentum > 0.22) {
                         lastActionTime = currentTime
                         gestureMomentum = 0.0
                         currentActionState = GestureAction.SWIPE_DOWN
@@ -174,5 +173,4 @@ class AirGestureCore(private val context: Context) {
         }
     }
 }
-
 
