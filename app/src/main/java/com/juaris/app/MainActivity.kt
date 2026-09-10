@@ -270,7 +270,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
         }
     }
 
-     // Autonomer Start – läuft stabil durch alle Tabs (inkl. Tab 9 Info)
+    // Autonomer Start – läuft stabil durch alle Tabs
     LaunchedEffect(hasCameraPermission, lifecycleOwner) {
         if (hasCameraPermission) {
             airGestureCore.startGestureDetection(lifecycleOwner) { action ->
@@ -286,7 +286,6 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
             }
         }
     }
-
     DisposableEffect(lifecycleOwner) {
         onDispose {
             airGestureCore.stopGestureDetection()
