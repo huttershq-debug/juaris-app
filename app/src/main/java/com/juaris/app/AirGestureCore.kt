@@ -1,156 +1,127 @@
 package com.juaris.app
 
 import android.content.Context
-import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.ImageProxy
+import androidx.camera.core.*
+import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlin.math.abs
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.nio.ByteBuffer
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
-class AirGestureCore(private val context: Context) : ImageAnalysis.Analyzer {
+class AirGestureCore(private val context: Context) {
 
     enum class GestureAction {
-        SWIPE_RIGHT, SWIPE_LEFT, NONE
+        NONE, SWIPE_LEFT, SWIPE_RIGHT
     }
 
-    private val _gestureState = MutableStateFlow("Bereit")
-    val gestureState: StateFlow<String> = _gestureState
+    private var cameraProvider: ProcessCameraProvider? = null
+    private var cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
+    private var lastActionTime = 0L
+    private var previousBrightnessLeft = 0.0
+    private var previousBrightnessRight = 0.0
 
-    private val _lastAction = MutableStateFlow("NONE")
-    val lastAction: StateFlow<String> = _lastAction
-
-    private var previousBytesBuffer: ByteArray? = null
-    private var isTracking = false
-    private var anchorY = -1f
-    private var smoothedCentroidY = -1f
-    private var gestureStartTime = 0L
-    private var lastTriggerTime = 0L
-
-    private var currentCallback: ((GestureAction) -> Unit)? = null
+    var currentActionState: GestureAction = GestureAction.NONE
+        private set
 
     fun startGestureDetection(lifecycleOwner: LifecycleOwner, onGestureDetected: (GestureAction) -> Unit) {
-        currentCallback = onGestureDetected
-        _gestureState.value = "Kamera aktiv - Bereit für Gesten"
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+        cameraProviderFuture.addListener({
+            try {
+                cameraProvider = cameraProviderFuture.get()
+                val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+
+                val imageAnalysis = ImageAnalysis.Builder()
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .build()
+
+                imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
+                    processImage(imageProxy, onGestureDetected)
+                }
+
+                cameraProvider?.unbindAll()
+                cameraProvider?.bindToLifecycle(
+                    lifecycleOwner,
+                    cameraSelector,
+                    imageAnalysis
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }, ContextCompat.getMainExecutor(context))
+    }
+
+    private fun processImage(imageProxy: ImageProxy, onGestureDetected: (GestureAction) -> Unit) {
+        val buffer: ByteBuffer = imageProxy.planes[0].buffer
+        val bytes = ByteArray(buffer.remaining())
+        buffer.get(bytes)
+
+        val width = imageProxy.width
+        val height = imageProxy.height
+
+        // Rasteranalyse: Helligkeit in linker und rechter Bildhälfte vergleichen
+        var leftSum = 0L
+        var rightSum = 0L
+        val step = (width * height) / 150 // Optimiert für Performance
+
+        var count = 0
+        var i = 0
+        while (i < bytes.size && count < 150) {
+            val pixel = bytes[i].toInt() and 0xFF
+            val xCoord = i % width
+            if (xCoord < width / 2) {
+                leftSum += pixel
+            } else {
+                rightSum += pixel
+            }
+            i += step.coerceAtLeast(1)
+            count++
+        }
+
+        val currentLeft = if (count > 0) leftSum.toDouble() / (count / 2) else 0.0
+        val currentRight = if (count > 0) rightSum.toDouble() / (count / 2) else 0.0
+
+        if (previousBrightnessLeft > 0 && previousBrightnessRight > 0) {
+            val diffLeft = currentLeft - previousBrightnessLeft
+            val diffRight = currentRight - previousBrightnessRight
+            val currentTime = System.currentTimeMillis()
+
+            // Debounce von 800ms, damit Wischgesten sauber einzeln erkannt werden
+            if (currentTime - lastActionTime > 800) {
+                // Wischbewegung von links nach rechts
+                if (diffLeft > 10.0 && diffRight < -10.0) {
+                    lastActionTime = currentTime
+                    currentActionState = GestureAction.SWIPE_RIGHT
+                    CoroutineScope(Dispatchers.Main).launch {
+                        onGestureDetected(GestureAction.SWIPE_RIGHT)
+                    }
+                } 
+                // Wischbewegung von rechts nach links
+                else if (diffRight > 10.0 && diffLeft < -10.0) {
+                    lastActionTime = currentTime
+                    currentActionState = GestureAction.SWIPE_LEFT
+                    CoroutineScope(Dispatchers.Main).launch {
+                        onGestureDetected(GestureAction.SWIPE_LEFT)
+                    }
+                }
+            }
+        }
+
+        previousBrightnessLeft = currentLeft
+        previousBrightnessRight = currentRight
+
+        imageProxy.close()
     }
 
     fun stopGestureDetection() {
-        currentCallback = null
-        previousBytesBuffer = null
-        isTracking = false
-        _gestureState.value = "Gestoppt"
-    }
-
-    override fun analyze(image: ImageProxy) {
         try {
-            val planes = image.planes
-            val buffer = planes[0].buffer
-            val remaining = buffer.remaining()
-            val currBytes = ByteArray(remaining)
-            buffer.get(currBytes)
-
-            val width = image.width
-            val height = image.height
-            val rowStride = planes[0].rowStride
-
-            if (previousBytesBuffer == null || previousBytesBuffer!!.size != remaining) {
-                previousBytesBuffer = currBytes
-                image.close()
-                return
-            }
-
-            val currentTime = System.currentTimeMillis()
-            // Auf 1200ms erhöht für eine angenehme Pause zwischen den Gesten
-            if (currentTime - lastTriggerTime > 1200L) {
-                var massY = 0L
-                var totalMass = 0L
-                val step = 4
-
-                for (y in 0 until height step step) {
-                    val rowOffset = y * rowStride
-                    for (x in 0 until width step step) {
-                        val index = rowOffset + x
-                        if (index < remaining) {
-                            val curr = currBytes[index].toInt() and 0xFF
-                            val prev = previousBytesBuffer!![index].toInt() and 0xFF
-                            val delta = abs(curr - prev)
-
-                            if (delta > 12) {
-                                massY += (y * delta).toLong()
-                                totalMass += delta.toLong()
-                            }
-                        }
-                    }
-                }
-
-                val massEnter = 400L
-                val massExit = 150L
-
-                if (totalMass > (if (isTracking) massExit else massEnter)) {
-                    val rawCentroidY = massY.toFloat() / totalMass.toFloat()
-
-                    smoothedCentroidY = if (smoothedCentroidY == -1f) {
-                        rawCentroidY
-                    } else {
-                        0.3f * rawCentroidY + 0.7f * smoothedCentroidY
-                    }
-
-                    if (!isTracking) {
-                        anchorY = smoothedCentroidY
-                        isTracking = true
-                        gestureStartTime = currentTime
-                        _gestureState.value = "Hand erkannt..."
-                    } else {
-                        val totalDisplacement = smoothedCentroidY - anchorY
-                        // Auf 12% der Höhe erhöht, verhindert unbeabsichtigtes "von alleine weitergehen"
-                        val swipeThreshold = height.toFloat() * 0.12f
-
-                        if (currentTime - gestureStartTime > 2000L) {
-                            anchorY = smoothedCentroidY
-                            gestureStartTime = currentTime
-                        }
-
-                        if (abs(totalDisplacement) > swipeThreshold) {
-                            lastTriggerTime = currentTime
-
-                            // Vertikale Steuerung: Rauf wischen = SWIPE_RIGHT, Runter wischen = SWIPE_LEFT
-                            val action = if (totalDisplacement < 0f) {
-                                _gestureState.value = "Aktion: Rauf (Nächster Tab)"
-                                _lastAction.value = "SWIPE_RIGHT"
-                                GestureAction.SWIPE_RIGHT
-                            } else {
-                                _gestureState.value = "Aktion: Runter (Vorheriger Tab)"
-                                _lastAction.value = "SWIPE_LEFT"
-                                GestureAction.SWIPE_LEFT
-                            }
-
-                            currentCallback?.let { callback ->
-                                ContextCompat.getMainExecutor(context).execute {
-                                    callback(action)
-                                }
-                            }
-
-                            isTracking = false
-                            smoothedCentroidY = -1f
-                            anchorY = -1f
-                        }
-                    }
-                } else {
-                    if (totalMass < massExit) {
-                        isTracking = false
-                        smoothedCentroidY = -1f
-                        anchorY = -1f
-                        _gestureState.value = "Warte auf Geste..."
-                    }
-                }
-            }
-
-            System.arraycopy(currBytes, 0, previousBytesBuffer!!, 0, remaining)
+            cameraProvider?.unbindAll()
+            cameraExecutor.shutdown()
         } catch (e: Exception) {
-            // Frame-Fehler abfangen
-        } finally {
-            image.close()
+            // Ignorieren falls bereits geschlossen
         }
     }
 }
