@@ -26,9 +26,7 @@ class AirGestureCore(private val context: Context) {
     private var frameCounter = 0
     
     private var gestureMomentum = 0.0
-
-    private var consecutiveUpCount = 0
-    private var consecutiveDownCount = 0
+    private var consecutiveCount = 0
 
     var currentActionState: GestureAction = GestureAction.NONE
         private set
@@ -46,7 +44,11 @@ class AirGestureCore(private val context: Context) {
 
                 imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
                     frameCounter++
-                    // Jedes Frame analysieren für maximale Reaktionsgeschwindigkeit
+                    // Jedes 2te Frame reicht völlig für flüssige Erkennung ohne Last
+                    if (frameCounter % 2 != 0) {
+                        imageProxy.close()
+                        return@setAnalyzer
+                    }
                     processImage(imageProxy, onGestureDetected)
                 }
 
@@ -79,8 +81,9 @@ class AirGestureCore(private val context: Context) {
 
             val isPortrait = rotation == 90 || rotation == 270
 
-            val yStep = (height / 16).coerceAtLeast(1)
-            val xStep = (width / 16).coerceAtLeast(1)
+            // Saubere Rasterung für die vertikale Ausrichtung
+            val yStep = (height / 12).coerceAtLeast(1)
+            val xStep = (width / 12).coerceAtLeast(1)
 
             for (y in 0 until height step yStep) {
                 for (x in 0 until width step xStep) {
@@ -88,16 +91,11 @@ class AirGestureCore(private val context: Context) {
                     if (index < buffer.capacity()) {
                         val pixel = buffer.get(index).toInt() and 0xFF
                         
-                        val verticalCoord = if (isPortrait) x else y
-                        val verticalLimit = if (isPortrait) width else height
+                        // Korrekte Zuweisung der vertikalen Koordinate je nach Rotation
+                        val verticalCoord = if (isPortrait) y else x
+                        val verticalLimit = if (isPortrait) height else width
 
-                        val isTopHalf = if (rotation == 270) {
-                            verticalCoord >= verticalLimit / 2
-                        } else {
-                            verticalCoord < verticalLimit / 2
-                        }
-
-                        if (isTopHalf) {
+                        if (verticalCoord < verticalLimit / 2) {
                             topSum += pixel
                             countTop++
                         } else {
@@ -121,62 +119,53 @@ class AirGestureCore(private val context: Context) {
             val currentTime = System.currentTimeMillis()
             val timeSinceLastAction = currentTime - lastActionTime
 
-            // Cooldown auf 600ms verkürzt für flüssigeres Weiterschalten
-            if (timeSinceLastAction > 600) {
+            // 700ms Cooldown zwischen Aktionen gegen zu schnelles Durchrauschen
+            if (timeSinceLastAction > 700) {
                 if (lastBalance != 0.0) {
                     val rawChange = currentBalance - lastBalance
 
-                    val balanceChange = rawChange.coerceIn(-0.15, 0.15)
+                    // Harten Filter gegen wildes Springen einbauen
+                    val balanceChange = rawChange.coerceIn(-0.08, 0.08)
 
-                    // Stark herabgesetzte Schwelle (0.003 statt 0.015), damit Handbewegungen sofort erkannt werden
-                    if (abs(balanceChange) > 0.003) {
+                    if (abs(balanceChange) > 0.008) {
+                        // Bei Richtungswechsel sofort Momentum löschen
                         if (gestureMomentum * balanceChange < 0) {
                             gestureMomentum = 0.0
-                            consecutiveUpCount = 0
-                            consecutiveDownCount = 0
+                            consecutiveCount = 0
                         }
                         gestureMomentum = (gestureMomentum + balanceChange).coerceIn(-1.0, 1.0)
                     } else {
-                        // Sanfteres Abklingen
-                        gestureMomentum *= 0.85
+                        // Sanftes Abklingen, damit es bei Ruhe sofort stoppt
+                        gestureMomentum *= 0.75
                     }
 
-                    // Sehr niedrige Auslöse-Schwelle (0.08 statt 0.18)
-                    if (gestureMomentum < -0.08) {
-                        consecutiveUpCount++
-                        consecutiveDownCount = 0
-                    } else if (gestureMomentum > 0.08) {
-                        consecutiveDownCount++
-                        consecutiveUpCount = 0
+                    // Klare Schwellenwerte für Rauf und Runter
+                    if (gestureMomentum < -0.12) {
+                        consecutiveCount++
+                    } else if (gestureMomentum > 0.12) {
+                        consecutiveCount++
                     } else {
-                        consecutiveUpCount = maxOf(0, consecutiveUpCount - 1)
-                        consecutiveDownCount = maxOf(0, consecutiveDownCount - 1)
+                        consecutiveCount = maxOf(0, consecutiveCount - 1)
                     }
 
-                    // Löst bereits nach 1 stabilen Frame aus – reagiert sofort wie ein Touch-Befehl
-                    if (consecutiveUpCount >= 1) {
+                    // Benötigt 2 stabile Frames in dieselbe Richtung -> Kein Zucken/Hüpfen mehr möglich
+                    if (consecutiveCount >= 2) {
+                        val action = if (gestureMomentum < 0) GestureAction.SWIPE_UP else GestureAction.SWIPE_DOWN
+                        
                         lastActionTime = currentTime
                         gestureMomentum = 0.0
-                        consecutiveUpCount = 0
-                        currentActionState = GestureAction.SWIPE_UP
+                        consecutiveCount = 0
+                        currentActionState = action
+
                         CoroutineScope(Dispatchers.Main).launch {
-                            onGestureDetected(GestureAction.SWIPE_UP)
-                        }
-                    } else if (consecutiveDownCount >= 1) {
-                        lastActionTime = currentTime
-                        gestureMomentum = 0.0
-                        consecutiveDownCount = 0
-                        currentActionState = GestureAction.SWIPE_DOWN
-                        CoroutineScope(Dispatchers.Main).launch {
-                            onGestureDetected(GestureAction.SWIPE_DOWN)
+                            onGestureDetected(action)
                         }
                     }
                 }
             } else {
                 currentActionState = GestureAction.NONE
                 gestureMomentum = 0.0
-                consecutiveUpCount = 0
-                consecutiveDownCount = 0
+                consecutiveCount = 0
             }
 
             lastBalance = currentBalance
@@ -196,5 +185,4 @@ class AirGestureCore(private val context: Context) {
         }
     }
 }
-
 
