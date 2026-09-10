@@ -21,18 +21,18 @@ fun AirGesturePage(airGestureCore: AirGestureCore, onTabSwitch: (Boolean) -> Uni
         while (true) {
             delay(200L)
             when (airGestureCore.currentActionState) {
-                AirGestureCore.GestureAction.SWIPE_LEFT -> {
-                    lastDetectedAction = "SWIPE_LEFT (Nach links gewischt)"
+                AirGestureCore.GestureAction.SWIPE_UP -> {
+                    lastDetectedAction = "SWIPE_UP (Nach oben gewischt)"
                     gestureCount++
                     onTabSwitch(false)
                 }
-                AirGestureCore.GestureAction.SWIPE_RIGHT -> {
-                    lastDetectedAction = "SWIPE_RIGHT (Nach rechts gewischt)"
+                AirGestureCore.GestureAction.SWIPE_DOWN -> {
+                    lastDetectedAction = "SWIPE_DOWN (Nach unten gewischt)"
                     gestureCount++
                     onTabSwitch(true)
                 }
                 AirGestureCore.GestureAction.NONE -> {
-                    // Warten
+                    // Warten auf Eingabe
                 }
             }
         }
@@ -47,7 +47,7 @@ fun AirGesturePage(airGestureCore: AirGestureCore, onTabSwitch: (Boolean) -> Uni
         item {
             Text("Air-Swiping Gesten-Steuerung", style = MaterialTheme.typography.titleLarge, color = Color.White)
             Spacer(modifier = Modifier.height(4.dp))
-            Text("Bediene Juaris berührungslos über die Frontkamera. Läuft permanent im Hintergrund (100% lokal & offline).", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text("Bediene Juaris gemütlich mit vertikalen Wischgesten vor der Frontkamera (100% lokal & offline).", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
             TacticalPulseCard {
@@ -62,14 +62,14 @@ fun AirGesturePage(airGestureCore: AirGestureCore, onTabSwitch: (Boolean) -> Uni
                             color = NeonGiftgruen
                         ) {}
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Kamera-Schutz & Gesten aktiv", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                        Text("Vertikale Gesten aktiv", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text("Sensor-Feed: Kamera aktiv - Bereit für Gesten", style = MaterialTheme.typography.bodyMedium, color = Color.White)
                     Text("Erkannte Gesten: $gestureCount", style = MaterialTheme.typography.bodyMedium, color = Color.White)
                     Text("Letzte Aktion: $lastDetectedAction", style = MaterialTheme.typography.bodyMedium, color = NeonGiftgruen, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Hinweis: Bewege deine Hand kurz mit etwas Abstand von links nach rechts oder rechts nach links vor die Frontkamera.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    Text("Hinweis: Wische ganz entspannt nach oben oder unten vor der Frontkamera, um die Tabs kontrolliert zu wechseln.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                 }
             }
         }
