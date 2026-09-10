@@ -62,10 +62,9 @@ class AirGestureCore(private val context: Context) {
         val width = imageProxy.width
         val height = imageProxy.height
 
-        // Rasteranalyse: Helligkeit in linker und rechter Bildhälfte vergleichen
         var leftSum = 0L
         var rightSum = 0L
-        val step = (width * height) / 150 // Optimiert für Performance
+        val step = (width * height) / 150
 
         var count = 0
         var i = 0
@@ -89,18 +88,14 @@ class AirGestureCore(private val context: Context) {
             val diffRight = currentRight - previousBrightnessRight
             val currentTime = System.currentTimeMillis()
 
-            // Debounce von 800ms, damit Wischgesten sauber einzeln erkannt werden
             if (currentTime - lastActionTime > 800) {
-                // Wischbewegung von links nach rechts
                 if (diffLeft > 10.0 && diffRight < -10.0) {
                     lastActionTime = currentTime
                     currentActionState = GestureAction.SWIPE_RIGHT
                     CoroutineScope(Dispatchers.Main).launch {
                         onGestureDetected(GestureAction.SWIPE_RIGHT)
                     }
-                } 
-                // Wischbewegung von rechts nach links
-                else if (diffRight > 10.0 && diffLeft < -10.0) {
+                } else if (diffRight > 10.0 && diffLeft < -10.0) {
                     lastActionTime = currentTime
                     currentActionState = GestureAction.SWIPE_LEFT
                     CoroutineScope(Dispatchers.Main).launch {
@@ -121,8 +116,9 @@ class AirGestureCore(private val context: Context) {
             cameraProvider?.unbindAll()
             cameraExecutor.shutdown()
         } catch (e: Exception) {
-            // Ignorieren falls bereits geschlossen
+            // Ignorieren
         }
     }
 }
+
 
