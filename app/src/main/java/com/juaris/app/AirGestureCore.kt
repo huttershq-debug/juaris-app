@@ -27,7 +27,6 @@ class AirGestureCore(private val context: Context) {
     
     private var gestureMomentum = 0.0
 
-    // NEU: Zähler für die Multi-Frame-Konsistenz (filtert Licht-Störsignale weg)
     private var consecutiveUpCount = 0
     private var consecutiveDownCount = 0
 
@@ -129,7 +128,6 @@ class AirGestureCore(private val context: Context) {
                 if (lastBalance != 0.0) {
                     val rawChange = currentBalance - lastBalance
 
-                    // Strenge Begrenzung gegen Erschütterungen
                     val balanceChange = rawChange.coerceIn(-0.12, 0.12)
 
                     if (abs(balanceChange) > 0.015) {
@@ -143,7 +141,6 @@ class AirGestureCore(private val context: Context) {
                         gestureMomentum *= 0.80
                     }
 
-                    // NEU: Erst auslösen, wenn die Richtung über mehrere Frames stabil bleibt (Licht-Filter)
                     if (gestureMomentum < -0.18) {
                         consecutiveUpCount++
                         consecutiveDownCount = 0
@@ -155,7 +152,6 @@ class AirGestureCore(private val context: Context) {
                         consecutiveDownCount = maxOf(0, consecutiveDownCount - 1)
                     }
 
-                    // Benötigt 2 stabile Frames am Stück in dieselbe Richtung -> Kein Licht-Flimmern triggert das mehr!
                     if (consecutiveUpCount >= 2) {
                         lastActionTime = currentTime
                         gestureMomentum = 0.0
@@ -189,7 +185,7 @@ class AirGestureCore(private val context: Context) {
         }
     }
 
-    fn stopGestureDetection() {
+    fun stopGestureDetection() {
         try {
             cameraProvider?.unbindAll()
             cameraExecutor.shutdown()
