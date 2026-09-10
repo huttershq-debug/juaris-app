@@ -22,6 +22,7 @@ class AirGestureCore(private val context: Context) {
     private var cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     private var lastActionTime = 0L
     private var lastBalance = 0.0
+    private var frameCounter = 0
 
     var currentActionState: GestureAction = GestureAction.NONE
         private set
@@ -38,6 +39,12 @@ class AirGestureCore(private val context: Context) {
                     .build()
 
                 imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
+                    // Frame-Skipping für maximale Gesamt-Flüssigkeit der App
+                    frameCounter++
+                    if (frameCounter % 2 != 0) {
+                        imageProxy.close()
+                        return@setAnalyzer
+                    }
                     processImage(imageProxy, onGestureDetected)
                 }
 
@@ -61,22 +68,30 @@ class AirGestureCore(private val context: Context) {
             val pixelStride = plane.pixelStride
             val width = imageProxy.width
             val height = imageProxy.height
+            val rotation = imageProxy.imageInfo.rotationDegrees
 
             var leftSum = 0.0
             var rightSum = 0.0
             var countLeft = 0
             var countRight = 0
 
-            // Raster-Sampling unter Berücksichtigung von rowStride und pixelStride
-            val yStep = (height / 12).coerceAtLeast(1)
-            val xStep = (width / 12).coerceAtLeast(1)
+            // Erkennen, ob das Gerät im Hochformat (Portrait) oder Querformat (Landscape) gehalten wird
+            val isPortrait = rotation == 90 || rotation == 270
+
+            val yStep = (height / 10).coerceAtLeast(1)
+            val xStep = (width / 10).coerceAtLeast(1)
 
             for (y in 0 until height step yStep) {
                 for (x in 0 until width step xStep) {
                     val index = y * rowStride + x * pixelStride
                     if (index < buffer.capacity()) {
                         val pixel = buffer.get(index).toInt() and 0xFF
-                        if (x < width / 2) {
+                        
+                        // Dynamische Achsen-Zuordnung je nach Ausrichtung
+                        val checkAxis = if (isPortrait) y else x
+                        val limitAxis = if (isPortrait) height else width
+
+                        if (checkAxis < limitAxis / 2) {
                             leftSum += pixel
                             countLeft++
                         } else {
@@ -90,22 +105,20 @@ class AirGestureCore(private val context: Context) {
             val avgLeft = if (countLeft > 0) leftSum / countLeft else 0.0
             val avgRight = if (countRight > 0) rightSum / countRight else 0.0
 
-            // Balance misst die Helligkeitsdifferenz zwischen rechter und linker Bildschirmhälfte
             val currentBalance = avgRight - avgLeft
             val currentTime = System.currentTimeMillis()
 
             if (lastBalance != 0.0) {
                 val balanceChange = currentBalance - lastBalance
 
-                // 700ms Sperre, damit Wischgesten sauber einzeln erkannt werden
-                if (currentTime - lastActionTime > 700) {
-                    if (balanceChange > 12.0) {
+                if (currentTime - lastActionTime > 600) {
+                    if (balanceChange > 10.0) {
                         lastActionTime = currentTime
                         currentActionState = GestureAction.SWIPE_RIGHT
                         CoroutineScope(Dispatchers.Main).launch {
                             onGestureDetected(GestureAction.SWIPE_RIGHT)
                         }
-                    } else if (balanceChange < -12.0) {
+                    } else if (balanceChange < -10.0) {
                         lastActionTime = currentTime
                         currentActionState = GestureAction.SWIPE_LEFT
                         CoroutineScope(Dispatchers.Main).launch {
@@ -132,5 +145,4 @@ class AirGestureCore(private val context: Context) {
         }
     }
 }
-
 
