@@ -22,11 +22,10 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
     private var cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     private var lastActionTime = 0L
-    private var lastBalance = 0.0
-    private var frameCounter = 0
     
-    private var gestureMomentum = 0.0
-    private var consecutiveCount = 0
+    // Dynamische Baseline für den Hintergrund (lernt sich selbst an)
+    private var baselineTop = -1.0
+    private var baselineBottom = -1.0
 
     var currentActionState: GestureAction = GestureAction.NONE
         private set
@@ -43,12 +42,6 @@ class AirGestureCore(private val context: Context) {
                     .build()
 
                 imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                    frameCounter++
-                    // Jedes 2te Frame reicht völlig für flüssige Erkennung ohne Last
-                    if (frameCounter % 2 != 0) {
-                        imageProxy.close()
-                        return@setAnalyzer
-                    }
                     processImage(imageProxy, onGestureDetected)
                 }
 
@@ -80,10 +73,11 @@ class AirGestureCore(private val context: Context) {
             var countBottom = 0
 
             val isPortrait = rotation == 90 || rotation == 270
+            val effectiveHeight = if (isPortrait) width else height
+            val effectiveWidth = if (isPortrait) height else width
 
-            // Saubere Rasterung für die vertikale Ausrichtung
-            val yStep = (height / 12).coerceAtLeast(1)
-            val xStep = (width / 12).coerceAtLeast(1)
+            val yStep = (effectiveHeight / 12).coerceAtLeast(1)
+            val xStep = (effectiveWidth / 12).coerceAtLeast(1)
 
             for (y in 0 until height step yStep) {
                 for (x in 0 until width step xStep) {
@@ -91,11 +85,11 @@ class AirGestureCore(private val context: Context) {
                     if (index < buffer.capacity()) {
                         val pixel = buffer.get(index).toInt() and 0xFF
                         
-                        // Korrekte Zuweisung der vertikalen Koordinate je nach Rotation
-                        val verticalCoord = if (isPortrait) y else x
-                        val verticalLimit = if (isPortrait) height else width
+                        // Korrekte Ausrichtung auf die vertikale Achse im Hochformat
+                        val vCoord = if (isPortrait) x else y
+                        val midPoint = effectiveHeight / 2
 
-                        if (verticalCoord < verticalLimit / 2) {
+                        if (vCoord < midPoint) {
                             topSum += pixel
                             countTop++
                         } else {
@@ -109,66 +103,45 @@ class AirGestureCore(private val context: Context) {
             val avgTop = if (countTop > 0) topSum / countTop else 0.0
             val avgBottom = if (countBottom > 0) bottomSum / countBottom else 0.0
 
-            val totalLight = avgTop + avgBottom
-            val currentBalance = if (totalLight > 1.0) {
-                (avgBottom - avgTop) / totalLight
-            } else {
-                0.0
+            // Baseline beim Start initialisieren
+            if (baselineTop < 0.0) {
+                baselineTop = avgTop
+                baselineBottom = avgBottom
+                return
             }
+
+            // Differenz zum normalen Hintergrund berechnen
+            val deltaTop = avgTop - baselineTop
+            val deltaBottom = avgBottom - baselineBottom
 
             val currentTime = System.currentTimeMillis()
-            val timeSinceLastAction = currentTime - lastActionTime
+            
+            // 500ms Cooldown für sauberes, flüssiges Blättern durch die Tabs
+            if (currentTime - lastActionTime > 500) {
+                val threshold = 2.5 // Sensitivitäts-Schwelle
 
-            // 700ms Cooldown zwischen Aktionen gegen zu schnelles Durchrauschen
-            if (timeSinceLastAction > 700) {
-                if (lastBalance != 0.0) {
-                    val rawChange = currentBalance - lastBalance
-
-                    // Harten Filter gegen wildes Springen einbauen
-                    val balanceChange = rawChange.coerceIn(-0.08, 0.08)
-
-                    if (abs(balanceChange) > 0.008) {
-                        // Bei Richtungswechsel sofort Momentum löschen
-                        if (gestureMomentum * balanceChange < 0) {
-                            gestureMomentum = 0.0
-                            consecutiveCount = 0
-                        }
-                        gestureMomentum = (gestureMomentum + balanceChange).coerceIn(-1.0, 1.0)
-                    } else {
-                        // Sanftes Abklingen, damit es bei Ruhe sofort stoppt
-                        gestureMomentum *= 0.75
+                // Hand bewegt sich von unten nach oben (Unten wird abgedeckt -> Delta negativ)
+                if (deltaBottom < -threshold && deltaTop > -threshold * 0.7) {
+                    lastActionTime = currentTime
+                    currentActionState = GestureAction.SWIPE_UP
+                    CoroutineScope(Dispatchers.Main).launch {
+                        onGestureDetected(GestureAction.SWIPE_UP)
                     }
-
-                    // Klare Schwellenwerte für Rauf und Runter
-                    if (gestureMomentum < -0.12) {
-                        consecutiveCount++
-                    } else if (gestureMomentum > 0.12) {
-                        consecutiveCount++
-                    } else {
-                        consecutiveCount = maxOf(0, consecutiveCount - 1)
-                    }
-
-                    // Benötigt 2 stabile Frames in dieselbe Richtung -> Kein Zucken/Hüpfen mehr möglich
-                    if (consecutiveCount >= 2) {
-                        val action = if (gestureMomentum < 0) GestureAction.SWIPE_UP else GestureAction.SWIPE_DOWN
-                        
-                        lastActionTime = currentTime
-                        gestureMomentum = 0.0
-                        consecutiveCount = 0
-                        currentActionState = action
-
-                        CoroutineScope(Dispatchers.Main).launch {
-                            onGestureDetected(action)
-                        }
+                } 
+                // Hand bewegt sich von oben nach unten (Oben wird abgedeckt -> Delta negativ)
+                else if (deltaTop < -threshold && deltaBottom > -threshold * 0.7) {
+                    lastActionTime = currentTime
+                    currentActionState = GestureAction.SWIPE_DOWN
+                    CoroutineScope(Dispatchers.Main).launch {
+                        onGestureDetected(GestureAction.SWIPE_DOWN)
                     }
                 }
-            } else {
-                currentActionState = GestureAction.NONE
-                gestureMomentum = 0.0
-                consecutiveCount = 0
             }
 
-            lastBalance = currentBalance
+            // Baseline passt sich langsam an Lichtveränderungen im Raum an
+            baselineTop = baselineTop * 0.92 + avgTop * 0.08
+            baselineBottom = baselineBottom * 0.92 + avgBottom * 0.08
+
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
