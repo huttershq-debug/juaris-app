@@ -25,12 +25,8 @@ class AirGestureCore(private val context: Context) {
     private var lastBalance = 0.0
     private var frameCounter = 0
     
-    // Zähler für die Multi-Frame-Bestätigung
-    private var consecutiveUpFrames = 0
-    private var consecutiveDownFrames = 0
-    
-    // Neu: Verhindert das "Hängenbleiben/Wilde Herumspringen" direkt nach Ablauf der Sperre
-    private var needsNeutralState = false
+    // Gleitendes Momentum für butterweiche, flüssige Erkennung ohne Hängenbleiben
+    private var gestureMomentum = 0.0
 
     var currentActionState: GestureAction = GestureAction.NONE
         private set
@@ -47,9 +43,9 @@ class AirGestureCore(private val context: Context) {
                     .build()
 
                 imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                    // Performance-Schonung: Jeden 3. Frame analysieren
+                    // Jeden 2. Frame analysieren für extrem flüssige und reaktionsschnelle Steuerung
                     frameCounter++
-                    if (frameCounter % 3 != 0) {
+                    if (frameCounter % 2 != 0) {
                         imageProxy.close()
                         return@setAnalyzer
                     }
@@ -97,7 +93,14 @@ class AirGestureCore(private val context: Context) {
                         val verticalCoord = if (isPortrait) x else y
                         val verticalLimit = if (isPortrait) width else height
 
-                        if (verticalCoord < verticalLimit / 2) {
+                        // Korrektur für Frontkamera-Rotation, damit Rauf/Runter exakt stimmt
+                        val isTopHalf = if (rotation == 270) {
+                            verticalCoord >= verticalLimit / 2
+                        } else {
+                            verticalCoord < verticalLimit / 2
+                        }
+
+                        if (isTopHalf) {
                             topSum += pixel
                             countTop++
                         } else {
@@ -121,59 +124,40 @@ class AirGestureCore(private val context: Context) {
             val currentTime = System.currentTimeMillis()
             val timeSinceLastAction = currentTime - lastActionTime
 
-            // 4.0 Sekunden absolute Sperre nach jeder Aktion
+            // 4.0 Sekunden absolute Sperre nach jeder Aktion (verhindert Überspringen)
             if (timeSinceLastAction > 4000) {
                 if (lastBalance != 0.0) {
                     val balanceChange = currentBalance - lastBalance
 
-                    // Erst prüfen, ob das Bild wieder neutral/ruhig ist nach der Sperre
-                    if (needsNeutralState) {
-                        if (abs(balanceChange) < 0.08) {
-                            needsNeutralState = false // Bild ist ruhig, bereit für die nächste Geste
-                        }
+                    // Momentum-Berechnung mit automatischem Zerfall (verhindert das "Hängenbleiben")
+                    if (abs(balanceChange) > 0.04) {
+                        gestureMomentum += balanceChange
                     } else {
-                        // Strikte und ausgewogene Schwellenwerte für beide Richtungen
-                        if (balanceChange < -0.20) {
-                            // Nach oben wischen -> SWIPE_UP (Nächster Tab / Rechts)
-                            consecutiveUpFrames++
-                            consecutiveDownFrames = 0
-                        } else if (balanceChange > 0.20) {
-                            // Nach unten wischen -> SWIPE_DOWN (Vorheriger Tab / Links)
-                            consecutiveDownFrames++
-                            consecutiveUpFrames = 0
-                        } else {
-                            // Werte langsam abbauen, wenn keine Bewegung da ist
-                            consecutiveUpFrames = maxOf(0, consecutiveUpFrames - 1)
-                            consecutiveDownFrames = maxOf(0, consecutiveDownFrames - 1)
-                        }
+                        gestureMomentum *= 0.70 // Zieht den Wert flüssig zurück auf 0, wenn nichts passiert
+                    }
 
-                        // Erst ab 3 stabilen Frames in Folge wird die Geste fehlerfrei ausgelöst
-                        if (consecutiveUpFrames >= 3) {
-                            lastActionTime = currentTime
-                            consecutiveUpFrames = 0
-                            consecutiveDownFrames = 0
-                            needsNeutralState = true // Sofort Neutralisierung erzwingen
-                            currentActionState = GestureAction.SWIPE_UP
-                            CoroutineScope(Dispatchers.Main).launch {
-                                onGestureDetected(GestureAction.SWIPE_UP)
-                            }
-                        } else if (consecutiveDownFrames >= 3) {
-                            lastActionTime = currentTime
-                            consecutiveUpFrames = 0
-                            consecutiveDownFrames = 0
-                            needsNeutralState = true // Sofort Neutralisierung erzwingen
-                            currentActionState = GestureAction.SWIPE_DOWN
-                            CoroutineScope(Dispatchers.Main).launch {
-                                onGestureDetected(GestureAction.SWIPE_DOWN)
-                            }
+                    // Korrekte Zuweisung:
+                    // Negatives Momentum = Wisch rauf -> Rechts (Nächster Tab)
+                    // Positives Momentum = Wisch runter -> Links (Vorheriger Tab)
+                    if (gestureMomentum < -0.45) {
+                        lastActionTime = currentTime
+                        gestureMomentum = 0.0
+                        currentActionState = GestureAction.SWIPE_UP
+                        CoroutineScope(Dispatchers.Main).launch {
+                            onGestureDetected(GestureAction.SWIPE_UP)
+                        }
+                    } else if (gestureMomentum > 0.45) {
+                        lastActionTime = currentTime
+                        gestureMomentum = 0.0
+                        currentActionState = GestureAction.SWIPE_DOWN
+                        CoroutineScope(Dispatchers.Main).launch {
+                            onGestureDetected(GestureAction.SWIPE_DOWN)
                         }
                     }
                 }
             } else {
                 currentActionState = GestureAction.NONE
-                consecutiveUpFrames = 0
-                consecutiveDownFrames = 0
-                needsNeutralState = true
+                gestureMomentum = 0.0
             }
 
             lastBalance = currentBalance
@@ -193,4 +177,5 @@ class AirGestureCore(private val context: Context) {
         }
     }
 }
+
 
