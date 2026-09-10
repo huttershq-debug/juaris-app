@@ -10,12 +10,13 @@ class EmailScanWorker(appContext: Context, workerParams: WorkerParameters) : Wor
 
     override fun doWork(): Result {
         return try {
-            val sender = inputData.getString("sender") ?: "unknown"
+            val sender = inputData.getString("sender") ?: "unbekannt"
             val subject = inputData.getString("subject") ?: ""
             val body = inputData.getString("body") ?: ""
 
+            // Lokaler Offline-Scan der E-Mail über die SecurityEngine
             val result = SecurityEngine.analyzeIncomingEmail(sender, subject, body)
-            
+
             if (result == EmailSecurityResult.BLOCK) {
                 Result.failure()
             } else {
@@ -26,4 +27,3 @@ class EmailScanWorker(appContext: Context, workerParams: WorkerParameters) : Wor
         }
     }
 }
-
