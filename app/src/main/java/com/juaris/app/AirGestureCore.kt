@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.math.abs
 
 class AirGestureCore(private val context: Context) {
 
@@ -22,12 +23,8 @@ class AirGestureCore(private val context: Context) {
     private var cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     private var lastActionTime = 0L
 
-    private var lastAvgTop = -1.0
-    private var lastAvgBottom = -1.0
-
-    // Sequenz-Tracking für echte Bewegungsrichtung
-    private var activeGestureDirection = 0 // 1 = von unten nach oben, -1 = von oben nach unten
-    private var gestureStageTime = 0L
+    private var baselineTop = -1.0
+    private var baselineBottom = -1.0
 
     var currentActionState: GestureAction = GestureAction.NONE
         private set
@@ -101,62 +98,44 @@ class AirGestureCore(private val context: Context) {
             val avgTop = if (countTop > 0) topSum / countTop else 0.0
             val avgBottom = if (countBottom > 0) bottomSum / countBottom else 0.0
 
-            if (lastAvgTop < 0.0) {
-                lastAvgTop = avgTop
-                lastAvgBottom = avgBottom
+            if (baselineTop < 0.0) {
+                baselineTop = avgTop
+                baselineBottom = avgBottom
                 return
             }
 
-            // Differenz zum vorherigen Frame (Frame-to-Frame Änderung)
-            val diffTop = avgTop - lastAvgTop
-            val diffBottom = avgBottom - lastAvgBottom
-
-            lastAvgTop = avgTop
-            lastAvgBottom = avgBottom
+            val deltaTop = avgTop - baselineTop
+            val deltaBottom = avgBottom - baselineBottom
 
             val currentTime = System.currentTimeMillis()
-            val threshold = 3.5 // Empfindlichkeits-Schwelle für Schattenwurf der Hand
+            val threshold = 5.0 // Hohe Schwelle, damit absolut nichts von alleine auslöst
 
-            // Cooldown zwischen Aktionen (600ms)
-            if (currentTime - lastActionTime > 600) {
+            // Prüfen, ob eine echte Bewegung vorliegt
+            val isMoving = abs(deltaTop) > threshold || abs(deltaBottom) > threshold
 
-                // 1. Schritt: Hand betritt das Bild von unten (Unten wird abgedunkelt)
-                if (diffBottom < -threshold && activeGestureDirection == 0) {
-                    activeGestureDirection = 1 // Vermutet Wisch nach Oben
-                    gestureStageTime = currentTime
-                }
-                // 1. Schritt Alternative: Hand betritt das Bild von oben (Oben wird abgedunkelt)
-                else if (diffTop < -threshold && activeGestureDirection == 0) {
-                    activeGestureDirection = -1 // Vermutet Wisch nach Unten
-                    gestureStageTime = currentTime
-                }
-
-                // 2. Schritt: Die Sequenz vervollständigen (innerhalb von 400ms muss die Hand im anderen Bereich ankommen)
-                if (activeGestureDirection == 1) {
-                    if (diffTop < -threshold && currentTime - gestureStageTime < 400) {
-                        // Erfolgreich: Unten gestartet, jetzt oben -> Wisch nach Oben!
-                        lastActionTime = currentTime
-                        activeGestureDirection = 0
-                        currentActionState = GestureAction.SWIPE_UP
-                        CoroutineScope(Dispatchers.Main).launch {
-                            onGestureDetected(GestureAction.SWIPE_UP)
-                        }
-                    } else if (currentTime - gestureStageTime > 400) {
-                        activeGestureDirection = 0 // Timeout zurücksetzen
-                    }
-                } else if (activeGestureDirection == -1) {
-                    if (diffBottom < -threshold && currentTime - gestureStageTime < 400) {
-                        // Erfolgreich: Oben gestartet, jetzt unten -> Wisch nach Unten!
-                        lastActionTime = currentTime
-                        activeGestureDirection = 0
-                        currentActionState = GestureAction.SWIPE_DOWN
-                        CoroutineScope(Dispatchers.Main).launch {
-                            onGestureDetected(GestureAction.SWIPE_DOWN)
-                        }
-                    } else if (currentTime - gestureStageTime > 400) {
-                        activeGestureDirection = 0 // Timeout zurücksetzen
+            if (currentTime - lastActionTime > 700) {
+                // Wisch nach oben (Unten wird zuerst abgedunkelt)
+                if (deltaBottom < -threshold && deltaTop > -threshold * 0.5) {
+                    lastActionTime = currentTime
+                    currentActionState = GestureAction.SWIPE_UP
+                    CoroutineScope(Dispatchers.Main).launch {
+                        onGestureDetected(GestureAction.SWIPE_UP)
                     }
                 }
+                // Wisch nach unten (Oben wird zuerst abgedunkelt)
+                else if (deltaTop < -threshold && deltaBottom > -threshold * 0.5) {
+                    lastActionTime = currentTime
+                    currentActionState = GestureAction.SWIPE_DOWN
+                    CoroutineScope(Dispatchers.Main).launch {
+                        onGestureDetected(GestureAction.SWIPE_DOWN)
+                    }
+                }
+            }
+
+            // WICHTIG: Baseline passt sich NUR an, wenn KEINE Hand im Bild ist (verhindert das "Von-alleine-Bewegen")
+            if (!isMoving) {
+                baselineTop = baselineTop * 0.95 + avgTop * 0.05
+                baselineBottom = baselineBottom * 0.95 + avgBottom * 0.05
             }
 
         } catch (e: Exception) {
