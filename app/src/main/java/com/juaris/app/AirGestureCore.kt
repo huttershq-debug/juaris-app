@@ -32,7 +32,7 @@ class AirGestureCore(private val context: Context) : ImageAnalysis.Analyzer {
 
     fun startGestureDetection(lifecycleOwner: LifecycleOwner, onGestureDetected: (GestureAction) -> Unit) {
         currentCallback = onGestureDetected
-        _gestureState.value = "Überwache Raum..."
+        _gestureState.value = "Kamera aktiv - Bereit für Gesten"
     }
 
     fun stopGestureDetection() {
@@ -61,10 +61,11 @@ class AirGestureCore(private val context: Context) : ImageAnalysis.Analyzer {
             }
 
             val currentTime = System.currentTimeMillis()
-            if (currentTime - lastTriggerTime > 1000L) {
+            // Reduzierte Sperrzeit für flüssigere Reaktionen
+            if (currentTime - lastTriggerTime > 600L) {
                 var massY = 0L
                 var totalMass = 0L
-                val step = 6
+                val step = 4 // Feinerer Raster-Scan für bessere Erkennung
 
                 for (y in 0 until height step step) {
                     val rowOffset = y * rowStride
@@ -75,7 +76,7 @@ class AirGestureCore(private val context: Context) : ImageAnalysis.Analyzer {
                             val prev = previousBytesBuffer!![index].toInt() and 0xFF
                             val delta = abs(curr - prev)
 
-                            if (delta > 15) {
+                            if (delta > 10) { // Empfindlicherer Delta-Wert
                                 massY += (y * delta).toLong()
                                 totalMass += delta.toLong()
                             }
@@ -83,8 +84,9 @@ class AirGestureCore(private val context: Context) : ImageAnalysis.Analyzer {
                     }
                 }
 
-                val massEnter = 1000L
-                val massExit = 400L
+                // Niedrigere Schwellenwerte für sofortige Handreaktion
+                val massEnter = 300L
+                val massExit = 100L
 
                 if (totalMass > (if (isTracking) massExit else massEnter)) {
                     val rawCentroidY = massY.toFloat() / totalMass.toFloat()
@@ -92,19 +94,19 @@ class AirGestureCore(private val context: Context) : ImageAnalysis.Analyzer {
                     smoothedCentroidY = if (smoothedCentroidY == -1f) {
                         rawCentroidY
                     } else {
-                        0.2f * rawCentroidY + 0.8f * smoothedCentroidY
+                        0.3f * rawCentroidY + 0.7f * smoothedCentroidY
                     }
 
                     if (!isTracking) {
                         anchorY = smoothedCentroidY
                         isTracking = true
                         gestureStartTime = currentTime
-                        _gestureState.value = "Bewegung erkannt..."
+                        _gestureState.value = "Hand erkannt..."
                     } else {
                         val totalDisplacement = smoothedCentroidY - anchorY
-                        val swipeThreshold = height.toFloat() * 0.08f
+                        val swipeThreshold = height.toFloat() * 0.05f // Sehr reaktiver Schwellenwert
 
-                        if (currentTime - gestureStartTime > 2000L) {
+                        if (currentTime - gestureStartTime > 1500L) {
                             anchorY = smoothedCentroidY
                             gestureStartTime = currentTime
                         }
@@ -112,12 +114,13 @@ class AirGestureCore(private val context: Context) : ImageAnalysis.Analyzer {
                         if (abs(totalDisplacement) > swipeThreshold) {
                             lastTriggerTime = currentTime
 
+                            // Vertikale Steuerung: Rauf wischen = Rechts, Runter wischen = Links
                             val action = if (totalDisplacement < 0f) {
-                                _gestureState.value = "Swipe: Rauf (Rechts)"
+                                _gestureState.value = "Aktion: Rauf (Rechts)"
                                 _lastAction.value = "SWIPE_RIGHT"
                                 GestureAction.SWIPE_RIGHT
                             } else {
-                                _gestureState.value = "Swipe: Runter (Links)"
+                                _gestureState.value = "Aktion: Runter (Links)"
                                 _lastAction.value = "SWIPE_LEFT"
                                 GestureAction.SWIPE_LEFT
                             }
@@ -138,7 +141,7 @@ class AirGestureCore(private val context: Context) : ImageAnalysis.Analyzer {
                         isTracking = false
                         smoothedCentroidY = -1f
                         anchorY = -1f
-                        _gestureState.value = "Bereit"
+                        _gestureState.value = "Warte auf Geste..."
                     }
                 }
             }
