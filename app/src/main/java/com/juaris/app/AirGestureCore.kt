@@ -46,10 +46,7 @@ class AirGestureCore(private val context: Context) {
 
                 imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
                     frameCounter++
-                    if (frameCounter % 2 != 0) {
-                        imageProxy.close()
-                        return@setAnalyzer
-                    }
+                    // Jedes Frame analysieren für maximale Reaktionsgeschwindigkeit
                     processImage(imageProxy, onGestureDetected)
                 }
 
@@ -82,8 +79,8 @@ class AirGestureCore(private val context: Context) {
 
             val isPortrait = rotation == 90 || rotation == 270
 
-            val yStep = (height / 12).coerceAtLeast(1)
-            val xStep = (width / 12).coerceAtLeast(1)
+            val yStep = (height / 16).coerceAtLeast(1)
+            val xStep = (width / 16).coerceAtLeast(1)
 
             for (y in 0 until height step yStep) {
                 for (x in 0 until width step xStep) {
@@ -124,13 +121,15 @@ class AirGestureCore(private val context: Context) {
             val currentTime = System.currentTimeMillis()
             val timeSinceLastAction = currentTime - lastActionTime
 
-            if (timeSinceLastAction > 800) {
+            // Cooldown auf 600ms verkürzt für flüssigeres Weiterschalten
+            if (timeSinceLastAction > 600) {
                 if (lastBalance != 0.0) {
                     val rawChange = currentBalance - lastBalance
 
-                    val balanceChange = rawChange.coerceIn(-0.12, 0.12)
+                    val balanceChange = rawChange.coerceIn(-0.15, 0.15)
 
-                    if (abs(balanceChange) > 0.015) {
+                    // Stark herabgesetzte Schwelle (0.003 statt 0.015), damit Handbewegungen sofort erkannt werden
+                    if (abs(balanceChange) > 0.003) {
                         if (gestureMomentum * balanceChange < 0) {
                             gestureMomentum = 0.0
                             consecutiveUpCount = 0
@@ -138,13 +137,15 @@ class AirGestureCore(private val context: Context) {
                         }
                         gestureMomentum = (gestureMomentum + balanceChange).coerceIn(-1.0, 1.0)
                     } else {
-                        gestureMomentum *= 0.80
+                        // Sanfteres Abklingen
+                        gestureMomentum *= 0.85
                     }
 
-                    if (gestureMomentum < -0.18) {
+                    // Sehr niedrige Auslöse-Schwelle (0.08 statt 0.18)
+                    if (gestureMomentum < -0.08) {
                         consecutiveUpCount++
                         consecutiveDownCount = 0
-                    } else if (gestureMomentum > 0.18) {
+                    } else if (gestureMomentum > 0.08) {
                         consecutiveDownCount++
                         consecutiveUpCount = 0
                     } else {
@@ -152,7 +153,8 @@ class AirGestureCore(private val context: Context) {
                         consecutiveDownCount = maxOf(0, consecutiveDownCount - 1)
                     }
 
-                    if (consecutiveUpCount >= 2) {
+                    // Löst bereits nach 1 stabilen Frame aus – reagiert sofort wie ein Touch-Befehl
+                    if (consecutiveUpCount >= 1) {
                         lastActionTime = currentTime
                         gestureMomentum = 0.0
                         consecutiveUpCount = 0
@@ -160,7 +162,7 @@ class AirGestureCore(private val context: Context) {
                         CoroutineScope(Dispatchers.Main).launch {
                             onGestureDetected(GestureAction.SWIPE_UP)
                         }
-                    } else if (consecutiveDownCount >= 2) {
+                    } else if (consecutiveDownCount >= 1) {
                         lastActionTime = currentTime
                         gestureMomentum = 0.0
                         consecutiveDownCount = 0
@@ -194,4 +196,5 @@ class AirGestureCore(private val context: Context) {
         }
     }
 }
+
 
