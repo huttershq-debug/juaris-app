@@ -1,159 +1,142 @@
 package com.juaris.app
 
 import android.content.Context
-import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
-import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.core.ImageProxy
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import kotlin.math.abs
 
-class AirGestureCore(private val context: Context) {
+enum class GestureAction {
+    SWIPE_RIGHT, SWIPE_LEFT
+}
 
-    enum class GestureAction {
-        NONE, SWIPE_LEFT, SWIPE_RIGHT
-    }
+class AirGestureCore(
+    private val context: Context,
+    private val onGestureDetected: (GestureAction) -> Unit
+) : ImageAnalysis.Analyzer {
 
-    private val _gestureState = MutableStateFlow("Juaris Kortex Aktiv")
+    private val _gestureState = MutableStateFlow("Bereit")
     val gestureState: StateFlow<String> = _gestureState
 
-    private val _lastAction = MutableStateFlow("KEINE")
+    private val _lastAction = MutableStateFlow("NONE")
     val lastAction: StateFlow<String> = _lastAction
 
-    private var cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
-    private var cameraProvider: ProcessCameraProvider? = null
-
-    private var lastTriggerTime = 0L
-    private val cooldownMillis = 600L
-   
-    private var smoothedCentroidY: Float = -1f
-    private var anchorY: Float = -1f
-    private var isTracking = false
-    private var gestureStartTime = 0L
-
-    private var currentBytesBuffer: ByteArray? = null
     private var previousBytesBuffer: ByteArray? = null
+    private var isTracking = false
+    private var anchorY = -1f
+    private var smoothedCentroidY = -1f
+    private var gestureStartTime = 0L
+    private var lastTriggerTime = 0L
 
-    fun startGestureDetection(lifecycleOwner: LifecycleOwner, onGestureDetected: (GestureAction) -> Unit) {
-        if (cameraProvider != null) return
+    override fun analyze(image: ImageProxy) {
+        try {
+            val planes = image.planes
+            val buffer = planes[0].buffer
+            val remaining = buffer.remaining()
+            val currBytes = ByteArray(remaining)
+            buffer.get(currBytes)
 
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+            val width = image.width
+            val height = image.height
+            val rowStride = planes[0].rowStride
 
-        cameraProviderFuture.addListener({
-            try {
-                cameraProvider = cameraProviderFuture.get()
-                val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+            if (previousBytesBuffer == null || previousBytesBuffer!!.size != remaining) {
+                previousBytesBuffer = currBytes
+                image.close()
+                return
+            }
 
-                val imageAnalysis = ImageAnalysis.Builder()
-                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                    .build()
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - lastTriggerTime > 1000L) {
+                var massY = 0L
+                var totalMass = 0L
 
-                imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                    try {
-                        val currentTime = System.currentTimeMillis()
-                       
-                        val yPlane = imageProxy.planes[0]
-                        val buffer = yPlane.buffer
-                        val rowStride = yPlane.rowStride
-                       
-                        val width = imageProxy.width
-                        val height = imageProxy.height
-                        val remaining = buffer.remaining()
+                // 1. Feinere Abtastung für größere Distanz
+                val step = 6
 
-                        if (currentBytesBuffer == null || currentBytesBuffer!!.size != remaining) {
-                            currentBytesBuffer = ByteArray(remaining)
-                            previousBytesBuffer = ByteArray(remaining)
-                            buffer.get(currentBytesBuffer!!, 0, remaining)
-                        } else {
-                            buffer.get(currentBytesBuffer!!, 0, remaining)
+                for (y in 0 until height step step) {
+                    val rowOffset = y * rowStride
+                    for (x in 0 until width step step) {
+                        val index = rowOffset + x
+                        if (index < remaining) {
+                            val curr = currBytes[index].toInt() and 0xFF
+                            val prev = previousBytesBuffer!![index].toInt() and 0xFF
+                            val delta = abs(curr - prev)
 
-                            val currBytes = currentBytesBuffer!!
-                            val prevBytes = previousBytesBuffer!!
+                            // Filtert Lichtflackern und Geister-Trigger weg
+                            if (delta > 15) {
+                                massY += (y * delta).toLong()
+                                totalMass += delta.toLong()
+                            }
+                        }
+                    }
+                }
 
-                            if (currentTime - lastTriggerTime < cooldownMillis) {
-                                System.arraycopy(currBytes, 0, prevBytes, 0, remaining)
+                // Angepasste Schwellenwerte für mehr Reichweite / Distanz
+                val massEnter = 1000L
+                val massExit = 400L
+
+                if (totalMass > (if (isTracking) massExit else massEnter)) {
+                    val rawCentroidY = massY.toFloat() / totalMass.toFloat()
+
+                    smoothedCentroidY = if (smoothedCentroidY == -1f) {
+                        rawCentroidY
+                    } else {
+                        0.2f * rawCentroidY + 0.8f * smoothedCentroidY
+                    }
+
+                    if (!isTracking) {
+                        anchorY = smoothedCentroidY
+                        isTracking = true
+                        gestureStartTime = currentTime
+                    } else {
+                        val totalDisplacement = smoothedCentroidY - anchorY
+                        val swipeThreshold = height.toFloat() * 0.08f
+
+                        if (currentTime - gestureStartTime > 2000L) {
+                            anchorY = smoothedCentroidY
+                            gestureStartTime = currentTime
+                        }
+
+                        if (abs(totalDisplacement) > swipeThreshold) {
+                            lastTriggerTime = currentTime
+
+                            val action = if (totalDisplacement < 0f) {
+                                _gestureState.value = "Swipe: Rauf (Rechts)"
+                                _lastAction.value = "SWIPE_RIGHT"
+                                GestureAction.SWIPE_RIGHT
                             } else {
-                                var massY = 0L
-                                var totalMass = 0L
-                                  // 1. Feinere Abtastung für größere Distanz (step 6 statt 8)
-                                val step = 6 
+                                _gestureState.value = "Swipe: Runter (Links)"
+                                _lastAction.value = "SWIPE_LEFT"
+                                GestureAction.SWIPE_LEFT
+                            }
 
-                                for (y in 0 until height step step) {
-                                    val rowOffset = y * rowStride
-                                    for (x in 0 until width step step) {
-                                        val index = rowOffset + x
-                                        if (index < remaining) {
-                                            val curr = currBytes[index].toInt() and 0xFF
-                                            val prev = previousBytesBuffer!![index].toInt() and 0xFF
-                                            val delta = abs(curr - prev)
-                                           
-                                            // Erhöhter Delta-Wert (15 statt 10) filtert Lichtflackern weg (verhindert Geister-Trigger)
-                                            if (delta > 15) {
-                                                massY += (y * delta).toLong()
-                                                totalMass += delta.toLong()
-                                            }
-                                        }
-                                    }
-                                }
+                            ContextCompat.getMainExecutor(context).execute {
+                                onGestureDetected(action)
+                            }
 
-                                // Angepasste Schwellenwerte für mehr Reichweite / Distanz
-                                val massEnter = 1000L // Niedriger, damit Hand aus der Ferne erkannt wird
-                                val massExit = 400L
+                            isTracking = false
+                            smoothedCentroidY = -1f
+                            anchorY = -1f
+                        }
+                    }
+                } else {
+                    if (totalMass < massExit) {
+                        isTracking = false
+                        smoothedCentroidY = -1f
+                        anchorY = -1f
+                    }
+                }
+            }
 
-                                if (totalMass > (if (isTracking) massExit else massEnter)) {
-                                    val rawCentroidY = massY.toFloat() / totalMass.toFloat()
-
-                                    smoothedCentroidY = if (smoothedCentroidY == -1f) {
-                                        rawCentroidY
-                                    } else {
-                                        0.2f * rawCentroidY + 0.8f * smoothedCentroidY // Noch glatter gegen Zittern
-                                    }
-
-                                    if (!isTracking) {
-                                        anchorY = smoothedCentroidY
-                                        isTracking = true
-                                        gestureStartTime = currentTime
-                                    } else {
-                                        val totalDisplacement = smoothedCentroidY - anchorY
-                                        val swipeThreshold = height.toFloat() * 0.08f // Etwas reaktiver (8% statt 10%)
-
-                                        // Großzügigerer Timeout (2000ms statt 1200ms), damit langsame Gesten nicht abbrechen
-                                        if (currentTime - gestureStartTime > 2000L) {
-                                            anchorY = smoothedCentroidY
-                                            gestureStartTime = currentTime
-                                        }
-
-                                        if (abs(totalDisplacement) > swipeThreshold) {
-                                            lastTriggerTime = currentTime
-
-                                            val action = if (totalDisplacement < 0f) {
-                                                _gestureState.value = "Swipe: Rauf (Rechts)"
-                                                _lastAction.value = "SWIPE_RIGHT"
-                                                GestureAction.SWIPE_RIGHT
-                                            } else {
-                                                _gestureState.value = "Swipe: Runter (Links)"
-                                                _lastAction.value = "SWIPE_LEFT"
-                                                GestureAction.SWIPE_LEFT
-                                            }
-
-                                            ContextCompat.getMainExecutor(context).execute {
-                                                onGestureDetected(action)
-                                            }
-
-                                            isTracking = false
-                                            smoothedCentroidY = -1f
-                                            anchorY = -1f
-                                        }
-                                    }
-                                } else {
-                                    if (totalMass < massExit) {
-                                        isTracking = false
-                                        smoothedCentroidY = -1f
-                                        anchorY = -1f
-                                    }
-                                }
+            System.arraycopy(currBytes, 0, previousBytesBuffer!!, 0, remaining)
+        } catch (e: Exception) {
+            // Ignorieren, um Frame-Abstürze zu verhindern
+        } finally {
+            image.close()
+        }
+    }
+}
 
