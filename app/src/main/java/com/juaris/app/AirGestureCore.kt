@@ -4,24 +4,14 @@ import android.content.Context
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.core.content.ContextCompat
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import androidx.lifecycle.LifecycleOwner
 import kotlin.math.abs
 
-enum class GestureAction {
-    SWIPE_RIGHT, SWIPE_LEFT
-}
+class AirGestureCore(private val context: Context) : ImageAnalysis.Analyzer {
 
-class AirGestureCore(
-    private val context: Context,
-    private val onGestureDetected: (GestureAction) -> Unit
-) : ImageAnalysis.Analyzer {
-
-    private val _gestureState = MutableStateFlow("Bereit")
-    val gestureState: StateFlow<String> = _gestureState
-
-    private val _lastAction = MutableStateFlow("NONE")
-    val lastAction: StateFlow<String> = _lastAction
+    enum class GestureAction {
+        SWIPE_RIGHT, SWIPE_LEFT, NONE
+    }
 
     private var previousBytesBuffer: ByteArray? = null
     private var isTracking = false
@@ -29,6 +19,19 @@ class AirGestureCore(
     private var smoothedCentroidY = -1f
     private var gestureStartTime = 0L
     private var lastTriggerTime = 0L
+
+    private var currentCallback: ((GestureAction) -> Unit)? = null
+
+    fun startGestureDetection(lifecycleOwner: LifecycleOwner, onGestureDetected: (GestureAction) -> Unit) {
+        currentCallback = onGestureDetected
+        // Hier wird die Kamera-Analyse eingebunden oder aktiv geschaltet
+    }
+
+    fun stopGestureDetection() {
+        currentCallback = null
+        previousBytesBuffer = null
+        isTracking = false
+    }
 
     override fun analyze(image: ImageProxy) {
         try {
@@ -52,8 +55,6 @@ class AirGestureCore(
             if (currentTime - lastTriggerTime > 1000L) {
                 var massY = 0L
                 var totalMass = 0L
-
-                // 1. Feinere Abtastung für größere Distanz
                 val step = 6
 
                 for (y in 0 until height step step) {
@@ -65,7 +66,6 @@ class AirGestureCore(
                             val prev = previousBytesBuffer!![index].toInt() and 0xFF
                             val delta = abs(curr - prev)
 
-                            // Filtert Lichtflackern und Geister-Trigger weg
                             if (delta > 15) {
                                 massY += (y * delta).toLong()
                                 totalMass += delta.toLong()
@@ -74,7 +74,6 @@ class AirGestureCore(
                     }
                 }
 
-                // Angepasste Schwellenwerte für mehr Reichweite / Distanz
                 val massEnter = 1000L
                 val massExit = 400L
 
@@ -104,17 +103,15 @@ class AirGestureCore(
                             lastTriggerTime = currentTime
 
                             val action = if (totalDisplacement < 0f) {
-                                _gestureState.value = "Swipe: Rauf (Rechts)"
-                                _lastAction.value = "SWIPE_RIGHT"
                                 GestureAction.SWIPE_RIGHT
                             } else {
-                                _gestureState.value = "Swipe: Runter (Links)"
-                                _lastAction.value = "SWIPE_LEFT"
                                 GestureAction.SWIPE_LEFT
                             }
 
-                            ContextCompat.getMainExecutor(context).execute {
-                                onGestureDetected(action)
+                            currentCallback?.let { callback ->
+                                ContextCompat.getMainExecutor(context).execute {
+                                    callback(action)
+                                }
                             }
 
                             isTracking = false
@@ -133,7 +130,7 @@ class AirGestureCore(
 
             System.arraycopy(currBytes, 0, previousBytesBuffer!!, 0, remaining)
         } catch (e: Exception) {
-            // Ignorieren, um Frame-Abstürze zu verhindern
+            // Frame-Fehler abfangen
         } finally {
             image.close()
         }
