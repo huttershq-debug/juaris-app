@@ -23,6 +23,7 @@ class AirGestureCore(private val context: Context) {
     private var lastActionTime = 0L
     private var lastBalance = 0.0
     private var frameCounter = 0
+    private var isCooldownActive = false
 
     var currentActionState: GestureAction = GestureAction.NONE
         private set
@@ -39,7 +40,7 @@ class AirGestureCore(private val context: Context) {
                     .build()
 
                 imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                    // Frame-Skipping für flüssige Performance
+                    // Performance-Schonung: Jeden 2. Frame verarbeiten
                     frameCounter++
                     if (frameCounter % 2 != 0) {
                         imageProxy.close()
@@ -75,11 +76,10 @@ class AirGestureCore(private val context: Context) {
             var countTop = 0
             var countBottom = 0
 
-            // Ausrichtung berücksichtigen, damit Oben/Unten im Hochformat perfekt greift
             val isPortrait = rotation == 90 || rotation == 270
 
-            val yStep = (height / 12).coerceAtLeast(1)
-            val xStep = (width / 12).coerceAtLeast(1)
+            val yStep = (height / 14).coerceAtLeast(1)
+            val xStep = (width / 14).coerceAtLeast(1)
 
             for (y in 0 until height step yStep) {
                 for (x in 0 until width step xStep) {
@@ -87,7 +87,6 @@ class AirGestureCore(private val context: Context) {
                     if (index < buffer.capacity()) {
                         val pixel = buffer.get(index).toInt() and 0xFF
                         
-                        // Wir werten jetzt strikt die vertikale Achse (Oben / Unten) aus
                         val verticalCoord = if (isPortrait) x else y
                         val verticalLimit = if (isPortrait) width else height
 
@@ -105,26 +104,39 @@ class AirGestureCore(private val context: Context) {
             val avgTop = if (countTop > 0) topSum / countTop else 0.0
             val avgBottom = if (countBottom > 0) bottomSum / countBottom else 0.0
 
-            val currentBalance = avgBottom - avgTop
+            // Normierte Balance-Berechnung: Unempfindlich gegen globale Lichtschwankungen (Raumlicht)
+            val totalLight = avgTop + avgBottom
+            val currentBalance = if (totalLight > 1.0) {
+                (avgBottom - avgTop) / totalLight
+            } else {
+                0.0
+            }
+
             val currentTime = System.currentTimeMillis()
 
-            if (lastBalance != 0.0) {
+            // Cooldown-Prüfung gegen mehrfaches Durchschalten / Tab-Überspringen
+            if (currentTime - lastActionTime > 1500) {
+                isCooldownActive = false
+                currentActionState = GestureAction.NONE
+            }
+
+            if (!isCooldownActive && lastBalance != 0.0) {
                 val balanceChange = currentBalance - lastBalance
 
-                // 1.2 Sekunden Sperrzeit, damit es gemütlich und kontrolliert bleibt
-                if (currentTime - lastActionTime > 1200) {
-                    if (balanceChange > 20.0) {
-                        lastActionTime = currentTime
-                        currentActionState = GestureAction.SWIPE_DOWN
-                        CoroutineScope(Dispatchers.Main).launch {
-                            onGestureDetected(GestureAction.SWIPE_DOWN)
-                        }
-                    } else if (balanceChange < -20.0) {
-                        lastActionTime = currentTime
-                        currentActionState = GestureAction.SWIPE_UP
-                        CoroutineScope(Dispatchers.Main).launch {
-                            onGestureDetected(GestureAction.SWIPE_UP)
-                        }
+                // Schwellenwert für stabile Erkennung bei gleichzeitiger Lichtunabhängigkeit
+                if (balanceChange > 0.15) {
+                    isCooldownActive = true
+                    lastActionTime = currentTime
+                    currentActionState = GestureAction.SWIPE_DOWN
+                    CoroutineScope(Dispatchers.Main).launch {
+                        onGestureDetected(GestureAction.SWIPE_DOWN)
+                    }
+                } else if (balanceChange < -0.15) {
+                    isCooldownActive = true
+                    lastActionTime = currentTime
+                    currentActionState = GestureAction.SWIPE_UP
+                    CoroutineScope(Dispatchers.Main).launch {
+                        onGestureDetected(GestureAction.SWIPE_UP)
                     }
                 }
             }
@@ -146,5 +158,4 @@ class AirGestureCore(private val context: Context) {
         }
     }
 }
-
 
