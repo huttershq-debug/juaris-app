@@ -270,15 +270,15 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
         }
     }
 
-    // Autonomer Start – läuft stabil durch alle Tabs
+     // Autonomer Start – läuft stabil durch alle Tabs
     LaunchedEffect(hasCameraPermission, lifecycleOwner) {
         if (hasCameraPermission) {
             airGestureCore.startGestureDetection(lifecycleOwner) { action ->
                 when (action) {
-                    AirGestureCore.GestureAction.SWIPE_RIGHT -> {
+                    AirGestureCore.GestureAction.SWIPE_DOWN -> {
                         selectedTab = (selectedTab + 1) % tabs.size
                     }
-                    AirGestureCore.GestureAction.SWIPE_LEFT -> {
+                    AirGestureCore.GestureAction.SWIPE_UP -> {
                         selectedTab = (selectedTab - 1 + tabs.size) % tabs.size
                     }
                     AirGestureCore.GestureAction.NONE -> {}
@@ -286,6 +286,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
             }
         }
     }
+    
     DisposableEffect(lifecycleOwner) {
         onDispose {
             airGestureCore.stopGestureDetection()
