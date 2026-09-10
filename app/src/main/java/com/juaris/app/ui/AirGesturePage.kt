@@ -1,109 +1,84 @@
 package com.juaris.app.ui
 
-import android.Manifest
-import android.content.pm.PackageManager
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import com.juaris.app.AirGestureCore
+import kotlinx.coroutines.delay
 
 @Composable
-fun AirGesturePage(
-    airGestureCore: AirGestureCore,
-    onNavigate: (Boolean) -> Unit
-) {
-    val context = LocalContext.current
-   
-    var hasCameraPermission by remember {
-        mutableStateOf(
-            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
-        )
+fun AirGesturePage(airGestureCore: AirGestureCore, onTabSwitch: (Boolean) -> Unit) {
+    var lastDetectedAction by remember { mutableStateOf("Warte auf Geste...") }
+    var gestureCount by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(200L)
+            when (airGestureCore.currentActionState) {
+                AirGestureCore.GestureAction.SWIPE_LEFT -> {
+                    lastDetectedAction = "SWIPE_LEFT (Nach links gewischt)"
+                    gestureCount++
+                    onTabSwitch(false)
+                }
+                AirGestureCore.GestureAction.SWIPE_RIGHT -> {
+                    lastDetectedAction = "SWIPE_RIGHT (Nach rechts gewischt)"
+                    gestureCount++
+                    onTabSwitch(true)
+                }
+                AirGestureCore.GestureAction.NONE -> {
+                    // Warten
+                }
+            }
+        }
     }
 
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        hasCameraPermission = granted
-    }
-
-    val gestureState by airGestureCore.gestureState.collectAsState()
-    val lastAction by airGestureCore.lastAction.collectAsState()
-
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(
-            text = "Air-Swiping Gesten-Steuerung",
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.primary
-        )
-        Text(
-            text = "Bediene Juaris berührungslos über die Frontkamera. Läuft permanent im Hintergrund (100% lokal & offline).",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                if (!hasCameraPermission) {
-                    Text(
-                        text = "⚠️ Kamera-Berechtigung erforderlich für Gesten!",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Color(0xFFFF3333)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(
-                        onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) },
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                    ) {
-                        Text("Berechtigung erteilen", color = Color.White)
+        item {
+            Text("Air-Swiping Gesten-Steuerung", style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text("Bediene Juaris berührungslos über die Frontkamera. Läuft permanent im Hintergrund (100% lokal & offline).", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+        }
+        item {
+            TacticalPulseCard {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Surface(
+                            modifier = Modifier.size(12.dp),
+                            shape = MaterialTheme.shapes.small,
+                            color = NeonGiftgruen
+                        ) {}
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Kamera-Schutz & Gesten aktiv", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     }
-                } else {
-                    Text(
-                        text = "🟢 Kamera-Schutz & Gesten aktiv",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                   
-                    Text(
-                        text = "Sensor-Feed: $gestureState",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                   
-                    Text(
-                        text = "Letzte Aktion: $lastAction",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text("Sensor-Feed: Kamera aktiv - Bereit für Gesten", style = MaterialTheme.typography.bodyMedium, color = Color.White)
+                    Text("Erkannte Gesten: $gestureCount", style = MaterialTheme.typography.bodyMedium, color = Color.White)
+                    Text("Letzte Aktion: $lastDetectedAction", style = MaterialTheme.typography.bodyMedium, color = NeonGiftgruen, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Hinweis: Bewege deine Hand kurz mit etwas Abstand von links nach rechts oder rechts nach links vor die Frontkamera.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                 }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = "Hinweis: Es werden zu keiner Zeit Bilder oder Videos gespeichert oder an Server gesendet.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            }
+        }
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
             }
         }
     }
 }
-
 
