@@ -21,8 +21,7 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
     private var cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     private var lastActionTime = 0L
-    private var previousBrightnessLeft = 0.0
-    private var previousBrightnessRight = 0.0
+    private var lastBalance = 0.0
 
     var currentActionState: GestureAction = GestureAction.NONE
         private set
@@ -55,60 +54,73 @@ class AirGestureCore(private val context: Context) {
     }
 
     private fun processImage(imageProxy: ImageProxy, onGestureDetected: (GestureAction) -> Unit) {
-        val buffer: ByteBuffer = imageProxy.planes[0].buffer
-        val bytes = ByteArray(buffer.remaining())
-        buffer.get(bytes)
+        try {
+            val plane = imageProxy.planes[0]
+            val buffer: ByteBuffer = plane.buffer
+            val rowStride = plane.rowStride
+            val pixelStride = plane.pixelStride
+            val width = imageProxy.width
+            val height = imageProxy.height
 
-        val width = imageProxy.width
-        val height = imageProxy.height
+            var leftSum = 0.0
+            var rightSum = 0.0
+            var countLeft = 0
+            var countRight = 0
 
-        var leftSum = 0L
-        var rightSum = 0L
-        val step = (width * height) / 150
+            // Raster-Sampling unter Berücksichtigung von rowStride und pixelStride
+            val yStep = (height / 12).coerceAtLeast(1)
+            val xStep = (width / 12).coerceAtLeast(1)
 
-        var count = 0
-        var i = 0
-        while (i < bytes.size && count < 150) {
-            val pixel = bytes[i].toInt() and 0xFF
-            val xCoord = i % width
-            if (xCoord < width / 2) {
-                leftSum += pixel
-            } else {
-                rightSum += pixel
-            }
-            i += step.coerceAtLeast(1)
-            count++
-        }
-
-        val currentLeft = if (count > 0) leftSum.toDouble() / (count / 2) else 0.0
-        val currentRight = if (count > 0) rightSum.toDouble() / (count / 2) else 0.0
-
-        if (previousBrightnessLeft > 0 && previousBrightnessRight > 0) {
-            val diffLeft = currentLeft - previousBrightnessLeft
-            val diffRight = currentRight - previousBrightnessRight
-            val currentTime = System.currentTimeMillis()
-
-            if (currentTime - lastActionTime > 800) {
-                if (diffLeft > 10.0 && diffRight < -10.0) {
-                    lastActionTime = currentTime
-                    currentActionState = GestureAction.SWIPE_RIGHT
-                    CoroutineScope(Dispatchers.Main).launch {
-                        onGestureDetected(GestureAction.SWIPE_RIGHT)
-                    }
-                } else if (diffRight > 10.0 && diffLeft < -10.0) {
-                    lastActionTime = currentTime
-                    currentActionState = GestureAction.SWIPE_LEFT
-                    CoroutineScope(Dispatchers.Main).launch {
-                        onGestureDetected(GestureAction.SWIPE_LEFT)
+            for (y in 0 until height step yStep) {
+                for (x in 0 until width step xStep) {
+                    val index = y * rowStride + x * pixelStride
+                    if (index < buffer.capacity()) {
+                        val pixel = buffer.get(index).toInt() and 0xFF
+                        if (x < width / 2) {
+                            leftSum += pixel
+                            countLeft++
+                        } else {
+                            rightSum += pixel
+                            countRight++
+                        }
                     }
                 }
             }
+
+            val avgLeft = if (countLeft > 0) leftSum / countLeft else 0.0
+            val avgRight = if (countRight > 0) rightSum / countRight else 0.0
+
+            // Balance misst die Helligkeitsdifferenz zwischen rechter und linker Bildschirmhälfte
+            val currentBalance = avgRight - avgLeft
+            val currentTime = System.currentTimeMillis()
+
+            if (lastBalance != 0.0) {
+                val balanceChange = currentBalance - lastBalance
+
+                // 700ms Sperre, damit Wischgesten sauber einzeln erkannt werden
+                if (currentTime - lastActionTime > 700) {
+                    if (balanceChange > 12.0) {
+                        lastActionTime = currentTime
+                        currentActionState = GestureAction.SWIPE_RIGHT
+                        CoroutineScope(Dispatchers.Main).launch {
+                            onGestureDetected(GestureAction.SWIPE_RIGHT)
+                        }
+                    } else if (balanceChange < -12.0) {
+                        lastActionTime = currentTime
+                        currentActionState = GestureAction.SWIPE_LEFT
+                        CoroutineScope(Dispatchers.Main).launch {
+                            onGestureDetected(GestureAction.SWIPE_LEFT)
+                        }
+                    }
+                }
+            }
+
+            lastBalance = currentBalance
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            imageProxy.close()
         }
-
-        previousBrightnessLeft = currentLeft
-        previousBrightnessRight = currentRight
-
-        imageProxy.close()
     }
 
     fun stopGestureDetection() {
