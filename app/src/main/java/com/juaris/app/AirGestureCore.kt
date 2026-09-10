@@ -23,9 +23,12 @@ class AirGestureCore(private val context: Context) {
     private var cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     private var lastActionTime = 0L
     
-    // Dynamische Baseline für den Hintergrund (lernt sich selbst an)
     private var baselineTop = -1.0
     private var baselineBottom = -1.0
+
+    // Stabilitäts-Zähler gegen das "Sprunghafte"
+    private var consecutiveUpFrames = 0
+    private var consecutiveDownFrames = 0
 
     var currentActionState: GestureAction = GestureAction.NONE
         private set
@@ -85,7 +88,6 @@ class AirGestureCore(private val context: Context) {
                     if (index < buffer.capacity()) {
                         val pixel = buffer.get(index).toInt() and 0xFF
                         
-                        // Korrekte Ausrichtung auf die vertikale Achse im Hochformat
                         val vCoord = if (isPortrait) x else y
                         val midPoint = effectiveHeight / 2
 
@@ -103,34 +105,47 @@ class AirGestureCore(private val context: Context) {
             val avgTop = if (countTop > 0) topSum / countTop else 0.0
             val avgBottom = if (countBottom > 0) bottomSum / countBottom else 0.0
 
-            // Baseline beim Start initialisieren
             if (baselineTop < 0.0) {
                 baselineTop = avgTop
                 baselineBottom = avgBottom
                 return
             }
 
-            // Differenz zum normalen Hintergrund berechnen
             val deltaTop = avgTop - baselineTop
             val deltaBottom = avgBottom - baselineBottom
 
             val currentTime = System.currentTimeMillis()
             
-            // 500ms Cooldown für sauberes, flüssiges Blättern durch die Tabs
-            if (currentTime - lastActionTime > 500) {
-                val threshold = 2.5 // Sensitivitäts-Schwelle
+            // 700ms Cooldown für sauberes, kontrolliertes Schalten
+            if (currentTime - lastActionTime > 700) {
+                val threshold = 4.5 // Strengerer Schwellenwert gegen Zufallszucker
 
-                // Hand bewegt sich von unten nach oben (Unten wird abgedeckt -> Delta negativ)
-                if (deltaBottom < -threshold && deltaTop > -threshold * 0.7) {
+                val isUp = deltaBottom < -threshold && deltaTop > -threshold * 0.6
+                val isDown = deltaTop < -threshold && deltaBottom > -threshold * 0.6
+
+                if (isUp) {
+                    consecutiveDownFrames = 0
+                    consecutiveUpFrames++
+                } else if (isDown) {
+                    consecutiveUpFrames = 0
+                    consecutiveDownFrames++
+                } else {
+                    // Lässt den Zähler bei Ruhe sanft abklingen
+                    consecutiveUpFrames = maxOf(0, consecutiveUpFrames - 1)
+                    consecutiveDownFrames = maxOf(0, consecutiveDownFrames - 1)
+                }
+
+                // Löst erst aus, wenn die Bewegung über 2 Frames stabil ist -> Kein wildes Springen mehr!
+                if (consecutiveUpFrames >= 2) {
                     lastActionTime = currentTime
+                    consecutiveUpFrames = 0
                     currentActionState = GestureAction.SWIPE_UP
                     CoroutineScope(Dispatchers.Main).launch {
                         onGestureDetected(GestureAction.SWIPE_UP)
                     }
-                } 
-                // Hand bewegt sich von oben nach unten (Oben wird abgedeckt -> Delta negativ)
-                else if (deltaTop < -threshold && deltaBottom > -threshold * 0.7) {
+                } else if (consecutiveDownFrames >= 2) {
                     lastActionTime = currentTime
+                    consecutiveDownFrames = 0
                     currentActionState = GestureAction.SWIPE_DOWN
                     CoroutineScope(Dispatchers.Main).launch {
                         onGestureDetected(GestureAction.SWIPE_DOWN)
@@ -138,9 +153,9 @@ class AirGestureCore(private val context: Context) {
                 }
             }
 
-            // Baseline passt sich langsam an Lichtveränderungen im Raum an
-            baselineTop = baselineTop * 0.92 + avgTop * 0.08
-            baselineBottom = baselineBottom * 0.92 + avgBottom * 0.08
+            // Sanfte Anpassung an den Hintergrund
+            baselineTop = baselineTop * 0.90 + avgTop * 0.10
+            baselineBottom = baselineBottom * 0.90 + avgBottom * 0.10
 
         } catch (e: Exception) {
             e.printStackTrace()
