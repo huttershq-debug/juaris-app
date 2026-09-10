@@ -24,7 +24,7 @@ class AirGestureCore(private val context: Context) {
     private var lastBalance = 0.0
     private var frameCounter = 0
     
-    // Zähler für die Multi-Frame-Bestätigung (verhindert das Herumspringen)
+    // Zähler für die Multi-Frame-Bestätigung (stoppt jegliches Herumspringen)
     private var consecutiveUpFrames = 0
     private var consecutiveDownFrames = 0
 
@@ -43,7 +43,7 @@ class AirGestureCore(private val context: Context) {
                     .build()
 
                 imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                    // Jeden 3. Frame analysieren für stabile Performance
+                    // Performance-Schonung: Jeden 3. Frame analysieren
                     frameCounter++
                     if (frameCounter % 3 != 0) {
                         imageProxy.close()
@@ -81,9 +81,9 @@ class AirGestureCore(private val context: Context) {
 
             val isPortrait = rotation == 90 || rotation == 270
 
-            // Feineres Raster (16 statt 12), um auch kleinere Handflächen aus größerer Distanz perfekt zu erfassen
-            val yStep = (height / 16).coerceAtLeast(1)
-            val xStep = (width / 16).coerceAtLeast(1)
+            // Stabiles Raster (12) gegen unnötiges Rauschen und Herumspringen
+            val yStep = (height / 12).coerceAtLeast(1)
+            val xStep = (width / 12).coerceAtLeast(1)
 
             for (y in 0 until height step yStep) {
                 for (x in 0 until width step xStep) {
@@ -117,38 +117,40 @@ class AirGestureCore(private val context: Context) {
 
             val currentTime = System.currentTimeMillis()
 
-            // 3.0 Sekunden absolute Sperre nach jeder Aktion (wie gewünscht)
-            if (currentTime - lastActionTime > 3000) {
+            // 4.0 Sekunden absolute Sperre nach jeder Aktion (verhindert Überspringen komplett)
+            if (currentTime - lastActionTime > 4000) {
                 if (lastBalance != 0.0) {
                     val balanceChange = currentBalance - lastBalance
 
-                    // Etwas feinerer Schwellenwert (0.14), damit auch Bewegungen aus der Distanz sauber greifen
-                    if (balanceChange > 0.14) {
-                        consecutiveDownFrames++
-                        consecutiveUpFrames = 0
-                    } else if (balanceChange < -0.14) {
+                    // Korrekte Richtungszuordnung & stabiler Schwellenwert (0.22) gegen Fehltrünke
+                    if (balanceChange > 0.22) {
+                        // Hand bewegt sich nach oben -> SWIPE_UP (Nächster Tab / Rechts)
                         consecutiveUpFrames++
                         consecutiveDownFrames = 0
+                    } else if (balanceChange < -0.22) {
+                        // Hand bewegt sich nach unten -> SWIPE_DOWN (Vorheriger Tab / Links)
+                        consecutiveDownFrames++
+                        consecutiveUpFrames = 0
                     } else {
-                        // Werte abbauen, wenn keine Bewegung stattfindet
+                        // Werte langsam abbauen, um Jitter zu vermeiden
                         consecutiveUpFrames = maxOf(0, consecutiveUpFrames - 1)
                         consecutiveDownFrames = maxOf(0, consecutiveDownFrames - 1)
                     }
 
-                    // 3 Frames Bestätigung verhindern jegliches ungewolltes Herumspringen
-                    if (consecutiveDownFrames >= 3) {
-                        lastActionTime = currentTime
-                        consecutiveDownFrames = 0
-                        currentActionState = GestureAction.SWIPE_DOWN
-                        CoroutineScope(Dispatchers.Main).launch {
-                            onGestureDetected(GestureAction.SWIPE_DOWN)
-                        }
-                    } else if (consecutiveUpFrames >= 3) {
+                    // Erst ab 3 stabilen Frames in Folge wird die Geste fehlerfrei ausgelöst
+                    if (consecutiveUpFrames >= 3) {
                         lastActionTime = currentTime
                         consecutiveUpFrames = 0
                         currentActionState = GestureAction.SWIPE_UP
                         CoroutineScope(Dispatchers.Main).launch {
                             onGestureDetected(GestureAction.SWIPE_UP)
+                        }
+                    } else if (consecutiveDownFrames >= 3) {
+                        lastActionTime = currentTime
+                        consecutiveDownFrames = 0
+                        currentActionState = GestureAction.SWIPE_DOWN
+                        CoroutineScope(Dispatchers.Main).launch {
+                            onGestureDetected(GestureAction.SWIPE_DOWN)
                         }
                     }
                 }
