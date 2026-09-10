@@ -116,8 +116,8 @@ class AirGestureCore(private val context: Context) {
 
             val currentTime = System.currentTimeMillis()
 
-            // 2.0 Sekunden absolute Sperre nach jeder Aktion (verhindert Überspringen und zu schnelles Schalten)
-            if (currentTime - lastActionTime > 2000) {
+            // 3.0 Sekunden absolute Sperre nach jeder Aktion (perfekt für entspanntes, fehlerfreies Schalten)
+            if (currentTime - lastActionTime > 3000) {
                 if (lastBalance != 0.0) {
                     val balanceChange = currentBalance - lastBalance
 
@@ -134,7 +134,7 @@ class AirGestureCore(private val context: Context) {
                         consecutiveDownFrames = maxOf(0, consecutiveDownFrames - 1)
                     }
 
-                    // Erst ab 3 stabilen Frames in Folge wird die Geste sicher ausgelöst (butterweich & fehlerfrei)
+                    // Erst ab 3 stabilen Frames in Folge wird die Geste sicher ausgelöst
                     if (consecutiveDownFrames >= 3) {
                         lastActionTime = currentTime
                         consecutiveDownFrames = 0
