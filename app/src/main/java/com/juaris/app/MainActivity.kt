@@ -862,7 +862,7 @@ fun PrivacyAndLegalContent() {
                 Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("Hutter IT Solutions", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Text("Copyright Benedikt Wolfgang Hütter", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                    Text("Design Julia Kerschhofer", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    Text("Design Benedikt Wolfgang Hütter", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                 }
             }
         }
