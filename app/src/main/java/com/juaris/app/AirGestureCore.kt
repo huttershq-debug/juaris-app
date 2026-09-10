@@ -5,6 +5,8 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlin.math.abs
 
 class AirGestureCore(private val context: Context) : ImageAnalysis.Analyzer {
@@ -12,6 +14,12 @@ class AirGestureCore(private val context: Context) : ImageAnalysis.Analyzer {
     enum class GestureAction {
         SWIPE_RIGHT, SWIPE_LEFT, NONE
     }
+
+    private val _gestureState = MutableStateFlow("Bereit")
+    val gestureState: StateFlow<String> = _gestureState
+
+    private val _lastAction = MutableStateFlow("NONE")
+    val lastAction: StateFlow<String> = _lastAction
 
     private var previousBytesBuffer: ByteArray? = null
     private var isTracking = false
@@ -24,13 +32,14 @@ class AirGestureCore(private val context: Context) : ImageAnalysis.Analyzer {
 
     fun startGestureDetection(lifecycleOwner: LifecycleOwner, onGestureDetected: (GestureAction) -> Unit) {
         currentCallback = onGestureDetected
-        // Hier wird die Kamera-Analyse eingebunden oder aktiv geschaltet
+        _gestureState.value = "Überwache Raum..."
     }
 
     fun stopGestureDetection() {
         currentCallback = null
         previousBytesBuffer = null
         isTracking = false
+        _gestureState.value = "Gestoppt"
     }
 
     override fun analyze(image: ImageProxy) {
@@ -90,6 +99,7 @@ class AirGestureCore(private val context: Context) : ImageAnalysis.Analyzer {
                         anchorY = smoothedCentroidY
                         isTracking = true
                         gestureStartTime = currentTime
+                        _gestureState.value = "Bewegung erkannt..."
                     } else {
                         val totalDisplacement = smoothedCentroidY - anchorY
                         val swipeThreshold = height.toFloat() * 0.08f
@@ -103,8 +113,12 @@ class AirGestureCore(private val context: Context) : ImageAnalysis.Analyzer {
                             lastTriggerTime = currentTime
 
                             val action = if (totalDisplacement < 0f) {
+                                _gestureState.value = "Swipe: Rauf (Rechts)"
+                                _lastAction.value = "SWIPE_RIGHT"
                                 GestureAction.SWIPE_RIGHT
                             } else {
+                                _gestureState.value = "Swipe: Runter (Links)"
+                                _lastAction.value = "SWIPE_LEFT"
                                 GestureAction.SWIPE_LEFT
                             }
 
@@ -124,6 +138,7 @@ class AirGestureCore(private val context: Context) : ImageAnalysis.Analyzer {
                         isTracking = false
                         smoothedCentroidY = -1f
                         anchorY = -1f
+                        _gestureState.value = "Bereit"
                     }
                 }
             }
