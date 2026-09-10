@@ -43,7 +43,7 @@ class AirGestureCore(private val context: Context) {
                     .build()
 
                 imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                    // Jeden 3. Frame analysieren für maximale Stabilität und Performance
+                    // Jeden 3. Frame analysieren für stabile Performance
                     frameCounter++
                     if (frameCounter % 3 != 0) {
                         imageProxy.close()
@@ -81,8 +81,9 @@ class AirGestureCore(private val context: Context) {
 
             val isPortrait = rotation == 90 || rotation == 270
 
-            val yStep = (height / 12).coerceAtLeast(1)
-            val xStep = (width / 12).coerceAtLeast(1)
+            // Feineres Raster (16 statt 12), um auch kleinere Handflächen aus größerer Distanz perfekt zu erfassen
+            val yStep = (height / 16).coerceAtLeast(1)
+            val xStep = (width / 16).coerceAtLeast(1)
 
             for (y in 0 until height step yStep) {
                 for (x in 0 until width step xStep) {
@@ -116,25 +117,25 @@ class AirGestureCore(private val context: Context) {
 
             val currentTime = System.currentTimeMillis()
 
-            // 3.0 Sekunden absolute Sperre nach jeder Aktion (perfekt für entspanntes, fehlerfreies Schalten)
+            // 3.0 Sekunden absolute Sperre nach jeder Aktion (wie gewünscht)
             if (currentTime - lastActionTime > 3000) {
                 if (lastBalance != 0.0) {
                     val balanceChange = currentBalance - lastBalance
 
-                    // Strikte Schwellenwerte gegen Lichtschwankungen
-                    if (balanceChange > 0.18) {
+                    // Etwas feinerer Schwellenwert (0.14), damit auch Bewegungen aus der Distanz sauber greifen
+                    if (balanceChange > 0.14) {
                         consecutiveDownFrames++
                         consecutiveUpFrames = 0
-                    } else if (balanceChange < -0.18) {
+                    } else if (balanceChange < -0.14) {
                         consecutiveUpFrames++
                         consecutiveDownFrames = 0
                     } else {
-                        // Werte langsam abbauen, wenn keine Bewegung da ist
+                        // Werte abbauen, wenn keine Bewegung stattfindet
                         consecutiveUpFrames = maxOf(0, consecutiveUpFrames - 1)
                         consecutiveDownFrames = maxOf(0, consecutiveDownFrames - 1)
                     }
 
-                    // Erst ab 3 stabilen Frames in Folge wird die Geste sicher ausgelöst
+                    // 3 Frames Bestätigung verhindern jegliches ungewolltes Herumspringen
                     if (consecutiveDownFrames >= 3) {
                         lastActionTime = currentTime
                         consecutiveDownFrames = 0
