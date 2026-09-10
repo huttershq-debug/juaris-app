@@ -15,7 +15,7 @@ import java.util.concurrent.Executors
 class AirGestureCore(private val context: Context) {
 
     enum class GestureAction {
-        NONE, SWIPE_LEFT, SWIPE_RIGHT
+        NONE, SWIPE_UP, SWIPE_DOWN
     }
 
     private var cameraProvider: ProcessCameraProvider? = null
@@ -39,7 +39,7 @@ class AirGestureCore(private val context: Context) {
                     .build()
 
                 imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                    // Frame-Skipping für maximale Gesamt-Flüssigkeit der App
+                    // Frame-Skipping für flüssige Performance
                     frameCounter++
                     if (frameCounter % 2 != 0) {
                         imageProxy.close()
@@ -70,16 +70,16 @@ class AirGestureCore(private val context: Context) {
             val height = imageProxy.height
             val rotation = imageProxy.imageInfo.rotationDegrees
 
-            var leftSum = 0.0
-            var rightSum = 0.0
-            var countLeft = 0
-            var countRight = 0
+            var topSum = 0.0
+            var bottomSum = 0.0
+            var countTop = 0
+            var countBottom = 0
 
-            // Erkennen, ob das Gerät im Hochformat (Portrait) oder Querformat (Landscape) gehalten wird
+            // Ausrichtung berücksichtigen, damit Oben/Unten im Hochformat perfekt greift
             val isPortrait = rotation == 90 || rotation == 270
 
-            val yStep = (height / 10).coerceAtLeast(1)
-            val xStep = (width / 10).coerceAtLeast(1)
+            val yStep = (height / 12).coerceAtLeast(1)
+            val xStep = (width / 12).coerceAtLeast(1)
 
             for (y in 0 until height step yStep) {
                 for (x in 0 until width step xStep) {
@@ -87,42 +87,43 @@ class AirGestureCore(private val context: Context) {
                     if (index < buffer.capacity()) {
                         val pixel = buffer.get(index).toInt() and 0xFF
                         
-                        // Dynamische Achsen-Zuordnung je nach Ausrichtung
-                        val checkAxis = if (isPortrait) y else x
-                        val limitAxis = if (isPortrait) height else width
+                        // Wir werten jetzt strikt die vertikale Achse (Oben / Unten) aus
+                        val verticalCoord = if (isPortrait) x else y
+                        val verticalLimit = if (isPortrait) width else height
 
-                        if (checkAxis < limitAxis / 2) {
-                            leftSum += pixel
-                            countLeft++
+                        if (verticalCoord < verticalLimit / 2) {
+                            topSum += pixel
+                            countTop++
                         } else {
-                            rightSum += pixel
-                            countRight++
+                            bottomSum += pixel
+                            countBottom++
                         }
                     }
                 }
             }
 
-            val avgLeft = if (countLeft > 0) leftSum / countLeft else 0.0
-            val avgRight = if (countRight > 0) rightSum / countRight else 0.0
+            val avgTop = if (countTop > 0) topSum / countTop else 0.0
+            val avgBottom = if (countBottom > 0) bottomSum / countBottom else 0.0
 
-            val currentBalance = avgRight - avgLeft
+            val currentBalance = avgBottom - avgTop
             val currentTime = System.currentTimeMillis()
 
             if (lastBalance != 0.0) {
                 val balanceChange = currentBalance - lastBalance
 
-                if (currentTime - lastActionTime > 600) {
-                    if (balanceChange > 10.0) {
+                // 1.2 Sekunden Sperrzeit, damit es gemütlich und kontrolliert bleibt
+                if (currentTime - lastActionTime > 1200) {
+                    if (balanceChange > 20.0) {
                         lastActionTime = currentTime
-                        currentActionState = GestureAction.SWIPE_RIGHT
+                        currentActionState = GestureAction.SWIPE_DOWN
                         CoroutineScope(Dispatchers.Main).launch {
-                            onGestureDetected(GestureAction.SWIPE_RIGHT)
+                            onGestureDetected(GestureAction.SWIPE_DOWN)
                         }
-                    } else if (balanceChange < -10.0) {
+                    } else if (balanceChange < -20.0) {
                         lastActionTime = currentTime
-                        currentActionState = GestureAction.SWIPE_LEFT
+                        currentActionState = GestureAction.SWIPE_UP
                         CoroutineScope(Dispatchers.Main).launch {
-                            onGestureDetected(GestureAction.SWIPE_LEFT)
+                            onGestureDetected(GestureAction.SWIPE_UP)
                         }
                     }
                 }
@@ -145,4 +146,5 @@ class AirGestureCore(private val context: Context) {
         }
     }
 }
+
 
