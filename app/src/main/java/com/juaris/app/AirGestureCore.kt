@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.math.abs
 
 class AirGestureCore(private val context: Context) {
 
@@ -24,9 +25,12 @@ class AirGestureCore(private val context: Context) {
     private var lastBalance = 0.0
     private var frameCounter = 0
     
-    // Zähler für die Multi-Frame-Bestätigung (stoppt jegliches Herumspringen)
+    // Zähler für die Multi-Frame-Bestätigung
     private var consecutiveUpFrames = 0
     private var consecutiveDownFrames = 0
+    
+    // Neu: Verhindert das "Hängenbleiben/Wilde Herumspringen" direkt nach Ablauf der Sperre
+    private var needsNeutralState = false
 
     var currentActionState: GestureAction = GestureAction.NONE
         private set
@@ -81,7 +85,6 @@ class AirGestureCore(private val context: Context) {
 
             val isPortrait = rotation == 90 || rotation == 270
 
-            // Stabiles Raster (12) gegen unnötiges Rauschen und Herumspringen
             val yStep = (height / 12).coerceAtLeast(1)
             val xStep = (width / 12).coerceAtLeast(1)
 
@@ -116,41 +119,53 @@ class AirGestureCore(private val context: Context) {
             }
 
             val currentTime = System.currentTimeMillis()
+            val timeSinceLastAction = currentTime - lastActionTime
 
-            // 4.0 Sekunden absolute Sperre nach jeder Aktion (verhindert Überspringen komplett)
-            if (currentTime - lastActionTime > 4000) {
+            // 4.0 Sekunden absolute Sperre nach jeder Aktion
+            if (timeSinceLastAction > 4000) {
                 if (lastBalance != 0.0) {
                     val balanceChange = currentBalance - lastBalance
 
-                    // Korrekte Richtungszuordnung & stabiler Schwellenwert (0.22) gegen Fehltrünke
-                    if (balanceChange > 0.22) {
-                        // Hand bewegt sich nach oben -> SWIPE_UP (Nächster Tab / Rechts)
-                        consecutiveUpFrames++
-                        consecutiveDownFrames = 0
-                    } else if (balanceChange < -0.22) {
-                        // Hand bewegt sich nach unten -> SWIPE_DOWN (Vorheriger Tab / Links)
-                        consecutiveDownFrames++
-                        consecutiveUpFrames = 0
-                    } else {
-                        // Werte langsam abbauen, um Jitter zu vermeiden
-                        consecutiveUpFrames = maxOf(0, consecutiveUpFrames - 1)
-                        consecutiveDownFrames = maxOf(0, consecutiveDownFrames - 1)
-                    }
-
-                    // Erst ab 3 stabilen Frames in Folge wird die Geste fehlerfrei ausgelöst
-                    if (consecutiveUpFrames >= 3) {
-                        lastActionTime = currentTime
-                        consecutiveUpFrames = 0
-                        currentActionState = GestureAction.SWIPE_UP
-                        CoroutineScope(Dispatchers.Main).launch {
-                            onGestureDetected(GestureAction.SWIPE_UP)
+                    // Erst prüfen, ob das Bild wieder neutral/ruhig ist nach der Sperre
+                    if (needsNeutralState) {
+                        if (abs(balanceChange) < 0.08) {
+                            needsNeutralState = false // Bild ist ruhig, bereit für die nächste Geste
                         }
-                    } else if (consecutiveDownFrames >= 3) {
-                        lastActionTime = currentTime
-                        consecutiveDownFrames = 0
-                        currentActionState = GestureAction.SWIPE_DOWN
-                        CoroutineScope(Dispatchers.Main).launch {
-                            onGestureDetected(GestureAction.SWIPE_DOWN)
+                    } else {
+                        // Strikte und ausgewogene Schwellenwerte für beide Richtungen
+                        if (balanceChange < -0.20) {
+                            // Nach oben wischen -> SWIPE_UP (Nächster Tab / Rechts)
+                            consecutiveUpFrames++
+                            consecutiveDownFrames = 0
+                        } else if (balanceChange > 0.20) {
+                            // Nach unten wischen -> SWIPE_DOWN (Vorheriger Tab / Links)
+                            consecutiveDownFrames++
+                            consecutiveUpFrames = 0
+                        } else {
+                            // Werte langsam abbauen, wenn keine Bewegung da ist
+                            consecutiveUpFrames = maxOf(0, consecutiveUpFrames - 1)
+                            consecutiveDownFrames = maxOf(0, consecutiveDownFrames - 1)
+                        }
+
+                        // Erst ab 3 stabilen Frames in Folge wird die Geste fehlerfrei ausgelöst
+                        if (consecutiveUpFrames >= 3) {
+                            lastActionTime = currentTime
+                            consecutiveUpFrames = 0
+                            consecutiveDownFrames = 0
+                            needsNeutralState = true // Sofort Neutralisierung erzwingen
+                            currentActionState = GestureAction.SWIPE_UP
+                            CoroutineScope(Dispatchers.Main).launch {
+                                onGestureDetected(GestureAction.SWIPE_UP)
+                            }
+                        } else if (consecutiveDownFrames >= 3) {
+                            lastActionTime = currentTime
+                            consecutiveUpFrames = 0
+                            consecutiveDownFrames = 0
+                            needsNeutralState = true // Sofort Neutralisierung erzwingen
+                            currentActionState = GestureAction.SWIPE_DOWN
+                            CoroutineScope(Dispatchers.Main).launch {
+                                onGestureDetected(GestureAction.SWIPE_DOWN)
+                            }
                         }
                     }
                 }
@@ -158,6 +173,7 @@ class AirGestureCore(private val context: Context) {
                 currentActionState = GestureAction.NONE
                 consecutiveUpFrames = 0
                 consecutiveDownFrames = 0
+                needsNeutralState = true
             }
 
             lastBalance = currentBalance
