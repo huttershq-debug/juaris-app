@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import java.nio.ByteBuffer
 import java.util.concurrent.Executors
+import kotlin.math.abs
 
 class AirGestureCore(private val context: Context) {
 
@@ -15,7 +16,7 @@ class AirGestureCore(private val context: Context) {
     private val analysisExecutor = Executors.newSingleThreadExecutor()
 
     enum class GestureAction {
-        NONE, SWIPE_UP, SWIPE_DOWN
+        NONE, TRIGGERED
     }
 
     fun startGestureDetection(
@@ -48,7 +49,7 @@ class AirGestureCore(private val context: Context) {
             .build()
 
         var lastLuminance = 0.0
-        var coolDownFrames = 0 // <--- DAS HIER VERHINDERT DAS ÜBERSPRINGEN
+        var coolDownFrames = 0
 
         imageAnalysis.setAnalyzer(analysisExecutor) { imageProxy ->
             try {
@@ -57,18 +58,16 @@ class AirGestureCore(private val context: Context) {
                 val currentLuminance = calculateAverageLuminance(data)
 
                 if (coolDownFrames > 0) {
-                    coolDownFrames-- // Zählt die Sperre herunter
-                    onDebugInfo("Warte auf nächsten Wisch...")
+                    coolDownFrames--
+                    onDebugInfo("Warte...")
                 } else if (lastLuminance > 0.0) {
                     val delta = currentLuminance - lastLuminance
                     onDebugInfo("Sensor aktiv | Delta: %.1f".format(delta))
 
-                    if (delta > 14.0) {
-                        onGestureDetected(GestureAction.SWIPE_UP)
-                        coolDownFrames = 50 // Sperrt den Sensor für ca. 1.5 Sekunden nach dem Auslösen
-                    } else if (delta < -14.0) {
-                        onGestureDetected(GestureAction.SWIPE_DOWN)
-                        coolDownFrames = 50 // Sperrt den Sensor für ca. 1.5 Sekunden nach dem Auslösen
+                    // Egal ob positive oder negative Helligkeitsänderung (Schatten / Wisch)
+                    if (abs(delta) > 12.0) {
+                        onGestureDetected(GestureAction.TRIGGERED)
+                        coolDownFrames = 50 // Sperrt kurz, damit es exakt 1 Tab weiterschaltet
                     }
                 }
                 lastLuminance = currentLuminance
