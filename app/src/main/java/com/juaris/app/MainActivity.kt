@@ -246,7 +246,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
     val coroutineScope = rememberCoroutineScope()
    
     var gestureEnabled by remember { mutableStateOf(false) }
-    var gestureStatusText by remember { mutableStateOf("Bereit") } // <--- Live-Status State hinzugefügt
+    var gestureStatusText by remember { mutableStateOf("Bereit") }
 
     val tabs = listOf(
         "Status", "Schutz", "Sperren", "Logs", "Clipboard",
@@ -273,7 +273,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                     }
                 },
                 onDebugInfo = { status ->
-                    gestureStatusText = status // <--- Schreibt den echten Kamerastatus in den State
+                    gestureStatusText = status
                 }
             )
         } else {
@@ -410,31 +410,58 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                 5 -> PermissionsAuditPage()
                 6 -> SwarmMeshPage()
                 7 -> AIPage(aiCore = aiCore, logs = liveLogs)
-                8 -> AirGesturePage(
-                    airGestureCore = airGestureCore,
-                    isGestureActive = gestureEnabled,
-                    statusText = gestureStatusText, // <--- Übergibt den Live-Status an die UI-Seite
-                    onToggleGesture = { newState ->
-                        gestureEnabled = newState
-                        if (newState) {
-                            Toast.makeText(context, "Sensor-Gesten aktiviert. Winke kurz über das Handy!", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                ) { forward ->
-                    coroutineScope.launch {
-                        val target = if (forward) {
-                            (pagerState.currentPage + 1) % tabs.size
+                8 -> {
+                    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+                        ActivityResultContracts.RequestPermission()
+                    ) { isGranted ->
+                        if (isGranted) {
+                            gestureEnabled = true
+                            Toast.makeText(context, "Kamera-Berechtigung erteilt! Sensor startet...", Toast.LENGTH_SHORT).show()
                         } else {
-                            if (pagerState.currentPage - 1 < 0) tabs.size - 1 else pagerState.currentPage - 1
+                            gestureEnabled = false
+                            Toast.makeText(context, "Kamera-Berechtigung wurde verweigert!", Toast.LENGTH_LONG).show()
                         }
-                        pagerState.animateScrollToPage(target)
                     }
-                }
+
+                    AirGesturePage(
+                        airGestureCore = airGestureCore,
+                        isGestureActive = gestureEnabled,
+                        statusText = gestureStatusText,
+                        onToggleGesture = { newState ->
+                            if (newState) {
+                                val permissionGranted = ContextCompat.checkSelfPermission(
+                                    context,
+                                    android.Manifest.permission.CAMERA
+                                ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+                                if (permissionGranted) {
+                                    gestureEnabled = true
+                                } else {
+                                    cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+                                }
+                            } else {
+                                gestureEnabled = false
+                                gestureStatusText = "Gesten pausiert"
+                            }
+                        },
+                        onTabSwitch = { forward ->
+                            coroutineScope.launch {
+                                val target = if (forward) {
+                                    (pagerState.currentPage + 1) % tabs.size
+                                } else {
+                                    if (pagerState.currentPage - 1 < 0) tabs.size - 1 else pagerState.currentPage - 1
+                                }
+                                pagerState.animateScrollToPage(target)
+                            }
+                        }
+                    ) // <--- Schließt AirGesturePage sauber ab
+                } // <--- Schließt den Block für Case 8 sauber ab
                 9 -> PrivacyAndLegalContent()
             }
         }
     }
 }
+
 
 @Composable
 fun StatusPage(
