@@ -12,7 +12,12 @@ import androidx.compose.ui.unit.dp
 import com.juaris.app.AirGestureCore
 
 @Composable
-fun AirGesturePage(airGestureCore: AirGestureCore, onTabSwitch: (Boolean) -> Unit) {
+fun AirGesturePage(
+    airGestureCore: AirGestureCore,
+    isGestureActive: Boolean,
+    onToggleGesture: (Boolean) -> Unit,
+    onTabSwitch: (Boolean) -> Unit
+) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -22,26 +27,30 @@ fun AirGesturePage(airGestureCore: AirGestureCore, onTabSwitch: (Boolean) -> Uni
         item {
             Text("Air-Swiping Gesten-Steuerung", style = MaterialTheme.typography.titleLarge, color = Color.White)
             Spacer(modifier = Modifier.height(4.dp))
-            Text("Bediene Juaris gemütlich mit vertikalen Wischgesten vor der Frontkamera (100% lokal & offline).", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text("Bediene Juaris mit vertikalen Wischgesten vor der Frontkamera (100% lokal & offline).", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
             TacticalPulseCard {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Surface(
-                            modifier = Modifier.size(12.dp),
-                            shape = MaterialTheme.shapes.small,
-                            color = NeonGiftgruen
-                        ) {}
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Vertikale Gesten aktiv", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Gesten-Steuerung aktivieren", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                            Text(if (isGestureActive) "Kamera-Scanner aktiv" else "Gesten pausiert (Standard)", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                        }
+                        Switch(
+                            checked = isGestureActive,
+                            onCheckedChange = onToggleGesture
+                        )
                     }
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text("Sensor-Feed: Kamera aktiv - Bereit für Gesten", style = MaterialTheme.typography.bodyMedium, color = Color.White)
-                    Text("Hinweis: Wische ganz entspannt nach oben oder unten vor der Frontkamera, um die Tabs kontrolliert zu wechseln.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    Text("Hinweis für den Store-Betrieb: Standardmäßig deaktiviert, um unbeabsichtigte Bildschirmsprünge zu verhindern.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                 }
             }
         }
@@ -53,3 +62,4 @@ fun AirGesturePage(airGestureCore: AirGestureCore, onTabSwitch: (Boolean) -> Uni
         }
     }
 }
+
