@@ -44,7 +44,7 @@ fun AIPage(aiCore: LocalAICore, logs: List<SecurityLogEntity>) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text("Sicherheits-Status", style = MaterialTheme.typography.titleMedium)
-                        Text(threatLevel, color = threatColor, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Text(text = threatLevel.orEmpty(), color = threatColor, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
                     Divider(color = MaterialTheme.colorScheme.surface)
                     Text("System-Zustand: $status", style = MaterialTheme.typography.bodyMedium)
@@ -56,7 +56,7 @@ fun AIPage(aiCore: LocalAICore, logs: List<SecurityLogEntity>) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Echtzeit-Analyse (Lokaler Kontext)", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(insights, style = MaterialTheme.typography.bodyMedium)
+                    Text(text = insights.orEmpty(), style = MaterialTheme.typography.bodyMedium)
                 }
             }
         }
