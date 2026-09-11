@@ -406,10 +406,11 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                     airGestureCore = airGestureCore,
                     isGestureActive = gestureEnabled,
                     onToggleGesture = { newState ->
-                        if (newState && !hasCameraPermission) {
-                            cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
-                        }
+                        // Kein Kamera-Dialog mehr nötig – schaltet sich sofort ein!
                         gestureEnabled = newState
+                        if (newState) {
+                            Toast.makeText(context, "Sensor-Gesten aktiviert. Winke kurz über das Display!", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 ) { forward ->
                     selectedTab = if (forward) {
@@ -418,6 +419,8 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                         if (selectedTab - 1 < 0) tabs.size - 1 else selectedTab - 1
                     }
                 }
+
+
                 9 -> PrivacyAndLegalContent()
             }
         }
