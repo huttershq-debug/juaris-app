@@ -1,4 +1,4 @@
-package com.juaris.app // Passe deinen Package-Namen hier an
+package com.juaris.app
 
 import android.content.Context
 import androidx.camera.core.CameraSelector
@@ -41,8 +41,6 @@ class AirGestureCore(private val context: Context) {
         onDebugInfo: (String) -> Unit
     ) {
         val cameraProvider = cameraProvider ?: return
-
-        // Frontkamera erzwingen
         val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
 
         val imageAnalysis = ImageAnalysis.Builder()
@@ -50,6 +48,7 @@ class AirGestureCore(private val context: Context) {
             .build()
 
         var lastLuminance = 0.0
+        var coolDownFrames = 0 // <--- DAS HIER VERHINDERT DAS ÜBERSPRINGEN
 
         imageAnalysis.setAnalyzer(analysisExecutor) { imageProxy ->
             try {
@@ -57,22 +56,25 @@ class AirGestureCore(private val context: Context) {
                 val data = byteBufferToByteArray(buffer)
                 val currentLuminance = calculateAverageLuminance(data)
 
-                if (lastLuminance > 0.0) {
+                if (coolDownFrames > 0) {
+                    coolDownFrames-- // Zählt die Sperre herunter
+                    onDebugInfo("Warte auf nächsten Wisch...")
+                } else if (lastLuminance > 0.0) {
                     val delta = currentLuminance - lastLuminance
                     onDebugInfo("Sensor aktiv | Delta: %.1f".format(delta))
 
-                    // Schwellenwert für Handbewegung / Schattenwurf vor der Linse
-                    if (delta > 12.0) {
+                    if (delta > 14.0) {
                         onGestureDetected(GestureAction.SWIPE_UP)
-                    } else if (delta < -12.0) {
+                        coolDownFrames = 50 // Sperrt den Sensor für ca. 1.5 Sekunden nach dem Auslösen
+                    } else if (delta < -14.0) {
                         onGestureDetected(GestureAction.SWIPE_DOWN)
+                        coolDownFrames = 50 // Sperrt den Sensor für ca. 1.5 Sekunden nach dem Auslösen
                     }
                 }
                 lastLuminance = currentLuminance
             } catch (e: Exception) {
                 onDebugInfo("Analyzer-Fehler: ${e.message}")
             } finally {
-                // CRITICAL: ImageProxy muss *immer* geschlossen werden, sonst stoppt der Stream sofort!
                 imageProxy.close()
             }
         }
@@ -84,7 +86,7 @@ class AirGestureCore(private val context: Context) {
                 cameraSelector,
                 imageAnalysis
             )
-            onDebugInfo("Kamera verbunden - Winke vor die Linse!")
+            onDebugInfo("Kamera verbunden - Wische vor die Linse!")
         } catch (e: Exception) {
             onDebugInfo("Kamera-Bindung fehlgeschlagen: ${e.message}")
         }
@@ -93,9 +95,7 @@ class AirGestureCore(private val context: Context) {
     fun stopGestureDetection() {
         try {
             cameraProvider?.unbindAll()
-        } catch (e: Exception) {
-            // Ignorieren beim Herunterfahren
-        }
+        } catch (e: Exception) {}
     }
 
     private fun byteBufferToByteArray(buffer: ByteBuffer): ByteArray {
@@ -107,7 +107,6 @@ class AirGestureCore(private val context: Context) {
 
     private fun calculateAverageLuminance(data: ByteArray): Double {
         var sum = 0L
-        // Performance-Optimierung: Nur jeden 50. Pixel abtasten, reicht völlig für Helligkeitswechsel
         val step = 50
         var count = 0
         for (i in data.indices step step) {
