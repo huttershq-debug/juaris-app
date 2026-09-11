@@ -253,17 +253,20 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
     // Der Pager für echtes Wischen mit dem Finger auf dem Bildschirm
     val pagerState = rememberPagerState(pageCount = { tabs.size })
 
-    // Näherungssensor-Gestensteuerung animiert den Pager weiter
+    // Näherungssensor-Gestensteuerung (explizit typisiert, damit der Compiler nicht stolpert)
     LaunchedEffect(gestureEnabled, lifecycleOwner) {
         if (gestureEnabled) {
             airGestureCore.startGestureDetection(lifecycleOwner) { action ->
-                coroutineScope.launch {
-                    when (action) {
-                        AirGestureCore.GestureAction.SWIPE_DOWN, AirGestureCore.GestureAction.SWIPE_UP -> {
+                when (action) {
+                    AirGestureCore.GestureAction.SWIPE_DOWN, 
+                    AirGestureCore.GestureAction.SWIPE_UP -> {
+                        coroutineScope.launch {
                             val nextTab = (pagerState.currentPage + 1) % tabs.size
                             pagerState.animateScrollToPage(nextTab)
                         }
-                        AirGestureCore.GestureAction.NONE -> {}
+                    }
+                    AirGestureCore.GestureAction.NONE -> {
+                        // Nichts tun
                     }
                 }
             }
