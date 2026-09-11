@@ -34,7 +34,7 @@ fun DashboardScreen() {
 
     val pagerState = rememberPagerState(pageCount = { 10 })
     var gestureEnabled by remember { mutableStateOf(false) }
-    
+   
     // Visueller Status direkt auf dem Handy-Bildschirm
     var debugStatusText by remember { mutableStateOf("Warte auf Aktivierung...") }
 
@@ -56,21 +56,17 @@ fun DashboardScreen() {
         DisposableEffect(lifecycleOwner) {
             val gestureCore = AirGestureCore(context)
             debugStatusText = "Starte AirGestureCore..."
-            
+           
             gestureCore.startGestureDetection(
                 lifecycleOwner = lifecycleOwner,
                 onGestureDetected = { action ->
-                    coroutineScope.launch {
-                        when (action) {
-                            AirGestureCore.GestureAction.SWIPE_UP -> {
+                    // Schutz vor Überspringen: Nur triggern, wenn Pager gerade NICHT scrollt
+                    if (action == AirGestureCore.GestureAction.TRIGGERED) {
+                        if (!pagerState.isScrollInProgress) {
+                            coroutineScope.launch {
                                 val nextTab = (pagerState.currentPage + 1) % 10
                                 pagerState.animateScrollToPage(nextTab)
                             }
-                            AirGestureCore.GestureAction.SWIPE_DOWN -> {
-                                val prevTab = if (pagerState.currentPage - 1 < 0) 9 else pagerState.currentPage - 1
-                                pagerState.animateScrollToPage(prevTab)
-                            }
-                            AirGestureCore.GestureAction.NONE -> {}
                         }
                     }
                 },
@@ -187,13 +183,13 @@ fun AirGestureControlView(isGestureActive: Boolean, debugText: String, onToggle:
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Vertikale Wischgesten vor der Frontkamera",
+            text = "Wischgesten vor der Frontkamera",
             color = Color.White,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(16.dp))
-        
+       
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
@@ -204,10 +200,9 @@ fun AirGestureControlView(isGestureActive: Boolean, debugText: String, onToggle:
                 onCheckedChange = { onToggle(it) }
             )
         }
-        
+       
         Spacer(modifier = Modifier.height(24.dp))
-        
-        // Live-Bildschirm-Feedback für GitHub / App
+       
         Card(
             colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
             modifier = Modifier
@@ -239,5 +234,4 @@ fun AirGestureControlView(isGestureActive: Boolean, debugText: String, onToggle:
         }
     }
 }
-
 
