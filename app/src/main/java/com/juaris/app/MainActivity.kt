@@ -1,4 +1,7 @@
-@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@file:OptIn(
+   androidx.compose.material3.ExperimentalMaterial3Api::class
+   androidx.compose.foundation.ExperimantalFoundationApi::class
+)
    
 package com.juaris.app
 
@@ -232,7 +235,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JuarisMainDashboard(prefs: SharedPreferences) {
     val context = LocalContext.current
@@ -242,21 +244,24 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
     val coroutineScope = rememberCoroutineScope()
     
     var gestureEnabled by remember { mutableStateOf(false) }
-    var selectedTab by remember { mutableStateOf(0) }
 
     val tabs = listOf(
         "Status", "Schutz", "Sperren", "Logs", "Clipboard",
         "Rechte", "Schwarm", "KI", "Gesten", "Info"
     )
 
-    // Näherungssensor-Gestensteuerung (100% stabil, schaltet zum nächsten Tab)
+    // Der Pager für echtes Wischen mit dem Finger auf dem Bildschirm
+    val pagerState = rememberPagerState(pageCount = { tabs.size })
+
+    // Näherungssensor-Gestensteuerung animiert den Pager weiter
     LaunchedEffect(gestureEnabled, lifecycleOwner) {
         if (gestureEnabled) {
             airGestureCore.startGestureDetection(lifecycleOwner) { action ->
                 coroutineScope.launch {
                     when (action) {
                         AirGestureCore.GestureAction.SWIPE_DOWN, AirGestureCore.GestureAction.SWIPE_UP -> {
-                            selectedTab = (selectedTab + 1) % tabs.size
+                            val nextTab = (pagerState.currentPage + 1) % tabs.size
+                            pagerState.animateScrollToPage(nextTab)
                         }
                         AirGestureCore.GestureAction.NONE -> {}
                     }
@@ -298,15 +303,19 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                     title = { Text("Juaris Security Suite (Production)") }
                 )
                 ScrollableTabRow(
-                    selectedTabIndex = selectedTab,
+                    selectedTabIndex = pagerState.currentPage,
                     edgePadding = 16.dp,
                     containerColor = MaterialTheme.colorScheme.surface,
                     contentColor = MaterialTheme.colorScheme.primary
                 ) {
                     tabs.forEachIndexed { index, title ->
                         Tab(
-                            selected = selectedTab == index,
-                            onClick = { selectedTab = index },
+                            selected = pagerState.currentPage == index,
+                            onClick = { 
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(index)
+                                }
+                            },
                             text = { Text(title) }
                         )
                     }
@@ -314,12 +323,14 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
             }
         }
     ) { innerPadding ->
-        Box(
+        // Hier greift das echte Wischen wie in jeder Standard-App
+        HorizontalPager(
+            state = pagerState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-        ) {
-            when (selectedTab) {
+        ) { page ->
+            when (page) {
                 0 -> StatusPage(
                     logs = liveLogs,
                     onSimulateThreat = {
@@ -401,10 +412,13 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                         }
                     }
                 ) { forward ->
-                    selectedTab = if (forward) {
-                        (selectedTab + 1) % tabs.size
-                    } else {
-                        if (selectedTab - 1 < 0) tabs.size - 1 else selectedTab - 1
+                    coroutineScope.launch {
+                        val target = if (forward) {
+                            (pagerState.currentPage + 1) % tabs.size
+                        } else {
+                            if (pagerState.currentPage - 1 < 0) tabs.size - 1 else pagerState.currentPage - 1
+                        }
+                        pagerState.animateScrollToPage(target)
                     }
                 }
                 9 -> PrivacyAndLegalContent()
@@ -412,8 +426,6 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
         }
     }
 }
-
-
 
 
 @Composable
