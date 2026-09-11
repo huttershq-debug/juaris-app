@@ -14,8 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-val NeonGiftgruen = Color(0xFF00FF66)
-
 
 @Composable
 fun TacticalPulseCard(
