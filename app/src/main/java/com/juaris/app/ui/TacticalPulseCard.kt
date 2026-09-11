@@ -13,12 +13,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
+// Korrigierter Ausschnitt für TacticalPulseCard.kt
 @Composable
 fun TacticalPulseCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val borderColor = NeonGiftgruen // Direkter Zugriff auf die Farbe
+
     if (onClick != null) {
         Card(
             modifier = modifier
@@ -26,11 +29,11 @@ fun TacticalPulseCard(
                 .clickable { onClick() },
             shape = MaterialTheme.shapes.medium,
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-            border = BorderStroke(1.dp, MaterialTheme.com.juaris.app.ui.NeonGiftgruen) // bzw. NeonGiftgruen direkt
+            border = BorderStroke(1.dp, borderColor)
         ) {
-            androidx.compose.foundation.layout.Column(
+            Column(
                 modifier = Modifier.padding(16.dp),
-                content = content
+                content =content
             )
         }
     } else {
@@ -38,13 +41,14 @@ fun TacticalPulseCard(
             modifier = modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.medium,
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-            border = BorderStroke(1.dp, NeonGiftgruen)
+            border = BorderStroke(1.dp, borderColor)
         ) {
-            androidx.compose.foundation.layout.Column(
+            Column(
                 modifier = Modifier.padding(16.dp),
                 content = content
             )
         }
     }
 }
+
 
