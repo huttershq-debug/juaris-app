@@ -2,7 +2,7 @@
     androidx.compose.material3.ExperimentalMaterial3Api::class,
     androidx.compose.foundation.ExperimentalFoundationApi::class
 )
-  
+ 
 package com.juaris.app
 
 import android.content.Context
@@ -244,18 +244,18 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
     val aiCore = remember { LocalAICore(context) }
     val airGestureCore = remember { AirGestureCore(context) }
     val coroutineScope = rememberCoroutineScope()
-    
+   
     var gestureEnabled by remember { mutableStateOf(false) }
+    var gestureStatusText by remember { mutableStateOf("Bereit") } // <--- Live-Status State hinzugefügt
 
     val tabs = listOf(
         "Status", "Schutz", "Sperren", "Logs", "Clipboard",
         "Rechte", "Schwarm", "KI", "Gesten", "Info"
     )
 
-    // Der Pager für echtes Wischen mit dem Finger auf dem Bildschirm
     val pagerState = rememberPagerState(pageCount = { tabs.size })
 
-    // Näherungssensor-Gestensteuerung (korrigiert mit onDebugInfo-Parameter)
+    // Kamera-Gestenerkennung mit Live-Status-Übertragung
     LaunchedEffect(gestureEnabled, lifecycleOwner) {
         if (gestureEnabled) {
             airGestureCore.startGestureDetection(
@@ -269,13 +269,11 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                                 pagerState.animateScrollToPage(nextTab)
                             }
                         }
-                        AirGestureCore.GestureAction.NONE -> {
-                            // Nichts tun
-                        }
+                        AirGestureCore.GestureAction.NONE -> {}
                     }
                 },
                 onDebugInfo = { status ->
-                    // Nimmt den Live-Debugstatus entgegen (kann hier leer bleiben oder geloggt werden)
+                    gestureStatusText = status // <--- Schreibt den echten Kamerastatus in den State
                 }
             )
         } else {
@@ -283,8 +281,6 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
         }
     }
 
-
-   
     DisposableEffect(lifecycleOwner) {
         onDispose {
             airGestureCore.stopGestureDetection()
@@ -324,7 +320,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                     tabs.forEachIndexed { index, title ->
                         Tab(
                             selected = pagerState.currentPage == index,
-                            onClick = { 
+                            onClick = {
                                 coroutineScope.launch {
                                     pagerState.animateScrollToPage(index)
                                 }
@@ -336,7 +332,6 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
             }
         }
     ) { innerPadding ->
-        // Hier greift das echte Wischen wie in jeder Standard-App
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
@@ -418,6 +413,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                 8 -> AirGesturePage(
                     airGestureCore = airGestureCore,
                     isGestureActive = gestureEnabled,
+                    statusText = gestureStatusText, // <--- Übergibt den Live-Status an die UI-Seite
                     onToggleGesture = { newState ->
                         gestureEnabled = newState
                         if (newState) {
@@ -439,7 +435,6 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
         }
     }
 }
-
 
 @Composable
 fun StatusPage(
@@ -888,4 +883,3 @@ fun PrivacyAndLegalContent() {
         }
     }
 }
-
