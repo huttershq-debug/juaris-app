@@ -22,13 +22,13 @@ android {
 
     buildTypes {
         release {
-            // Wichtig für den Play Store: Code-Verschleierung und Ressourcen-Minimierung aktivieren
-            isMinifyEnabled = true
-            isShrinkResources = true
+            // HIER IST DIE KORREKTUR FÜR GROOVY:
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            isMinifyEnabled = false
+            minifyEnabled false
         }
     }
 
