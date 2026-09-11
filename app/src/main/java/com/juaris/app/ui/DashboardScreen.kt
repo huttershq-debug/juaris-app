@@ -23,48 +23,9 @@ import androidx.compose.ui.unit.sp
 import com.juaris.app.AirGestureCore
 import kotlinx.coroutines.launch
 
-val NeonGiftgruen = Color(0xFF00FF66)
-
-class DashboardActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            JuarisTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    JuarisDashboardScreen()
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun JuarisTheme(content: @Composable () -> Unit) {
-    val hackerGreenColorScheme = darkColorScheme(
-        primary = NeonGiftgruen,
-        onPrimary = Color.Black,
-        primaryContainer = Color(0xFF003311),
-        onPrimaryContainer = NeonGiftgruen,
-        background = Color.Black,
-        onBackground = NeonGiftgruen,
-        surface = Color(0xFF080808),
-        onSurface = Color(0xFFE0E0E0),
-        surfaceVariant = Color(0xFF121212),
-        onSurfaceVariant = NeonGiftgruen,
-        error = Color(0xFFFF3333)
-    )
-    MaterialTheme(
-        colorScheme = hackerGreenColorScheme,
-        content = content
-    )
-}
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun JuarisDashboardScreen() {
+fun DashboardScreen() {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
@@ -166,18 +127,6 @@ fun TabContentScreen(tabIndex: Int) {
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun TacticalPulseCard(content: @Composable () -> Unit) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF121212)),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Box(modifier = Modifier.padding(12.dp)) {
-            content()
         }
     }
 }
