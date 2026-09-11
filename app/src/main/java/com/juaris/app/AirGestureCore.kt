@@ -108,13 +108,13 @@ class AirGestureCore(private val context: Context) {
             val deltaBottom = avgBottom - baselineBottom
 
             val currentTime = System.currentTimeMillis()
-            val threshold = 5.0 // Hohe Schwelle, damit absolut nichts von alleine auslöst
+            val threshold = 3.8 // Perfekter Mittelweg für knackige Erkennung ohne Fehlzündungen
 
-            // Prüfen, ob eine echte Bewegung vorliegt
             val isMoving = abs(deltaTop) > threshold || abs(deltaBottom) > threshold
 
-            if (currentTime - lastActionTime > 700) {
-                // Wisch nach oben (Unten wird zuerst abgedunkelt)
+            // 650ms Cooldown, damit eine Geste exakt einen Tab weiterschaltet
+            if (currentTime - lastActionTime > 650) {
+                // Rauf wischen (Hand zieht von unten nach oben) -> Nächster Tab (Rechts)
                 if (deltaBottom < -threshold && deltaTop > -threshold * 0.5) {
                     lastActionTime = currentTime
                     currentActionState = GestureAction.SWIPE_UP
@@ -122,7 +122,7 @@ class AirGestureCore(private val context: Context) {
                         onGestureDetected(GestureAction.SWIPE_UP)
                     }
                 }
-                // Wisch nach unten (Oben wird zuerst abgedunkelt)
+                // Runter wischen (Hand zieht von oben nach unten) -> Vorheriger Tab (Links)
                 else if (deltaTop < -threshold && deltaBottom > -threshold * 0.5) {
                     lastActionTime = currentTime
                     currentActionState = GestureAction.SWIPE_DOWN
@@ -132,10 +132,10 @@ class AirGestureCore(private val context: Context) {
                 }
             }
 
-            // WICHTIG: Baseline passt sich NUR an, wenn KEINE Hand im Bild ist (verhindert das "Von-alleine-Bewegen")
+            // Baseline passt sich nur an, wenn keine Bewegung stattfindet
             if (!isMoving) {
-                baselineTop = baselineTop * 0.95 + avgTop * 0.05
-                baselineBottom = baselineBottom * 0.95 + avgBottom * 0.05
+                baselineTop = baselineTop * 0.93 + avgTop * 0.07
+                baselineBottom = baselineBottom * 0.93 + avgBottom * 0.07
             }
 
         } catch (e: Exception) {
