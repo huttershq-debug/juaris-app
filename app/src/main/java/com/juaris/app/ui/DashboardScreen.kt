@@ -1,8 +1,11 @@
 package com.juaris.app.ui
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -36,12 +39,10 @@ fun DashboardScreen() {
     // Pager für genau 10 App-Tabs (unterstützt Touch-Wischen nativ)
     val pagerState = rememberPagerState(pageCount = { 10 })
 
-    // 1. Zustand für den Schalter und Berechtigungs-Launcher oben im Dashboard definieren
+    // 1. Zustand für den Schalter (Gestensteuerung standardmäßig aus)
     var gestureEnabled by remember { mutableStateOf(false) }
-    val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val coroutineScope = rememberCoroutineScope()
 
+    // 2. Kamera-Berechtigungs-Launcher für Android Runtime Permissions
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -54,7 +55,7 @@ fun DashboardScreen() {
         }
     }
 
-    // 2. AirGestureCore nur starten, WENN gestureEnabled auf true steht!
+    // 3. AirGestureCore nur starten, WENN gestureEnabled auf true steht!
     if (gestureEnabled) {
         DisposableEffect(lifecycleOwner) {
             val gestureCore = AirGestureCore(context)
@@ -78,7 +79,6 @@ fun DashboardScreen() {
             }
         }
     }
-
 
     Column(
         modifier = Modifier
@@ -108,7 +108,23 @@ fun DashboardScreen() {
                 .fillMaxWidth()
                 .weight(1f)
         ) { page ->
-            TabContentScreen(tabIndex = page + 1)
+            // Wenn es Tab 9 ist (Index 8), übergeben wir den Schalter & Launcher an deine Gesten-UI!
+            if (page == 8) {
+                // Beispielhafter Aufruf deiner Gesten-Page (passe den Funktionsnamen an deine UI an)
+                AirGestureControlView(
+                    isGestureActive = gestureEnabled,
+                    onToggle = { activate ->
+                        if (activate) {
+                            cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+                        } else {
+                            gestureEnabled = false
+                            Toast.makeText(context, "Gesten-Steuerung deaktiviert.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                )
+            } else {
+                TabContentScreen(tabIndex = page + 1)
+            }
         }
     }
 }
@@ -148,6 +164,37 @@ fun TabContentScreen(tabIndex: Int) {
                     )
                 }
             }
+        }
+    }
+}
+
+// Falls du eine dedizierte Ansicht für den Gesten-Schalter in Tab 9 hast:
+@Composable
+fun AirGestureControlView(isGestureActive: Boolean, onToggle: (Boolean) -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF080808))
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Bediene Juaris mit vertikalen Wischgesten vor der Frontkamera",
+            color = Color.White,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(text = "Kamera-Scanner: ", color = Color.Gray)
+            Switch(
+                checked = isGestureActive,
+                onCheckedChange = { onToggle(it) }
+            )
         }
     }
 }
