@@ -8,19 +8,13 @@ android {
     namespace 'com.juaris.app'
     compileSdk 34
 
-    buildFeatures {
-        buildConfig = true 
-    }    
-
     defaultConfig {
         applicationId "com.juaris.app"
         minSdk 26
         targetSdk 34
         versionCode 1
         versionName "1.0"
-
         multiDexEnabled true
-        
     }
 
     buildTypes {
@@ -29,24 +23,29 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    
+   
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    
+   
     kotlinOptions {
         jvmTarget = '1.8'
     }
 
+    // Hier beide Features sauber zusammengefasst:
     buildFeatures {
-        compose true
+        buildConfig = true
+        compose = true
     }
 
     composeOptions {
         kotlinCompilerExtensionVersion '1.5.3'
     }
 }
+
+
+
 
 dependencies {
     implementation 'androidx.core:core-ktx:1.12.0'
