@@ -255,27 +255,35 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
     // Der Pager für echtes Wischen mit dem Finger auf dem Bildschirm
     val pagerState = rememberPagerState(pageCount = { tabs.size })
 
-    // Näherungssensor-Gestensteuerung (explizit typisiert, damit der Compiler nicht stolpert)
+    // Näherungssensor-Gestensteuerung (korrigiert mit onDebugInfo-Parameter)
     LaunchedEffect(gestureEnabled, lifecycleOwner) {
         if (gestureEnabled) {
-            airGestureCore.startGestureDetection(lifecycleOwner) { action ->
-                when (action) {
-                    AirGestureCore.GestureAction.SWIPE_DOWN, 
-                    AirGestureCore.GestureAction.SWIPE_UP -> {
-                        coroutineScope.launch {
-                            val nextTab = (pagerState.currentPage + 1) % tabs.size
-                            pagerState.animateScrollToPage(nextTab)
+            airGestureCore.startGestureDetection(
+                lifecycleOwner = lifecycleOwner,
+                onGestureDetected = { action ->
+                    when (action) {
+                        AirGestureCore.GestureAction.SWIPE_DOWN,
+                        AirGestureCore.GestureAction.SWIPE_UP -> {
+                            coroutineScope.launch {
+                                val nextTab = (pagerState.currentPage + 1) % tabs.size
+                                pagerState.animateScrollToPage(nextTab)
+                            }
+                        }
+                        AirGestureCore.GestureAction.NONE -> {
+                            // Nichts tun
                         }
                     }
-                    AirGestureCore.GestureAction.NONE -> {
-                        // Nichts tun
-                    }
+                },
+                onDebugInfo = { status ->
+                    // Nimmt den Live-Debugstatus entgegen (kann hier leer bleiben oder geloggt werden)
                 }
-            }
+            )
         } else {
             airGestureCore.stopGestureDetection()
         }
     }
+
+
    
     DisposableEffect(lifecycleOwner) {
         onDispose {
