@@ -232,21 +232,22 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JuarisMainDashboard(prefs: SharedPreferences) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val aiCore = remember { LocalAICore(context) }
     val airGestureCore = remember { AirGestureCore(context) }
-    val coroutineScope = rememberCoroutineScope()
-
+    var selectedTab by remember { mutableStateOf(0) }
+    
+    // Gesten standardmäßig auf FALSE für einen stabilen Play-Store-Review
+    var gestureEnabled by remember { mutableStateOf(false) }
+   
     val tabs = listOf(
         "Status", "Schutz", "Sperren", "Logs", "Clipboard",
         "Rechte", "Schwarm", "KI", "Gesten", "Info"
     )
-
-    // Pager für flüssiges Touch-Wischen und saubere Synchronisation
-    val pagerState = rememberPagerState(pageCount = { tabs.size })
 
     var hasCameraPermission by remember {
         mutableStateOf(
@@ -259,34 +260,26 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
     ) { isGranted ->
         hasCameraPermission = isGranted
         if (isGranted) {
-            Toast.makeText(context, "Air-Gestenkern voll aktiviert!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Kamera-Berechtigung erteilt.", Toast.LENGTH_SHORT).show()
         }
     }
 
-    LaunchedEffect(Unit) {
-        if (!hasCameraPermission) {
-            cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
-        }
-    }
-
-    // Kamera-Gesten direkt mit dem Pager verknüpfen
-    LaunchedEffect(hasCameraPermission, lifecycleOwner) {
-        if (hasCameraPermission) {
+    // Kamera-Gesten laufen NUR, wenn Berechtigung da UND der Nutzer sie aktiv eingeschaltet hat
+    LaunchedEffect(hasCameraPermission, gestureEnabled, lifecycleOwner) {
+        if (hasCameraPermission && gestureEnabled) {
             airGestureCore.startGestureDetection(lifecycleOwner) { action ->
-                coroutineScope.launch {
-                    when (action) {
-                        AirGestureCore.GestureAction.SWIPE_UP -> {
-                            val nextTab = (pagerState.currentPage + 1) % tabs.size
-                            pagerState.animateScrollToPage(nextTab)
-                        }
-                        AirGestureCore.GestureAction.SWIPE_DOWN -> {
-                            val prevTab = if (pagerState.currentPage - 1 < 0) tabs.size - 1 else pagerState.currentPage - 1
-                            pagerState.animateScrollToPage(prevTab)
-                        }
-                        AirGestureCore.GestureAction.NONE -> {}
+                when (action) {
+                    AirGestureCore.GestureAction.SWIPE_DOWN -> {
+                        selectedTab = (selectedTab + 1) % tabs.size
                     }
+                    AirGestureCore.GestureAction.SWIPE_UP -> {
+                        selectedTab = (selectedTab - 1 + tabs.size) % tabs.size
+                    }
+                    AirGestureCore.GestureAction.NONE -> {}
                 }
             }
+        } else {
+            airGestureCore.stopGestureDetection()
         }
     }
    
@@ -321,19 +314,15 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                     title = { Text("Juaris Security Suite (Production)") }
                 )
                 ScrollableTabRow(
-                    selectedTabIndex = pagerState.currentPage,
+                    selectedTabIndex = selectedTab,
                     edgePadding = 16.dp,
                     containerColor = MaterialTheme.colorScheme.surface,
                     contentColor = MaterialTheme.colorScheme.primary
                 ) {
                     tabs.forEachIndexed { index, title ->
                         Tab(
-                            selected = pagerState.currentPage == index,
-                            onClick = { 
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(index)
-                                }
-                            },
+                            selected = selectedTab == index,
+                            onClick = { selectedTab = index },
                             text = { Text(title) }
                         )
                     }
@@ -341,14 +330,8 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
             }
         }
     ) { innerPadding ->
-        // HorizontalPager ermöglicht echtes Touch-Wischen mit dem Finger auf dem Bildschirm!
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) { page ->
-            when (page) {
+        Box(modifier = Modifier.padding(innerPadding)) {
+            when (selectedTab) {
                 0 -> StatusPage(
                     logs = liveLogs,
                     onSimulateThreat = {
@@ -420,11 +403,20 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                 5 -> PermissionsAuditPage()
                 6 -> SwarmMeshPage()
                 7 -> AIPage(aiCore = aiCore, logs = liveLogs)
-                8 -> AirGesturePage(airGestureCore = airGestureCore) { forward ->
-                    coroutineScope.launch {
-                        val target = if (forward) (pagerState.currentPage + 1) % tabs.size
-                        else if (pagerState.currentPage - 1 < 0) tabs.size - 1 else pagerState.currentPage - 1
-                        pagerState.animateScrollToPage(target)
+                8 -> AirGesturePage(
+                    airGestureCore = airGestureCore,
+                    isGestureActive = gestureEnabled,
+                    onToggleGesture = { newState ->
+                        if (newState && !hasCameraPermission) {
+                            cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+                        }
+                        gestureEnabled = newState
+                    }
+                ) { forward ->
+                    selectedTab = if (forward) {
+                        (selectedTab + 1) % tabs.size
+                    } else {
+                        if (selectedTab - 1 < 0) tabs.size - 1 else selectedTab - 1
                     }
                 }
                 9 -> PrivacyAndLegalContent()
@@ -432,6 +424,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
         }
     }
 }
+
 
 
 @Composable
