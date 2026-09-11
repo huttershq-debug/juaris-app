@@ -36,31 +36,49 @@ fun DashboardScreen() {
     // Pager für genau 10 App-Tabs (unterstützt Touch-Wischen nativ)
     val pagerState = rememberPagerState(pageCount = { 10 })
 
-    // AirGestureCore binden
-    DisposableEffect(lifecycleOwner) {
-        val gestureCore = AirGestureCore(context)
-        gestureCore.startGestureDetection(lifecycleOwner) { action ->
-            coroutineScope.launch {
-                when (action) {
-                    AirGestureCore.GestureAction.SWIPE_UP -> {
-                        // Rauf wischen -> Nächster Tab (Rechts)
-                        val nextTab = (pagerState.currentPage + 1) % 10
-                        pagerState.animateScrollToPage(nextTab)
-                    }
-                    AirGestureCore.GestureAction.SWIPE_DOWN -> {
-                        // Runter wischen -> Vorheriger Tab (Links)
-                        val prevTab = if (pagerState.currentPage - 1 < 0) 9 else pagerState.currentPage - 1
-                        pagerState.animateScrollToPage(prevTab)
-                    }
-                    AirGestureCore.GestureAction.NONE -> {}
-                }
-            }
-        }
+    // 1. Zustand für den Schalter und Berechtigungs-Launcher oben im Dashboard definieren
+    var gestureEnabled by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val coroutineScope = rememberCoroutineScope()
 
-        onDispose {
-            gestureCore.stopGestureDetection()
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            gestureEnabled = true
+            Toast.makeText(context, "Kamera-Berechtigung erteilt! Gesten aktiv.", Toast.LENGTH_SHORT).show()
+        } else {
+            gestureEnabled = false
+            Toast.makeText(context, "Kamera-Berechtigung für Gesten erforderlich!", Toast.LENGTH_LONG).show()
         }
     }
+
+    // 2. AirGestureCore nur starten, WENN gestureEnabled auf true steht!
+    if (gestureEnabled) {
+        DisposableEffect(lifecycleOwner) {
+            val gestureCore = AirGestureCore(context)
+            gestureCore.startGestureDetection(lifecycleOwner) { action ->
+                coroutineScope.launch {
+                    when (action) {
+                        AirGestureCore.GestureAction.SWIPE_UP -> {
+                            val nextTab = (pagerState.currentPage + 1) % 10
+                            pagerState.animateScrollToPage(nextTab)
+                        }
+                        AirGestureCore.GestureAction.SWIPE_DOWN -> {
+                            val prevTab = if (pagerState.currentPage - 1 < 0) 9 else pagerState.currentPage - 1
+                            pagerState.animateScrollToPage(prevTab)
+                        }
+                        AirGestureCore.GestureAction.NONE -> {}
+                    }
+                }
+            }
+            onDispose {
+                gestureCore.stopGestureDetection()
+            }
+        }
+    }
+
 
     Column(
         modifier = Modifier
