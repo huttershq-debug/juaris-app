@@ -57,7 +57,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
        
-        // Verhindert das Abdunkeln/Ausschalten des Bildschirms beim Gesten-Steuern:
         window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         try {
@@ -93,7 +92,6 @@ class MainActivity : ComponentActivity() {
             var showIntro by remember { mutableStateOf(true) }
             var isLoggedIn by remember { mutableStateOf(securePrefs.getBoolean("is_logged_in", false)) }
 
-            // Hologramm läuft vollautomatisch für 3 Sekunden ab
             LaunchedEffect(Unit) {
                 delay(3000L)
                 showIntro = false
@@ -163,8 +161,7 @@ fun WelcomeScreen() {
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(48.dp))
-            
-            // Dezenter Ladeindikator für den automatischen Übergang
+           
             CircularProgressIndicator(
                 color = NeonGiftgruen,
                 modifier = Modifier.size(36.dp)
@@ -248,7 +245,6 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
         "Rechte", "Schwarm", "KI", "Gesten", "Info"
     )
 
-    // Automatische Kamera-Berechtigungs-Prüfung und Anforderung beim Start
     var hasCameraPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED
@@ -270,7 +266,6 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
         }
     }
 
-     // Autonomer Start – läuft stabil durch alle Tabs
     LaunchedEffect(hasCameraPermission, lifecycleOwner) {
         if (hasCameraPermission) {
             airGestureCore.startGestureDetection(lifecycleOwner) { action ->
@@ -286,7 +281,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
             }
         }
     }
-    
+   
     DisposableEffect(lifecycleOwner) {
         onDispose {
             airGestureCore.stopGestureDetection()
@@ -419,7 +414,6 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
         }
     }
 }
-
 
 @Composable
 fun StatusPage(
@@ -847,7 +841,7 @@ fun PrivacyAndLegalContent() {
                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://huttershq-debug.github.io/juaris-app/privacy.md"))
                        context.startActivity(intent)
                    } catch (e: Exception) {
-                        // Fängt den Fehler ab, falls kein Browser verfügbar ist
+                       // Fehler abfangen
                    }
               },
               modifier = Modifier.fillMaxWidth(),
@@ -868,5 +862,4 @@ fun PrivacyAndLegalContent() {
         }
     }
 }
-
 
