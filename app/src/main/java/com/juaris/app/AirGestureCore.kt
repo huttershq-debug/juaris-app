@@ -5,6 +5,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.util.Log
 import androidx.lifecycle.LifecycleOwner
 
 class AirGestureCore(private val context: Context) : SensorEventListener {
@@ -19,18 +20,31 @@ class AirGestureCore(private val context: Context) : SensorEventListener {
 
     private var lastTriggerTime = 0L
 
+    init {
+        if (proximitySensor == null) {
+            Log.e("AirGestureCore", "❌ FEHLER: Kein Proximity-Sensor auf diesem Gerät gefunden!")
+        } else {
+            Log.d("AirGestureCore", "✅ Proximity-Sensor gefunden. Max Range: ${proximitySensor.maximumRange}")
+        }
+    }
+
     fun startGestureDetection(lifecycleOwner: LifecycleOwner, onGestureDetected: (GestureAction) -> Unit) {
         this.listener = onGestureDetected
-        proximitySensor?.let { sensor ->
-            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)
+        if (proximitySensor != null) {
+            // WICHTIG: SENSOR_DELAY_FASTEST verwenden, damit schnelle Bewegungen nicht verschluckt werden
+            val success = sensorManager.registerListener(this, proximitySensor, SensorManager.SENSOR_DELAY_FASTEST)
+            Log.d("AirGestureCore", "Sensor-Registrierung erfolgreich gestartet: $success")
+        } else {
+            Log.e("AirGestureCore", "❌ Kann Gestenerkennung nicht starten, da Sensor null ist.")
         }
     }
 
     fun stopGestureDetection() {
         try {
             sensorManager.unregisterListener(this)
+            Log.d("AirGestureCore", "Sensor-Listener erfolgreich unregistriert.")
         } catch (e: Exception) {
-            // Ignorieren
+            Log.e("AirGestureCore", "Fehler beim Unregistrieren: ${e.message}")
         }
         listener = null
     }
@@ -38,15 +52,14 @@ class AirGestureCore(private val context: Context) : SensorEventListener {
     override fun onSensorChanged(event: SensorEvent?) {
         if (event?.sensor?.type == Sensor.TYPE_PROXIMITY) {
             val distance = event.values[0]
-            val maxRange = proximitySensor?.maximumRange ?: 5.0f
-            
-            // Wenn die Hand nah am oberen Rand des Handys ist (Entfernung < Max-Reichweite)
-            if (distance < maxRange) {
+            Log.d("AirGestureCore", "📡 Sensor Event empfangen! Aktueller Abstand: $distance")
+
+            // Auf dem Galaxy S23: 0.0f bedeutet Hand/Finger ist direkt am oberen Rand
+            if (distance == 0.0f || distance < (proximitySensor?.maximumRange ?: 5.0f)) {
                 val currentTime = System.currentTimeMillis()
-                // 800ms Cooldown, damit ein Winken nicht direkt 5 Tabs auf einmal weiterschaltet
-                if (currentTime - lastTriggerTime > 800) {
+                if (currentTime - lastTriggerTime > 600) { // 600ms Cooldown
                     lastTriggerTime = currentTime
-                    // Löst den Tab-Wechsel aus
+                    Log.d("AirGestureCore", "🎯 GESTE ERKANNT! Liefere SWIPE_DOWN an UI aus.")
                     listener?.invoke(GestureAction.SWIPE_DOWN)
                 }
             }
@@ -57,5 +70,4 @@ class AirGestureCore(private val context: Context) : SensorEventListener {
         // Nicht benötigt
     }
 }
-
 
