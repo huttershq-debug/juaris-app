@@ -1,73 +1,111 @@
 package com.juaris.app
 
 import android.content.Context
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
 import android.util.Log
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
-class AirGestureCore(private val context: Context) : SensorEventListener {
+class AirGestureCore(private val context: Context) {
 
     enum class GestureAction {
         NONE, SWIPE_UP, SWIPE_DOWN
     }
 
-    private val sensorManager: SensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-    private val proximitySensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
     private var listener: ((GestureAction) -> Unit)? = null
-
+    private var cameraProvider: ProcessCameraProvider? = null
+    private val cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
+    
     private var lastTriggerTime = 0L
-
-    init {
-        if (proximitySensor == null) {
-            Log.e("AirGestureCore", "❌ FEHLER: Kein Proximity-Sensor auf diesem Gerät gefunden!")
-        } else {
-            Log.d("AirGestureCore", "✅ Proximity-Sensor gefunden. Max Range: ${proximitySensor.maximumRange}")
-        }
-    }
+    private var lastAverageBrightness = -1.0
 
     fun startGestureDetection(lifecycleOwner: LifecycleOwner, onGestureDetected: (GestureAction) -> Unit) {
         this.listener = onGestureDetected
-        if (proximitySensor != null) {
-            // WICHTIG: SENSOR_DELAY_FASTEST verwenden, damit schnelle Bewegungen nicht verschluckt werden
-            val success = sensorManager.registerListener(this, proximitySensor, SensorManager.SENSOR_DELAY_FASTEST)
-            Log.d("AirGestureCore", "Sensor-Registrierung erfolgreich gestartet: $success")
-        } else {
-            Log.e("AirGestureCore", "❌ Kann Gestenerkennung nicht starten, da Sensor null ist.")
-        }
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+
+        cameraProviderFuture.addListener({
+            try {
+                cameraProvider = cameraProviderFuture.get()
+                bindCameraUseCases(lifecycleOwner)
+                Log.d("AirGestureCore", "✅ CameraX Frontkamera-Scanner erfolgreich gestartet.")
+            } catch (e: Exception) {
+                Log.e("AirGestureCore", "❌ Fehler beim Starten von CameraX: ${e.message}")
+            }
+        }, ContextCompat.getMainExecutor(context))
     }
 
-    fun stopGestureDetection() {
+    private fun bindCameraUseCases(lifecycleOwner: LifecycleOwner) {
+        val cameraProvider = cameraProvider ?: return
+
+        // Frontkamera anfordern
+        val cameraSelector = CameraSelector.Builder()
+            .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
+            .build()
+
+        // Bildanalyse-Stream einrichten (leichtgewichtiger Stream für Performance)
+        val imageAnalysis = ImageAnalysis.Builder()
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .build()
+
+        imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
+            processImageProxy(imageProxy)
+        }
+
         try {
-            sensorManager.unregisterListener(this)
-            Log.d("AirGestureCore", "Sensor-Listener erfolgreich unregistriert.")
+            cameraProvider.unbindAll()
+            cameraProvider.bindToLifecycle(
+                lifecycleOwner,
+                cameraSelector,
+                imageAnalysis
+            )
         } catch (e: Exception) {
-            Log.e("AirGestureCore", "Fehler beim Unregistrieren: ${e.message}")
+            Log.e("AirGestureCore", "❌ Bindung an Lifecycle fehlgeschlagen: ${e.message}")
         }
-        listener = null
     }
 
-    override fun onSensorChanged(event: SensorEvent?) {
-        if (event?.sensor?.type == Sensor.TYPE_PROXIMITY) {
-            val distance = event.values[0]
-            Log.d("AirGestureCore", "📡 Sensor Event empfangen! Aktueller Abstand: $distance")
+    private fun processImageProxy(imageProxy: ImageProxy) {
+        val buffer = imageProxy.planes[0].buffer
+        val data = ByteArray(buffer.remaining())
+        buffer.get(data)
 
-            // Auf dem Galaxy S23: 0.0f bedeutet Hand/Finger ist direkt am oberen Rand
-            if (distance == 0.0f || distance < (proximitySensor?.maximumRange ?: 5.0f)) {
+        // Durchschnittliche Helligkeit (Luminanz) des Kamerabildes berechnen
+        var sum = 0L
+        for (byte in data) {
+            sum += (byte.toInt() and 0xFF)
+        }
+        val averageBrightness = sum.toDouble() / data.size
+
+        if (lastAverageBrightness != -1.0) {
+            val diff = lastAverageBrightness - averageBrightness
+            
+            // Wenn es plötzlich deutlich dunkler wird (Hand wird vor die Frontkamera geführt)
+            if (diff > 35.0) { 
                 val currentTime = System.currentTimeMillis()
-                if (currentTime - lastTriggerTime > 600) { // 600ms Cooldown
+                if (currentTime - lastTriggerTime > 800) { // 800ms Cooldown gegen Mehrfach-Trigger
                     lastTriggerTime = currentTime
-                    Log.d("AirGestureCore", "🎯 GESTE ERKANNT! Liefere SWIPE_DOWN an UI aus.")
+                    Log.d("AirGestureCore", "🎯 GESTE ERKANNT! (Luminanz-Drop: $diff)")
                     listener?.invoke(GestureAction.SWIPE_DOWN)
                 }
             }
         }
+        lastAverageBrightness = averageBrightness
+        imageProxy.close() // Wichtig, um den Stream für das nächste Bild freizugeben
     }
 
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        // Nicht benötigt
+    fun stopGestureDetection() {
+        try {
+            cameraProvider?.unbindAll()
+            Log.d("AirGestureCore", "🛑 CameraX Scanner gestoppt.")
+        } catch (e: Exception) {
+            Log.e("AirGestureCore", "Fehler beim Stoppen: ${e.message}")
+        }
+        listener = null
     }
 }
+
 
