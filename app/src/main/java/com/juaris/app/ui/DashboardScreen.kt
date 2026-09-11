@@ -23,6 +23,9 @@ import androidx.compose.ui.unit.sp
 import com.juaris.app.AirGestureCore
 import kotlinx.coroutines.launch
 
+// Globale Definition für den DashboardScreen
+val NeonGiftgruen = Color(0xFF00FF66)
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DashboardScreen() {
