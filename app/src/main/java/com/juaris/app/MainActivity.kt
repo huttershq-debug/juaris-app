@@ -1,8 +1,8 @@
 @file:OptIn(
-   androidx.compose.material3.ExperimentalMaterial3Api::class
-   androidx.compose.foundation.ExperimantalFoundationApi::class
+    androidx.compose.material3.ExperimentalMaterial3Api::class,
+    androidx.compose.foundation.ExperimentalFoundationApi::class
 )
-   
+  
 package com.juaris.app
 
 import android.content.Context
