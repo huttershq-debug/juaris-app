@@ -11,7 +11,11 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+
+// Zentrale Definition für diese Datei, um "Unresolved reference" zu verhindern
+val NeonGiftgruen = Color(0xFF00FF66)
 
 @Composable
 fun TacticalPulseCard(
@@ -19,8 +23,6 @@ fun TacticalPulseCard(
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    val borderColor = NeonGiftgruen
-
     val finalModifier = if (onClick != null) {
         modifier
             .fillMaxWidth()
@@ -33,7 +35,7 @@ fun TacticalPulseCard(
         modifier = finalModifier,
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        border = BorderStroke(1.dp, borderColor)
+        border = BorderStroke(1.dp, NeonGiftgruen)
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -41,5 +43,4 @@ fun TacticalPulseCard(
         )
     }
 }
-
 
