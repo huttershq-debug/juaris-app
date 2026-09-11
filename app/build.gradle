@@ -8,6 +8,12 @@ android {
     namespace 'com.juaris.app'
     compileSdk 35
 
+    sourceSets {
+        main {
+            res.srcDirs = ['src/main/res', 'res']
+        }
+    }   
+
     defaultConfig {
         applicationId "com.juaris.app"
         minSdk 26
