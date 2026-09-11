@@ -131,6 +131,7 @@ fun JuarisDashboardScreen() {
     }
 }
 
+/ Korrigierter Ausschnitt für TabContentScreen in DashboardActivity.kt
 @Composable
 fun TabContentScreen(tabIndex: Int) {
     val auditLogs = listOf(
@@ -147,7 +148,7 @@ fun TabContentScreen(tabIndex: Int) {
     ) {
         Text(
             text = "Sicherheits-Tab 0$tabIndex",
-            fontSize = ار.sp.coerceAtLeast(18.sp), // Standard 18sp
+            fontSize = 18.sp, // Korrigiert von ار.sp
             fontWeight = FontWeight.Bold,
             color = NeonGiftgruen
         )
@@ -169,6 +170,8 @@ fun TabContentScreen(tabIndex: Int) {
         }
     }
 }
+
+
 
 @Composable
 fun TacticalPulseCard(content: @Composable () -> Unit) {
