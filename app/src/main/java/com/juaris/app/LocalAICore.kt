@@ -49,7 +49,7 @@ fun AIPage(aiCore: LocalAICore, logs: List<SecurityLogEntity>) {
             TacticalPulseCard {
                 Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Kognitive Einblicke", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                    Text(aiInsights, style = MaterialTheme.typography.bodyMedium, color = Color(0xFFB0BEC5))
+                    Text(aiInsights.orEmpty(), style = MaterialTheme.typography.bodyMedium, color = Color(0xFFB0BEC5))
                 }
             }
         }
