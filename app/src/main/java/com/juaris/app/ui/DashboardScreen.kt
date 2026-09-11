@@ -1,6 +1,5 @@
 package com.juaris.app.ui
 
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,7 +15,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ContextLocal
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
@@ -71,17 +69,17 @@ fun JuarisDashboardScreen() {
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
 
-    // Pager für genau 10 App-Tabs (unterstützt Touch-Wischen von Haus aus nativ)
+    // Pager für genau 10 App-Tabs (unterstützt Touch-Wischen nativ)
     val pagerState = rememberPagerState(pageCount = { 10 })
 
-    // AirGestureCore initialisieren und an den Lifecycle binden
+    // AirGestureCore binden
     DisposableEffect(lifecycleOwner) {
         val gestureCore = AirGestureCore(context)
         gestureCore.startGestureDetection(lifecycleOwner) { action ->
             coroutineScope.launch {
                 when (action) {
                     AirGestureCore.GestureAction.SWIPE_UP -> {
-                        // Rauf wischen -> Nächster Tab (Rechts) mit Modulo-Sicherung für 10 Tabs
+                        // Rauf wischen -> Nächster Tab (Rechts)
                         val nextTab = (pagerState.currentPage + 1) % 10
                         pagerState.animateScrollToPage(nextTab)
                     }
@@ -105,16 +103,14 @@ fun JuarisDashboardScreen() {
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // Header
         Text(
             text = "Juaris Security Command Center",
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             color = NeonGiftgruen
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
-        // Tab-Indikator Anzeige (Zeigt an, auf welchem der 10 Tabs man sich befindet)
         Text(
             text = "Aktiver Tab: ${pagerState.currentPage + 1} / 10",
             fontSize = 14.sp,
@@ -123,7 +119,7 @@ fun JuarisDashboardScreen() {
         
         Spacer(modifier = Modifier.height(12.dp))
 
-        // HorizontalPager für die 10 App-Tabs (Beinhaltet Touch-Bedienung + Kamera-Gesten)
+        // HorizontalPager für die 10 Tabs (Touch + Gesten kombiniert)
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
@@ -151,7 +147,7 @@ fun TabContentScreen(tabIndex: Int) {
     ) {
         Text(
             text = "Sicherheits-Tab 0$tabIndex",
-            fontSize = 18.sp,
+            fontSize = ار.sp.coerceAtLeast(18.sp), // Standard 18sp
             fontWeight = FontWeight.Bold,
             color = NeonGiftgruen
         )
@@ -162,19 +158,26 @@ fun TabContentScreen(tabIndex: Int) {
             modifier = Modifier.fillMaxSize()
         ) {
             items(auditLogs) { log ->
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF121212)),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Box(modifier = Modifier.padding(12.dp)) {
-                        Text(
-                            text = log,
-                            color = Color(0xFFB0BEC5),
-                            fontSize = 12.sp
-                        )
-                    }
+                TacticalPulseCard {
+                    Text(
+                        text = log,
+                        color = Color(0xFFB0BEC5),
+                        fontSize = 12.sp
+                    )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun TacticalPulseCard(content: @Composable () -> Unit) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF121212)),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Box(modifier = Modifier.padding(12.dp)) {
+            content()
         }
     }
 }
