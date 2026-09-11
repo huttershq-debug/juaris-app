@@ -7,7 +7,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.juaris.app.AirGestureCore
 
@@ -15,6 +14,7 @@ import com.juaris.app.AirGestureCore
 fun AirGesturePage(
     airGestureCore: AirGestureCore,
     isGestureActive: Boolean,
+    statusText: String, // <--- 1. Parameter für den Live-Status hinzugefügt
     onToggleGesture: (Boolean) -> Unit,
     onTabSwitch: (Boolean) -> Unit
 ) {
@@ -42,7 +42,13 @@ fun AirGesturePage(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text("Gesten-Steuerung aktivieren", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                            Text(if (isGestureActive) "Kamera-Scanner aktiv" else "Gesten pausiert (Standard)", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                            Spacer(modifier = Modifier.height(2.dp))
+                            // 2. Hier wird nun der echte Live-Status aus der Pipeline angezeigt:
+                            Text(
+                                text = statusText,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (statusText.contains("Fehler") || statusText.contains("verweigert")) Color(0xFFFF3333) else Color.Gray
+                            )
                         }
                         Switch(
                             checked = isGestureActive,
@@ -62,4 +68,5 @@ fun AirGesturePage(
         }
     }
 }
+
 
