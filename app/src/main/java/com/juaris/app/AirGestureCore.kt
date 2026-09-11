@@ -15,6 +15,7 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
     private val analysisExecutor = Executors.newSingleThreadExecutor()
 
+    // Einzig notwendige Aktion: Jede Handbewegung triggert exakt einen Schritt
     enum class GestureAction {
         NONE, TRIGGERED
     }
@@ -49,7 +50,7 @@ class AirGestureCore(private val context: Context) {
             .build()
 
         var lastLuminance = 0.0
-        var coolDownFrames = 0
+        var coolDownFrames = 0 // Sperrzeit auf ~1.2 - 1.3 Sekunden angepasst (40 Frames)
 
         imageAnalysis.setAnalyzer(analysisExecutor) { imageProxy ->
             try {
@@ -64,10 +65,10 @@ class AirGestureCore(private val context: Context) {
                     val delta = currentLuminance - lastLuminance
                     onDebugInfo("Sensor aktiv | Delta: %.1f".format(delta))
 
-                    // Egal ob positive oder negative Helligkeitsänderung (Schatten / Wisch)
+                    // Löst bei jeder starken Helligkeitsänderung (Schattenwurf vor Linse) aus
                     if (abs(delta) > 12.0) {
                         onGestureDetected(GestureAction.TRIGGERED)
-                        coolDownFrames = 50 // Sperrt kurz, damit es exakt 1 Tab weiterschaltet
+                        coolDownFrames = 40 // ca. 1,2 bis 1,3 Sekunden Pause
                     }
                 }
                 lastLuminance = currentLuminance
