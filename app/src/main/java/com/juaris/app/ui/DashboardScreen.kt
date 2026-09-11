@@ -116,7 +116,7 @@ fun JuarisDashboardScreen() {
             fontSize = 14.sp,
             color = Color.Gray
         )
-        
+       
         Spacer(modifier = Modifier.height(12.dp))
 
         // HorizontalPager für die 10 Tabs (Touch + Gesten kombiniert)
@@ -131,7 +131,6 @@ fun JuarisDashboardScreen() {
     }
 }
 
-/ Korrigierter Ausschnitt für TabContentScreen in DashboardActivity.kt
 @Composable
 fun TabContentScreen(tabIndex: Int) {
     val auditLogs = listOf(
@@ -148,7 +147,7 @@ fun TabContentScreen(tabIndex: Int) {
     ) {
         Text(
             text = "Sicherheits-Tab 0$tabIndex",
-            fontSize = 18.sp, // Korrigiert von ار.sp
+            fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             color = NeonGiftgruen
         )
@@ -171,8 +170,6 @@ fun TabContentScreen(tabIndex: Int) {
     }
 }
 
-
-
 @Composable
 fun TacticalPulseCard(content: @Composable () -> Unit) {
     Card(
@@ -184,5 +181,4 @@ fun TacticalPulseCard(content: @Composable () -> Unit) {
         }
     }
 }
-
 
