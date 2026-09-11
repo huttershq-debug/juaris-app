@@ -1,25 +1,25 @@
-package com.juaris.app
+package com.juaris.app // Passe deinen Package-Namen hier an
 
 import android.content.Context
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
-import java.util.concurrent.ExecutorService
+import androidx.lifecycle.LifecycleOwner
+import java.nio.ByteBuffer
 import java.util.concurrent.Executors
-import kotlin.math.abs
 
 class AirGestureCore(private val context: Context) {
 
-    private var cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     private var cameraProvider: ProcessCameraProvider? = null
+    private val analysisExecutor = Executors.newSingleThreadExecutor()
 
     enum class GestureAction {
-        SWIPE_UP, SWIPE_DOWN, NONE
+        NONE, SWIPE_UP, SWIPE_DOWN
     }
 
     fun startGestureDetection(
-        lifecycleOwner: androidx.lifecycle.LifecycleOwner,
+        lifecycleOwner: LifecycleOwner,
         onGestureDetected: (GestureAction) -> Unit,
         onDebugInfo: (String) -> Unit
     ) {
@@ -28,107 +28,93 @@ class AirGestureCore(private val context: Context) {
         cameraProviderFuture.addListener({
             try {
                 cameraProvider = cameraProviderFuture.get()
-
-                val imageAnalysis = ImageAnalysis.Builder()
-                    .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                    .build()
-
-                var previousPixels: IntArray? = null
-                var coolDown = 0
-
-                imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                    try {
-                        val buffer = imageProxy.planes[0].buffer
-                        val width = imageProxy.width
-                        val height = imageProxy.height
-                        val rowStride = imageProxy.planes[0].rowStride
-
-                        val step = 16
-                        val sampledWidth = width / step
-                        val sampledHeight = height / step
-                        val currentPixels = IntArray(sampledWidth * sampledHeight)
-                        var index = 0
-
-                        buffer.rewind()
-                        for (y in 0 until height step step) {
-                            for (x in 0 until width step step) {
-                                val byteIndex = y * rowStride + x * 4
-                                if (byteIndex + 2 < buffer.capacity()) {
-                                    val r = buffer.get(byteIndex).toInt() and 0xFF
-                                    val g = buffer.get(byteIndex + 1).toInt() and 0xFF
-                                    val b = buffer.get(byteIndex + 2).toInt() and 0xFF
-                                    currentPixels[index++] = (r + g + b) / 3
-                                }
-                            }
-                        }
-
-                        // Lokale Kopie sichern, um den Kotlin Smart-Cast Fehler zu umgehen
-                        val localPrev = previousPixels
-
-                        if (coolDown > 0) {
-                            coolDown--
-                        } else if (localPrev != null && currentPixels.size == localPrev.size) {
-                            var changedCount = 0
-                            var upperChange = 0
-                            var lowerChange = 0
-
-                            for (i in currentPixels.indices) {
-                                val diff = abs(currentPixels[i] - localPrev[i])
-                                if (diff > 35) {
-                                    changedCount++
-                                    val yCoord = i / sampledWidth
-                                    if (yCoord < sampledHeight / 2) {
-                                        upperChange++
-                                    } else {
-                                        lowerChange++
-                                    }
-                                }
-                            }
-
-                            if (changedCount > currentPixels.size * 0.06) {
-                                if (upperChange > lowerChange * 1.3) {
-                                    onDebugInfo("Geste erkannt: RUNTER (Swipe Down)")
-                                    onGestureDetected(GestureAction.SWIPE_DOWN)
-                                    coolDown = 25
-                                } else if (lowerChange > upperChange * 1.3) {
-                                    onDebugInfo("Geste erkannt: HOCH (Swipe Up)")
-                                    onGestureDetected(GestureAction.SWIPE_UP)
-                                    coolDown = 25
-                                }
-                            } else {
-                                onDebugInfo("Kamera aktiv (${changedCount} Pixel-Änderungen)")
-                            }
-                        }
-
-                        previousPixels = currentPixels
-                    } catch (e: Exception) {
-                        onDebugInfo("Analyzer-Fehler: ${e.localizedMessage}")
-                    } finally {
-                        imageProxy.close()
-                    }
-                }
-
-                cameraProvider?.unbindAll()
-                cameraProvider?.bindToLifecycle(
-                    lifecycleOwner,
-                    CameraSelector.DEFAULT_FRONT_CAMERA,
-                    imageAnalysis
-                )
-                onDebugInfo("Kamera läuft - Wische vor der Linse!")
+                bindCameraUseCases(lifecycleOwner, onGestureDetected, onDebugInfo)
             } catch (e: Exception) {
-                onDebugInfo("Kamera-Startfehler: ${e.localizedMessage}")
+                onDebugInfo("Hardware-Fehler: ${e.localizedMessage}")
             }
         }, ContextCompat.getMainExecutor(context))
+    }
+
+    private fun bindCameraUseCases(
+        lifecycleOwner: LifecycleOwner,
+        onGestureDetected: (GestureAction) -> Unit,
+        onDebugInfo: (String) -> Unit
+    ) {
+        val cameraProvider = cameraProvider ?: return
+
+        // Frontkamera erzwingen
+        val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+
+        val imageAnalysis = ImageAnalysis.Builder()
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .build()
+
+        var lastLuminance = 0.0
+
+        imageAnalysis.setAnalyzer(analysisExecutor) { imageProxy ->
+            try {
+                val buffer = imageProxy.planes[0].buffer
+                val data = byteBufferToByteArray(buffer)
+                val currentLuminance = calculateAverageLuminance(data)
+
+                if (lastLuminance > 0.0) {
+                    val delta = currentLuminance - lastLuminance
+                    onDebugInfo("Sensor aktiv | Delta: %.1f".format(delta))
+
+                    // Schwellenwert für Handbewegung / Schattenwurf vor der Linse
+                    if (delta > 12.0) {
+                        onGestureDetected(GestureAction.SWIPE_UP)
+                    } else if (delta < -12.0) {
+                        onGestureDetected(GestureAction.SWIPE_DOWN)
+                    }
+                }
+                lastLuminance = currentLuminance
+            } catch (e: Exception) {
+                onDebugInfo("Analyzer-Fehler: ${e.message}")
+            } finally {
+                // CRITICAL: ImageProxy muss *immer* geschlossen werden, sonst stoppt der Stream sofort!
+                imageProxy.close()
+            }
+        }
+
+        try {
+            cameraProvider.unbindAll()
+            cameraProvider.bindToLifecycle(
+                lifecycleOwner,
+                cameraSelector,
+                imageAnalysis
+            )
+            onDebugInfo("Kamera verbunden - Winke vor die Linse!")
+        } catch (e: Exception) {
+            onDebugInfo("Kamera-Bindung fehlgeschlagen: ${e.message}")
+        }
     }
 
     fun stopGestureDetection() {
         try {
             cameraProvider?.unbindAll()
-            cameraExecutor.shutdown()
         } catch (e: Exception) {
-            // Ignorieren
+            // Ignorieren beim Herunterfahren
         }
+    }
+
+    private fun byteBufferToByteArray(buffer: ByteBuffer): ByteArray {
+        buffer.rewind()
+        val data = ByteArray(buffer.remaining())
+        buffer.get(data)
+        return data
+    }
+
+    private fun calculateAverageLuminance(data: ByteArray): Double {
+        var sum = 0L
+        // Performance-Optimierung: Nur jeden 50. Pixel abtasten, reicht völlig für Helligkeitswechsel
+        val step = 50
+        var count = 0
+        for (i in data.indices step step) {
+            sum += (data[i].toInt() and 0xFF)
+            count++
+        }
+        return if (count > 0) sum.toDouble() / count else 0.0
     }
 }
 
