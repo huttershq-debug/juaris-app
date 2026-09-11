@@ -22,7 +22,7 @@ class AirGestureCore(private val context: Context) : SensorEventListener {
     fun startGestureDetection(lifecycleOwner: LifecycleOwner, onGestureDetected: (GestureAction) -> Unit) {
         this.listener = onGestureDetected
         proximitySensor?.let { sensor ->
-            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)
         }
     }
 
