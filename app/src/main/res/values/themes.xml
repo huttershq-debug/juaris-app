@@ -1,0 +1,9 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Das Haupt-Theme für die Juaris Security Suite -->
+    <style name="Theme.Juaris" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Primäre und sekundäre Farben für das Design -->
+        <item name="colorPrimary">@android:color/holo_blue_dark</item>
+        <item name="colorSecondary">@android:color/holo_green_dark</item>
+        <item name="android:windowBackground">@android:color/white</item>
+    </style>
+</resources>
