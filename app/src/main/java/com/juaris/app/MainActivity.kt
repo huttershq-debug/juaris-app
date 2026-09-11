@@ -255,21 +255,20 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
 
     val pagerState = rememberPagerState(pageCount = { tabs.size })
 
-    // Kamera-Gestenerkennung mit Live-Status-Übertragung
+      // Kamera-Gestenerkennung: Schaltet garantiert nur 1 Tab weiter und wartet, bis die Animation fertig ist
     LaunchedEffect(gestureEnabled, lifecycleOwner) {
         if (gestureEnabled) {
             airGestureCore.startGestureDetection(
                 lifecycleOwner = lifecycleOwner,
                 onGestureDetected = { action ->
-                    when (action) {
-                        AirGestureCore.GestureAction.SWIPE_DOWN,
-                        AirGestureCore.GestureAction.SWIPE_UP -> {
+                    if (action == AirGestureCore.GestureAction.TRIGGERED) {
+                        // ABSOLUTER SCHUTZ: Nur auslösen, wenn der Pager gerade NICHT scrollt!
+                        if (!pagerState.isScrollInProgress) {
                             coroutineScope.launch {
                                 val nextTab = (pagerState.currentPage + 1) % tabs.size
                                 pagerState.animateScrollToPage(nextTab)
                             }
                         }
-                        AirGestureCore.GestureAction.NONE -> {}
                     }
                 },
                 onDebugInfo = { status ->
