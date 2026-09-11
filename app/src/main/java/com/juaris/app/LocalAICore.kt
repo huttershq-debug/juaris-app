@@ -1,4 +1,4 @@
-package com.juaris.app.ui
+package com.juaris.app
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
