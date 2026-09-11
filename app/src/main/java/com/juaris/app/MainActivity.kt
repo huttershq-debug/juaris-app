@@ -1,11 +1,14 @@
-@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@file:OptIn(
+    androidx.compose.material3.ExperimentalMaterial3Api::class,
+    androidx.compose.foundation.ExperimenatlFoundationApi::class
+)
 package com.juaris.app
 
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPageSate
+import androidx.compose.foundation.pager.rememberPageState
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
