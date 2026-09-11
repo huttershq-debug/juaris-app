@@ -1,0 +1,28 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    
+    <!-- Dark background with a hint of blue -->
+    <path
+        android:fillColor="#080E1A"
+        android:pathData="M0,0h100v100h-100z"/>
+        
+    <!-- Outer shield shape in NeonGiftgruen -->
+    <path
+        android:fillColor="#39FF14"
+        android:pathData="M50,5L85,25V75L50,95L15,75V25Z"/>
+        
+    <!-- Inner shield detail for depth -->
+    <path
+        android:fillColor="#01A233"
+        android:pathData="M50,15L75,30V70L50,85L25,70V30Z"/>
+        
+    <!-- Lock symbol in NeonGiftgruen -->
+    <path
+        android:fillColor="#39FF14"
+        android:pathData="M50,40C45,40 41,44 41,49V55H40C38.34,55 37,56.34 38,58C39,59.47,40,61 40,61H60C60,61 61,59.47,61,58C62,56.34 60.66,55 59,55H58V49C58,44 54,40 50,40ZM50,43C52.21,43 54,44.79 54,47V55H46V47C46,44.79 47.79,43 50,43Z"/>
+</vector>
+
+
