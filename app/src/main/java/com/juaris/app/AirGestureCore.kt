@@ -29,7 +29,6 @@ class AirGestureCore(private val context: Context) {
             try {
                 cameraProvider = cameraProviderFuture.get()
 
-                // Wir nutzen RGBA_8888 für direkten, stabilen Pixelzugriff
                 val imageAnalysis = ImageAnalysis.Builder()
                     .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
@@ -45,7 +44,6 @@ class AirGestureCore(private val context: Context) {
                         val height = imageProxy.height
                         val rowStride = imageProxy.planes[0].rowStride
 
-                        // Performance-optimiertes Downsampling (jeden 16. Pixel prüfen)
                         val step = 16
                         val sampledWidth = width / step
                         val sampledHeight = height / step
@@ -65,16 +63,19 @@ class AirGestureCore(private val context: Context) {
                             }
                         }
 
+                        // Lokale Kopie sichern, um den Kotlin Smart-Cast Fehler zu umgehen
+                        val localPrev = previousPixels
+
                         if (coolDown > 0) {
                             coolDown--
-                        } else if (previousPixels != null && currentPixels.size == previousPixels.size) {
+                        } else if (localPrev != null && currentPixels.size == localPrev.size) {
                             var changedCount = 0
                             var upperChange = 0
                             var lowerChange = 0
 
                             for (i in currentPixels.indices) {
-                                val diff = abs(currentPixels[i] - previousPixels[i])
-                                if (diff > 35) { // Schwellenwert für echte Bewegung
+                                val diff = abs(currentPixels[i] - localPrev[i])
+                                if (diff > 35) {
                                     changedCount++
                                     val yCoord = i / sampledWidth
                                     if (yCoord < sampledHeight / 2) {
@@ -85,12 +86,11 @@ class AirGestureCore(private val context: Context) {
                                 }
                             }
 
-                            // Wenn mindestens 6% des Bildausschnitts in Bewegung sind
                             if (changedCount > currentPixels.size * 0.06) {
                                 if (upperChange > lowerChange * 1.3) {
                                     onDebugInfo("Geste erkannt: RUNTER (Swipe Down)")
                                     onGestureDetected(GestureAction.SWIPE_DOWN)
-                                    coolDown = 25 // Sperre für 25 Frames, um Mehrfach-Trigger zu verhindern
+                                    coolDown = 25
                                 } else if (lowerChange > upperChange * 1.3) {
                                     onDebugInfo("Geste erkannt: HOCH (Swipe Up)")
                                     onGestureDetected(GestureAction.SWIPE_UP)
