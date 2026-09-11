@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
@@ -108,31 +109,45 @@ class AirGestureCore(private val context: Context) {
             val deltaBottom = avgBottom - baselineBottom
 
             val currentTime = System.currentTimeMillis()
-            val threshold = 3.8 // Perfekter Mittelweg für knackige Erkennung ohne Fehlzündungen
+            val threshold = 3.8 // Solider Schwellenwert gegen Fehlzündungen
 
             val isMoving = abs(deltaTop) > threshold || abs(deltaBottom) > threshold
 
-            // 650ms Cooldown, damit eine Geste exakt einen Tab weiterschaltet
-            if (currentTime - lastActionTime > 650) {
-                // Rauf wischen (Hand zieht von unten nach oben) -> Nächster Tab (Rechts)
+            // 800ms Cooldown, damit eine Geste exakt einen Schritt steuert
+            if (currentTime - lastActionTime > 800) {
+                // Rauf wischen -> Nächster Tab
                 if (deltaBottom < -threshold && deltaTop > -threshold * 0.5) {
                     lastActionTime = currentTime
                     currentActionState = GestureAction.SWIPE_UP
+                    
                     CoroutineScope(Dispatchers.Main).launch {
                         onGestureDetected(GestureAction.SWIPE_UP)
                     }
+
+                    // Status nach kurzer Zeit automatisch auf NONE zurücksetzen
+                    CoroutineScope(Dispatchers.IO).launch {
+                        delay(400)
+                        currentActionState = GestureAction.NONE
+                    }
                 }
-                // Runter wischen (Hand zieht von oben nach unten) -> Vorheriger Tab (Links)
+                // Runter wischen -> Vorheriger Tab
                 else if (deltaTop < -threshold && deltaBottom > -threshold * 0.5) {
                     lastActionTime = currentTime
                     currentActionState = GestureAction.SWIPE_DOWN
+                    
                     CoroutineScope(Dispatchers.Main).launch {
                         onGestureDetected(GestureAction.SWIPE_DOWN)
+                    }
+
+                    // Status nach kurzer Zeit automatisch auf NONE zurücksetzen
+                    CoroutineScope(Dispatchers.IO).launch {
+                        delay(400)
+                        currentActionState = GestureAction.NONE
                     }
                 }
             }
 
-            // Baseline passt sich nur an, wenn keine Bewegung stattfindet
+            // Baseline passt sich nur an, wenn keine aktive Bewegung stattfindet
             if (!isMoving) {
                 baselineTop = baselineTop * 0.93 + avgTop * 0.07
                 baselineBottom = baselineBottom * 0.93 + avgBottom * 0.07
