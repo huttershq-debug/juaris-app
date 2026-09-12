@@ -3,6 +3,7 @@ package com.juaris.app
 import android.app.Activity
 import android.content.Context
 import com.android.billingclient.api.*
+import com.android.billingclient.api.PendingPurchasesParams
 
 class BillingManager(
     private val context: Context,
