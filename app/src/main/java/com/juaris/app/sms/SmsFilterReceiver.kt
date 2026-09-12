@@ -31,6 +31,12 @@ class SmsFilterReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
+        // Prüfen, ob der SMS-Schutz in der App überhaupt aktiv ist
+        val prefs = context.getSharedPreferences("juaris_secure_vault", Context.MODE_PRIVATE)
+        if (!prefs.getBoolean("sms_prot", true)) {
+            return
+        }
+
         if (intent.action == Telephony.Sms.Intents.SMS_RECEIVED_ACTION) {
             val messages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
 
@@ -42,7 +48,7 @@ class SmsFilterReceiver : BroadcastReceiver() {
 
                 when {
                     isImportantNotice(body) -> {
-                        // 1. WICHTIG: Frist oder offizielle Nachricht erkannt -> Durchlassen & Alarm senden!
+                        // WICHTIGE Nachricht / Frist erkannt -> Durchlassen & Alarm senden
                         Log.d(TAG, "WICHTIGE SMS/FRIST erkannt von $sender")
                         showImportantNotification(
                             context,
@@ -51,13 +57,13 @@ class SmsFilterReceiver : BroadcastReceiver() {
                         )
                     }
                     isPhishingOrSpam(body) -> {
-                        // 2. SPAM: Wegfiltern / Unterdrücken, damit es gar nicht erst stört
+                        // SPAM: Wegfiltern / Unterdrücken
                         Log.d(TAG, "SPAM erfolgreich blockiert von $sender")
                         abortBroadcast()
                         logBlockedSmsLocally(context, sender, body)
                     }
                     else -> {
-                        // 3. Normaler Alltag (Freunde, Familie) -> Normal durchlassen ohne Eingriff
+                        // Normaler Alltag -> durchlassen
                     }
                 }
             }
@@ -90,7 +96,7 @@ class SmsFilterReceiver : BroadcastReceiver() {
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.app_icon)
-            .setTitle(title)
+            .setContentTitle(title) // KORREKTUR: setContentTitle statt setTitle
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
