@@ -7,14 +7,14 @@ import android.telecom.CallScreeningService
 
 class ScamCallScreeningService : CallScreeningService() {
 
-    override fun onScreeningCall(details: Call.Details) {
+    override fun onScreeningCall(callDetails: Call.Details) {
         // Nur eingehende Anrufe prüfen
-        if (details.callDirection != Call.Details.DIRECTION_INCOMING) {
-            respondToCall(details, CallResponse.Builder().setDisallowCall(false).build())
+        if (callDetails.callDirection != Call.Details.DIRECTION_INCOMING) {
+            respondToCall(callDetails, CallResponse.Builder().setDisallowCall(false).build())
             return
         }
 
-        val phoneNumber = details.handle?.schemeSpecificPart
+        val phoneNumber = callDetails.handle?.schemeSpecificPart
         if (phoneNumber.isNullOrEmpty()) {
             // Unterdrückte / private Nummern ohne Kennung behandeln
             val response = CallResponse.Builder()
@@ -22,13 +22,13 @@ class ScamCallScreeningService : CallScreeningService() {
                 .setSkipCallLog(false)
                 .setSkipNotification(false)
                 .build()
-            respondToCall(details, response)
+            respondToCall(callDetails, response)
             return
         }
 
         // 1. DAS EISERNE GESETZ: Echte Kontakte aus dem Telefonbuch MÜSSEN immer durchkommen!
         if (isContactInPhoneBook(phoneNumber)) {
-            respondToCall(details, CallResponse.Builder().setDisallowCall(false).build())
+            respondToCall(callDetails, CallResponse.Builder().setDisallowCall(false).build())
             return
         }
 
@@ -40,10 +40,10 @@ class ScamCallScreeningService : CallScreeningService() {
                 .setSkipCallLog(false)
                 .setSkipNotification(true)
                 .build()
-            respondToCall(details, response)
+            respondToCall(callDetails, response)
         } else {
             // Unbekannt, aber unauffällig -> normal durchlassen
-            respondToCall(details, CallResponse.Builder().setDisallowCall(false).build())
+            respondToCall(callDetails, CallResponse.Builder().setDisallowCall(false).build())
         }
     }
 
