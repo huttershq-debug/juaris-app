@@ -25,6 +25,12 @@ class EmailScanWorker(appContext: Context, workerParams: WorkerParameters) : Wor
 
     override fun doWork(): Result {
         return try {
+            // Prüfen, ob der E-Mail-Schutz in der App aktiv ist
+            val prefs = applicationContext.getSharedPreferences("juaris_secure_vault", Context.MODE_PRIVATE)
+            if (!prefs.getBoolean("email_prot", true)) {
+                return Result.success()
+            }
+
             val sender = inputData.getString("sender") ?: "unbekannt"
             val subject = inputData.getString("subject") ?: ""
             val body = inputData.getString("body") ?: ""
@@ -72,7 +78,7 @@ class EmailScanWorker(appContext: Context, workerParams: WorkerParameters) : Wor
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.app_icon)
-            .setTitle(title)
+            .setContentTitle(title) // KORREKTUR: setContentTitle statt setTitle
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
