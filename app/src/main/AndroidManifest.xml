@@ -18,6 +18,7 @@
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" /> <!-- WICHTIG: Fehlt aktuell noch -->
 
     <!-- Google Play Billing Berechtigung für In-App-Abos -->
     <uses-permission android:name="com.android.vending.BILLING" />
@@ -43,15 +44,17 @@
             </intent-filter>
         </activity>
 
-        <service 
-    android:name=".ScamCallScreeningService"
-    android:permission="android.permission.BIND_SCREENING_SERVICE"
-    android:exported="true">
-    <intent-filter>
-        <action android:name="android.telecom.CallScreeningService"/>
-    </intent-filter>
-</service>
+        <service
+            android:name=".ScamCallScreeningService"
+            android:permission="android.permission.BIND_SCREENING_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.telecom.CallScreeningService"/>
+            </intent-filter>
+        </service>
 
     </application>
 
 </manifest>
+
+
