@@ -18,7 +18,8 @@
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
-    <uses-permission android:name="android.permission.READ_CONTACTS" /> <!-- WICHTIG: Fehlt aktuell noch -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- Google Play Billing Berechtigung für In-App-Abos -->
     <uses-permission android:name="com.android.vending.BILLING" />
