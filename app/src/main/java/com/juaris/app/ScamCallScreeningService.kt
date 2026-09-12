@@ -7,7 +7,7 @@ import android.telecom.CallScreeningService
 
 class ScamCallScreeningService : CallScreeningService() {
 
-    override fun onScreeningCall(callDetails: Call.Details) {
+    override fun onScreenCall(callDetails: Call.Details) {
         // Nur eingehende Anrufe prüfen
         if (callDetails.callDirection != Call.Details.DIRECTION_INCOMING) {
             respondToCall(callDetails, CallResponse.Builder().setDisallowCall(false).build())
