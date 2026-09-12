@@ -1,72 +1,81 @@
 package com.juaris.app
 
-import android.content.Context
-import android.os.Build
+import android.net.Uri
+import android.provider.ContactsContract
 import android.telecom.Call
 import android.telecom.CallScreeningService
-import androidx.annotation.RequiresApi
 
-@RequiresApi(Build.VERSION_CODES.N)
 class ScamCallScreeningService : CallScreeningService() {
 
-    override fun onScreenCall(callDetails: Call.Details) {
-        val phoneNumber = callDetails.handle?.schemeSpecificPart
-        val responseBuilder = CallResponse.Builder()
-
-        // 1. Unterdrückte oder anonyme Nummern sofort blockieren
-        if (phoneNumber == null) {
-            blockCall(responseBuilder)
-            respondToCall(callDetails, responseBuilder.build())
+    override fun onScreeningCall(details: Call.Details) {
+        // Nur eingehende Anrufe prüfen
+        if (details.callDirection != Call.Details.DIRECTION_INCOMING) {
+            respondToCall(details, CallResponse.Builder().setDisallowCall(false).build())
             return
         }
 
-        // 2. Prüfen, ob die Nummer dauerhaft gesperrt ist oder in der Liste steht
-        if (isNumberBlockedPermanently(phoneNumber) || checkNumberLocally(phoneNumber)) {
-            blockCall(responseBuilder)
+        val phoneNumber = details.handle?.schemeSpecificPart
+        if (phoneNumber.isNullOrEmpty()) {
+            // Unterdrückte / private Nummern ohne Kennung behandeln
+            val response = CallResponse.Builder()
+                .setRejectCall(true)
+                .setSkipCallLog(false)
+                .setSkipNotification(false)
+                .build()
+            respondToCall(details, response)
+            return
+        }
+
+        // 1. DAS EISERNE GESETZ: Echte Kontakte aus dem Telefonbuch MÜSSEN immer durchkommen!
+        if (isContactInPhoneBook(phoneNumber)) {
+            respondToCall(details, CallResponse.Builder().setDisallowCall(false).build())
+            return
+        }
+
+        // 2. LOKALE BETRUGSERKENNUNG (100% On-Device, ohne Cloud)
+        if (isLocalFraudDetected(phoneNumber)) {
+            // Zero-Ring-Drop: Kein Klingeln, kein Ton, wird sofort hart abgewehrt
+            val response = CallResponse.Builder()
+                .setRejectCall(true)
+                .setSkipCallLog(false)
+                .setSkipNotification(true)
+                .build()
+            respondToCall(details, response)
         } else {
-            responseBuilder.setDisallowCall(false)
+            // Unbekannt, aber unauffällig -> normal durchlassen
+            respondToCall(details, CallResponse.Builder().setDisallowCall(false).build())
         }
-
-        respondToCall(callDetails, responseBuilder.build())
     }
 
-    private fun blockCall(builder: CallResponse.Builder) {
-        builder.setDisallowCall(true)
-        builder.setRejectCall(true)
-        builder.setSkipCallLog(false)
-        builder.setSkipNotification(true)
-    }
-
-    private fun isNumberBlockedPermanently(number: String): Boolean {
-        // A) Feste Liste bekannter internationaler Betrugs-Vorwahlen
-        val suspiciousPrefixes = listOf(
-            "+243", // DR Kongo
-            "+225", // Elfenbeinküste
-            "+232", // Sierra Leone
-            "+375", // Belarus
-            "+882", // Satelliten
-            "+881" // Satelliten
-        )
-
-        for (prefix in suspiciousPrefixes) {
-            if (number.startsWith(prefix)) {
-                return true
-            }
+    private fun isContactInPhoneBook(phoneNumber: String): Boolean {
+        return try {
+            val uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber))
+            val cursor = contentResolver.query(
+                uri,
+                arrayOf(ContactsContract.PhoneLookup.DISPLAY_NAME),
+                null, null, null
+            )
+            cursor?.use { it.moveToFirst() } ?: false
+        } catch (e: Exception) {
+            false
         }
-        return false
     }
 
-    private fun checkNumberLocally(number: String): Boolean {
-        // Test-Liste fuer bekannte Betrugsnummern
-        val localScamDatabase = listOf("+43123456789", "+49190123456")
-        if (localScamDatabase.contains(number)) {
+    private fun isLocalFraudDetected(phoneNumber: String): Boolean {
+        val cleanNumber = phoneNumber.replace(Regex("[^\\d+]"), "")
+
+        // Lokale Heuristik für bekannte Risiko-Vorwahlen (z.B. Zypern +357 oder ähnliche Spam-Fallen)
+        val highRiskPrefixes = listOf("+357", "+216", "+243") 
+        if (highRiskPrefixes.any { cleanNumber.startsWith(it) }) {
             return true
         }
 
-        // B) Abgleich mit dem dauerhaften lokalen Speicher des Handys
-        val prefs = getSharedPreferences("JuarisPrefs", Context.MODE_PRIVATE)
-        val blockedSet = prefs.getStringSet("blocked_numbers", mutableSetOf()) ?: mutableSetOf()
+        // Manipulierte oder unnatürlich kurze Nummern abfangen
+        if (cleanNumber.length < 4) {
+            return true
+        }
 
-        return blockedSet.contains(number)
+        return false
     }
 }
+
