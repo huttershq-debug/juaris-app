@@ -7,16 +7,20 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import com.juaris.app.JuarisDatabase
 import com.juaris.app.SecurityEngine
 import com.juaris.app.EmailSecurityResult
 import com.juaris.app.R
+import com.juaris.app.SecurityLogEntity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class EmailScanWorker(appContext: Context, workerParams: WorkerParameters) : Worker(appContext, workerParams) {
 
     companion object {
         private const val CHANNEL_ID = "juaris_important_alerts"
 
-        // Wichtige E-Mail-Schlüsselwörter für Rechnungen, Ämter und Fristen
         private val IMPORTANT_EMAIL_PATTERNS = listOf(
             "rechnung", "mahnung", "inkasso", "gericht", "finanzamt",
             "frist", "zahlungsaufforderung", "steuer", "bescheid", "rechtsanwalt"
@@ -25,7 +29,6 @@ class EmailScanWorker(appContext: Context, workerParams: WorkerParameters) : Wor
 
     override fun doWork(): Result {
         return try {
-            // Prüfen, ob der E-Mail-Schutz in der App aktiv ist
             val prefs = applicationContext.getSharedPreferences("juaris_secure_vault", Context.MODE_PRIVATE)
             if (!prefs.getBoolean("email_prot", true)) {
                 return Result.success()
@@ -34,21 +37,41 @@ class EmailScanWorker(appContext: Context, workerParams: WorkerParameters) : Wor
             val sender = inputData.getString("sender") ?: "unbekannt"
             val subject = inputData.getString("subject") ?: ""
             val body = inputData.getString("body") ?: ""
+            val db = JuarisDatabase.getDatabase(applicationContext)
 
-            // 1. Lokaler Offline-Scan über die SecurityEngine (Prüfung auf Phishing/Spam)
             val result = SecurityEngine.analyzeIncomingEmail(sender, subject, body)
 
             if (result == EmailSecurityResult.BLOCK) {
-                // E-Mail ist reiner Spam/Gefahr -> direkt verwerfen
+                // Blockierte E-Mail in DB loggen
+                CoroutineScope(Dispatchers.IO).launch {
+                    db.securityLogDao().insertLog(
+                        SecurityLogEntity(
+                            timestamp = System.currentTimeMillis(),
+                            module = "E-Mail-Heuristik",
+                            description = "Phishing-Mail blockiert von $sender",
+                            status = "BLOCKED"
+                        )
+                    )
+                }
                 return Result.failure()
             }
 
-            // 2. Auf wichtige Dokumente / Rechnungen / Fristen prüfen
             val combinedText = "$subject $body".lowercase()
             val isImportant = IMPORTANT_EMAIL_PATTERNS.any { combinedText.contains(it) }
 
             if (isImportant) {
-                // Sofort den Nutzer warnen, damit keine Frist verpasst wird!
+                // Wichtiges Dokument / Frist in DB loggen
+                CoroutineScope(Dispatchers.IO).launch {
+                    db.securityLogDao().insertLog(
+                        SecurityLogEntity(
+                            timestamp = System.currentTimeMillis(),
+                            module = "E-Mail-Fristen-Wächter",
+                            description = "Wichtiges Dokument/Frist von $sender: $subject",
+                            status = "IMPORTANT"
+                        )
+                    )
+                }
+
                 showImportantEmailNotification(
                     applicationContext,
                     "📄 Wichtiges Dokument / Frist entdeckt",
@@ -78,7 +101,7 @@ class EmailScanWorker(appContext: Context, workerParams: WorkerParameters) : Wor
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.app_icon)
-            .setContentTitle(title) // KORREKTUR: setContentTitle statt setTitle
+            .setContentTitle(title)
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
