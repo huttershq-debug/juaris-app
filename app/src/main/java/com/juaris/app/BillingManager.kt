@@ -3,7 +3,6 @@ package com.juaris.app
 import android.app.Activity
 import android.content.Context
 import com.android.billingclient.api.*
-import com.android.billingclient.api.PendingPurchasesParams
 
 class BillingManager(
     private val context: Context,
@@ -21,9 +20,7 @@ class BillingManager(
                     }
                 }
             }
-            .enablePendingPurchases(
-                PendingPurchasesParams.newBuilder().enableOneTimeProducts().build()
-            )
+            .enablePendingPurchases()
             .build()
 
         billingClient.startConnection(object : BillingClientStateListener {
@@ -32,10 +29,17 @@ class BillingManager(
                     onReady()
                 }
             }
+
             override fun onBillingServiceDisconnected() {
                 // Verbindung wird bei Bedarf neu aufgebaut
             }
         })
+    }
+
+    private fun handlePurchase(purchase: Purchase) {
+        if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
+            onPurchased()
+        }
     }
 
     fun launchBillingFlow(activity: Activity) {
@@ -45,34 +49,25 @@ class BillingManager(
                 .setProductType(BillingClient.ProductType.SUBS)
                 .build()
         )
-
-        val params = QueryProductDetailsParams.newBuilder().setProductList(productList).build()
+        
+        val params = QueryProductDetailsParams.newBuilder()
+            .setProductList(productList)
+            .build()
 
         billingClient.queryProductDetailsAsync(params) { billingResult, productDetailsList ->
-            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && !productDetailsList.isNullOrEmpty()) {
+            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && productDetailsList.isNotEmpty()) {
                 val productDetails = productDetailsList[0]
-                val offerToken = productDetails.subscriptionOfferDetails?.firstOrNull()?.offerToken ?: return@queryProductDetailsAsync
-
                 val productDetailsParamsList = listOf(
                     BillingFlowParams.ProductDetailsParams.newBuilder()
                         .setProductDetails(productDetails)
-                        .setOfferToken(offerToken)
                         .build()
                 )
-
                 val billingFlowParams = BillingFlowParams.newBuilder()
                     .setProductDetailsParamsList(productDetailsParamsList)
                     .build()
-
                 billingClient.launchBillingFlow(activity, billingFlowParams)
             }
         }
     }
-
-    private fun handlePurchase(purchase: Purchase) {
-        if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
-            // Abo erfolgreich erworben, Callback triggern
-            onPurchased()
-        }
-    }
 }
+
