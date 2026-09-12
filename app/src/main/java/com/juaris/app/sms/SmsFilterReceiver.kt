@@ -9,7 +9,12 @@ import android.os.Build
 import android.provider.Telephony
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.juaris.app.JuarisDatabase
 import com.juaris.app.R
+import com.juaris.app.SecurityLogEntity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class SmsFilterReceiver : BroadcastReceiver() {
 
@@ -17,13 +22,11 @@ class SmsFilterReceiver : BroadcastReceiver() {
         private const val TAG = "SmsFilter"
         private const val CHANNEL_ID = "juaris_important_alerts"
 
-        // Der ganze unnötige Blödsinn & Spam
         private val SPAM_PATTERNS = listOf(
             "paket", "konto gesperrt", "zollgebühr", "klicken sie",
             "verification code", "banking update", "wallet locked", "gewonnen"
         )
 
-        // Kritische Inhalte & Fristen, die sofort gemeldet werden müssen
         private val IMPORTANT_PATTERNS = listOf(
             "rechnung", "mahnung", "inkasso", "gericht", "finanzamt",
             "frist", "zahlungsaufforderung", "steuer", "bescheid", "termin"
@@ -31,7 +34,6 @@ class SmsFilterReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        // Prüfen, ob der SMS-Schutz in der App überhaupt aktiv ist
         val prefs = context.getSharedPreferences("juaris_secure_vault", Context.MODE_PRIVATE)
         if (!prefs.getBoolean("sms_prot", true)) {
             return
@@ -39,6 +41,7 @@ class SmsFilterReceiver : BroadcastReceiver() {
 
         if (intent.action == Telephony.Sms.Intents.SMS_RECEIVED_ACTION) {
             val messages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
+            val db = JuarisDatabase.getDatabase(context)
 
             for (message in messages) {
                 val sender = message.displayOriginatingAddress ?: "Unbekannt"
@@ -48,8 +51,20 @@ class SmsFilterReceiver : BroadcastReceiver() {
 
                 when {
                     isImportantNotice(body) -> {
-                        // WICHTIGE Nachricht / Frist erkannt -> Durchlassen & Alarm senden
                         Log.d(TAG, "WICHTIGE SMS/FRIST erkannt von $sender")
+                        
+                        // Direkt in die Datenbank schreiben für die Logs-Ansicht
+                        CoroutineScope(Dispatchers.IO).launch {
+                            db.securityLogDao().insertLog(
+                                SecurityLogEntity(
+                                    timestamp = System.currentTimeMillis(),
+                                    module = "SMS-Fristen-Wächter",
+                                    description = "Frist/Wichtig von $sender: $body",
+                                    status = "IMPORTANT"
+                                )
+                            )
+                        }
+
                         showImportantNotification(
                             context,
                             "⚠️ Wichtige Nachricht / Frist von: $sender",
@@ -57,13 +72,23 @@ class SmsFilterReceiver : BroadcastReceiver() {
                         )
                     }
                     isPhishingOrSpam(body) -> {
-                        // SPAM: Wegfiltern / Unterdrücken
                         Log.d(TAG, "SPAM erfolgreich blockiert von $sender")
                         abortBroadcast()
-                        logBlockedSmsLocally(context, sender, body)
+
+                        // Spam-Blockade direkt in die Datenbank schreiben
+                        CoroutineScope(Dispatchers.IO).launch {
+                            db.securityLogDao().insertLog(
+                                SecurityLogEntity(
+                                    timestamp = System.currentTimeMillis(),
+                                    module = "SMS-Filter",
+                                    description = "Spam-SMS blockiert von $sender",
+                                    status = "BLOCKED"
+                                )
+                            )
+                        }
                     }
                     else -> {
-                        // Normaler Alltag -> durchlassen
+                        // Normaler Durchlauf
                     }
                 }
             }
@@ -96,7 +121,7 @@ class SmsFilterReceiver : BroadcastReceiver() {
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.app_icon)
-            .setContentTitle(title) // KORREKTUR: setContentTitle statt setTitle
+            .setContentTitle(title)
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -105,10 +130,5 @@ class SmsFilterReceiver : BroadcastReceiver() {
 
         notificationManager.notify(System.currentTimeMillis().toInt(), notification)
     }
-
-    private fun logBlockedSmsLocally(context: Context, sender: String, body: String) {
-        Log.d(TAG, "BLOCKIERT: SMS von $sender wurde lokal gefiltert.")
-    }
 }
-
 
