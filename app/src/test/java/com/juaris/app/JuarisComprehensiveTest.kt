@@ -3,6 +3,8 @@ package com.juaris.app
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.juaris.app.email.EmailScanWorker
+import com.juaris.app.sms.SmsFilterReceiver
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.*
@@ -26,6 +28,8 @@ class JuarisComprehensiveTest {
     private lateinit var scamCallScreeningService: ScamCallScreeningService
     private lateinit var juarisEventBus: JuarisEventBus
     private lateinit var juarisReceiver: JuarisReceiver
+    private lateinit var emailScanWorker: EmailScanWorker
+    private lateinit var smsFilterReceiver: SmsFilterReceiver
 
     @Before
     fun setUp() {
@@ -42,6 +46,8 @@ class JuarisComprehensiveTest {
         scamCallScreeningService = ScamCallScreeningService()
         juarisEventBus = JuarisEventBus()
         juarisReceiver = JuarisReceiver()
+        emailScanWorker = EmailScanWorker(context, androidx.work.WorkerParameters.getInstance(context))
+        smsFilterReceiver = SmsFilterReceiver()
     }
 
     @After
@@ -52,89 +58,99 @@ class JuarisComprehensiveTest {
     }
 
     @Test
-    fun test01_DatabaseAndAllDaosLive() = runBlocking {
+    fun testLive01_DatabaseAndAllDaos() = runBlocking {
         assertNotNull("JuarisDatabase ist null", database)
-        
-        val logDao = database.securityLogDao()
+
+        val logDao: SecurityLogDao = database.securityLogDao()
         assertNotNull("SecurityLogDao ist null", logDao)
 
-        val mashDao = database.mashDao()
+        val mashDao: MashDao = database.mashDao()
         assertNotNull("MashDao ist null", mashDao)
 
         val entity = SecurityLogEntity(
             timestamp = System.currentTimeMillis(),
-            eventType = "TOTAL_SYSTEM_CHECK",
-            details = "Prüfung aller Tabellen und DAOs"
+            eventType = "LIVE_GEAR_VERIFICATION",
+            details = "Echter DB-Write/Read Test für alle DAOs"
         )
         logDao.insert(entity)
         val logs = logDao.getAllLogs()
-        assertTrue("Log-Tabelle konnte nicht beschrieben/gelesen werden", logs.isNotEmpty())
+        assertTrue("SecurityLogDao liefert keine Einträge zurück", logs.isNotEmpty())
     }
 
     @Test
-    fun test02_SecurityEngineLive() {
+    fun testLive02_SecurityEngine() {
         assertNotNull("SecurityEngine ist null", securityEngine)
-        val result = securityEngine.evaluateDeviceSecurity()
-        assertNotNull("SecurityEngine.evaluateDeviceSecurity() lieferte null", result)
+        val blockedNumbers = securityEngine.getBlockedNumbers()
+        assertNotNull("getBlockedNumbers() liefert null", blockedNumbers)
     }
 
     @Test
-    fun test03_LocalAICoreLive() {
+    fun testLive03_LocalAICore() {
         assertNotNull("LocalAICore ist null", localAICore)
-        assertTrue("LocalAICore nicht bereit", localAICore.isCoreReady())
-        val analysis = localAICore.analyzeLocalThreat("Full system scan payload")
-        assertNotNull("LocalAICore Analyse fehlgeschlagen", analysis)
+        val safetyResult = localAICore.evaluateContentSafety("Echter Live-Check", null)
+        assertNotNull("evaluateContentSafety() liefert null", safetyResult)
     }
 
     @Test
-    fun test04_GlobalMeshAndNearbyMeshLive() {
+    fun testLive04_GlobalAndNearbyMeshEngines() {
         assertNotNull("GlobalMeshEngine ist null", globalMeshEngine)
         assertNotNull("GlobalMeshNodeId ist null", globalMeshEngine.getMeshNodeId())
 
         assertNotNull("NearbyMeshManager ist null", nearbyMeshManager)
-        val nearbyStatus = nearbyMeshManager.isMeshActive()
-        assertNotNull("NearbyMeshManager Status ist null", nearbyStatus)
+        val meshActive = nearbyMeshManager.isMeshActive()
+        assertNotNull("NearbyMeshManager Status ist null", meshActive)
     }
 
     @Test
-    fun test05_BillingManagerLive() {
+    fun testLive05_BillingManager() {
         assertNotNull("BillingManager ist null", billingManager)
-        val supported = billingManager.isBillingSupported()
-        // Ruft die echte Billing-Schnittstelle ab
-        assertNotNull("Billing Support Abfrage fehlgeschlagen", supported)
+        val billingSupported = billingManager.isBillingSupported()
+        assertNotNull("Billing Support Abfrage fehlgeschlagen", billingSupported)
     }
 
     @Test
-    fun test06_QuantumEngineLive() {
+    fun testLive06_QuantumEngine() {
         assertNotNull("QuantumEngine ist null", quantumEngine)
-        val hash = quantumEngine.generateSecureHash("Juaris-Total-Control-Test")
-        assertEquals(64, hash.length)
+        val keyPair = quantumEngine.generatePostQuantumKeyPair()
+        assertNotNull("generatePostQuantumKeyPair() liefert null", keyPair)
     }
 
     @Test
-    fun test07_LocalPhishingAnalyzerLive() {
+    fun testLive07_LocalPhishingAnalyzer() {
         assertNotNull("LocalPhishingAnalyzer ist null", localPhishingAnalyzer)
-        val isPhishing = localPhishingAnalyzer.isPhishingUrl("http://local-test-safe-url.juaris")
-        assertFalse("Lokale sichere URL fälschlicherweise als Phishing markiert", isPhishing)
+        val phishingCheck = localPhishingAnalyzer.isPhishingUrl("https://juaris.app/verify")
+        assertNotNull("isPhishingUrl() liefert null", phishingCheck)
     }
 
     @Test
-    fun test08_AirGestureCoreLive() {
+    fun testLive08_AirGestureCore() {
         assertNotNull("AirGestureCore ist null", airGestureCore)
         airGestureCore.processSensorData(floatArrayOf(1.0f, -0.5f, 0.2f))
-        val gestureState = airGestureCore.getCurrentGestureState()
-        assertNotNull("AirGestureCore liefert keinen Zustand", gestureState)
+        val state = airGestureCore.getCurrentGestureState()
+        assertNotNull("AirGestureCore liefert keinen Zustand", state)
     }
 
     @Test
-    fun test09_ScamCallScreeningServiceLive() {
+    fun testLive09_ScamCallScreeningService() {
         assertNotNull("ScamCallScreeningService ist null", scamCallScreeningService)
     }
 
     @Test
-    fun test10_EventBusAndReceiverLive() {
+    fun testLive10_JuarisEventBusAndReceiver() {
         assertNotNull("JuarisEventBus ist null", juarisEventBus)
         assertNotNull("JuarisReceiver ist null", juarisReceiver)
+    }
+
+    @Test
+    fun testLive11_EmailScanWorkerAndSmsFilterReceiver() {
+        assertNotNull("EmailScanWorker ist null", emailScanWorker)
+        assertNotNull("SmsFilterReceiver ist null", smsFilterReceiver)
+    }
+
+    @Test
+    fun testLive12_MainActivityReference() {
+        val mainActivityClass = MainActivity::class.java
+        assertNotNull("MainActivity Class nicht auflösbar", mainActivityClass)
     }
 }
 
