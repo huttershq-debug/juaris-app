@@ -19,21 +19,35 @@ object GlobalMeshEngine {
         }
     }
 
-    // Broadcastet einen neuen Post in den globalen Schwarm (Instagram/Snapchat-Hybrid)
+    // Standard Broadcast (nur Text)
     fun broadcastToSwarm(
         context: Context,
         content: String,
         isEphemeral: Boolean,
         onSuccess: (String) -> Unit
     ) {
+        broadcastToSwarmWithMedia(context, content, null, "TEXT", isEphemeral, onSuccess)
+    }
+
+    // Erweiterter Broadcast für Medien (Fotos & Videos im Instagram-/Snapchat-Stil)
+    fun broadcastToSwarmWithMedia(
+        context: Context,
+        content: String,
+        mediaUri: String?,
+        mediaType: String,
+        isEphemeral: Boolean,
+        onSuccess: (String) -> Unit
+    ) {
         val db = JuarisDatabase.getDatabase(context)
-        val packetId = generatePacketHash(content + System.currentTimeMillis())
+        val packetId = generatePacketHash(content + (mediaUri ?: "") + System.currentTimeMillis())
         val nodeName = "Juaris-Node-" + android.os.Build.MODEL
 
         val post = MeshPostEntity(
             postId = packetId,
             senderNode = nodeName,
             content = content,
+            mediaUri = mediaUri,
+            mediaType = mediaType,
             timestamp = System.currentTimeMillis(),
             isEphemeral = isEphemeral,
             ttlHopCount = 10 // Max 10 Hops durch den weltweiten Schwarm
