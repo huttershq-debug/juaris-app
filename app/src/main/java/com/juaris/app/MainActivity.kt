@@ -178,6 +178,7 @@ fun WelcomeScreen() {
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit) {
     val context = LocalContext.current
+    var isBillingActive by remember { mutableStateOf(false) }
 
     val billingManager = remember {
         BillingManager(context, "juaris_monats_abo") {
@@ -186,7 +187,9 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
     }
 
     LaunchedEffect(Unit) {
-        billingManager.startConnection {}
+        billingManager.startConnection {
+            isBillingActive = true
+        }
     }
 
     Box(
@@ -201,22 +204,23 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
             modifier = Modifier.padding(32.dp)
         ) {
             Text(
-                text = "AKTIVIERUNG",
+                text = "JUARIS ON-DEVICE KERNEL",
                 color = NeonGiftgruen,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Bitte aktiviere dein Juaris Abo (1,99 €/Monat), um den lokalen Schutz zu starten.",
+                text = "Post-Quantum Security Suite\n1,99 € / Monat (Jederzeit kündbar über Google Play)",
                 color = Color.Gray,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(64.dp))
+
             Button(
                 onClick = {
-                    onLoginSuccess()
+                    billingManager.launchBillingFlow()
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -227,15 +231,34 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                 )
             ) {
                 Text(
-                    text = "Abo starten / Anmelden (Test-Bypass)",
+                    text = "Abo starten (Google Play Billing)",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     color = Color.Black
                 )
             }
+
+            // Nur im Debug-Build aktivierbarer Test-Bypass für dich als Entwickler
+            if (com.juaris.app.BuildConfig.DEBUG) {
+                Spacer(modifier = Modifier.height(24.dp))
+                OutlinedButton(
+                    onClick = {
+                        onLoginSuccess()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    border = BorderStroke(1.dp, Color(0xFFFF9900))
+                ) {
+                    Text(
+                        text = "[DEBUG] Entwickler-Bypass (Nur im Debug Build)",
+                        color = Color(0xFFFF9900),
+                        fontSize = 12.sp
+                    )
+                }
+            }
         }
     }
 }
+
 
 @Composable
 fun JuarisMainDashboard(prefs: SharedPreferences) {
