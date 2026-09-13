@@ -1,7 +1,7 @@
 package com.juaris.app
 
 import androidx.room.Dao
-import androidx.Room.Insert
+import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
