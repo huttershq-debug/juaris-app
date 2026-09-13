@@ -19,7 +19,9 @@ class QuantumEngine {
     data class PostQuantumKeyPair(
         val publicKeyBase64: String,
         val privateKeyBytes: ByteArray,
-        val publicKeyBytes: ByteArray
+        val publicKeyBytes: ByteArray,
+        val privateKeyObj: DilithiumPrivateKeyParameters,
+        val publicKeyObj: DilithiumPublicKeyParameters
     )
 
     fun generatePostQuantumKeyPair(): PostQuantumKeyPair {
@@ -37,28 +39,29 @@ class QuantumEngine {
         return PostQuantumKeyPair(
             publicKeyBase64 = Base64.encodeToString(pubBytes, Base64.NO_WRAP),
             privateKeyBytes = privBytes,
-            publicKeyBytes = pubBytes
+            publicKeyBytes = pubBytes,
+            privateKeyObj = privParams,
+            publicKeyObj = pubParams
         )
     }
 
-    fun signThreatData(privateKeyBytes: ByteArray, payload: ByteArray): String {
-        val privateKey = DilithiumPrivateKeyParameters(parameters, privateKeyBytes)
+    fun signThreatData(privateKeyObj: DilithiumPrivateKeyParameters, payload: ByteArray): String {
         val signer = DilithiumSigner()
-        signer.init(true, ParametersWithRandom(privateKey, random))
+        signer.init(true, ParametersWithRandom(privateKeyObj, random))
         val signature = signer.generateSignature(payload)
         return Base64.encodeToString(signature, Base64.NO_WRAP)
     }
 
-    fun verifySwarmSignature(publicKeyBytes: ByteArray, payload: ByteArray, base64Signature: String): Boolean {
+    fun verifySwarmSignature(publicKeyObj: DilithiumPublicKeyParameters, payload: ByteArray, base64Signature: String): Boolean {
         return try {
-            val publicKey = DilithiumPublicKeyParameters(parameters, publicKeyBytes)
             val signature = Base64.decode(base64Signature, Base64.NO_WRAP)
             val verifier = DilithiumSigner()
-            verifier.init(false, publicKey)
+            verifier.init(false, publicKeyObj)
             verifier.verifySignature(payload, signature)
         } catch (e: Exception) {
             false
         }
     }
 }
+
 
