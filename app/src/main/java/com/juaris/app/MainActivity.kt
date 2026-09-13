@@ -5,6 +5,7 @@
  
 package com.juaris.app
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -178,6 +179,7 @@ fun WelcomeScreen() {
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit) {
     val context = LocalContext.current
+    val activity = context as? Activity
     var isBillingActive by remember { mutableStateOf(false) }
 
     val billingManager = remember {
@@ -798,7 +800,6 @@ fun SwarmMeshPage() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
    
-    // Datenbank & Live-Feed laden
     val db = remember { JuarisDatabase.getDatabase(context) }
     val postsFlow = remember { db.meshDao().getAllActivePosts() }
     val posts by postsFlow.collectAsState(initial = emptyList())
@@ -1091,5 +1092,4 @@ fun PrivacyAndLegalContent() {
         }
     }
 }
-
 
