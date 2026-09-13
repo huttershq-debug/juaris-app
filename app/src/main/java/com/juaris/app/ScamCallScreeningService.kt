@@ -1,17 +1,17 @@
-package com.juaris.app
-
+import android.os.Build
 import android.net.Uri
 import android.provider.ContactsContract
 import android.telecom.Call
 import android.telecom.CallScreeningService
 
 class ScamCallScreeningService : CallScreeningService() {
-
     override fun onScreenCall(callDetails: Call.Details) {
-        // Nur eingehende Anrufe prüfen
-        if (callDetails.callDirection != Call.Details.DIRECTION_INCOMING) {
-            respondToCall(callDetails, CallResponse.Builder().setDisallowCall(false).build())
-            return
+        // Nur eingehende Anrufe prüfen (API-Check für getCallDirection ab API 29)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (callDetails.callDirection != Call.Details.DIRECTION_INCOMING) {
+                respondToCall(callDetails, CallResponse.Builder().setDisallowCall(false).build())
+                return
+            }
         }
 
         val phoneNumber = callDetails.handle?.schemeSpecificPart
@@ -64,8 +64,8 @@ class ScamCallScreeningService : CallScreeningService() {
     private fun isLocalFraudDetected(phoneNumber: String): Boolean {
         val cleanNumber = phoneNumber.replace(Regex("[^\\d+]"), "")
 
-        // Lokale Heuristik für bekannte Risiko-Vorwahlen (z.B. Zypern +357 oder ähnliche Spam-Fallen)
-        val highRiskPrefixes = listOf("+357", "+216", "+243") 
+        // Lokale Heuristik für bekannte Risiko-Vorwahlen (z.B. Zypern +357 oder ähnliche Spam-Fälle)
+        val highRiskPrefixes = listOf("+357", "+216", "+243")
         if (highRiskPrefixes.any { cleanNumber.startsWith(it) }) {
             return true
         }
