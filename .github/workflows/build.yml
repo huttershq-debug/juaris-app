@@ -42,12 +42,19 @@ jobs:
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > $GITHUB_WORKSPACE/juaris-release-key.jks
 
-      - name: Build Both AAB and APK
+      - name: Download Gradle 8.4
         run: |
           echo "Lade Gradle 8.4 herunter..."
           wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
           unzip -q gradle-8.4-bin.zip
-          
+
+      - name: Run Unit Tests
+        run: |
+          echo "Führe Unit-Tests aus..."
+          ./gradle-8.4/bin/gradle testDebugUnitTest --stacktrace
+
+      - name: Build Both AAB and APK
+        run: |
           echo "Kompiliere APK und AAB mit 3GB Heap..."
           ./gradle-8.4/bin/gradle assembleRelease bundleRelease --stacktrace \
             -Dorg.gradle.jvmargs="-Xmx3g" \
@@ -57,7 +64,6 @@ jobs:
             -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
             -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
             -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}"
-
 
       - name: Release Both Files veröffentlichen
         uses: softprops/action-gh-release@v1
@@ -70,4 +76,5 @@ jobs:
           body: "Dieses Release enthält sowohl die .aab-Datei für den Google Play Store als auch die .apk-Datei zum direkten Installieren auf dem Handy."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
