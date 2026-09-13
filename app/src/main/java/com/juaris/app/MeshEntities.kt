@@ -21,15 +21,3 @@ data class MeshPostEntity(
     val ttlHopCount: Int // Verbleibende Hops im globalen Schwarm
 )
 
-@Dao
-interface MeshDao {
-    @Query("SELECT * FROM mesh_posts ORDER BY timestamp DESC")
-    fun getAllMeshPosts(): Flow<List<MeshPostEntity>>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertPost(post: MeshPostEntity)
-
-    @Query("DELETE FROM mesh_posts WHERE timestamp < :expirationTime OR ttlHopCount <= 0")
-    suspend fun purgeExpiredPosts(expirationTime: Long)
-}
-
