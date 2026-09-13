@@ -38,11 +38,12 @@ class EmailScanWorker(appContext: Context, workerParams: WorkerParameters) : Wor
             val subject = inputData.getString("subject") ?: ""
             val body = inputData.getString("body") ?: ""
             val db = JuarisDatabase.getDatabase(applicationContext)
+            val securityEngine = SecurityEngine(applicationContext)
 
-            val result = SecurityEngine.analyzeIncomingEmail(sender, subject, body)
+            val fullEmailContent = "From: $sender \nSubject: $subject \nBody: $body"
+            val result = securityEngine.analyzeIncomingEmail(fullEmailContent)
 
             if (result == EmailSecurityResult.BLOCK) {
-                // Blockierte E-Mail in DB loggen
                 CoroutineScope(Dispatchers.IO).launch {
                     db.securityLogDao().insertLog(
                         SecurityLogEntity(
@@ -60,7 +61,6 @@ class EmailScanWorker(appContext: Context, workerParams: WorkerParameters) : Wor
             val isImportant = IMPORTANT_EMAIL_PATTERNS.any { combinedText.contains(it) }
 
             if (isImportant) {
-                // Wichtiges Dokument / Frist in DB loggen
                 CoroutineScope(Dispatchers.IO).launch {
                     db.securityLogDao().insertLog(
                         SecurityLogEntity(
@@ -74,7 +74,7 @@ class EmailScanWorker(appContext: Context, workerParams: WorkerParameters) : Wor
 
                 showImportantEmailNotification(
                     applicationContext,
-                    "📄 Wichtiges Dokument / Frist entdeckt",
+                    "Wichtiges Dokument / Frist entdeckt",
                     "Betreff: $subject\nAbsender: $sender"
                 )
             }
@@ -100,7 +100,7 @@ class EmailScanWorker(appContext: Context, workerParams: WorkerParameters) : Wor
         }
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.app_icon)
+            .setSmallIcon(R.drawable.hologram_avatar)
             .setContentTitle(title)
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
