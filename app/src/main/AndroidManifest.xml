@@ -5,7 +5,7 @@
     <!-- Hardware & Sensor-Berechtigungen -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
-    <uses-permission android:name="android.permission.INTERNET" />
+  
 
     <!-- Bluetooth & P2P-Mesh Berechtigungen -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
