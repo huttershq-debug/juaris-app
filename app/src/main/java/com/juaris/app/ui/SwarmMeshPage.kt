@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.juaris.app.GlobalMeshEngine
 import com.juaris.app.JuarisDatabase
 import com.juaris.app.MeshPostEntity
@@ -20,7 +21,7 @@ fun SwarmMeshPageUi(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
    
-    // Datenbank & DAO laden (mit korrekter DAO-Methode getAllActivePosts())
+    // Datenbank & DAO laden
     val db = remember { JuarisDatabase.getDatabase(context) }
     val postsFlow = remember { db.meshDao().getAllActivePosts() }
     val posts by postsFlow.collectAsState(initial = emptyList())
@@ -32,7 +33,7 @@ fun SwarmMeshPageUi(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF0B0F0C)) // Juaris Dark Matrix Style
+            .background(Color(0xFF0B0F0C))
             .padding(16.dp)
     ) {
         Text(
@@ -43,7 +44,6 @@ fun SwarmMeshPageUi(modifier: Modifier = Modifier) {
        
         Spacer(modifier = Modifier.height(8.dp))
 
-        // --- INPUT BEREICH (Instagram / Snapchat Style) ---
         OutlinedTextField(
             value = inputMessage,
             onValueChange = { inputMessage = it },
@@ -64,7 +64,6 @@ fun SwarmMeshPageUi(modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Snapchat-Modus (Ephemer / Selbstzerstörung)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(
                     checked = isEphemeral,
@@ -74,7 +73,6 @@ fun SwarmMeshPageUi(modifier: Modifier = Modifier) {
                 Text("Snapchat-Modus (Ephemer)", color = Color.LightGray)
             }
 
-            // Sende-Button mit automatischer AGI-Prüfung
             Button(
                 onClick = {
                     if (inputMessage.isNotBlank()) {
@@ -107,7 +105,6 @@ fun SwarmMeshPageUi(modifier: Modifier = Modifier) {
         HorizontalDivider(color = Color.DarkGray)
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- LIVE FEED DER SCHWARM-BEITRÄGE (WhatsApp / Instagram Feed Style) ---
         Text(
             text = "Eingehende Schwarm-Pakete (${posts.size})",
             style = MaterialTheme.typography.titleMedium,
