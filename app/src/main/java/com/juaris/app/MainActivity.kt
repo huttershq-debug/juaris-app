@@ -6,6 +6,9 @@
 package com.juaris.app
 
 import android.content.Context
+import androidx.core.content.ContextCompat
+import androidx.compose.ui.platform.LocalContext
+import java.security.MessageDigest
 import android.content.Intent
 import android.content.SharedPreferences
 import androidx.compose.foundation.pager.HorizontalPager
