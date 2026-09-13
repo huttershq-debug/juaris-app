@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.juaris.app.email.EmailScanWorker
 import com.juaris.app.sms.SmsFilterReceiver
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.*
@@ -72,11 +73,14 @@ class JuarisComprehensiveTest {
 
         val entity = SecurityLogEntity(
             timestamp = System.currentTimeMillis(),
-            eventType = "LIVE_GEAR_VERIFICATION",
-            details = "Echter DB-Write/Read Test für alle DAOs"
+            module = "LIVE_GEAR_VERIFICATION",
+            description = "Echter DB-Write/Read Test für alle DAOs",
+            status = "OK",
+            details = "Testdetails"
         )
-        logDao.insert(entity)
-        val logs = logDao.getAllLogs()
+
+        logDao.insertLog(entity)
+        val logs = logDao.getAllLogs().first()
         assertTrue("SecurityLogDao liefert keine Einträge zurück", logs.isNotEmpty())
     }
 
@@ -160,5 +164,4 @@ class JuarisComprehensiveTest {
         assertNotNull("MainActivity Class nicht auflösbar", mainActivityClass)
     }
 }
-
 
