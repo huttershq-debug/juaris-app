@@ -5,15 +5,15 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
-import androidx.copmose.foundation.border
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,11 +21,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.juaris.app.JuarisDatabase
 import com.juaris.app.GlobalMeshEngine
+import com.juaris.app.JuarisDatabase
+import com.juaris.app.MeshPostEntity
+import kotlinx.coroutines.launch
 
 enum class SwarmSubTab {
     RADAR, CIPHER_CHAT, GHOST_STORIES, MATRIX_FEED
@@ -33,280 +34,265 @@ enum class SwarmSubTab {
 
 @Composable
 fun SwarmMeshPage() {
-    var activeTab by remember { mutableStateOf(SwarmSubTab.RADAR) }
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    var selectedSubTab by remember { mutableStateOf(SwarmSubTab.RADAR) }
+
+    var messageInput by remember { mutableStateOf("") }
+    var selectedMediaUri by remember { mutableStateOf<String?>(null) }
+    
+    val db = remember { JuarisDatabase.getDatabase(context) }
+    val meshPosts by db.meshDao().getAllPosts().collectAsState(initial = emptyList())
+
+    val mediaLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        selectedMediaUri = uri?.toString()
+        if (uri != null) {
+            Toast.makeText(context, "Medienanhang geladen", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "JUARIS SWARM & SOCIAL HUB",
-                color = NeonGiftgruen,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 2.sp
-            )
-            Text(
-                text = "0% Cloud / P2P",
-                color = Color.Gray,
-                fontSize = 10.sp
-            )
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            SubTabButton("Radar", activeTab == SwarmSubTab.RADAR) { activeTab = SwarmSubTab.RADAR }
-            SubTabButton("Cipher-Chat", activeTab == SwarmSubTab.CIPHER_CHAT) { activeTab = SwarmSubTab.CIPHER_CHAT }
-            SubTabButton("Ghost-Stories", activeTab == SwarmSubTab.GHOST_STORIES) { activeTab = SwarmSubTab.GHOST_STORIES }
-            SubTabButton("Matrix-Feed", activeTab == SwarmSubTab.MATRIX_FEED) { activeTab = SwarmSubTab.MATRIX_FEED }
-        }
-
-        Divider(color = Color(0xFF1E2923), thickness = 1.dp)
-
-        when (activeTab) {
-            SwarmSubTab.RADAR -> SwarmRadarView()
-            SwarmSubTab.CIPHER_CHAT -> CipherChatView()
-            SwarmSubTab.GHOST_STORIES -> GhostStoriesView()
-            SwarmSubTab.MATRIX_FEED -> MatrixFeedView()
-        }
-    }
-}
-
-@Composable
-fun RowScope.SubTabButton(text: String, isSelected: Boolean, onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
-        modifier = Modifier.weight(1f).height(38.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = if (isSelected) NeonGiftgruen else Color(0xFF0F1412)
-        ),
-        shape = RoundedCornerShape(10.dp),
-        border = BorderStroke(1.dp, NeonGiftgruen.copy(alpha = if (isSelected) 1f else 0.3f)),
-        contentPadding = PaddingValues(0.dp)
+            .padding(16.dp)
     ) {
         Text(
-            text = text,
-            color = if (isSelected) Color.Black else NeonGiftgruen,
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Bold
+            text = "Swarm & Social Hub",
+            style = MaterialTheme.typography.titleLarge,
+            color = Color.White
         )
-    }
-}
+        Text(
+            text = "Dezentrales P2P Mesh-Ökosystem",
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.Gray
+        )
 
-@Composable
-fun SwarmRadarView() {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxSize()) {
-        TacticalPulseCard {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = "Aktive P2P-Tunnel (Global)", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(text = "Direkte Verbindung zu Nodes weltweit aktiv. Keine Server, keine Cloud.", color = Color.Gray, fontSize = 11.sp)
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Sub-Tab Row
+        ScrollableTabRow(
+            selectedTabIndex = selectedSubTab.ordinal,
+            containerColor = Color(0xFF080808),
+            edgePadding = 0.dp
+        ) {
+            SwarmSubTab.values().forEach { tab ->
+                Tab(
+                    selected = selectedSubTab == tab,
+                    onClick = { selectedSubTab = tab },
+                    text = {
+                        Text(
+                            text = tab.name.replace("_", " "),
+                            color = if (selectedSubTab == tab) NeonGiftgruen else Color.Gray
+                        )
+                    }
+                )
             }
         }
 
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(1f)) {
-            items(listOf("Node_Alpha (Wien - Secure)", "CyberPeer_07 (Global P2P)", "MatrixNode_X (Direct Socket)")) { node ->
+        Spacer(modifier = Modifier.height(16.dp))
+
+        when (selectedSubTab) {
+            SwarmSubTab.RADAR -> {
+                MeshRadarView()
+            }
+            SwarmSubTab.CIPHER_CHAT -> {
+                CipherChatView(
+                    posts = meshPosts,
+                    messageInput = messageInput,
+                    onMessageChange = { messageInput = it },
+                    selectedMediaUri = selectedMediaUri,
+                    onSelectMedia = { mediaLauncher.launch("image/*") },
+                    onSend = {
+                        if (messageInput.isNotBlank() || selectedMediaUri != null) {
+                            GlobalMeshEngine.broadcastToSwarmWithMedia(
+                                context = context,
+                                content = messageInput,
+                                mediaUri = selectedMediaUri,
+                                mediaType = if (selectedMediaUri != null) "MEDIA" else "TEXT",
+                                isEphemeral = false
+                            ) { hash ->
+                                Toast.makeText(context, "Broadcast gesendet! Hash: ${hash.take(8)}...", Toast.LENGTH_SHORT).show()
+                                messageInput = ""
+                                selectedMediaUri = null
+                            }
+                        }
+                    }
+                )
+            }
+            SwarmSubTab.GHOST_STORIES -> {
+                GhostStoriesView(posts = meshPosts)
+            }
+            SwarmSubTab.MATRIX_FEED -> {
+                MatrixFeedView(posts = meshPosts)
+            }
+        }
+    }
+}
+
+@Composable
+fun MeshRadarView() {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        item {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(BorderStroke(1.dp, NeonGiftgruen), RoundedCornerShape(12.dp)),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF121212))
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Mesh-Radar Aktiv", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Suche nach direkten P2P-Nachbarn im lokalen Funkfeld...", style = MaterialTheme.typography.bodyMedium, color = Color.White)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CipherChatView(
+    posts: List<MeshPostEntity>,
+    messageInput: String,
+    onMessageChange: (String) -> Unit,
+    selectedMediaUri: String?,
+    onSelectMedia: () -> Unit,
+    onSend: () -> Unit
+) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(posts) { post ->
                 Card(
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF121C16)),
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, NeonGiftgruen.copy(alpha = 0.2f))
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(BorderStroke(1.dp, NeonGiftgruen.copy(alpha = 0.5f)), RoundedCornerShape(8.dp)),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF0F0F0F))
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(14.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = node, color = Color.White, fontSize = 12.sp)
-                        Text(text = "Online", color = NeonGiftgruen, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text(text = post.senderNode, style = MaterialTheme.typography.bodySmall, color = NeonGiftgruen)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(text = post.content, style = MaterialTheme.typography.bodyMedium, color = Color.White)
+                        if (post.mediaUri != null) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(text = "[Medienanhang vorhanden]", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                        }
                     }
                 }
             }
         }
-    }
-}
 
-@Composable
-fun CipherChatView() {
-    var messageText by remember { mutableStateOf("") }
-    val messages = remember { mutableStateListOf(
-        "Node_Alpha: P2P-Kanal verschlüsselt (AES-256).",
-        "Du: Bereit für den globalen Release!"
-    ) }
+        Spacer(modifier = Modifier.height(8.dp))
 
-    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(messages) { msg ->
-                TacticalPulseCard {
-                    Text(text = msg, color = Color.White, modifier = Modifier.padding(12.dp), fontSize = 12.sp)
-                }
-            }
-        }
-
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             OutlinedTextField(
-                value = messageText,
-                onValueChange = { messageText = it },
-                placeholder = { Text("Verschlüsselte Nachricht...", color = Color.Gray, fontSize = 12.sp) },
+                value = messageInput,
+                onValueChange = onMessageChange,
+                placeholder = { Text("Cipher-Nachricht eingeben...", color = Color.Gray) },
                 modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = NeonGiftgruen,
-                    unfocusedBorderColor = Color.DarkGray,
+                    unfocusedBorderColor = Color.Gray,
                     focusedTextColor = Color.White,
                     unfocusedTextColor = Color.White
                 )
             )
-            Spacer(modifier = Modifier.width(8.dp))
+
+            IconButton(onClick = onSelectMedia) {
+                Icon(Icons.Default.Add, contentDescription = "Medium hinzufügen", tint = NeonGiftgruen)
+            }
+
             Button(
-                onClick = {
-                    if (messageText.isNotBlank()) {
-                        messages.add("Du: $messageText")
-                        messageText = ""
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen),
-                shape = RoundedCornerShape(12.dp)
+                onClick = onSend,
+                colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
             ) {
-                Text("Senden", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                Icon(Icons.Default.Send, contentDescription = "Senden", tint = Color.Black)
             }
         }
     }
 }
 
 @Composable
-fun GhostStoriesView() {
-    val context = LocalContext.current
-    var selectedMediaUri by remember { mutableStateOf<Uri?>(null) }
-    var selectedMediaType by remember { mutableStateOf("TEXT") }
-
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let {
-            selectedMediaUri = it
-            selectedMediaType = if (it.toString().contains("video", ignoreCase = true)) "VIDEO" else "IMAGE"
-            Toast.makeText(context, "Ghost-Payload geladen!", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        Text(text = "Ephemere P2P-Stories (Löschung nach Ansicht)", color = Color.Gray, fontSize = 11.sp)
-
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            items(4) { index ->
-                Box(
-                    modifier = Modifier
-                        .size(70.dp)
-                        .background(Color(0xFF0F1412), RoundedCornerShape(35.dp))
-                        .border(2.dp, NeonGiftgruen, RoundedCornerShape(35.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = "Ghost $index", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                }
-            }
-        }
-
-        TacticalPulseCard {
-            Column(modifier = Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = "LOKALER GHOST CAPTURE", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(text = "Medien aufnehmen und direkt verschlüsselt an den Schwarm übertragen.", color = Color.Gray, fontSize = 11.sp, textAlign = TextAlign.Center)
-                Spacer(modifier = Modifier.height(14.dp))
-                
-                OutlinedButton(
-                    onClick = { launcher.launch("*/*") },
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = NeonGiftgruen),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = null)
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(if (selectedMediaUri == null) "Foto/Video auswählen" else "Mediendatei angehängt")
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Button(
-                    onClick = {
-                        if (selectedMediaUri != null) {
-                            GlobalMeshEngine.broadcastToSwarmWithMedia(
-                                context = context,
-                                content = "[Ghost-Media-Post]",
-                                mediaUri = selectedMediaUri?.toString(),
-                                mediaType = selectedMediaType,
-                                isEphemeral = true
-                            ) { hash ->
-                                Toast.makeText(context, "Ghost gesendet! Hash: ${hash.take(8)}", Toast.LENGTH_SHORT).show()
-                                selectedMediaUri = null
-                            }
-                        } else {
-                            Toast.makeText(context, "Bitte zuerst Medien auswählen!", Toast.LENGTH_SHORT).show()
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(text = "ALS GHOST SENDEN", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun MatrixFeedView() {
-    val context = LocalContext.current
-    val db = remember { JuarisDatabase.getDatabase(context) }
-    val meshPosts by db.meshDao().getAllMeshPosts().collectAsState(initial = emptyList())
-
-    LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+fun GhostStoriesView(posts: List<MeshPostEntity>) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
         item {
-            Text(text = "Dezentraler Matrix-Stream (${meshPosts.size} Einträge)", color = Color.Gray, fontSize = 11.sp)
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(BorderStroke(1.dp, Color(0xFFFF3333)), RoundedCornerShape(12.dp)),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF121212))
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Ghost-Stories (Ephemeral Feed)", style = MaterialTheme.typography.titleMedium, color = Color(0xFFFF3333))
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Ephemere, selbstlöschende P2P-Momente.", style = MaterialTheme.typography.bodyMedium, color = Color.White)
+                }
+            }
         }
+        items(posts.filter { it.isEphemeral }) { post ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(BorderStroke(1.dp, Color(0xFFFF3333).copy(alpha = 0.5f)), RoundedCornerShape(8.dp)),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF0F0F0F))
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(text = post.senderNode, style = MaterialTheme.typography.bodySmall, color = Color(0xFFFF3333))
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(text = post.content, style = MaterialTheme.typography.bodyMedium, color = Color.White)
+                }
+            }
+        }
+    }
+}
 
-        items(meshPosts) { post ->
-            TacticalPulseCard {
-                Column(modifier = Modifier.fillMaxWidth().padding(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(post.senderNode, style = MaterialTheme.typography.bodySmall, color = NeonGiftgruen, fontWeight = FontWeight.Bold)
-                        if (post.isEphemeral) {
-                            Text("⚡ Ghost (Ephemer)", style = MaterialTheme.typography.bodySmall, color = Color(0xFFFF3333))
-                        } else {
-                            Text("🌐 ${post.mediaType}", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                        }
+@Composable
+fun MatrixFeedView(posts: List<MeshPostEntity>) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        item {
+            Text("Global Matrix Feed", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+            Spacer(modifier = Modifier.height(4.dp))
+        }
+        items(posts) { post ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(BorderStroke(1.dp, NeonGiftgruen.copy(alpha = 0.3f)), RoundedCornerShape(6.dp)),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF0A0A0A))
+            ) {
+                Column(modifier = Modifier.padding(10.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = post.senderNode, fontSize = 11.sp, color = NeonGiftgruen)
+                        Text(text = "Hops: ${post.ttlHopCount}", fontSize = 11.sp, color = Color.Gray)
                     }
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(post.content, style = MaterialTheme.typography.bodyLarge, color = Color.White)
-                   
-                    if (!post.mediaUri.isNullOrEmpty()) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(140.dp)
-                                .background(Color.Black, RoundedCornerShape(12.dp))
-                                .border(1.dp, NeonGiftgruen.copy(alpha = 0.4f), RoundedCornerShape(12.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = "▶ Lokales Medium Abspielen", color = NeonGiftgruen, fontSize = 12.sp)
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Hash-ID: ${post.postId.take(16)}... | Hops: ${post.ttlHopCount}", style = MaterialTheme.typography.labelSmall, color = Color.DarkGray)
+                    Text(text = post.content, fontSize = 13.sp, color = Color.White)
                 }
             }
         }
     }
 }
+
 
