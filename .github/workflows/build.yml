@@ -48,6 +48,11 @@ jobs:
           wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
           unzip -q gradle-8.4-bin.zip
 
+      - name: Run Android Lint (Statische Code-Analyse)
+        run: |
+          echo "Scanne den Code nach Fehlern und Problemen..."
+          ./gradle-8.4/bin/gradle lintRelease --stacktrace
+
       - name: Run Unit Tests
         run: |
           echo "Führe Unit-Tests aus..."
@@ -76,5 +81,4 @@ jobs:
           body: "Dieses Release enthält sowohl die .aab-Datei für den Google Play Store als auch die .apk-Datei zum direkten Installieren auf dem Handy."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 
