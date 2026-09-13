@@ -15,4 +15,3 @@ interface MeshDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPost(post: MeshPostEntity)
 }
-
