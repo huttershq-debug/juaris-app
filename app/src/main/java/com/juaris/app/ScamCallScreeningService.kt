@@ -1,3 +1,5 @@
+package com.juaris.app
+
 import android.os.Build
 import android.net.Uri
 import android.provider.ContactsContract
