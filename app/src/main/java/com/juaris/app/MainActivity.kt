@@ -773,6 +773,17 @@ fun PermissionsAuditPage() {
 @Composable
 fun SwarmMeshPage() {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    
+    // Datenbank & Live-Feed laden
+    val db = remember { JuarisDatabase.getDatabase(context) }
+    val postsFlow = remember { db.meshDao().getAllPosts() }
+    val posts by postsFlow.collectAsState(initial = emptyList())
+
+    var inputMessage by remember { mutableStateOf("") }
+    var isEphemeral by remember { mutableStateOf(false) }
+    var statusMessage by remember { mutableStateOf("") }
+
     var scanStatusText by remember { mutableStateOf("Bereit für Hardware-Abgleich") }
     var discoveredDevicesCount by remember { mutableStateOf(0) }
 
@@ -797,11 +808,118 @@ fun SwarmMeshPage() {
         } catch (e: Exception) { "Fehler" }
     }
 
-    LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
         item {
-            Text("P2P-Schwarm & Mesh", style = MaterialTheme.typography.titleLarge, color = Color.White)
-            Text("Dezentraler Austausch von SHA-256 Hashes.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text("P2P-Schwarm & Live-Feed", style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text("Dezentraler Austausch & verschlüsselter Social-Feed.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
+
+        // --- 1. SCHWARM BROADCAST (WhatsApp / Instagram / Snapchat Style) ---
+        item {
+            TacticalPulseCard {
+                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Nachricht in den Schwarm broadcasten", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    
+                    OutlinedTextField(
+                        value = inputMessage,
+                        onValueChange = { inputMessage = it },
+                        label = { Text("Nachricht eingeben...", color = Color.Gray) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = NeonGiftgruen,
+                            unfocusedBorderColor = Color.DarkGray,
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White
+                        )
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                checked = isEphemeral,
+                                onCheckedChange = { isEphemeral = it },
+                                colors = CheckboxDefaults.colors(checkedColor = NeonGiftgruen)
+                            )
+                            Text("Snapchat-Modus (Ephemer)", color = Color.LightGray, fontSize = 12.sp)
+                        }
+
+                        Button(
+                            onClick = {
+                                if (inputMessage.isNotBlank()) {
+                                    GlobalMeshEngine.broadcastToSwarm(
+                                        context = context,
+                                        content = inputMessage,
+                                        isEphemeral = isEphemeral,
+                                        onBlocked = { reason ->
+                                            statusMessage = reason
+                                            Toast.makeText(context, "KI-Blockade: $reason", Toast.LENGTH_SHORT).show()
+                                        },
+                                        onSuccess = { packetId ->
+                                            statusMessage = "Gesendet! ID: ${packetId.take(8)}..."
+                                            Toast.makeText(context, "Erfolgreich in den Schwarm gebroadcastet!", Toast.LENGTH_SHORT).show()
+                                            inputMessage = ""
+                                        }
+                                    )
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
+                        ) {
+                            Text("Broadcast", color = Color.Black, fontWeight = FontWeight.Bold)
+                        }
+                    }
+
+                    if (statusMessage.isNotEmpty()) {
+                        Text(text = statusMessage, color = Color(0xFFFF3333), fontSize = 12.sp)
+                    }
+                }
+            }
+        }
+
+        // --- 2. LIVE FEED DER SCHWARM-BEITRÄGE ---
+        item {
+            Text("Eingehende Schwarm-Pakete (${posts.size})", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+        }
+
+        if (posts.isEmpty()) {
+            item {
+                TacticalPulseCard {
+                    Text("Keine aktiven Pakete im lokalen Schwarm empfangen. Starte einen Broadcast!", color = Color.Gray, fontSize = 13.sp)
+                }
+            }
+        } else {
+            items(posts) { post ->
+                TacticalPulseCard {
+                    Column(modifier = Modifier.fillMaxWidth().padding(4.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(text = post.senderNode, color = NeonGiftgruen, style = MaterialTheme.typography.bodySmall)
+                            if (post.isEphemeral) {
+                                Text(text = "🔥 Ephemer", color = Color(0xFFFF9900), style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(text = post.content, color = Color.White)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Hops: ${post.ttlHopCount} | ID: ${post.postId.take(8)}",
+                            color = Color.Gray,
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+                }
+            }
+        }
+
+        // --- 3. HARDWARE & BLUETOOTH STATUS ---
         item {
             TacticalPulseCard {
                 Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -827,17 +945,31 @@ fun SwarmMeshPage() {
                 }
             }
         }
+
+        // --- 4. QUANTUM HASH GENERATOR ---
         item {
             TacticalPulseCard {
                 Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Quantum-Hash Generator", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                    OutlinedTextField(value = testInputText, onValueChange = { testInputText = it }, label = { Text("Signatur-Text", color = Color.Gray) }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(
+                        value = testInputText,
+                        onValueChange = { testInputTest = it },
+                        label = { Text("Signatur-Text", color = Color.Gray) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = NeonGiftgruen,
+                            unfocusedBorderColor = Color.DarkGray,
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White
+                        )
+                    )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text("SHA-256 Hash:", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                     Text(generatedHash, style = MaterialTheme.typography.bodyMedium, color = NeonGiftgruen)
                 }
             }
         }
+
         item {
             Spacer(modifier = Modifier.height(16.dp))
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -846,6 +978,7 @@ fun SwarmMeshPage() {
         }
     }
 }
+
 
 @Composable
 fun PrivacyAndLegalContent() {
