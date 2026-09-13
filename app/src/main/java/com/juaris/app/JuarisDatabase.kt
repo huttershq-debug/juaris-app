@@ -5,9 +5,11 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [SecurityLogEntity::class], version = 1, exportSchema = false)
+@Database(entities = [SecurityLogEntity::class, MeshPostEntity::class], version = 2, exportSchema = false)
 abstract class JuarisDatabase : RoomDatabase() {
+
     abstract fun securityLogDao(): SecurityLogDao
+    abstract fun meshDao(): MeshDao
 
     companion object {
         @Volatile
@@ -18,11 +20,14 @@ abstract class JuarisDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     JuarisDatabase::class.java,
-                    "juaris_secure_db"
-                ).build()
+                    "juaris_secure_database"
+                )
+                .fallbackToDestructiveMigration()
+                .build()
                 INSTANCE = instance
                 instance
             }
         }
     }
 }
+
