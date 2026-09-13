@@ -1,3 +1,5 @@
+package com.juaris.app
+
 import android.content.Context
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.*
@@ -16,7 +18,6 @@ class NearbyMeshManager(
 
     private val connectionLifecycleCallback = object : ConnectionLifecycleCallback() {
         override fun onConnectionInitiated(endpointId: String, info: ConnectionInfo) {
-            // Automatisch annehmen oder per Dialog bestätigen
             connectionsClient.acceptConnection(endpointId, payloadCallback)
         }
 
@@ -46,7 +47,6 @@ class NearbyMeshManager(
 
     private val endpointDiscoveryCallback = object : EndpointDiscoveryCallback() {
         override fun onEndpointFound(endpointId: String, info: DiscoveredEndpointInfo) {
-            // Gefundenes Gerät direkt verbinden wollen
             connectionsClient.requestConnection(myEndpointName, endpointId, connectionLifecycleCallback)
         }
 
@@ -80,9 +80,13 @@ class NearbyMeshManager(
     }
 
     fun stopMeshNode() {
-        connectionsClient.stopAdvertising()
-        connectionsClient.stopDiscovery()
-        connectionsClient.stopAllEndpoints()
+        try {
+            connectionsClient.stopAdvertising()
+            connectionsClient.stopDiscovery()
+            connectionsClient.stopAllEndpoints()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         connectedEndpoints.clear()
     }
 }
