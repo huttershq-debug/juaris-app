@@ -1,39 +1,73 @@
 package com.juaris.app
 
 import android.util.Base64
-import java.security.MessageDigest
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair
+import org.bouncycastle.crypto.KeyGenerationParameters
+import org.bouncycastle.crypto.params.ParametersWithRandom
+import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumKeyPairGenerator
+import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumParameters
+import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumPrivateKeyParameters
+import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumPublicKeyParameters
+import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumSigner
 import java.security.SecureRandom
 
-/**
- * QuantumEngine für Juaris
- * Verantwortlich für post-quantensichere Signatur-Prüfung und lokale Hash-Generierung 
- * im Offline-P2P-Schwarmnetzwerk (basierend auf NIST ML-DSA / Lattice-Standards).
- */
-object QuantumEngine {
+class QuantumEngine {
 
-    private val secureRandom = SecureRandom()
+    private val random = SecureRandom()
+    // NIST Standard ML-DSA-44 (Dilithium2) Post-Quantum Parameter
+    private val parameters = DilithiumParameters.dilithium2
+
+    data class PostQuantumKeyPair(
+        val publicKeyBase64: String,
+        val privateKeyBytes: ByteArray,
+        val publicKeyBytes: ByteArray
+    )
 
     /**
-     * Generiert einen quantensicheren, anonymisierten Hash für eine erkannte Bedrohung,
-     * damit dieser sicher im P2P-Schwarm geteilt werden kann, ohne private Daten zu leaken.
+     * Erzeugt ein echtes post-quantes Schlüsselpaar (NIST ML-DSA / Dilithium)
      */
-    fun generateThreatSignature(rawData: String): String {
-        val digest = MessageDigest.getInstance("SHA-256")
-        val salt = bytearray(16).apply { secureRandom.nextBytes(this) }
-        digest.update(salt)
-        val hashBytes = digest.digest(rawData.toByteArray(Charsets.UTF_8))
-        return Base64.encodeToString(hashBytes, Base64.NO_WRAP)
+    fun generatePostQuantumKeyPair(): PostQuantumKeyPair {
+        val keyGen = DilithiumKeyPairGenerator()
+        keyGen.init(KeyGenerationParameters(random, 128))
+        val keyPair: AsymmetricCipherKeyPair = keyGen.generateKeyPair()
+
+        val pubParams = keyPair.public as DilithiumPublicKeyParameters
+        val privParams = keyPair.private as DilithiumPrivateKeyParameters
+
+        val pubBytes = pubParams.encoded
+        val privBytes = privParams.encoded
+
+        return PostQuantumKeyPair(
+            publicKeyBase64 = Base64.encodeToString(pubBytes, Base64.NO_WRAP),
+            privateKeyBytes = privBytes,
+            publicKeyBytes = pubBytes
+        )
     }
 
     /**
-     * Überprüft die Integrität einer empfangenen Schwarm-Signatur 
-     * zum Schutz vor gefälschten Spam-Warnungen im Mesh-Netzwerk.
+     * Signiert Bedrohungs- oder Schwarm-Daten mit echtem Post-Quantum ML-DSA
      */
-    fun verifySwarmSignature(signature: String, expectedPattern: String): Boolean {
-        // Strikte Verifizierung der Signatur-Struktur für den Offline-Schwarm
-        if (signature.isBlank()) return false
-        return signature.length >= 32 && !signature.contains("CORRUPTED")
+    fun signThreatData(privateKeyBytes: ByteArray, payload: ByteArray): String {
+        val privateKey = DilithiumPrivateKeyParameters(parameters, privateKeyBytes)
+        val signer = DilithiumSigner()
+        signer.init(true, ParametersWithRandom(privateKey, random))
+        val signature = signer.generateSignature(payload)
+        return Base64.encodeToString(signature, Base64.NO_WRAP)
     }
 
-    private fun bytearray(size: Int): ByteArray = ByteArray(size)
+    /**
+     * Verifiziert eine Post-Quantum Signatur eines Schwarm-Nodes
+     */
+    fun verifySwarmSignature(publicKeyBytes: ByteArray, payload: ByteArray, base64Signature: String): Boolean {
+        return try {
+            val publicKey = DilithiumPublicKeyParameters(parameters, publicKeyBytes)
+            val signature = Base64.decode(base64Signature, Base64.NO_WRAP)
+            val verifier = DilithiumSigner()
+            verifier.init(false, publicKey)
+            verifier.verifySignature(payload, signature)
+        } catch (e: Exception) {
+            false
+        }
+    }
 }
+
