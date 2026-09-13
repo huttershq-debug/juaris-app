@@ -30,6 +30,17 @@ class SecurityEngine(private val context: Context) {
         ALLOW,
         BLOCK
     }
-}
+
+    enum class SmsSecurityResult {
+        SAFE,
+        SPAM,
+        PHISHING
+    }
+
+    enum class EmailSecurityResult {
+        SAFE,
+        SPAM,
+        PHISHING
+    }
 
 
