@@ -24,7 +24,16 @@ class SecurityEngine(private val context: Context) {
             CallSecurityResult.ALLOW
         }
     }
-} // <--- Diese schließende Klammer hat gefehlt!
+
+    fun analyzeIncomingEmail(emailContent: String): EmailSecurityResult {
+        val lower = emailContent.lowercase()
+        return when {
+            lower.contains("phishing") || lower.contains("malware") -> EmailSecurityResult.QUARANTINE_AND_ALERT
+            lower.contains("spam") -> EmailSecurityResult.SPAM
+            else -> EmailSecurityResult.SAFE
+        }
+    }
+}
 
 enum class CallSecurityResult {
     ALLOW,
@@ -40,7 +49,8 @@ enum class SmsSecurityResult {
 enum class EmailSecurityResult {
     SAFE,
     SPAM,
-    PHISHING
+    PHISHING,
+    QUARANTINE_AND_ALERT,
+    BLOCK
 }
-
 
