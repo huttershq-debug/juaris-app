@@ -1,35 +1,33 @@
 package com.juaris.app.ui
 
-import androidx.core.content.ContextCompact
-import androidx.compass.ui.platform.LocalCintext
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ContextCompat
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.juaris.app.GlobalMeshEngine
 import com.juaris.app.JuarisDatabase
 import com.juaris.app.MeshPostEntity
-import kotlinx.coroutines.launch
 
 @Composable
-fun SwarmMeshPage(modifier: Modifier = Modifier) {
+fun SwarmMeshPageUi(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    
-    // Datenbank & DAO laden
+   
+    // Datenbank & DAO laden (mit korrekter DAO-Methode getAllActivePosts())
     val db = remember { JuarisDatabase.getDatabase(context) }
-    val postsFlow = remember { db.meshDao().getAllPosts() }
+    val postsFlow = remember { db.meshDao().getAllActivePosts() }
     val posts by postsFlow.collectAsState(initial = emptyList())
 
     var inputMessage by remember { mutableStateOf("") }
     var isEphemeral by remember { mutableStateOf(false) }
-    var statusMessage by remember { val state = mutableStateOf(""); state }
+    var statusMessage by remember { mutableStateOf("") }
 
     Column(
         modifier = modifier
@@ -42,7 +40,7 @@ fun SwarmMeshPage(modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.titleLarge,
             color = Color(0xFF00FF66)
         )
-        
+       
         Spacer(modifier = Modifier.height(8.dp))
 
         // --- INPUT BEREICH (Instagram / Snapchat Style) ---
@@ -63,10 +61,11 @@ fun SwarmMeshPage(modifier: Modifier = Modifier) {
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             // Snapchat-Modus (Ephemer / Selbstzerstörung)
-            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(
                     checked = isEphemeral,
                     onCheckedChange = { isEphemeral = it },
@@ -105,7 +104,7 @@ fun SwarmMeshPage(modifier: Modifier = Modifier) {
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-        Divider(color = Color.DarkGray)
+        HorizontalDivider(color = Color.DarkGray)
         Spacer(modifier = Modifier.height(16.dp))
 
         // --- LIVE FEED DER SCHWARM-BEITRÄGE (WhatsApp / Instagram Feed Style) ---
