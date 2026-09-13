@@ -12,7 +12,6 @@ class SecurityEngine(private val context: Context) {
 
     fun isNumberBlocked(phoneNumber: String): Boolean {
         val blockedSet = getBlockedNumbers()
-        // Direkter Abgleich oder exaktes Pattern-Matching
         return blockedSet.any { pattern ->
             phoneNumber.contains(pattern) || phoneNumber == pattern
         }
@@ -25,22 +24,23 @@ class SecurityEngine(private val context: Context) {
             CallSecurityResult.ALLOW
         }
     }
+} // <--- Diese schließende Klammer hat gefehlt!
 
-    enum class CallSecurityResult {
-        ALLOW,
-        BLOCK
-    }
+enum class CallSecurityResult {
+    ALLOW,
+    BLOCK
+}
 
-    enum class SmsSecurityResult {
-        SAFE,
-        SPAM,
-        PHISHING
-    }
+enum class SmsSecurityResult {
+    SAFE,
+    SPAM,
+    PHISHING
+}
 
-    enum class EmailSecurityResult {
-        SAFE,
-        SPAM,
-        PHISHING
-    }
+enum class EmailSecurityResult {
+    SAFE,
+    SPAM,
+    PHISHING
+}
 
 
