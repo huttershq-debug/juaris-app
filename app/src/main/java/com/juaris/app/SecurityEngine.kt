@@ -1,58 +1,35 @@
 package com.juaris.app
 
-import android.util.Log
+import android.content.Context
 
-enum class SecurityStatus {
-    SAFE, BLOCK
-}
+class SecurityEngine(private val context: Context) {
 
-enum class CallSecurityResult { ALLOW, BLOCK }
-enum class SmsSecurityResult { ALLOW, QUARANTINE_AND_ALERT }
-enum class EmailSecurityResult { SAFE, WARN_USER, BLOCK }
+    private val prefs = context.getSharedPreferences("juaris_secure_vault", Context.MODE_PRIVATE)
 
-object SecurityEngine {
-
-    private const val TAG = "JuarisSecurity"
-    private val blockedNumbers = setOf("+43123456789", "+49987654321")
-
-    fun evaluate(): SecurityStatus {
-        Log.d(TAG, "Evaluating security status")
-        return SecurityStatus.SAFE
+    fun getBlockedNumbers(): Set<String> {
+        return prefs.getStringSet("blocked_numbers", emptySet()) ?: emptySet()
     }
 
-    fun analyzeText(text: String): SecurityStatus {
-        val analyzer = LocalPhishingAnalyzer()
-        val result = analyzer.analyzeText(text)
-        return if (result.isSuspicious) SecurityStatus.BLOCK else SecurityStatus.SAFE
+    fun isNumberBlocked(phoneNumber: String): Boolean {
+        val blockedSet = getBlockedNumbers()
+        // Direkter Abgleich oder exaktes Pattern-Matching
+        return blockedSet.any { pattern ->
+            phoneNumber.contains(pattern) || phoneNumber == pattern
+        }
     }
 
     fun analyzeIncomingCall(phoneNumber: String): CallSecurityResult {
-        Log.d(TAG, "Prüfe Anruf von: $phoneNumber")
-        return if (blockedNumbers.contains(phoneNumber)) {
+        return if (isNumberBlocked(phoneNumber)) {
             CallSecurityResult.BLOCK
         } else {
             CallSecurityResult.ALLOW
         }
     }
 
-    fun analyzeIncomingSms(sender: String, messageBody: String): SmsSecurityResult {
-        val analyzer = LocalPhishingAnalyzer()
-        val result = analyzer.analyzeText(messageBody)
-        return if (result.isSuspicious) {
-            SmsSecurityResult.QUARANTINE_AND_ALERT
-        } else {
-            SmsSecurityResult.ALLOW
-        }
-    }
-
-    fun analyzeIncomingEmail(sender: String, subject: String, body: String): EmailSecurityResult {
-        val analyzer = LocalPhishingAnalyzer()
-        val result = analyzer.analyzeText("$subject $body")
-        return if (result.isSuspicious) {
-            EmailSecurityResult.BLOCK
-        } else {
-            EmailSecurityResult.SAFE
-        }
+    enum class CallSecurityResult {
+        ALLOW,
+        BLOCK
     }
 }
+
 
