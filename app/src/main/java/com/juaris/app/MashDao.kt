@@ -12,6 +12,10 @@ interface MeshDao {
     @Query("SELECT * FROM mesh_posts ORDER BY timestamp DESC")
     fun getAllActivePosts(): Flow<List<MeshPostEntity>>
 
+    @Query("SELECT * FROM mesh_posts ORDER BY timestamp DESC")
+    fun getAllPosts(): Flow<List<MeshPostEntity>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPost(post: MeshPostEntity)
 }
+
