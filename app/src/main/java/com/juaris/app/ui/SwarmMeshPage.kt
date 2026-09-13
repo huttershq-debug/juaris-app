@@ -26,7 +26,7 @@ import com.juaris.app.GlobalMeshEngine
 fun SwarmMeshPage() {
     val context = LocalContext.current
     val db = remember { JuarisDatabase.getDatabase(context) }
-    
+   
     val meshPosts by db.meshDao().getAllMeshPosts().collectAsState(initial = emptyList())
 
     var postInputText by remember { mutableStateOf("") }
@@ -62,7 +62,7 @@ fun SwarmMeshPage() {
             TacticalPulseCard {
                 Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Neuen Schwarm-Beitrag erstellen", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                    
+                   
                     OutlinedTextField(
                         value = postInputText,
                         onValueChange = { postInputText = it },
@@ -147,7 +147,7 @@ fun SwarmMeshPage() {
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(post.content, style = MaterialTheme.typography.bodyLarge, color = Color.White)
-                    
+                   
                     if (!post.mediaUri.isNullOrEmpty()) {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text("📎 Mediendatei lokal verknüpft", style = MaterialTheme.typography.bodySmall, color = NeonGiftgruen)
@@ -160,4 +160,3 @@ fun SwarmMeshPage() {
         }
     }
 }
-
