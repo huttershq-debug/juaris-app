@@ -20,10 +20,33 @@ object GlobalMeshEngine {
         }
     }
 
-    // Erweiterte Sende-Funktion mit direkter Anbindung an den LocalAICore
-    fun broadcastToSwarmWithAIValidation(
+    // --- STANDARD BROADCAST (NUR TEXT) - JETZT AUTOMATISCH GESICHERT ---
+    fun broadcastToSwarm(
         context: Context,
-        aiCore: LocalAICore,
+        content: String,
+        isEphemeral: Boolean,
+        onBlocked: (String) -> Unit = {},
+        onSuccess: (String) -> Unit
+    ) {
+        executeSecuredBroadcast(context, content, null, "TEXT", isEphemeral, onBlocked, onSuccess)
+    }
+
+    // --- ERWEITERTER BROADCAST FÜR MEDIEN - EBENFALLS AUTOMATISCH GESICHERT ---
+    fun broadcastToSwarmWithMedia(
+        context: Context,
+        content: String,
+        mediaUri: String?,
+        mediaType: String,
+        isEphemeral: Boolean,
+        onBlocked: (String) -> Unit = {},
+        onSuccess: (String) -> Unit
+    ) {
+        executeSecuredBroadcast(context, content, mediaUri, mediaType, isEphemeral, onBlocked, onSuccess)
+    }
+
+    // Das absolute Herzstück: Hier MUSS absolut JEDER Broadcast durch. Kein Entkommen!
+    private fun executeSecuredBroadcast(
+        context: Context,
         content: String,
         mediaUri: String?,
         mediaType: String,
@@ -31,38 +54,19 @@ object GlobalMeshEngine {
         onBlocked: (String) -> Unit,
         onSuccess: (String) -> Unit
     ) {
-        // 1. Lokale AGI-Prüfung über den LocalAICore ausführen
+        // AGI-Core wird automatisch initialisiert – vollständige Abdeckung im gesamten System
+        val aiCore = LocalAICore(context)
+
+        // 1. Unbestechliche AGI-Inhaltsprüfung
         val isContentSafe = aiCore.evaluateContentSafety(content, mediaUri)
 
         if (!isContentSafe) {
             aiCore.triggerAutonomousCountermeasure()
-            onBlocked("AGI-Sicherheits-Stopp: Inhalt wurde lokal als unzulässig bewertet.")
+            onBlocked("AGI-Sicherheits-Stopp: Inhalt wurde zentral als unzulässig bewertet und blockiert.")
             return
         }
 
-        // 2. Wenn sicher: Normaler Broadcast mit den übergebenen Parametern
-        broadcastToSwarmWithMedia(context, content, mediaUri, mediaType, isEphemeral, onSuccess)
-    }
-
-    // Standard Broadcast (nur Text)
-    fun broadcastToSwarm(
-        context: Context,
-        content: String,
-        isEphemeral: Boolean,
-        onSuccess: (String) -> Unit
-    ) {
-        broadcastToSwarmWithMedia(context, content, null, "TEXT", isEphemeral, onSuccess)
-    }
-
-    // Erweiterter Broadcast für Medien (Fotos & Videos im Instagram-/Snapchat-Stil)
-    fun broadcastToSwarmWithMedia(
-        context: Context,
-        content: String,
-        mediaUri: String?,
-        mediaType: String,
-        isEphemeral: Boolean,
-        onSuccess: (String) -> Unit
-    ) {
+        // 2. Erst nach bestandener AGI-Prüfung erfolgt der Schreibvorgang und Mesh-Versand
         val db = JuarisDatabase.getDatabase(context)
         val packetId = generatePacketHash(content + (mediaUri ?: "") + System.currentTimeMillis())
         val nodeName = "Juaris-Node-" + android.os.Build.MODEL
