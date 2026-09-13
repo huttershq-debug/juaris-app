@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,12 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.juaris.app.JuarisDatabase
 import com.juaris.app.GlobalMeshEngine
 
-// Rechtlich saubere, eigenständige Juaris-Bezeichnungen
 enum class SwarmSubTab {
     RADAR, CIPHER_CHAT, GHOST_STORIES, MATRIX_FEED
 }
@@ -42,7 +41,6 @@ fun SwarmMeshPage() {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        // --- HAUPTÜBERSCHRIFT ---
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -62,7 +60,6 @@ fun SwarmMeshPage() {
             )
         }
 
-        // --- DIE 4 UNTERPUNKTE (RECHTLICH SICHER) ---
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -75,7 +72,6 @@ fun SwarmMeshPage() {
 
         Divider(color = Color(0xFF1E2923), thickness = 1.dp)
 
-        // --- INHALT JE NACH AUSGEWÄHLTEM BEREICH ---
         when (activeTab) {
             SwarmSubTab.RADAR -> SwarmRadarView()
             SwarmSubTab.CIPHER_CHAT -> CipherChatView()
@@ -85,7 +81,6 @@ fun SwarmMeshPage() {
     }
 }
 
-// Hilfs-Button für die Unterpunkte
 @Composable
 fun RowScope.SubTabButton(text: String, isSelected: Boolean, onClick: () -> Unit) {
     Button(
@@ -107,15 +102,14 @@ fun RowScope.SubTabButton(text: String, isSelected: Boolean, onClick: () -> Unit
     }
 }
 
-// --- BEREICH 1: MESH RADAR ---
 @Composable
 fun SwarmRadarView() {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxSize()) {
         TacticalPulseCard {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = "Aktive P2P-Tunnel (Global)", color = Color.White, fontWeight = FontWeight.Bold, fontSize: 13.sp)
+                Text(text = "Aktive P2P-Tunnel (Global)", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(text = "Direkte Verbindung zu Nodes weltweit aktiv. Keine Server, keine Cloud.", color = Color.Gray, fontSize: 11.sp)
+                Text(text = "Direkte Verbindung zu Nodes weltweit aktiv. Keine Server, keine Cloud.", color = Color.Gray, fontSize = 11.sp)
             }
         }
 
@@ -131,8 +125,8 @@ fun SwarmRadarView() {
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = node, color = Color.White, fontSize: 12.sp)
-                        Text(text = "Online", color = NeonGiftgruen, fontSize: 11.sp, fontWeight = FontWeight.Bold)
+                        Text(text = node, color = Color.White, fontSize = 12.sp)
+                        Text(text = "Online", color = NeonGiftgruen, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -140,7 +134,6 @@ fun SwarmRadarView() {
     }
 }
 
-// --- BEREICH 2: CIPHER-CHAT (Direkter P2P Chat) ---
 @Composable
 fun CipherChatView() {
     var messageText by remember { mutableStateOf("") }
@@ -153,7 +146,7 @@ fun CipherChatView() {
         LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(messages) { msg ->
                 TacticalPulseCard {
-                    Text(text = msg, color = Color.White, modifier = Modifier.padding(12.dp), fontSize: 12.sp)
+                    Text(text = msg, color = Color.White, modifier = Modifier.padding(12.dp), fontSize = 12.sp)
                 }
             }
         }
@@ -162,7 +155,7 @@ fun CipherChatView() {
             OutlinedTextField(
                 value = messageText,
                 onValueChange = { messageText = it },
-                placeholder = { Text("Verschlüsselte Nachricht...", color = Color.Gray, fontSize: 12.sp) },
+                placeholder = { Text("Verschlüsselte Nachricht...", color = Color.Gray, fontSize = 12.sp) },
                 modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -183,13 +176,12 @@ fun CipherChatView() {
                 colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Senden", color = Color.Black, fontWeight = FontWeight.Bold, fontSize: 11.sp)
+                Text("Senden", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 11.sp)
             }
         }
     }
 }
 
-// --- BEREICH 3: GHOST-STORIES (Ephemerer Medien-Capture) ---
 @Composable
 fun GhostStoriesView() {
     val context = LocalContext.current
@@ -207,7 +199,7 @@ fun GhostStoriesView() {
     }
 
     Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        Text(text = "Ephemere P2P-Stories (Löschung nach Ansicht)", color = Color.Gray, fontSize: 11.sp)
+        Text(text = "Ephemere P2P-Stories (Löschung nach Ansicht)", color = Color.Gray, fontSize = 11.sp)
 
         LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             items(4) { index ->
@@ -218,16 +210,16 @@ fun GhostStoriesView() {
                         .border(2.dp, NeonGiftgruen, RoundedCornerShape(35.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "Ghost $index", color = Color.White, fontSize: 10.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "Ghost $index", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
 
         TacticalPulseCard {
             Column(modifier = Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = "LOKALER GHOST CAPTURE", color = Color.White, fontWeight = FontWeight.Bold, fontSize: 14.sp)
+                Text(text = "LOKALER GHOST CAPTURE", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 Spacer(modifier = Modifier.height(6.dp))
-                Text(text = "Medien aufnehmen und direkt verschlüsselt an den Schwarm übertragen.", color = Color.Gray, fontSize: 11.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                Text(text = "Medien aufnehmen und direkt verschlüsselt an den Schwarm übertragen.", color = Color.Gray, fontSize = 11.sp, textAlign = TextAlign.Center)
                 Spacer(modifier = Modifier.height(14.dp))
                 
                 OutlinedButton(
@@ -263,14 +255,13 @@ fun GhostStoriesView() {
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(text = "ALS GHOST SENDEN", color = Color.Black, fontWeight = FontWeight.Bold, fontSize: 12.sp)
+                    Text(text = "ALS GHOST SENDEN", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 }
             }
         }
     }
 }
 
-// --- BEREICH 4: MATRIX-FEED (Datenbank-gestützter Live Feed) ---
 @Composable
 fun MatrixFeedView() {
     val context = LocalContext.current
@@ -279,7 +270,7 @@ fun MatrixFeedView() {
 
     LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item {
-            Text(text = "Dezentraler Matrix-Stream (${meshPosts.size} Einträge)", color = Color.Gray, fontSize: 11.sp)
+            Text(text = "Dezentraler Matrix-Stream (${meshPosts.size} Einträge)", color = Color.Gray, fontSize = 11.sp)
         }
 
         items(meshPosts) { post ->
@@ -306,7 +297,7 @@ fun MatrixFeedView() {
                                 .border(1.dp, NeonGiftgruen.copy(alpha = 0.4f), RoundedCornerShape(12.dp)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(text = "▶ Lokales Medium Abspielen", color = NeonGiftgruen, fontSize: 12.sp)
+                            Text(text = "▶ Lokales Medium Abspielen", color = NeonGiftgruen, fontSize = 12.sp)
                         }
                     }
 
