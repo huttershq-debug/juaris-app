@@ -4,23 +4,30 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.juaris.app.AirGestureCore
+import com.juaris.app.R
 import kotlinx.coroutines.launch
 
 val NeonGiftgruen = Color(0xFF00FF66)
@@ -84,23 +91,13 @@ fun DashboardScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color.Black)
             .padding(16.dp)
     ) {
-        Text(
-            text = "Juaris Security Command Center",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            color = NeonGiftgruen
-        )
-        Spacer(modifier = Modifier.height(4.dp))
+        // DER NEUE EDLE HOLOGRAMM-HEADER ALS BLICKFANG OBEN
+        JuarisHeroHeader(currentPage = pagerState.currentPage)
 
-        Text(
-            text = "Aktiver Tab: ${pagerState.currentPage + 1} / 10",
-            fontSize = 14.sp,
-            color = Color.Gray
-        )
-       
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         HorizontalPager(
             state = pagerState,
@@ -124,6 +121,64 @@ fun DashboardScreen() {
             } else {
                 TabContentScreen(tabIndex = page + 1)
             }
+        }
+    }
+}
+
+@Composable
+fun JuarisHeroHeader(currentPage: Int) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(180.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(Color(0xFF0A140F), Color(0xFF020503))
+                )
+            )
+            .border(
+                width = 1.dp,
+                brush = Brush.horizontalGradient(
+                    colors = listOf(NeonGiftgruen, Color(0xFF00FFCC), NeonGiftgruen)
+                ),
+                shape = RoundedCornerShape(20.dp)
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(12.dp)
+        ) {
+            // Hologramm-Avatar aus deinen Ressourcen
+            Image(
+                painter = painterResource(id = R.drawable.hologram_avatar),
+                contentDescription = "Juaris Hologramm",
+                modifier = Modifier.size(56.dp)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Der fette Markenname
+            Text(
+                text = "JUARIS",
+                color = Color.White,
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 6.sp
+            )
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            // Dynamischer Status mit aktuellem Tab
+            Text(
+                text = "SECURITY CENTER • TAB ${currentPage + 1} / 10",
+                color = NeonGiftgruen,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.5.sp
+            )
         }
     }
 }
@@ -234,4 +289,5 @@ fun AirGestureControlView(isGestureActive: Boolean, debugText: String, onToggle:
         }
     }
 }
+
 
