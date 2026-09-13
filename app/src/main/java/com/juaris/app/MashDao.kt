@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 interface MeshDao {
 
     @Query("SELECT * FROM mesh_posts ORDER BY timestamp DESC")
-    fun getAllPosts(): Flow<List<MeshPostEntity>>
+    fun getAllActivePosts(): Flow<List<MeshPostEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPost(post: MeshPostEntity)
