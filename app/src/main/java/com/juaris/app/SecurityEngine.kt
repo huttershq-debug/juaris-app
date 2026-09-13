@@ -25,6 +25,15 @@ class SecurityEngine(private val context: Context) {
         }
     }
 
+    fun analyzeIncomingSms(smsText: String): SmsSecurityResult {
+        val lower = smsText.lowercase()
+        return when {
+            lower.contains("phishing") || lower.contains("malware") -> SmsSecurityResult.QUARANTINE_AND_ALERT
+            lower.contains("spam") -> SmsSecurityResult.SPAM
+            else -> SmsSecurityResult.SAFE
+        }
+    }
+
     fun analyzeIncomingEmail(emailContent: String): EmailSecurityResult {
         val lower = emailContent.lowercase()
         return when {
@@ -37,13 +46,16 @@ class SecurityEngine(private val context: Context) {
 
 enum class CallSecurityResult {
     ALLOW,
-    BLOCK
+    BLOCK,
+    QUARANTINE_AND_ALERT
 }
 
 enum class SmsSecurityResult {
     SAFE,
     SPAM,
-    PHISHING
+    PHISHING,
+    QUARANTINE_AND_ALERT,
+    BLOCK
 }
 
 enum class EmailSecurityResult {
