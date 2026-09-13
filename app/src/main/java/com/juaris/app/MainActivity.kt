@@ -130,6 +130,13 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// Hilfsfunktion zum sicheren Finden der Activity aus dem Compose Context
+private fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is android.content.ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
+
 @Composable
 fun WelcomeScreen() {
     Box(
@@ -179,7 +186,6 @@ fun WelcomeScreen() {
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit) {
     val context = LocalContext.current
-    val activity = context as? Activity
     var isBillingActive by remember { mutableStateOf(false) }
 
     val billingManager = remember {
@@ -222,8 +228,8 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 
             Button(
                 onClick = {
-                    activity?.let {
-                        billingManager.launchBillingFlow(it)
+                    context.findActivity()?.let { act ->
+                        billingManager.launchBillingFlow(act)
                     }
                 },
                 modifier = Modifier
@@ -242,7 +248,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                 )
             }
 
-            // Nur im Debug-Build aktivierbarer Test-Bypass für dich als Entwickler
             if (com.juaris.app.BuildConfig.DEBUG) {
                 Spacer(modifier = Modifier.height(24.dp))
                 OutlinedButton(
@@ -798,7 +803,6 @@ fun PermissionsAuditPage() {
 @Composable
 fun SwarmMeshPage() {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
    
     val db = remember { JuarisDatabase.getDatabase(context) }
     val postsFlow = remember { db.meshDao().getAllActivePosts() }
@@ -822,7 +826,7 @@ fun SwarmMeshPage() {
                 discoveredDevicesCount = (discoveredDevicesCount - 1).coerceAtLeast(0)
                 scanStatusText = "Node getrennt: $endpointId"
             },
-            onMessageReceived = { endpointId, msg ->
+            onMessageReceived = { _, msg ->
                 GlobalMeshEngine.broadcastToSwarm(
                     context = context,
                     content = msg,
