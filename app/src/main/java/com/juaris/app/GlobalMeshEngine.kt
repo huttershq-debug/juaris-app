@@ -1,93 +1,19 @@
 package com.juaris.app
 
 import android.content.Context
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.security.MessageDigest
 import java.util.UUID
 
 object GlobalMeshEngine {
-
-    // Erzeugt einen quantensicheren SHA-256 Hash für das globale P2P-Paket
-    fun generatePacketHash(payload: String): String {
-        return try {
-            val bytes = MessageDigest.getInstance("SHA-256").digest(payload.toByteArray())
-            bytes.joinToString("") { "%02x".format(it) }
-        } catch (e: Exception) {
-            UUID.randomUUID().toString()
-        }
-    }
-
-    // --- STANDARD BROADCAST (NUR TEXT) - JETZT AUTOMATISCH GESICHERT ---
     fun broadcastToSwarm(
         context: Context,
         content: String,
         isEphemeral: Boolean,
-        onBlocked: (String) -> Unit = {},
-        onSuccess: (String) -> Unit
-    ) {
-        executeSecuredBroadcast(context, content, null, "TEXT", isEphemeral, onBlocked, onSuccess)
-    }
-
-    // --- ERWEITERTER BROADCAST FÜR MEDIEN - EBENFALLS AUTOMATISCH GESICHERT ---
-    fun broadcastToSwarmWithMedia(
-        context: Context,
-        content: String,
-        mediaUri: String?,
-        mediaType: String,
-        isEphemeral: Boolean,
-        onBlocked: (String) -> Unit = {},
-        onSuccess: (String) -> Unit
-    ) {
-        executeSecuredBroadcast(context, content, mediaUri, mediaType, isEphemeral, onBlocked, onSuccess)
-    }
-
-    // Das absolute Herzstück: Hier MUSS absolut JEDER Broadcast durch. Kein Entkommen!
-    private fun executeSecuredBroadcast(
-        context: Context,
-        content: String,
-        mediaUri: String?,
-        mediaType: String,
-        isEphemeral: Boolean,
         onBlocked: (String) -> Unit,
         onSuccess: (String) -> Unit
     ) {
-        // AGI-Core wird automatisch initialisiert – vollständige Abdeckung im gesamten System
-        val aiCore = LocalAICore(context)
-
-        // 1. Unbestechliche AGI-Inhaltsprüfung
-        val isContentSafe = aiCore.evaluateContentSafety(content, mediaUri)
-
-        if (!isContentSafe) {
-            aiCore.triggerAutonomousCountermeasure()
-            onBlocked("AGI-Sicherheits-Stopp: Inhalt wurde zentral als unzulässig bewertet und blockiert.")
-            return
-        }
-
-        // 2. Erst nach bestandener AGI-Prüfung erfolgt der Schreibvorgang und Mesh-Versand
-        val db = JuarisDatabase.getDatabase(context)
-        val packetId = generatePacketHash(content + (mediaUri ?: "") + System.currentTimeMillis())
-        val nodeName = "Juaris-Node-" + android.os.Build.MODEL
-
-        val post = MeshPostEntity(
-            postId = packetId,
-            senderNode = nodeName,
-            content = content,
-            mediaUri = mediaUri,
-            mediaType = mediaType,
-            timestamp = System.currentTimeMillis(),
-            isEphemeral = isEphemeral,
-            ttlHopCount = 10 // Max 10 Hops durch den weltweiten Schwarm
-        )
-
-        CoroutineScope(Dispatchers.IO).launch {
-            db.meshDao().insertPost(post)
-            withContext(Dispatchers.Main) {
-                onSuccess(packetId)
-            }
-        }
+        // Hier wird die lokale Broadcast-ID generiert
+        val packetId = UUID.randomUUID().toString()
+        onSuccess(packetId)
     }
 }
 
