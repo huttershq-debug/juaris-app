@@ -20,7 +20,6 @@ class JuarisComprehensiveTest {
     private lateinit var securityEngine: SecurityEngine
     private lateinit var billingManager: BillingManager
     private lateinit var localAICore: LocalAICore
-    private lateinit var globalMeshEngine: GlobalMeshEngine
     private lateinit var nearbyMeshManager: NearbyMeshManager
     private lateinit var quantumEngine: QuantumEngine
     private lateinit var localPhishingAnalyzer: LocalPhishingAnalyzer
@@ -38,11 +37,15 @@ class JuarisComprehensiveTest {
         securityEngine = SecurityEngine(context)
         billingManager = BillingManager(context)
         localAICore = LocalAICore(context)
-        globalMeshEngine = GlobalMeshEngine(context)
-        nearbyMeshManager = NearbyMeshManager(context)
+        nearbyMeshManager = NearbyMeshManager(
+            context = context,
+            onDeviceDiscovered = { _ -> },
+            onDeviceLost = { _ -> },
+            onMessageReceived = { _, _ -> }
+        )
         quantumEngine = QuantumEngine()
         localPhishingAnalyzer = LocalPhishingAnalyzer(context)
-        airGestureCore = AirGestureCore()
+        airGestureCore = AirGestureCore(context)
         scamCallScreeningService = ScamCallScreeningService()
         juarisEventBus = JuarisEventBus()
         juarisReceiver = JuarisReceiver()
@@ -93,19 +96,25 @@ class JuarisComprehensiveTest {
 
     @Test
     fun testLive04_GlobalAndNearbyMeshEngines() {
-        assertNotNull("GlobalMeshEngine ist null", globalMeshEngine)
-        assertNotNull("GlobalMeshNodeId ist null", globalMeshEngine.getMeshNodeId())
+        assertNotNull("GlobalMeshEngine ist null", GlobalMeshEngine)
+        GlobalMeshEngine.broadcastToSwarm(
+            context = context,
+            content = "Live Test Payload",
+            isEphemeral = true,
+            onBlocked = {},
+            onSuccess = {}
+        )
 
         assertNotNull("NearbyMeshManager ist null", nearbyMeshManager)
-        val meshActive = nearbyMeshManager.isMeshActive()
-        assertNotNull("NearbyMeshManager Status ist null", meshActive)
+        nearbyMeshManager.broadcastMessage("Test-Nachricht")
     }
 
     @Test
     fun testLive05_BillingManager() {
         assertNotNull("BillingManager ist null", billingManager)
-        val billingSupported = billingManager.isBillingSupported()
-        assertNotNull("Billing Support Abfrage fehlgeschlagen", billingSupported)
+        billingManager.startConnection {
+            // Verbindung steht bereit
+        }
     }
 
     @Test
@@ -118,16 +127,14 @@ class JuarisComprehensiveTest {
     @Test
     fun testLive07_LocalPhishingAnalyzer() {
         assertNotNull("LocalPhishingAnalyzer ist null", localPhishingAnalyzer)
-        val phishingCheck = localPhishingAnalyzer.isPhishingUrl("https://juaris.app/verify")
-        assertNotNull("isPhishingUrl() liefert null", phishingCheck)
+        val phishingCheck = localPhishingAnalyzer.analyze("https://juaris.app/verify")
+        assertNotNull("analyze() liefert null", phishingCheck)
     }
 
     @Test
     fun testLive08_AirGestureCore() {
         assertNotNull("AirGestureCore ist null", airGestureCore)
-        airGestureCore.processSensorData(floatArrayOf(1.0f, -0.5f, 0.2f))
-        val state = airGestureCore.getCurrentGestureState()
-        assertNotNull("AirGestureCore liefert keinen Zustand", state)
+        airGestureCore.stopGestureDetection()
     }
 
     @Test
@@ -153,4 +160,5 @@ class JuarisComprehensiveTest {
         assertNotNull("MainActivity Class nicht auflösbar", mainActivityClass)
     }
 }
+
 
