@@ -4,6 +4,7 @@ import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.security.MessageDigest
 import java.util.UUID
 
@@ -17,6 +18,30 @@ object GlobalMeshEngine {
         } catch (e: Exception) {
             UUID.randomUUID().toString()
         }
+    }
+
+    // Erweiterte Sende-Funktion mit direkter Anbindung an den LocalAICore
+    fun broadcastToSwarmWithAIValidation(
+        context: Context,
+        aiCore: LocalAICore,
+        content: String,
+        mediaUri: String?,
+        mediaType: String,
+        isEphemeral: Boolean,
+        onBlocked: (String) -> Unit,
+        onSuccess: (String) -> Unit
+    ) {
+        // 1. Lokale AGI-Prüfung über den LocalAICore ausführen
+        val isContentSafe = aiCore.evaluateContentSafety(content, mediaUri)
+
+        if (!isContentSafe) {
+            aiCore.triggerAutonomousCountermeasure()
+            onBlocked("AGI-Sicherheits-Stopp: Inhalt wurde lokal als unzulässig bewertet.")
+            return
+        }
+
+        // 2. Wenn sicher: Normaler Broadcast mit den übergebenen Parametern
+        broadcastToSwarmWithMedia(context, content, mediaUri, mediaType, isEphemeral, onSuccess)
     }
 
     // Standard Broadcast (nur Text)
@@ -55,7 +80,7 @@ object GlobalMeshEngine {
 
         CoroutineScope(Dispatchers.IO).launch {
             db.meshDao().insertPost(post)
-            kotlinx.coroutines.withContext(Dispatchers.Main) {
+            withContext(Dispatchers.Main) {
                 onSuccess(packetId)
             }
         }
