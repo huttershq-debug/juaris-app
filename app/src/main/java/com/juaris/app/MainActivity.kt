@@ -985,7 +985,7 @@ fun SwarmMeshPage() {
                     Text("Quantum-Hash Generator", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     OutlinedTextField(
                         value = testInputText,
-                        onValueChange = { testInputTest = it },
+                        onValueChange = { testInputText = it },
                         label = { Text("Signatur-Text", color = Color.Gray) },
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
