@@ -103,6 +103,6 @@ dependencies {
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
     debugImplementation platform('androidx.compose:compose-bom:2024.02.00')
     debugImplementation 'androidx.compose.ui:ui-tooling:1.6.0'
-    debugImplementation 'androidx.compose.ui:ui-manifest:1.6.0'
+    debugImplementation 'androidx.compose.ui:ui-test-manifest:1.6.0'
 }
 
