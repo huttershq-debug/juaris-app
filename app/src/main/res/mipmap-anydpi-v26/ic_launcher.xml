@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Hintergrund (schwarz, damit das Neon-Grün perfekt leuchtet) -->
+    <background android:drawable="@android:color/black" />
+    <!-- Verweis auf dein Hologramm-Bild im drawable-Ordner -->
+    <foreground android:drawable="@drawable/hologram_avatar" />
+</adaptive-icon>
