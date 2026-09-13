@@ -19,17 +19,18 @@ class JuarisReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
+        val securityEngine = SecurityEngine(context)
+
         when (intent.action) {
-            
+
             // 1. ANRUF-ÜBERWACHUNG IM HINTERGRUND
             TelephonyManager.ACTION_PHONE_STATE_CHANGED -> {
                 val state = intent.getStringExtra(TelephonyManager.EXTRA_STATE)
                 if (state == TelephonyManager.EXTRA_STATE_RINGING) {
                     val incomingNumber = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER) ?: "Unbekannt"
                     Log.d(TAG, "Eingehender Anruf erkannt: $incomingNumber")
-                    
-                    // Lokaler Offline-Check durch die SecurityEngine
-                    val result = SecurityEngine.analyzeIncomingCall(incomingNumber)
+
+                    val result = securityEngine.analyzeIncomingCall(incomingNumber)
                     if (result == CallSecurityResult.BLOCK) {
                         Log.w(TAG, "ALARM: Gefährlicher Anruf von $incomingNumber lokal blockiert!")
                     }
@@ -44,8 +45,8 @@ class JuarisReceiver : BroadcastReceiver() {
                     val body = message.messageBody ?: ""
                     Log.d(TAG, "Eingehende SMS von $sender")
 
-                    // Lokaler Offline-Check durch die SecurityEngine
-                    val result = SecurityEngine.analyzeIncomingSms(sender, body)
+                    val smsFullText = "Sender: $sender | Message: $body"
+                    val result = securityEngine.analyzeIncomingSms(smsFullText)
                     if (result == SmsSecurityResult.QUARANTINE_AND_ALERT) {
                         Log.w(TAG, "ALARM: Phishing-SMS von $sender in Quarantäne verschoben!")
                     }
@@ -54,3 +55,4 @@ class JuarisReceiver : BroadcastReceiver() {
         }
     }
 }
+
