@@ -2,8 +2,8 @@ package com.juaris.app
 
 import android.util.Base64
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair
-import org.bouncycastle.crypto.KeyGenerationParameters
 import org.bouncycastle.crypto.params.ParametersWithRandom
+import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumKeyGenerationParameters
 import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumKeyPairGenerator
 import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumParameters
 import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumPrivateKeyParameters
@@ -14,8 +14,7 @@ import java.security.SecureRandom
 class QuantumEngine {
 
     private val random = SecureRandom()
-    // NIST Standard ML-DSA-44 (Dilithium2) Post-Quantum Parameter
-    private val parameters = DilithiumParameters.dilithium2
+    private val parameters: DilithiumParameters = DilithiumParameters.dilithium2
 
     data class PostQuantumKeyPair(
         val publicKeyBase64: String,
@@ -23,12 +22,10 @@ class QuantumEngine {
         val publicKeyBytes: ByteArray
     )
 
-    /**
-     * Erzeugt ein echtes post-quantes Schlüsselpaar (NIST ML-DSA / Dilithium)
-     */
     fun generatePostQuantumKeyPair(): PostQuantumKeyPair {
+        val keyGenParams = DilithiumKeyGenerationParameters(random, parameters)
         val keyGen = DilithiumKeyPairGenerator()
-        keyGen.init(KeyGenerationParameters(random, 128))
+        keyGen.init(keyGenParams)
         val keyPair: AsymmetricCipherKeyPair = keyGen.generateKeyPair()
 
         val pubParams = keyPair.public as DilithiumPublicKeyParameters
@@ -44,9 +41,6 @@ class QuantumEngine {
         )
     }
 
-    /**
-     * Signiert Bedrohungs- oder Schwarm-Daten mit echtem Post-Quantum ML-DSA
-     */
     fun signThreatData(privateKeyBytes: ByteArray, payload: ByteArray): String {
         val privateKey = DilithiumPrivateKeyParameters(parameters, privateKeyBytes)
         val signer = DilithiumSigner()
@@ -55,9 +49,6 @@ class QuantumEngine {
         return Base64.encodeToString(signature, Base64.NO_WRAP)
     }
 
-    /**
-     * Verifiziert eine Post-Quantum Signatur eines Schwarm-Nodes
-     */
     fun verifySwarmSignature(publicKeyBytes: ByteArray, payload: ByteArray, base64Signature: String): Boolean {
         return try {
             val publicKey = DilithiumPublicKeyParameters(parameters, publicKeyBytes)
