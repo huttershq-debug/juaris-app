@@ -255,14 +255,12 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
 
     val pagerState = rememberPagerState(pageCount = { tabs.size })
 
-      // Kamera-Gestenerkennung: Schaltet garantiert nur 1 Tab weiter und wartet, bis die Animation fertig ist
     LaunchedEffect(gestureEnabled, lifecycleOwner) {
         if (gestureEnabled) {
             airGestureCore.startGestureDetection(
                 lifecycleOwner = lifecycleOwner,
                 onGestureDetected = { action ->
                     if (action == AirGestureCore.GestureAction.TRIGGERED) {
-                        // ABSOLUTER SCHUTZ: Nur auslösen, wenn der Pager gerade NICHT scrollt!
                         if (!pagerState.isScrollInProgress) {
                             coroutineScope.launch {
                                 val nextTab = (pagerState.currentPage + 1) % tabs.size
@@ -453,8 +451,8 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                                 pagerState.animateScrollToPage(target)
                             }
                         }
-                    ) // <--- Schließt AirGesturePage sauber ab
-                } // <--- Schließt den Block für Case 8 sauber ab
+                    )
+                }
                 9 -> PrivacyAndLegalContent()
             }
         }
@@ -600,7 +598,7 @@ fun ProtectionModulesPage(
                         }
                         Switch(checked = callProtection, onCheckedChange = onCallChange)
                     }
-                    Divider(color = Color(0xFF112211))
+                    HorizontalDivider(color = Color(0xFF112211))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text("SMS-Filter", style = MaterialTheme.typography.bodyLarge, color = Color.White)
@@ -608,7 +606,7 @@ fun ProtectionModulesPage(
                         }
                         Switch(checked = smsProtection, onCheckedChange = onSmsChange)
                     }
-                    Divider(color = Color(0xFF112211))
+                    HorizontalDivider(color = Color(0xFF112211))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text("E-Mail-Scan", style = MaterialTheme.typography.bodyLarge, color = Color.White)
@@ -787,7 +785,6 @@ fun SwarmMeshPage() {
     var scanStatusText by remember { mutableStateOf("Bereit für Hardware-Abgleich") }
     var discoveredDevicesCount by remember { mutableStateOf(0) }
 
-    // NearbyMeshManager initialisieren
     val meshManager = remember {
         NearbyMeshManager(
             context = context,
@@ -848,7 +845,6 @@ fun SwarmMeshPage() {
             Text("Dezentraler Austausch & verschlüsselter Social-Feed.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
 
-        // --- 1. SCHWARM BROADCAST (WhatsApp / Instagram / Snapchat Style) ---
         item {
             TacticalPulseCard {
                 Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -914,7 +910,6 @@ fun SwarmMeshPage() {
             }
         }
 
-        // --- 2. LIVE FEED DER SCHWARM-BEITRÄGE ---
         item {
             Text("Eingehende Schwarm-Pakete (${posts.size})", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
         }
@@ -951,7 +946,6 @@ fun SwarmMeshPage() {
             }
         }
 
-        // --- 3. HARDWARE & BLUETOOTH STATUS ---
         item {
             TacticalPulseCard {
                 Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -978,7 +972,6 @@ fun SwarmMeshPage() {
             }
         }
 
-        // --- 4. QUANTUM HASH GENERATOR ---
         item {
             TacticalPulseCard {
                 Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1010,8 +1003,6 @@ fun SwarmMeshPage() {
         }
     }
 }
-
-
 
 @Composable
 fun PrivacyAndLegalContent() {
@@ -1075,3 +1066,5 @@ fun PrivacyAndLegalContent() {
         }
     }
 }
+
+
