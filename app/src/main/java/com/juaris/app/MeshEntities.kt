@@ -13,7 +13,9 @@ data class MeshPostEntity(
     @PrimaryKey
     val postId: String, // SHA-256 Signatur des Posts
     val senderNode: String, // Absender-ID (z.B. "Node-AT-2700")
-    val content: String, // Inhalt (Nachricht oder Payload)
+    val content: String, // Inhalt oder Bild-Untertitel
+    val mediaUri: String?, // NEU: Pfad für lokale Fotos oder Videos
+    val mediaType: String, // NEU: "TEXT", "IMAGE" oder "VIDEO"
     val timestamp: Long,
     val isEphemeral: Boolean, // True = Snapchat-Modus (Selbstzerstörung)
     val ttlHopCount: Int // Verbleibende Hops im globalen Schwarm
