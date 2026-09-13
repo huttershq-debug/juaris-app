@@ -774,10 +774,10 @@ fun PermissionsAuditPage() {
 fun SwarmMeshPage() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    
+   
     // Datenbank & Live-Feed laden
     val db = remember { JuarisDatabase.getDatabase(context) }
-    val postsFlow = remember { db.meshDao().getAllPosts() }
+    val postsFlow = remember { db.meshDao().getAllActivePosts() }
     val posts by postsFlow.collectAsState(initial = emptyList())
 
     var inputMessage by remember { mutableStateOf("") }
@@ -787,13 +787,44 @@ fun SwarmMeshPage() {
     var scanStatusText by remember { mutableStateOf("Bereit für Hardware-Abgleich") }
     var discoveredDevicesCount by remember { mutableStateOf(0) }
 
+    // NearbyMeshManager initialisieren
+    val meshManager = remember {
+        NearbyMeshManager(
+            context = context,
+            onDeviceDiscovered = { endpointId ->
+                discoveredDevicesCount += 1
+                scanStatusText = "Mit Node verbunden: $endpointId"
+            },
+            onDeviceLost = { endpointId ->
+                discoveredDevicesCount = (discoveredDevicesCount - 1).coerceAtLeast(0)
+                scanStatusText = "Node getrennt: $endpointId"
+            },
+            onMessageReceived = { endpointId, msg ->
+                GlobalMeshEngine.broadcastToSwarm(
+                    context = context,
+                    content = msg,
+                    isEphemeral = false,
+                    onBlocked = {},
+                    onSuccess = {}
+                )
+            }
+        )
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            meshManager.stopMeshNode()
+        }
+    }
+
     val bluetoothPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         val allGranted = permissions.values.all { it }
         if (allGranted) {
             scanStatusText = "Hardware-Scan aktiv"
-            Toast.makeText(context, "Bluetooth-Mesh-Scan gestartet...", Toast.LENGTH_SHORT).show()
+            meshManager.startMeshNode()
+            Toast.makeText(context, "Bluetooth-Mesh-Scan & P2P gestartet...", Toast.LENGTH_SHORT).show()
         } else {
             scanStatusText = "Berechtigungen fehlen!"
             Toast.makeText(context, "Bluetooth-Berechtigungen werden für den Schwarm benötigt!", Toast.LENGTH_LONG).show()
@@ -822,7 +853,7 @@ fun SwarmMeshPage() {
             TacticalPulseCard {
                 Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Nachricht in den Schwarm broadcasten", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                    
+                   
                     OutlinedTextField(
                         value = inputMessage,
                         onValueChange = { inputMessage = it },
@@ -853,6 +884,7 @@ fun SwarmMeshPage() {
                         Button(
                             onClick = {
                                 if (inputMessage.isNotBlank()) {
+                                    meshManager.broadcastMessage(inputMessage)
                                     GlobalMeshEngine.broadcastToSwarm(
                                         context = context,
                                         content = inputMessage,
@@ -978,6 +1010,7 @@ fun SwarmMeshPage() {
         }
     }
 }
+
 
 
 @Composable
