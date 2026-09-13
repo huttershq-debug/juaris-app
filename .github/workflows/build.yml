@@ -81,7 +81,7 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -no-audio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew connectedAndroidTest --stacktrace
+          script: ./gradle-8.4/bin/gradle connectedAndroidTest --stacktrace
 
       - name: Build Both AAB and APK
         run: |
