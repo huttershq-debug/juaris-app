@@ -220,7 +220,9 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 
             Button(
                 onClick = {
-                    billingManager.launchBillingFlow()
+                    activity?.let {
+                        billingManager.launchBillingFlow(it)
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
