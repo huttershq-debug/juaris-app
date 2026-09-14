@@ -3,6 +3,7 @@ package com.juaris.app
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.work.testing.TestListenableWorkerBuilder
 import com.juaris.app.email.EmailScanWorker
 import com.juaris.app.sms.SmsFilterReceiver
 import kotlinx.coroutines.flow.first
@@ -48,7 +49,7 @@ class JuarisComprehensiveTest {
         airGestureCore = AirGestureCore(context)
         scamCallScreeningService = ScamCallScreeningService()
         juarisReceiver = JuarisReceiver()
-        emailScanWorker = EmailScanWorker(context, androidx.work.WorkerParameters.getInstance(context))
+        emailScanWorker = TestListenableWorkerBuilder.from(context, EmailScanWorker::class.java).build()
         smsFilterReceiver = SmsFilterReceiver()
     }
 
@@ -66,8 +67,8 @@ class JuarisComprehensiveTest {
         val logDao: SecurityLogDao = database.securityLogDao()
         assertNotNull("SecurityLogDao ist null", logDao)
 
-        val mashDao: MashDao = database.mashDao()
-        assertNotNull("MashDao ist null", mashDao)
+        val meshDao: MeshDao = database.meshDao()
+        assertNotNull("MeshDao ist null", meshDao)
 
         val entity = SecurityLogEntity(
             timestamp = System.currentTimeMillis(),
