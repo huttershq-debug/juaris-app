@@ -3,7 +3,6 @@ package com.juaris.app
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.work.testing.TestWorkerBuilder
 import com.juaris.app.email.EmailScanWorker
 import com.juaris.app.sms.SmsFilterReceiver
 import kotlinx.coroutines.flow.first
@@ -34,7 +33,6 @@ class JuarisComprehensiveTest {
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
-        // Korrigiert auf getDatabase(context) aus JuarisDatabase.kt
         database = JuarisDatabase.getDatabase(context)
         securityEngine = SecurityEngine(context)
         billingManager = BillingManager(context)
@@ -49,11 +47,8 @@ class JuarisComprehensiveTest {
         localPhishingAnalyzer = LocalPhishingAnalyzer(context)
         airGestureCore = AirGestureCore(context)
         scamCallScreeningService = ScamCallScreeningService()
-        // JuarisEventBus ist ein object (Singleton), wird nicht instanziiert
         juarisReceiver = JuarisReceiver()
-        
-        // Korrekte Instanziierung eines WorkManager Workers für Tests
-        emailScanWorker = TestWorkerBuilder.from(context, EmailScanWorker::class.java).build()
+        emailScanWorker = EmailScanWorker(context, androidx.work.WorkerParameters.getInstance(context))
         smsFilterReceiver = SmsFilterReceiver()
     }
 
@@ -76,9 +71,10 @@ class JuarisComprehensiveTest {
 
         val entity = SecurityLogEntity(
             timestamp = System.currentTimeMillis(),
-            eventType = "LIVE_GEAR_VERIFICATION",
-            severity = "OK",
-            description = "Echter DB-Write/Read Test für alle DAOs"
+            module = "LIVE_GEAR_VERIFICATION",
+            description = "Echter DB-Write/Read Test für alle DAOs",
+            status = "OK",
+            details = "Testdetails"
         )
 
         logDao.insertLog(entity)
@@ -150,7 +146,6 @@ class JuarisComprehensiveTest {
 
     @Test
     fun testLive10_JuarisEventBusAndReceiver() {
-        // Direkter Test des JuarisEventBus Singletons
         assertNotNull("JuarisEventBus ist null", JuarisEventBus)
         assertNotNull("JuarisReceiver ist null", juarisReceiver)
     }
@@ -167,5 +162,4 @@ class JuarisComprehensiveTest {
         assertNotNull("MainActivity Class nicht auflösbar", mainActivityClass)
     }
 }
-
 
