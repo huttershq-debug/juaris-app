@@ -33,7 +33,6 @@ class JuarisComprehensiveTest {
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
-        // Korrigiert auf getDatabase(context)
         database = JuarisDatabase.getDatabase(context)
         securityEngine = SecurityEngine(context)
         billingManager = BillingManager(context)
