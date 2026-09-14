@@ -81,7 +81,15 @@ jobs:
           force-avd-creation: true
           emulator-options: -no-window -gpu auto -no-audio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradle-8.4/bin/gradle connectedAndroidTest --stacktrace
+          script: |
+            echo "Warte auf vollständiges Booten des Emulators..."
+            adb wait-for-device
+            while [ "$(adb shell getprop sys.boot_completed | tr -d '\r')" != "1" ]; do
+              echo "Bootvorgang läuft noch..."
+              sleep 2
+            done
+            sleep 5
+            ./gradle-8.4/bin/gradle connectedDebugAndroidTest --stacktrace
 
       - name: Build Both AAB and APK
         run: |
@@ -103,7 +111,6 @@ jobs:
             app/build/outputs/apk/release/app-release.apk
           tag_name: v1.0.0-${{ github.run_number }}
           name: "Juaris Release v1.0.0-${{ github.run_number }} (AAB & APK)"
-          body: "Dieses Release enthält sowohl die .aab-Datei für den Google Play store als auch die .apk-Datei zum direkten Installieren auf dem Handy."
+          body: "Dieses Release enthält sowohl die .aab-Datei für den Google Play Store als auch die .apk-Datei zum direkten Installieren auf dem Handy."
           token: ${{ secrets.GITHUB_TOKEN }}
-
 
