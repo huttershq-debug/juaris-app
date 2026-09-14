@@ -75,25 +75,25 @@ jobs:
       - name: Run Instrumented Tests (UI & System)
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 34
+          api-level: 31
           target: google_apis
           arch: x86_64
-          force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -no-audio -no-boot-anim -camera-back none
+          force-avd-creation: true
+          emulator-options: -no-window -gpu auto -no-audio -no-boot-anim -camera-back none
           disable-animations: true
           script: ./gradle-8.4/bin/gradle connectedAndroidTest --stacktrace
 
       - name: Build Both AAB and APK
         run: |
-          echo "Kompiliere APK und AAB mit 3GB Heap..."
+          echo "kompiliere APK und AAB mit 3GB Heap..."
           ./gradle-8.4/bin/gradle assembleRelease bundleRelease --stacktrace \
             -Dorg.gradle.jvmargs="-Xmx3g" \
             -Pandroid.useAndroidX=true \
             -Pandroid.enableJetifier=true \
             -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/juaris-release-key.jks" \
-            -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
-            -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
-            -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}"
+            -Pandroid.injected.signing.store-password="${{ secrets.KEYSTORE_PASSWORD }}" \
+            -Pandroid.injected.signing.key_alias="${{ secrets.KEY_ALIAS }}" \
+            -Pandroid.injected.signing.key_password="${{ secrets.KEY_PASSWORD }}"
 
       - name: Release Both Files
         uses: softprops/action-gh-release@v1
@@ -103,7 +103,7 @@ jobs:
             app/build/outputs/apk/release/app-release.apk
           tag_name: v1.0.0-${{ github.run_number }}
           name: "Juaris Release v1.0.0-${{ github.run_number }} (AAB & APK)"
-          body: "Dieses Release enthält sowohl die .aab-Datei für den Google Play Store als auch die .apk-Datei zum direkten Installieren auf dem Handy."
+          body: "Dieses Release enthält sowohl die .aab-Datei für den Google Play store als auch die .apk-Datei zum direkten Installieren auf dem Handy."
           token: ${{ secrets.GITHUB_TOKEN }}
 
 
