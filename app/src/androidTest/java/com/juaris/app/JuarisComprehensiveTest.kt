@@ -3,6 +3,7 @@ package com.juaris.app
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.work.testing.TestWorkerBuilder
 import com.juaris.app.email.EmailScanWorker
 import com.juaris.app.sms.SmsFilterReceiver
 import kotlinx.coroutines.flow.first
@@ -26,7 +27,6 @@ class JuarisComprehensiveTest {
     private lateinit var localPhishingAnalyzer: LocalPhishingAnalyzer
     private lateinit var airGestureCore: AirGestureCore
     private lateinit var scamCallScreeningService: ScamCallScreeningService
-    private lateinit var juarisEventBus: JuarisEventBus
     private lateinit var juarisReceiver: JuarisReceiver
     private lateinit var emailScanWorker: EmailScanWorker
     private lateinit var smsFilterReceiver: SmsFilterReceiver
@@ -34,7 +34,8 @@ class JuarisComprehensiveTest {
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
-        database = JuarisDatabase.getInstance(context)
+        // Korrigiert auf getDatabase(context) aus JuarisDatabase.kt
+        database = JuarisDatabase.getDatabase(context)
         securityEngine = SecurityEngine(context)
         billingManager = BillingManager(context)
         localAICore = LocalAICore(context)
@@ -48,9 +49,11 @@ class JuarisComprehensiveTest {
         localPhishingAnalyzer = LocalPhishingAnalyzer(context)
         airGestureCore = AirGestureCore(context)
         scamCallScreeningService = ScamCallScreeningService()
-        juarisEventBus = JuarisEventBus()
+        // JuarisEventBus ist ein object (Singleton), wird nicht instanziiert
         juarisReceiver = JuarisReceiver()
-        emailScanWorker = EmailScanWorker(context, androidx.work.WorkerParameters.getInstance(context))
+        
+        // Korrekte Instanziierung eines WorkManager Workers für Tests
+        emailScanWorker = TestWorkerBuilder.from(context, EmailScanWorker::class.java).build()
         smsFilterReceiver = SmsFilterReceiver()
     }
 
@@ -73,10 +76,9 @@ class JuarisComprehensiveTest {
 
         val entity = SecurityLogEntity(
             timestamp = System.currentTimeMillis(),
-            module = "LIVE_GEAR_VERIFICATION",
-            description = "Echter DB-Write/Read Test für alle DAOs",
-            status = "OK",
-            details = "Testdetails"
+            eventType = "LIVE_GEAR_VERIFICATION",
+            severity = "OK",
+            description = "Echter DB-Write/Read Test für alle DAOs"
         )
 
         logDao.insertLog(entity)
@@ -148,7 +150,8 @@ class JuarisComprehensiveTest {
 
     @Test
     fun testLive10_JuarisEventBusAndReceiver() {
-        assertNotNull("JuarisEventBus ist null", juarisEventBus)
+        // Direkter Test des JuarisEventBus Singletons
+        assertNotNull("JuarisEventBus ist null", JuarisEventBus)
         assertNotNull("JuarisReceiver ist null", juarisReceiver)
     }
 
@@ -164,4 +167,5 @@ class JuarisComprehensiveTest {
         assertNotNull("MainActivity Class nicht auflösbar", mainActivityClass)
     }
 }
+
 
