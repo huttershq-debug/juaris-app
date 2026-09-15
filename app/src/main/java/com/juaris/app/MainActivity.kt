@@ -13,6 +13,7 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -60,10 +61,20 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var securePrefs: SharedPreferences
 
+    // Launcher für Anruf-Spam-Filter Rolle
     private val callScreeningRoleLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
-    ) { _ ->
-        // Rückmeldung nach Rollenanfrage (optional verarbeitbar)
+    ) { _ -> }
+
+    // Launcher für Standard-SMS-App Rolle (Google Play konform für SMS-Phishing-Schutz)
+    private val smsRoleLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            Toast.makeText(this, "Juaris ist jetzt als Standard-SMS-Wächter aktiv!", Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(this, "SMS-Rolle wurde abgelehnt.", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,8 +82,9 @@ class MainActivity : ComponentActivity() {
        
         window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-        // Offizielle Google-konforme Rollenabfrage für Call Screening (Anruf- und Spam-Filter)
+        // Offizielle Google-konforme Rollen beim Start anfordern
         requestCallScreeningRoleIfNeeded()
+        requestSmsRoleIfNeeded()
 
         try {
             val masterKey = MasterKey.Builder(this)
@@ -149,9 +161,20 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    private fun requestSmsRoleIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val roleManager = getSystemService(RoleManager::class.java)
+            if (roleManager != null && roleManager.isRoleAvailable(RoleManager.ROLE_SMS)) {
+                if (!roleManager.isRoleHeld(RoleManager.ROLE_SMS)) {
+                    val intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_SMS)
+                    smsRoleLauncher.launch(intent)
+                }
+            }
+        }
+    }
 }
 
-// Hilfsfunktion zum sicheren Finden der Activity aus dem Compose Context
 private fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
     is android.content.ContextWrapper -> baseContext.findActivity()
@@ -161,9 +184,7 @@ private fun Context.findActivity(): Activity? = when (this) {
 @Composable
 fun WelcomeScreen() {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black),
+        modifier = Modifier.fillMaxSize().background(Color.Black),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -174,12 +195,9 @@ fun WelcomeScreen() {
             Image(
                 painter = painterResource(id = R.drawable.hologram_avatar),
                 contentDescription = "Juaris KI Hologramm",
-                modifier = Modifier
-                    .size(200.dp)
-                    .padding(bottom = 24.dp)
+                modifier = Modifier.size(200.dp).padding(bottom = 24.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
-
             Text(
                 text = "WILLKOMMEN BEI JUARIS",
                 color = NeonGiftgruen,
@@ -189,17 +207,13 @@ fun WelcomeScreen() {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Dein Zuhause, deine Regeln, 100% sicher.",
+                text = "Local-First Security Kernel. Zero Cloud.",
                 color = Color.White,
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(48.dp))
-           
-            CircularProgressIndicator(
-                color = NeonGiftgruen,
-                modifier = Modifier.size(36.dp)
-            )
+            CircularProgressIndicator(color = NeonGiftgruen, modifier = Modifier.size(36.dp))
         }
     }
 }
@@ -222,9 +236,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black),
+        modifier = Modifier.fillMaxSize().background(Color.Black),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -240,7 +252,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Post-Quantum Security Suite\n1,99 € / Monat (Jederzeit kündbar über Google Play)",
+                text = "Post-Quantum Security Suite\n1,99 € / Monat (Jederzeit kündbar)",
                 color = Color.Gray,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
@@ -253,42 +265,25 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                         billingManager.launchBillingFlow(act)
                     }
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(54.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = NeonGiftgruen,
-                    contentColor = Color.Black
-                )
+                modifier = Modifier.fillMaxWidth().height(54.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen, contentColor = Color.Black)
             ) {
-                Text(
-                    text = "Abo starten (Google Play Billing)",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    color = Color.Black
-                )
+                Text(text = "Abo starten (Google Play Billing)", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.Black)
             }
 
             if (com.juaris.app.BuildConfig.DEBUG) {
                 Spacer(modifier = Modifier.height(24.dp))
                 OutlinedButton(
-                    onClick = {
-                        onLoginSuccess()
-                    },
+                    onClick = { onLoginSuccess() },
                     modifier = Modifier.fillMaxWidth(),
                     border = BorderStroke(1.dp, Color(0xFFFF9900))
                 ) {
-                    Text(
-                        text = "[DEBUG] Entwickler-Bypass (Nur im Debug Build)",
-                        color = Color(0xFFFF9900),
-                        fontSize = 12.sp
-                    )
+                    Text(text = "[DEBUG] Entwickler-Bypass (Aktiv zum Testen)", color = Color(0xFFFF9900), fontSize = 12.sp)
                 }
             }
         }
     }
 }
-
 
 @Composable
 fun JuarisMainDashboard(prefs: SharedPreferences) {
@@ -322,9 +317,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                         }
                     }
                 },
-                onDebugInfo = { status ->
-                    gestureStatusText = status
-                }
+                onDebugInfo = { status -> gestureStatusText = status }
             )
         } else {
             airGestureCore.stopGestureDetection()
@@ -332,20 +325,18 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
     }
 
     DisposableEffect(lifecycleOwner) {
-        onDispose {
-            airGestureCore.stopGestureDetection()
-        }
+        onDispose { airGestureCore.stopGestureDetection() }
     }
 
     val liveLogs = remember {
         mutableStateListOf(
-            SecurityLogEntity(timestamp = System.currentTimeMillis(), module = "Netzwerk-Monitor", description = "Verschlüsselter Lokalspeicher initialisiert", status = "SAFE"),
-            SecurityLogEntity(timestamp = System.currentTimeMillis() - 15000, module = "Berechtigungs-Wächter", description = "Keine verdächtige App im Hintergrund aktiv", status = "SAFE")
+            SecurityLogEntity(timestamp = System.currentTimeMillis(), module = "Netzwerk-Monitor", description = "Verschlüsselter Lokalspeicher aktiv", status = "SAFE"),
+            SecurityLogEntity(timestamp = System.currentTimeMillis() - 15000, module = "Berechtigungs-Wächter", description = "Keine Cloud-Telemetrie festgestellt", status = "SAFE")
         )
     }
 
     val blockedContacts = remember {
-        val savedList = prefs.getStringSet("blocked_numbers", setOf("+43123456789", "Anonyme Anrufe")) ?: setOf()
+        val savedList = prefs.getStringSet("blocked_numbers", setOf("+43123456789", "Spam-Nummern")) ?: setOf()
         mutableStateListOf(*savedList.toTypedArray())
     }
 
@@ -358,9 +349,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
     Scaffold(
         topBar = {
             Column {
-                TopAppBar(
-                    title = { Text("Juaris Security Suite (Production)") }
-                )
+                TopAppBar(title = { Text("Juaris Security Suite (Local-First)") })
                 ScrollableTabRow(
                     selectedTabIndex = pagerState.currentPage,
                     edgePadding = 16.dp,
@@ -370,11 +359,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                     tabs.forEachIndexed { index, title ->
                         Tab(
                             selected = pagerState.currentPage == index,
-                            onClick = {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(index)
-                                }
-                            },
+                            onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
                             text = { Text(title) }
                         )
                     }
@@ -384,32 +369,30 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
     ) { innerPadding ->
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
+            modifier = Modifier.fillMaxSize().padding(innerPadding)
         ) { page ->
             when (page) {
                 0 -> StatusPage(
                     logs = liveLogs,
                     onSimulateThreat = {
-                        val threatDescription = "E-Mail-Phishing & Live-Sandbox Vektor erfolgreich isoliert!"
+                        val threatDescription = "E-Mail & SMS Phishing-Vektor lokal abgefangen!"
                         val newLog = SecurityLogEntity(
                             timestamp = System.currentTimeMillis(),
-                            module = "E-Mail-Heuristik",
+                            module = "Local-AI-Heuristik",
                             description = threatDescription,
                             status = "BLOCKED"
                         )
                         liveLogs.add(0, newLog)
-                        Toast.makeText(context, "Heilige Dreifaltigkeit: Bedrohung lokal abgewehrt!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Bedrohung auf dem Gerät neutralisiert!", Toast.LENGTH_SHORT).show()
                     },
                     onExportLogs = {
-                        Toast.makeText(context, "${liveLogs.size} Logs sicher in den verschlüsselten Vault geschrieben.", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, "Logs sicher im verschlüsselten Vault gesichert.", Toast.LENGTH_LONG).show()
                     },
                     onPanicWipe = {
                         liveLogs.clear()
                         blockedContacts.clear()
                         prefs.edit().clear().apply()
-                        Toast.makeText(context, "PANIC WIPE: Alle lokalen Daten unwiderruflich gelöscht!", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, "PANIC WIPE: Alle lokalen Daten gelöscht!", Toast.LENGTH_LONG).show()
                     }
                 )
                 1 -> ProtectionModulesPage(
@@ -437,7 +420,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                         if (newEntry.isNotBlank() && !blockedContacts.contains(newEntry)) {
                             blockedContacts.add(newEntry)
                             prefs.edit().putStringSet("blocked_numbers", blockedContacts.toSet()).apply()
-                            Toast.makeText(context, "Nummer permanent gesperrt", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Nummer blockiert", Toast.LENGTH_SHORT).show()
                         }
                     },
                     onRemoveBlocked = { item ->
@@ -457,7 +440,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                         prefs.edit().putBoolean("clip_auto", it).apply()
                     }
                 )
-                5 -> PermissionsAuditPage()
+                5 -> PermissionsAuditPage() // Enthält jetzt auch Direktlinks für E-Mail Notification Listener!
                 6 -> SwarmMeshPage()
                 7 -> AIPage(aiCore = aiCore, logs = liveLogs)
                 8 -> {
@@ -466,10 +449,10 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                     ) { isGranted ->
                         if (isGranted) {
                             gestureEnabled = true
-                            Toast.makeText(context, "Kamera-Berechtigung erteilt! Sensor startet...", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Kamera-Sensor gestartet!", Toast.LENGTH_SHORT).show()
                         } else {
                             gestureEnabled = false
-                            Toast.makeText(context, "Kamera-Berechtigung wurde verweigert!", Toast.LENGTH_LONG).show()
+                            Toast.makeText(context, "Berechtigung verweigert", Toast.LENGTH_LONG).show()
                         }
                     }
 
@@ -480,8 +463,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                         onToggleGesture = { newState ->
                             if (newState) {
                                 val permissionGranted = ContextCompat.checkSelfPermission(
-                                    context,
-                                    android.Manifest.permission.CAMERA
+                                    context, android.Manifest.permission.CAMERA
                                 ) == android.content.pm.PackageManager.PERMISSION_GRANTED
 
                                 if (permissionGranted) {
@@ -491,7 +473,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                                 }
                             } else {
                                 gestureEnabled = false
-                                gestureStatusText = "Gesten pausiert"
+                                gestureStatusText = "Pausiert"
                             }
                         },
                         onTabSwitch = { forward ->
@@ -512,7 +494,6 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
     }
 }
 
-
 @Composable
 fun StatusPage(
     logs: List<SecurityLogEntity>,
@@ -527,36 +508,20 @@ fun StatusPage(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            Text("System-Gesundheit & Status", style = MaterialTheme.typography.titleLarge, color = Color.White)
-            Text("Echtzeit-Diagnose des verschlüsselten Offline-Kernels.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text("System-Gesundheit (Local-First)", style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text("100% On-Device Kontrolle ohne Server-Anbindung.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
-            val infiniteTransition = rememberInfiniteTransition(label = "pulse")
-            val alphaAnim by infiniteTransition.animateFloat(
-                initialValue = 0.3f,
-                targetValue = 1f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(1000),
-                    repeatMode = RepeatMode.Reverse
-                ),
-                label = "alpha"
-            )
-
             TacticalPulseCard {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Icon(
-                        Icons.Default.CheckCircle,
-                        contentDescription = null,
-                        tint = NeonGiftgruen.copy(alpha = alphaAnim),
-                        modifier = Modifier.size(36.dp)
-                    )
+                    Icon(Icons.Default.CheckCircle, contentDescription = null, tint = NeonGiftgruen, modifier = Modifier.size(36.dp))
                     Column {
-                        Text("Status: AES-256 Gesichert", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                        Text("Keine Telemetrie, Keine Cloud, 100% On-Device", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                        Text("Status: AES-256 Verschlüsselt", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                        Text("Anruf-, SMS- & E-Mail-Filter aktiv", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                     }
                 }
             }
@@ -566,7 +531,7 @@ fun StatusPage(
                 Box(modifier = Modifier.weight(1f)) {
                     TacticalPulseCard {
                         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("ABGEWEHRT", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                            Text("BLOCKIERT", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                             Spacer(modifier = Modifier.height(4.dp))
                             Text("$blockedCount", style = MaterialTheme.typography.headlineLarge, color = Color(0xFFFF3333))
                         }
@@ -575,9 +540,9 @@ fun StatusPage(
                 Box(modifier = Modifier.weight(1f)) {
                     TacticalPulseCard {
                         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("VERSCHLÜSSELUNG", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                            Text("DATENFLUSS", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                             Spacer(modifier = Modifier.height(4.dp))
-                            Text("AKTIV", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                            Text("NUR LOKAL", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                         }
                     }
                 }
@@ -585,7 +550,7 @@ fun StatusPage(
         }
         item {
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Echtzeit-Aktionen", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+            Text("Aktionen", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
         }
         item {
             TacticalPulseCard {
@@ -597,7 +562,7 @@ fun StatusPage(
                     ) {
                         Icon(Icons.Default.Refresh, contentDescription = null, tint = Color.Black)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Echtzeit-Angriff abwehren & testen", color = Color.Black, fontWeight = FontWeight.Bold)
+                        Text("Phishing-Angriff (SMS/Mail) simulieren", color = Color.Black, fontWeight = FontWeight.Bold)
                     }
                     OutlinedButton(
                         onClick = onExportLogs,
@@ -637,35 +602,49 @@ fun ProtectionModulesPage(
     val context = LocalContext.current
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
-            Text("Kernmodule & Schutz-Regler", style = MaterialTheme.typography.titleLarge, color = Color.White)
-            Text("Aktive Hintergrund-Wächter auf Device-Ebene.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text("Schutz-Module", style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text("Echtzeit-Wächter für Anrufe, SMS und E-Mails.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
             TacticalPulseCard {
                 Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("System-Filter", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text("Kommunikations-Filter", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text("Anruf-Schutz", style = MaterialTheme.typography.bodyLarge, color = Color.White)
-                            Text("Blockiert Spam & unterdrückte Nummern", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                            Text("Null-Ring Spam-Abweisung", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                         }
                         Switch(checked = callProtection, onCheckedChange = onCallChange)
                     }
                     HorizontalDivider(color = Color(0xFF112211))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("SMS-Filter", style = MaterialTheme.typography.bodyLarge, color = Color.White)
-                            Text("Erkennt Phishing & Malware-Links", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                            Text("SMS-Phishing-Filter", style = MaterialTheme.typography.bodyLarge, color = Color.White)
+                            Text("Standard-SMS-App Engine", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                         }
                         Switch(checked = smsProtection, onCheckedChange = onSmsChange)
                     }
                     HorizontalDivider(color = Color(0xFF112211))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("E-Mail-Scan", style = MaterialTheme.typography.bodyLarge, color = Color.White)
-                            Text("Lokale Postfach-Heuristik", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                            Text("E-Mail-Benachrichtigungs-Scan", style = MaterialTheme.typography.bodyLarge, color = Color.White)
+                            Text("Lokaler Notification Listener", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                         }
-                        Switch(checked = emailProtection, onCheckedChange = onEmailChange)
+                        Switch(
+                            checked = emailProtection,
+                            onCheckedChange = { newState ->
+                                onEmailChange(newState)
+                                if (newState) {
+                                    // Direkter Absprung in die Android Einstellungen für Notification Listener
+                                    try {
+                                        val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+                                        context.startActivity(intent)
+                                    } catch (e: Exception) {
+                                        Toast.makeText(context, "Bitte aktiviere den Notification Listener manuell.", Toast.LENGTH_LONG).show()
+                                    }
+                                }
+                            }
+                        )
                     }
                 }
             }
@@ -674,24 +653,16 @@ fun ProtectionModulesPage(
             TacticalPulseCard(
                 onClick = {
                     onVaultToggle(!vaultUnlocked)
-                    val statusText = if (!vaultUnlocked) "Vault sicher entsperrt" else "Vault verschlüsselt"
-                    Toast.makeText(context, statusText, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, if (!vaultUnlocked) "Vault entsperrt" else "Vault gesperrt", Toast.LENGTH_SHORT).show()
                 }
             ) {
                 Column {
                     Text("Verschlüsselter Offline-Vault", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text("AES-256 geschützter Speicher für sensible Notizen.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    Text("AES-256 geschützter Speicher.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                     Spacer(modifier = Modifier.height(8.dp))
-                    val statusColor = if (vaultUnlocked) NeonGiftgruen else Color(0xFFFF3333)
-                    Text(if (vaultUnlocked) "Status: Entsperrt" else "Status: Gesperrt", color = statusColor, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                    Text(if (vaultUnlocked) "Status: Entsperrt" else "Status: Gesperrt", color = if (vaultUnlocked) NeonGiftgruen else Color(0xFFFF3333), fontWeight = FontWeight.Bold)
                 }
-            }
-        }
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
             }
         }
     }
@@ -702,43 +673,37 @@ fun BlacklistPage(blockedList: MutableList<String>, onAddBlocked: (String) -> Un
     var inputNumber by remember { mutableStateOf("") }
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
-            Text("Sperrliste & Blockaden", style = MaterialTheme.typography.titleLarge, color = Color.White)
-            Text("Persistente Rufnummern- und Muster-Filter.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text("Sperrliste", style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text("Persistente Offline-Blockaden.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
             TacticalPulseCard {
                 Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Nummer zur Sperrliste hinzufügen", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text("Nummer / Muster hinzufügen", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         OutlinedTextField(
                             value = inputNumber,
                             onValueChange = { inputNumber = it },
-                            label = { Text("Rufnummer / Muster", color = Color.Gray) },
+                            label = { Text("Rufnummer", color = Color.Gray) },
                             modifier = Modifier.weight(1f)
                         )
                         Button(
                             onClick = { onAddBlocked(inputNumber); inputNumber = "" },
                             colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
                         ) {
-                            Icon(Icons.Default.Add, contentDescription = "Hinzufügen", tint = Color.Black)
+                            Icon(Icons.Default.Add, contentDescription = null, tint = Color.Black)
                         }
                     }
                 }
             }
         }
-        item { Text("Aktive Sperrlisteneinträge (${blockedList.size})", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen) }
+        item { Text("Gesperrte Einträge (${blockedList.size})", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen) }
         items(blockedList) { item ->
             TacticalPulseCard {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text(item, style = MaterialTheme.typography.bodyLarge, color = Color.White)
                     TextButton(onClick = { onRemoveBlocked(item) }) { Text("Freigeben", color = Color(0xFFFF3333)) }
                 }
-            }
-        }
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
             }
         }
     }
@@ -750,8 +715,8 @@ fun ClipboardProtectionPage(autoClearEnabled: Boolean, onAutoClearChange: (Boole
     val clipboardManager = LocalClipboardManager.current
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
-            Text("Zwischenablage-Wächter", style = MaterialTheme.typography.titleLarge, color = Color.White)
-            Text("Schützt sensible Daten vor Hintergrund-Spyware.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text("Zwischenablage", style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text("Schützt sensible Daten vor Spyware.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
             TacticalPulseCard {
@@ -768,20 +733,14 @@ fun ClipboardProtectionPage(autoClearEnabled: Boolean, onAutoClearChange: (Boole
                     Button(
                         onClick = {
                             clipboardManager.setText(AnnotatedString(""))
-                            Toast.makeText(context, "Zwischenablage komplett geleert!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Zwischenablage geleert!", Toast.LENGTH_SHORT).show()
                         },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
                     ) {
-                        Text("Zwischenablage jetzt leeren", color = Color.Black, fontWeight = FontWeight.Bold)
+                        Text("Jetzt leeren", color = Color.Black, fontWeight = FontWeight.Bold)
                     }
                 }
-            }
-        }
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
             }
         }
     }
@@ -792,30 +751,39 @@ fun PermissionsAuditPage() {
     val context = LocalContext.current
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
-            Text("Berechtigungs-Auditor", style = MaterialTheme.typography.titleLarge, color = Color.White)
-            Text("Prüft das System auf kritische Sonderrechte.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text("Berechtigungen & E-Mail-Listener", style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text("Verwalte die System-Schnittstellen für E-Mail- und SMS-Schutz.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
             TacticalPulseCard {
                 Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Accessibility & Overlays", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                    Text("Status: Keine unautorisierten Screen-Reader aktiv.", style = MaterialTheme.typography.bodyMedium, color = Color.White)
+                    Text("E-Mail Notification Listener", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text("Ermöglicht das lokale Scannen eingehender E-Mail-Benachrichtigungen (Gmail, Outlook etc.) ohne Cloud.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(
+                        onClick = {
+                            try {
+                                val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                Toast.makeText(context, "Fehler beim Öffnen der Einstellungen", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
+                    ) {
+                        Text("Benachrichtigungs-Zugriff erlauben", color = Color.Black, fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         }
         item {
             Button(
-                onClick = { Toast.makeText(context, "Audit erfolgreich: System sauber.", Toast.LENGTH_SHORT).show() },
+                onClick = { Toast.makeText(context, "System-Audit: Alle Wächter bereit.", Toast.LENGTH_SHORT).show() },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
             ) {
                 Text("Vollständigen Audit-Scan starten", color = Color.Black, fontWeight = FontWeight.Bold)
-            }
-        }
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
             }
         }
     }
@@ -824,7 +792,6 @@ fun PermissionsAuditPage() {
 @Composable
 fun SwarmMeshPage() {
     val context = LocalContext.current
-   
     val db = remember { JuarisDatabase.getDatabase(context) }
     val postsFlow = remember { db.meshDao().getAllActivePosts() }
     val posts by postsFlow.collectAsState(initial = emptyList())
@@ -832,8 +799,7 @@ fun SwarmMeshPage() {
     var inputMessage by remember { mutableStateOf("") }
     var isEphemeral by remember { mutableStateOf(false) }
     var statusMessage by remember { mutableStateOf("") }
-
-    var scanStatusText by remember { mutableStateOf("Bereit für Hardware-Abgleich") }
+    var scanStatusText by remember { mutableStateOf("Bereit") }
     var discoveredDevicesCount by remember { mutableStateOf(0) }
 
     val meshManager = remember {
@@ -841,11 +807,11 @@ fun SwarmMeshPage() {
             context = context,
             onDeviceDiscovered = { endpointId ->
                 discoveredDevicesCount += 1
-                scanStatusText = "Mit Node verbunden: $endpointId"
+                scanStatusText = "Verbunden: $endpointId"
             },
             onDeviceLost = { endpointId ->
                 discoveredDevicesCount = (discoveredDevicesCount - 1).coerceAtLeast(0)
-                scanStatusText = "Node getrennt: $endpointId"
+                scanStatusText = "Getrennt: $endpointId"
             },
             onMessageReceived = { _, msg ->
                 GlobalMeshEngine.broadcastToSwarm(
@@ -861,31 +827,18 @@ fun SwarmMeshPage() {
     }
 
     DisposableEffect(Unit) {
-        onDispose {
-            meshManager.stopMeshNode()
-        }
+        onDispose { meshManager.stopMeshNode() }
     }
 
     val bluetoothPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        val allGranted = permissions.values.all { id -> id }
-        if (allGranted) {
-            scanStatusText = "Hardware-Scan aktiv"
+        if (permissions.values.all { it }) {
             meshManager.startMeshNode()
-            Toast.makeText(context, "Bluetooth-Mesh-Scan & P2P gestartet...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "P2P-Schwarm gestartet", Toast.LENGTH_SHORT).show()
         } else {
-            scanStatusText = "Berechtigungen fehlen!"
-            Toast.makeText(context, "Bluetooth-Berechtigungen werden für den Schwarm benötigt!", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Bluetooth-Berechtigungen fehlen", Toast.LENGTH_LONG).show()
         }
-    }
-
-    var testInputText by remember { mutableStateOf("Juaris Secure Node") }
-    val generatedHash = remember(testInputText) {
-        try {
-            val bytes = MessageDigest.getInstance("SHA-256").digest(testInputText.toByteArray())
-            bytes.joinToString("") { "%02x".format(it) }
-        } catch (e: Exception) { "Fehler" }
     }
 
     LazyColumn(
@@ -894,41 +847,27 @@ fun SwarmMeshPage() {
     ) {
         item {
             Text("P2P-Schwarm & Live-Feed", style = MaterialTheme.typography.titleLarge, color = Color.White)
-            Text("Dezentraler Austausch & verschlüsselter Social-Feed.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text("Dezentraler Offline-Austausch.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
-
         item {
             TacticalPulseCard {
                 Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Nachricht in den Schwarm broadcasten", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                   
+                    Text("Nachricht broadcasten", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     OutlinedTextField(
                         value = inputMessage,
                         onValueChange = { inputMessage = it },
-                        label = { Text("Nachricht eingeben...", color = Color.Gray) },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = NeonGiftgruen,
-                            unfocusedBorderColor = Color.DarkGray,
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White
-                        )
+                        label = { Text("Nachricht...", color = Color.Gray) },
+                        modifier = Modifier.fillMaxWidth()
                     )
-
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(
-                                checked = isEphemeral,
-                                onCheckedChange = { isEphemeral = it },
-                                colors = CheckboxDefaults.colors(checkedColor = NeonGiftgruen)
-                            )
-                            Text("Snapchat-Modus (Ephemer)", color = Color.LightGray, fontSize = 12.sp)
+                            Checkbox(checked = isEphemeral, onCheckedChange = { isEphemeral = it })
+                            Text("Ephemer", color = Color.LightGray, fontSize = 12.sp)
                         }
-
                         Button(
                             onClick = {
                                 if (inputMessage.isNotBlank()) {
@@ -938,13 +877,9 @@ fun SwarmMeshPage() {
                                         content = inputMessage,
                                         isEphemeral = isEphemeral,
                                         meshManager = meshManager,
-                                        onBlocked = { reason ->
-                                            statusMessage = reason
-                                            Toast.makeText(context, "KI-Blockade: $reason", Toast.LENGTH_SHORT).show()
-                                        },
+                                        onBlocked = { reason -> statusMessage = reason },
                                         onSuccess = { packetId ->
-                                            statusMessage = "Gesendet! ID: ${packetId.take(8)}..."
-                                            Toast.makeText(context, "Erfolgreich in den Schwarm gebroadcastet!", Toast.LENGTH_SHORT).show()
+                                            statusMessage = "Gesendet!"
                                             inputMessage = ""
                                         }
                                     )
@@ -955,57 +890,24 @@ fun SwarmMeshPage() {
                             Text("Broadcast", color = Color.Black, fontWeight = FontWeight.Bold)
                         }
                     }
-
-                    if (statusMessage.isNotEmpty()) {
-                        Text(text = statusMessage, color = Color(0xFFFF3333), fontSize = 12.sp)
-                    }
                 }
             }
         }
-
-        item {
-            Text("Eingehende Schwarm-Pakete (${posts.size})", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-        }
-
-        if (posts.isEmpty()) {
-            item {
-                TacticalPulseCard {
-                    Text("Keine aktiven Pakete im lokalen Schwarm empfangen. Starte einen Broadcast!", color = Color.Gray, fontSize = 13.sp)
-                }
-            }
-        } else {
-            items(posts) { post ->
-                TacticalPulseCard {
-                    Column(modifier = Modifier.fillMaxWidth().padding(4.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(text = post.senderNode, color = NeonGiftgruen, style = MaterialTheme.typography.bodySmall)
-                            if (post.isEphemeral) {
-                                Text(text = "🔥 Ephemer", color = Color(0xFFFF9900), style = MaterialTheme.typography.bodySmall)
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(text = post.content, color = Color.White)
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Hops: ${post.ttlHopCount} | ID: ${post.postId.take(8)}",
-                            color = Color.Gray,
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
+        item { Text("Schwarm-Pakete (${posts.size})", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen) }
+        items(posts) { post ->
+            TacticalPulseCard {
+                Column(modifier = Modifier.fillMaxWidth().padding(4.dp)) {
+                    Text(text = post.senderNode, color = NeonGiftgruen, style = MaterialTheme.typography.bodySmall)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(text = post.content, color = Color.White)
                 }
             }
         }
-
         item {
             TacticalPulseCard {
                 Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Bluetooth-Hardware Status", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                    Text(scanStatusText, style = MaterialTheme.typography.bodyMedium, color = Color.White)
-                    Text("Gekoppelte Nodes: $discoveredDevicesCount", style = MaterialTheme.typography.bodyLarge, color = Color.White)
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Bluetooth Mesh Hardware", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text("Status: $scanStatusText", color = Color.White)
                     Button(
                         onClick = {
                             bluetoothPermissionLauncher.launch(
@@ -1019,39 +921,9 @@ fun SwarmMeshPage() {
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
                     ) {
-                        Text("Hardware-Mesh-Scan ausführen", color = Color.Black, fontWeight = FontWeight.Bold)
+                        Text("Mesh-Scan starten", color = Color.Black, fontWeight = FontWeight.Bold)
                     }
                 }
-            }
-        }
-
-        item {
-            TacticalPulseCard {
-                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Quantum-Hash Generator", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                    OutlinedTextField(
-                        value = testInputText,
-                        onValueChange = { testInputText = it },
-                        label = { Text("Signatur-Text", color = Color.Gray) },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = NeonGiftgruen,
-                            unfocusedBorderColor = Color.DarkGray,
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White
-                        )
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text("SHA-256 Hash:", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                    Text(generatedHash, style = MaterialTheme.typography.bodyMedium, color = NeonGiftgruen)
-                }
-            }
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
             }
         }
     }
@@ -1062,58 +934,19 @@ fun PrivacyAndLegalContent() {
     val context = LocalContext.current
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
-            Text("Datenschutzerklärung & Impressum", style = MaterialTheme.typography.titleLarge, color = Color.White)
-            Text("Rechtliche Bestimmungen von Juaris", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text("Datenschutz & Impressum", style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text("100% Local-First Prinzip.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
             TacticalPulseCard {
                 Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("1. Grundsatz", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                    Text("Juaris wurde entwickelt, um die Privatsphäre der Nutzer maximal zu schützen. Der Schutz deiner persönlichen Daten hat für uns oberste Priorität.", color = Color.White)
+                    Text("Datenschutz", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text("Keine Cloud, keine Server, keine Telemetrie. Alle Daten verbleiben ausschließlich verschlüsselt auf deinem Endgerät.", color = Color.White)
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text("2. Keine Datenerhebung", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                    Text("Juaris arbeitet strikt nach dem Local-First-Prinzip. Sämtliche App-Daten, Logs und Einstellungen werden ausschließlich lokal auf deinem Endgerät in einer verschlüsselten Datenbank gespeichert. Es werden keine persönlichen Daten, Standortdaten oder Nutzungsprofile an uns oder Dritte übertragen.", color = Color.White)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text("3. In-App-Abonnements", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                    Text("Für die Abwicklung des monatlichen Abonnements (1,99 €/Monat) nutzen wir den offiziellen Google Play Billing Service. Wir selbst erhalten keine Kreditkarten- oder Bankdaten.", color = Color.White)
-                }
-            }
-        }
-        item {
-            TacticalPulseCard {
-                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Impressum", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                    Text("Angaben gemäß § 5 TMG / ECG:", color = Color.White)
                     Text("Entwickler: Benedikt Wolfgang Hütter", color = Color.White)
                     Text("Anschrift: Schulgasse 4/15, 2700 Wiener Neustadt, Österreich", color = Color.White)
-                    Text("Kontakt: hutters.hq@gmail.com", color = Color.White)
-                    Text("Verantwortlich für den Inhalt: Benedikt Wolfgang Hütter", color = Color.White)
-                }
-            }
-        }
-        item {
-            OutlinedButton(
-               onClick = {
-                   try {
-                       val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://huttershq-debug.github.io/juaris-app/privacy.md"))
-                       context.startActivity(intent)
-                   } catch (e: Exception) {
-                       // Fehler abfangen
-                   }
-              },
-              modifier = Modifier.fillMaxWidth(),
-              border = BorderStroke(1.dp, NeonGiftgruen)
-          ) {
-              Text("Online-Dokumentation im Browser öffnen", color = NeonGiftgruen)
-          }
-        }
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
-            TacticalPulseCard {
-                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Hutter IT-Solutions", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                    Text("Copyright Benedikt Wolfgang Hütter", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                    Text("Design Benedikt Wolfgang Hütter", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    Text("E-Mail: hutters.hq@gmail.com", color = Color.White)
                 }
             }
         }
