@@ -816,15 +816,17 @@ fun SwarmMeshPage() {
             onMessageReceived = { _, msg ->
                 GlobalMeshEngine.broadcastToSwarm(
                     context = context,
-                    content = msg,
-                    isEphemeral = false,
-                    meshManager = null,
-                    onBlocked = {},
-                    onSuccess = {}
+                    content = inputMessage,
+                    isEphemeral = isEphemeral,
+                    meshManager = meshManager, // <--- Wichtig: muss hier übergeben werden!
+                    onBlocked = { reason -> statusMessage = reason },
+                    onSuccess = { packetId ->
+                        statusMessage = "Gesendet!"
+                        inputMessage = ""
+                    }
                 )
-            }
-        )
-    }
+            )
+         }
 
     DisposableEffect(Unit) {
         onDispose { meshManager.stopMeshNode() }
