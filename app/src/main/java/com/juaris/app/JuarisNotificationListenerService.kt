@@ -3,6 +3,9 @@ package com.juaris.app
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class JuarisNotificationListenerService : NotificationListenerService() {
 
@@ -17,7 +20,7 @@ class JuarisNotificationListenerService : NotificationListenerService() {
         super.onNotificationPosted(sbn)
         sbn?.let { notification ->
             val packageName = notification.packageName
-            
+           
             // Bekannte E-Mail-Apps auf Android
             val emailPackages = listOf(
                 "com.google.android.gm", // Gmail
@@ -35,9 +38,9 @@ class JuarisNotificationListenerService : NotificationListenerService() {
                 val isSafe = aiCore.evaluateContentSafety(fullEmailContent, packageName)
                 if (!isSafe) {
                     Log.w("JuarisEmailScan", "Phishing / Betrug in E-Mail-Notification erkannt: $fullEmailContent")
-                    
-                    // Optional: Direkt als Security-Log in die lokale Room-Datenbank schreiben
-                    kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                   
+                    // Als Security-Log sicher in die lokale Room-Datenbank schreiben
+                    CoroutineScope(Dispatchers.IO).launch {
                         val db = JuarisDatabase.getDatabase(applicationContext)
                         db.securityLogDao().insertLog(
                             SecurityLogEntity(
@@ -53,3 +56,4 @@ class JuarisNotificationListenerService : NotificationListenerService() {
         }
     }
 }
+
