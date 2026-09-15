@@ -72,19 +72,7 @@ jobs:
           name: juaris-unit-test-results
           path: app/build/reports/tests/testDebugUnitTest/
    
-      # - name: Run Instrumented Tests (UI & System)
-        # uses: reactivecircus/android-emulator-runner@v2
-    # with:
-    # api-level: 35
-    # target: google_apis
-    # arch: x86_64
-    # force-avd-creation: true
-    # emulator-options: -no-snapshot-save -no-snapshot-load -no-window -gpu auto -no-audio -no-boot-anim -camera-back none
-    # disable-animations: true
-    # script: adb wait-for-device && while [ "$(adb shell getprop sys.boot_completed | tr -d '\r')" != "1" ]; do sleep 2; done && sleep 5 && ./gradlew-8.4/bin/gradle connectedDebugAndroidTest --stacktrace
-
-
-         run: |
+      - run: |
           echo "kompiliere APK und AAB mit 3GB Heap..."
           ./gradle-8.4/bin/gradle assembleRelease bundleRelease --stacktrace \
             -Dorg.gradle.jvmargs="-Xmx3g" \
