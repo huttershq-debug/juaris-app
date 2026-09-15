@@ -2,16 +2,16 @@
     androidx.compose.material3.ExperimentalMaterial3Api::class,
     androidx.compose.foundation.ExperimentalFoundationApi::class
 )
- 
+
 package com.juaris.app
 
 import android.app.Activity
+import android.app.role.RoleManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -60,10 +60,19 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var securePrefs: SharedPreferences
 
+    private val callScreeningRoleLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { _ ->
+        // Rückmeldung nach Rollenanfrage (optional verarbeitbar)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
        
         window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+        // Offizielle Google-konforme Rollenabfrage für Call Screening (Anruf- und Spam-Filter)
+        requestCallScreeningRoleIfNeeded()
 
         try {
             val masterKey = MasterKey.Builder(this)
@@ -124,6 +133,18 @@ class MainActivity : ComponentActivity() {
                             JuarisMainDashboard(securePrefs)
                         }
                     }
+                }
+            }
+        }
+    }
+
+    private fun requestCallScreeningRoleIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val roleManager = getSystemService(RoleManager::class.java)
+            if (roleManager != null && roleManager.isRoleAvailable(RoleManager.ROLE_CALL_SCREENING)) {
+                if (!roleManager.isRoleHeld(RoleManager.ROLE_CALL_SCREENING)) {
+                    val intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_CALL_SCREENING)
+                    callScreeningRoleLauncher.launch(intent)
                 }
             }
         }
@@ -831,6 +852,7 @@ fun SwarmMeshPage() {
                     context = context,
                     content = msg,
                     isEphemeral = false,
+                    meshManager = null,
                     onBlocked = {},
                     onSuccess = {}
                 )
@@ -847,7 +869,7 @@ fun SwarmMeshPage() {
     val bluetoothPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        val allGranted = permissions.values.all { it }
+        val allGranted = permissions.values.all { id -> id }
         if (allGranted) {
             scanStatusText = "Hardware-Scan aktiv"
             meshManager.startMeshNode()
@@ -915,6 +937,7 @@ fun SwarmMeshPage() {
                                         context = context,
                                         content = inputMessage,
                                         isEphemeral = isEphemeral,
+                                        meshManager = meshManager,
                                         onBlocked = { reason ->
                                             statusMessage = reason
                                             Toast.makeText(context, "KI-Blockade: $reason", Toast.LENGTH_SHORT).show()
