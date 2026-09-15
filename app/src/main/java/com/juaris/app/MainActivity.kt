@@ -48,7 +48,6 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.juaris.app.ui.AIPage
 import com.juaris.app.ui.AirGesturePage
-import com.juaris.app.ui.TacticalPulseCard
 import com.juaris.app.ui.NeonGiftgruen
 import com.juaris.app.ui.SecurityLogsPage
 import kotlinx.coroutines.delay
@@ -506,9 +505,13 @@ fun StatusPage(
             Text("100% On-Device Kontrolle ohne Server-Anbindung.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
-            TacticalPulseCard {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                border = BorderStroke(1.dp, NeonGiftgruen.copy(alpha = 0.3f))
+            ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
@@ -523,8 +526,11 @@ fun StatusPage(
         item {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Box(modifier = Modifier.weight(1f)) {
-                    TacticalPulseCard {
-                        Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        Column(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                             Text("BLOCKIERT", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                             Spacer(modifier = Modifier.height(4.dp))
                             Text("$blockedCount", style = MaterialTheme.typography.headlineLarge, color = Color(0xFFFF3333))
@@ -532,8 +538,11 @@ fun StatusPage(
                     }
                 }
                 Box(modifier = Modifier.weight(1f)) {
-                    TacticalPulseCard {
-                        Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        Column(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                             Text("DATENFLUSS", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                             Spacer(modifier = Modifier.height(4.dp))
                             Text("NUR LOKAL", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
@@ -547,8 +556,11 @@ fun StatusPage(
             Text("Aktionen", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
         }
         item {
-            TacticalPulseCard {
-                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(
                         onClick = onSimulateThreat,
                         modifier = Modifier.fillMaxWidth(),
@@ -600,8 +612,11 @@ fun ProtectionModulesPage(
             Text("Echtzeit-Wächter für Anrufe, SMS und E-Mails.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
-            TacticalPulseCard {
-                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("Kommunikations-Filter", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
@@ -643,13 +658,15 @@ fun ProtectionModulesPage(
             }
         }
         item {
-            TacticalPulseCard(
+            Card(
                 onClick = {
                     onVaultToggle(!vaultUnlocked)
                     Toast.makeText(context, if (!vaultUnlocked) "Vault entsperrt" else "Vault gesperrt", Toast.LENGTH_SHORT).show()
-                }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                Column {
+                Column(modifier = Modifier.padding(16.dp)) {
                     Text("Verschlüsselter Offline-Vault", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Spacer(modifier = Modifier.height(4.dp))
                     Text("AES-256 geschützter Speicher.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
@@ -670,8 +687,11 @@ fun BlacklistPage(blockedList: MutableList<String>, onAddBlocked: (String) -> Un
             Text("Persistente Offline-Blockaden.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
-            TacticalPulseCard {
-                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Nummer / Muster hinzufügen", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         OutlinedTextField(
@@ -692,8 +712,11 @@ fun BlacklistPage(blockedList: MutableList<String>, onAddBlocked: (String) -> Un
         }
         item { Text("Gesperrte Einträge (${blockedList.size})", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen) }
         items(blockedList) { item ->
-            TacticalPulseCard {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Row(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text(item, style = MaterialTheme.typography.bodyLarge, color = Color.White)
                     TextButton(onClick = { onRemoveBlocked(item) }) { Text("Freigeben", color = Color(0xFFFF3333)) }
                 }
@@ -712,8 +735,11 @@ fun ClipboardProtectionPage(autoClearEnabled: Boolean, onAutoClearChange: (Boole
             Text("Schützt sensible Daten vor Spyware.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
-            TacticalPulseCard {
-                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("Clipboard-Sicherheit", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
@@ -748,8 +774,11 @@ fun PermissionsAuditPage() {
             Text("Verwalte die System-Schnittstellen für E-Mail- und SMS-Schutz.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
-            TacticalPulseCard {
-                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("E-Mail Notification Listener", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Text("Ermöglicht das lokale Scannen eingehender E-Mail-Benachrichtigungen (Gmail, Outlook etc.) ohne Cloud.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                     Spacer(modifier = Modifier.height(8.dp))
@@ -843,8 +872,11 @@ fun SwarmMeshPage() {
             Text("Dezentraler Offline-Austausch.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
-            TacticalPulseCard {
-                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Nachricht broadcasten", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     OutlinedTextField(
                         value = inputMessage,
@@ -888,8 +920,11 @@ fun SwarmMeshPage() {
         }
         item { Text("Schwarm-Pakete (${posts.size})", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen) }
         items(posts) { post ->
-            TacticalPulseCard {
-                Column(modifier = Modifier.fillMaxWidth().padding(4.dp)) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                     Text(text = post.senderNode, color = NeonGiftgruen, style = MaterialTheme.typography.bodySmall)
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(text = post.content, color = Color.White)
@@ -897,8 +932,11 @@ fun SwarmMeshPage() {
             }
         }
         item {
-            TacticalPulseCard {
-                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Bluetooth Mesh Hardware", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Text("Status: $scanStatusText", color = Color.White)
                     Button(
@@ -930,8 +968,11 @@ fun PrivacyAndLegalContent() {
             Text("100% Local-First Prinzip.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
-            TacticalPulseCard {
-                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Datenschutz", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Text("Keine Cloud, keine Server, keine Telemetrie. Alle Daten verbleiben ausschließlich verschlüsselt auf deinem Endgerät.", color = Color.White)
                     Spacer(modifier = Modifier.height(4.dp))
