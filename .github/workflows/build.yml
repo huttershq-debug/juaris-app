@@ -74,16 +74,17 @@ jobs:
           name: juaris-unit-test-results
           path: app/build/reports/tests/testDebugUnitTest/
    
-      - run: |
+       - name: Build Both AAB and APK
+        run: |
           echo "kompiliere APK und AAB mit 3GB Heap..."
-          ./gradle-8.4/bin/gradle assembleRelease bundleRelease --stacktrace \
+          ./gradlew-8.4/bin/gradle assembleRelease bundleRelease --stacktrace \
             -Dorg.gradle.jvmargs="-Xmx3g" \
             -Pandroid.useAndroidX=true \
             -Pandroid.enableJetifier=true \
             -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/juaris-release-key.jks" \
-            -Pandroid.injected.signing.store-password="${{ secrets.KEYSTORE_PASSWORD }}" \
-            -Pandroid.injected.signing.key_alias="${{ secrets.KEY_ALIAS }}" \
-            -Pandroid.injected.signing.key_password="${{ secrets.KEY_PASSWORD }}"
+            -Pandroid.injected.signing.storePassword="${{ secrets.KEYSTORE_PASSWORD }}" \
+            -Pandroid.injected.signing.keyAlias="${{ secrets.KEY_ALIAS }}" \
+            -Pandroid.injected.signing.keyPassword="${{ secrets.KEY_PASSWORD }}"
 
       - name: Release Both Files
         uses: softprops/action-gh-release@v1
