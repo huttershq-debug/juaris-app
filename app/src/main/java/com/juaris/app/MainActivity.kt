@@ -10,7 +10,6 @@ import android.app.role.RoleManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -19,7 +18,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
@@ -55,18 +53,15 @@ import com.juaris.app.ui.NeonGiftgruen
 import com.juaris.app.ui.SecurityLogsPage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.security.MessageDigest
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var securePrefs: SharedPreferences
 
-    // Launcher für Anruf-Spam-Filter Rolle
     private val callScreeningRoleLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { _ -> }
 
-    // Launcher für Standard-SMS-App Rolle (Google Play konform für SMS-Phishing-Schutz)
     private val smsRoleLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -82,7 +77,6 @@ class MainActivity : ComponentActivity() {
        
         window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-        // Offizielle Google-konforme Rollen beim Start anfordern
         requestCallScreeningRoleIfNeeded()
         requestSmsRoleIfNeeded()
 
@@ -440,7 +434,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                         prefs.edit().putBoolean("clip_auto", it).apply()
                     }
                 )
-                5 -> PermissionsAuditPage() // Enthält jetzt auch Direktlinks für E-Mail Notification Listener!
+                5 -> PermissionsAuditPage()
                 6 -> SwarmMeshPage()
                 7 -> AIPage(aiCore = aiCore, logs = liveLogs)
                 8 -> {
@@ -635,7 +629,6 @@ fun ProtectionModulesPage(
                             onCheckedChange = { newState ->
                                 onEmailChange(newState)
                                 if (newState) {
-                                    // Direkter Absprung in die Android Einstellungen für Notification Listener
                                     try {
                                         val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
                                         context.startActivity(intent)
@@ -816,17 +809,15 @@ fun SwarmMeshPage() {
             onMessageReceived = { _, msg ->
                 GlobalMeshEngine.broadcastToSwarm(
                     context = context,
-                    content = inputMessage,
-                    isEphemeral = isEphemeral,
-                    meshManager = meshManager, // <--- Wichtig: muss hier übergeben werden!
-                    onBlocked = { reason -> statusMessage = reason },
-                    onSuccess = { packetId ->
-                        statusMessage = "Gesendet!"
-                        inputMessage = ""
-                    }
+                    content = msg,
+                    isEphemeral = false,
+                    meshManager = null,
+                    onBlocked = {},
+                    onSuccess = {}
                 )
-            )
-         }
+            }
+        )
+    }
 
     DisposableEffect(Unit) {
         onDispose { meshManager.stopMeshNode() }
@@ -880,7 +871,7 @@ fun SwarmMeshPage() {
                                         isEphemeral = isEphemeral,
                                         meshManager = meshManager,
                                         onBlocked = { reason -> statusMessage = reason },
-                                        onSuccess = { packetId ->
+                                        onSuccess = { _ ->
                                             statusMessage = "Gesendet!"
                                             inputMessage = ""
                                         }
@@ -933,7 +924,6 @@ fun SwarmMeshPage() {
 
 @Composable
 fun PrivacyAndLegalContent() {
-    val context = LocalContext.current
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
             Text("Datenschutz & Impressum", style = MaterialTheme.typography.titleLarge, color = Color.White)
@@ -954,4 +944,5 @@ fun PrivacyAndLegalContent() {
         }
     }
 }
+
 
