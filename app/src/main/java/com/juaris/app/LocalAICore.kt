@@ -3,63 +3,44 @@ package com.juaris.app
 import android.content.Context
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 class LocalAICore(private val context: Context) {
 
-    private val _aiStatus = MutableStateFlow("Bereit - On-Device AGI aktiv")
-    val aiStatus: StateFlow<String> = _aiStatus.asStateFlow()
+    private val _aiStatus = MutableStateFlow("On-Device AGI: Aktiv & Gesichert")
+    val aiStatus: StateFlow<String> = _aiStatus
 
-    private val _threatLevel = MutableStateFlow("SICHER")
-    val threatLevel: StateFlow<String> = _threatLevel.asStateFlow()
+    private val _threatLevel = MutableStateFlow(0) // 0 (Sicher) bis 100 (Kritisch)
+    val threatLevel: StateFlow<Int> = _threatLevel
 
-    private val _aiInsights = MutableStateFlow("Keine sicherheitsrelevanten Anomalien im lokalen Kontext erkannt.")
-    val aiInsights: StateFlow<String> = _aiInsights.asStateFlow()
+    // Echte On-Device Text- und Inhaltsanalyse (Ohne Cloud / Telemetrie)
+    fun evaluateContentSafety(text: String, sender: String?): Boolean {
+        val normalized = erodeAndNormalizeText(text)
+        val suspiciousTriggers = listOf(
+            "konto gesperrt", "kreditkarte", "gewinn", "sofort handeln",
+            "phishing", "malware", "bitcoinguthaben", "identitaet"
+        )
 
-    private val _autonomousDecisions = MutableStateFlow<List<String>>(emptyList())
-    val autonomousDecisions: StateFlow<List<String>> = _autonomousDecisions.asStateFlow()
+        val hitCount = suspiciousTriggers.count { normalized.contains(it) }
+        val calculatedScore = (hitCount * 30).coerceAtMost(100)
+        _threatLevel.value = calculatedScore
 
-    fun executeDeepCognitiveScan(
-        logs: List<SecurityLogEntity>,
-        activeMeshNodes: Int,
-        clipboardActive: Boolean
-    ) {
-        _aiStatus.value = "Deep Scan abgeschlossen (${logs.size} Logs analysiert)"
-        _threatLevel.value = "SICHER"
-        _aiInsights.value = "Mesh-Netzwerk ($activeMeshNodes Knoten) ist synchron und geschützt."
-    }
+        if (calculatedScore >= 60) {
+            _aiStatus.value = "Bedrohung lokal erkannt (Score: $calculatedScore)"
+            return false // Geblockt durch On-Device AGI
+        }
 
-    fun analyzeLocalEnvironment(
-        logs: List<SecurityLogEntity>,
-        activeMeshNodes: Int,
-        clipboardActive: Boolean
-    ) {
-        executeDeepCognitiveScan(logs, activeMeshNodes, true)
-    }
-
-    fun triggerAutonomousCountermeasure() {
-        _aiStatus.value = "Autonome Gegenmaßnahme ausgeführt"
-        _threatLevel.value = "SICHER"
-        _aiInsights.value = "System-Integrität verifiziert."
-        _autonomousDecisions.value = _autonomousDecisions.value + "Heuristische Bereinigung durchgeführt."
-    }
-
-    fun wipeAiMemory() {
-        _aiStatus.value = "Gedächtnis vollständig gelöscht"
-        _threatLevel.value = "SICHER"
-        _aiInsights.value = "Cache geleert. Privacy Wipe erfolgreich."
-        _autonomousDecisions.value = emptyList()
-    }
-
-    // On-Device AGI-Integritätsprüfung für den Schwarm vor dem Broadcast
-    fun evaluateContentSafety(content: String, mediaUri: String?): Boolean {
-        if (content.isBlank() && mediaUri == null) return false
-        
-        // Hier läuft die lokale AGI-Heuristik. 
-        // True = Inhalt ist integer und freigegeben
-        // False = Bedrohung erkannt, wird autonom gestoppt
+        _aiStatus.value = "Inhalt verifiziert (Score: $calculatedScore)"
         return true
     }
+
+    // Leetspeak-Bereinigung und Normalisierung
+    private fun erodeAndNormalizeText(input: String): String {
+        return input.lowercase()
+            .replace("0", "o")
+            .replace("4", "a")
+            .replace("1", "i")
+            .replace("3", "e")
+            .replace("@", "a")
+            .replace(Regex("[^a-zäöüß0-9\\s]"), "")
+    }
 }
-
-
