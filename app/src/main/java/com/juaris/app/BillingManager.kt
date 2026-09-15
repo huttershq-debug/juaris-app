@@ -6,85 +6,96 @@ import com.android.billingclient.api.*
 
 class BillingManager(
     private val context: Context,
-    private val productID: String = "juaris_monats_abo",
-    private val onPurchased: () -> Unit = {}
-) {
-    private lateinit var billingClient: BillingClient
+    private val skuId: String = "juaris_monats_abo",
+    private val onSubscriptionActive: () -> Unit
+) : PurchasesUpdatedListener {
 
+    // ⚠️ HIER MIT EINEM KLICK AUF TRUE STELLEN ZUM TESTEN AUF DEM HANDY
+    // Vor dem Upload in die Google Play Console auf FALSE setzen!
     companion object {
-        // HIER für den Beta-Test auf `true` lassen. 
-        // Später vor dem Einreichen bei Google einfach auf `false` stellen!
-        var IS_BETA_BYPASS_ACTIVE: Boolean = true
+        var IS_BETA_BYPASS_ACTIVE: Boolean = com.juaris.app.BuildConfig.DEBUG
     }
 
-    fun startConnection(onReady: () -> Unit) {
-        // Wenn der Beta-Bypass aktiv ist, überspringen wir die echte Billing-Verbindung
+    private var billingClient: BillingClient = BillingClient.newBuilder(context)
+        .setListener(this)
+        .enablePendingPurchases()
+        .build()
+
+    fun startConnection(onReady: () -> Unit = {}) {
         if (IS_BETA_BYPASS_ACTIVE) {
-            onPurchased()
+            onSubscriptionActive()
             onReady()
             return
         }
 
-        billingClient = BillingClient.newBuilder(context)
-            .setListener { billingResult, purchases ->
-                if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
-                    for (purchase in purchases) {
-                        handlePurchase(purchase)
-                    }
-                }
-            }
-            .enablePendingPurchases()
-            .build()
-
         billingClient.startConnection(object : BillingClientStateListener {
             override fun onBillingSetupFinished(billingResult: BillingResult) {
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                    checkExistingPurchases()
                     onReady()
                 }
             }
 
             override fun onBillingServiceDisconnected() {
-                // Verbindung wird bei Bedarf neu aufgebaut
+                // Retry logic / Neuverbindung bei Bedarf
             }
         })
     }
 
-    private fun handlePurchase(purchase: Purchase) {
-        if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
-            onPurchased()
+    private fun checkExistingPurchases() {
+        billingClient.queryPurchasesAsync(
+            QueryPurchasesParams.newBuilder()
+                .setProductType(BillingClient.ProductType.SUBS)
+                .build()
+        ) { result, purchases ->
+            if (result.responseCode == BillingClient.BillingResponseCode.OK && purchases.isNotEmpty()) {
+                onSubscriptionActive()
+            }
         }
     }
 
     fun launchBillingFlow(activity: Activity) {
-        // Wenn der Bypass aktiv ist, triggern wir den Kauf-Erfolg direkt ohne Play Store
         if (IS_BETA_BYPASS_ACTIVE) {
-            onPurchased()
+            onSubscriptionActive()
             return
         }
 
         val productList = listOf(
             QueryProductDetailsParams.Product.newBuilder()
-                .setProductId(productID)
+                .setProductId(skuId)
                 .setProductType(BillingClient.ProductType.SUBS)
                 .build()
         )
-       
-        val params = QueryProductDetailsParams.newBuilder()
-            .setProductList(productList)
-            .build()
+
+        val params = QueryProductDetailsParams.newBuilder().setProductList(productList).build()
 
         billingClient.queryProductDetailsAsync(params) { billingResult, productDetailsList ->
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && productDetailsList.isNotEmpty()) {
-                val productDetails = productDetailsList[0]
+                val productDetails = productDetailsList.first()
+                val offerToken = productDetails.subscriptionOfferDetails?.firstOrNull()?.offerToken ?: return@queryProductDetailsAsync
+
                 val productDetailsParamsList = listOf(
                     BillingFlowParams.ProductDetailsParams.newBuilder()
                         .setProductDetails(productDetails)
+                        .setOfferToken(offerToken)
                         .build()
                 )
+
                 val billingFlowParams = BillingFlowParams.newBuilder()
                     .setProductDetailsParamsList(productDetailsParamsList)
                     .build()
+
                 billingClient.launchBillingFlow(activity, billingFlowParams)
+            }
+        }
+    }
+
+    override fun onPurchasesUpdated(billingResult: BillingResult, purchases: List<Purchase>?) {
+        if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
+            for (purchase in purchases) {
+                if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
+                    onSubscriptionActive()
+                }
             }
         }
     }
