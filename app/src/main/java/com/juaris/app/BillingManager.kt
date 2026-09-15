@@ -11,7 +11,20 @@ class BillingManager(
 ) {
     private lateinit var billingClient: BillingClient
 
+    companion object {
+        // HIER für den Beta-Test auf `true` lassen. 
+        // Später vor dem Einreichen bei Google einfach auf `false` stellen!
+        var IS_BETA_BYPASS_ACTIVE: Boolean = true
+    }
+
     fun startConnection(onReady: () -> Unit) {
+        // Wenn der Beta-Bypass aktiv ist, überspringen wir die echte Billing-Verbindung
+        if (IS_BETA_BYPASS_ACTIVE) {
+            onPurchased()
+            onReady()
+            return
+        }
+
         billingClient = BillingClient.newBuilder(context)
             .setListener { billingResult, purchases ->
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
@@ -43,13 +56,19 @@ class BillingManager(
     }
 
     fun launchBillingFlow(activity: Activity) {
+        // Wenn der Bypass aktiv ist, triggern wir den Kauf-Erfolg direkt ohne Play Store
+        if (IS_BETA_BYPASS_ACTIVE) {
+            onPurchased()
+            return
+        }
+
         val productList = listOf(
             QueryProductDetailsParams.Product.newBuilder()
                 .setProductId(productID)
                 .setProductType(BillingClient.ProductType.SUBS)
                 .build()
         )
-        
+       
         val params = QueryProductDetailsParams.newBuilder()
             .setProductList(productList)
             .build()
