@@ -20,7 +20,10 @@ object GlobalMeshEngine {
                 senderNode = "LocalDevice",
                 content = content,
                 timestamp = System.currentTimeMillis(),
-                isEphemeral = isEphemeral
+                isEphemeral = isEphemeral,
+                mediaUri = null,
+                mediaType = null,
+                ttlHopCount = 3 // Standard-Hop-Count für das Mesh-Netzwerk
             )
             db.meshDao().insertPost(post)
             onSuccess(System.currentTimeMillis())
