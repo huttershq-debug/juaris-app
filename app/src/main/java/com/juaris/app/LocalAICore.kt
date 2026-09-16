@@ -15,21 +15,36 @@ class LocalAICore(private val context: Context) {
     // Echte On-Device Text- und Inhaltsanalyse (Ohne Cloud / Telemetrie)
     fun evaluateContentSafety(text: String, sender: String?): Boolean {
         val normalized = erodeAndNormalizeText(text)
-        val suspiciousTriggers = listOf(
-            "konto gesperrt", "kreditkarte", "gewinn", "sofort handeln",
-            "phishing", "malware", "bitcoinguthaben", "identitaet"
+        
+        // Toxische Betrugs-Trigger (Kombination aus Druck & Masche)
+        val coreTriggers = listOf(
+            "konto gesperrt", "kreditkarte gesperrt", "sofort handeln", 
+            "zollgebuehr", "paket zurueck", "gewinn eingeloest", "identitaet bestaetigen",
+            "bitcoinguthaben", "wallet verifizieren", "gerichtlicher mahnbescheid"
         )
 
-        val hitCount = suspiciousTriggers.count { normalized.contains(it) }
-        val calculatedScore = (hitCount * 30).coerceAtMost(100)
-        _threatLevel.value = calculatedScore
-
-        if (calculatedScore >= 60) {
-            _aiStatus.value = "Bedrohung lokal erkannt (Score: $calculatedScore)"
-            return false // Geblockt durch On-Device AGI
+        var score = 0
+        
+        for (trigger in coreTriggers) {
+            if (normalized.contains(trigger)) {
+                score += 40
+            }
         }
 
-        _aiStatus.value = "Inhalt verifiziert (Score: $calculatedScore)"
+        if (normalized.contains("http://") || normalized.contains("bit.ly/") || normalized.contains("tinyurl")) {
+            score += 30
+        }
+
+        val finalScore = score.coerceAtMost(100)
+        _threatLevel.value = finalScore
+
+        // Schwellenwert: Ab 60 Punkten schlägt der Alarm an
+        if (finalScore >= 60) {
+            _aiStatus.value = "Bedrohung lokal erkannt (Score: $finalScore)"
+            return false // Blockieren + Alarm auslösen!
+        }
+
+        _aiStatus.value = "Inhalt verifiziert (Score: $finalScore)"
         return true
     }
 
