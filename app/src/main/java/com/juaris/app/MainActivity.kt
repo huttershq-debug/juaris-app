@@ -402,6 +402,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                     }
                 )
                 1 -> ProtectionModulesPage(
+                    prefs = prefs,
                     callProtection = callProtection,
                     onCallChange = {
                         callProtection = it
