@@ -13,7 +13,7 @@ class BillingManager(
     // ⚠️ HIER MIT EINEM KLICK AUF TRUE STELLEN ZUM TESTEN AUF DEM HANDY
     // Vor dem Upload in die Google Play Console auf FALSE setzen!
     companion object {
-        var IS_BETA_BYPASS_ACTIVE: Boolean = com.juaris.app.BuildConfig.DEBUG
+        var IS_BETA_BYPASS_ACTIVE: Boolean = BuildConfig.DEBUG
     }
 
     private var billingClient: BillingClient = BillingClient.newBuilder(context)
