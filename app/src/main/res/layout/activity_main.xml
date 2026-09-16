@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#121212">
+
+    <!-- Titel / App Name -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="JUARIS SECURITY"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#00E676"
+        android:gravity="center"
+        android:paddingBottom="12dp"/>
+
+    <!-- Status-Karte -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#1E1E1E"
+        android:padding="12dp"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="STATUS: WÄCHTER AKTIV (OFFLINE)"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/txtSwarmStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Schwarm-Signaturen lokal: 0 (P2P bereit)"
+            android:textColor="#B0BEC5"
+            android:textSize="12sp"
+            android:paddingTop="4dp"/>
+    </LinearLayout>
+
+    <!-- Überschrift für das Bedrohungs-Log -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Abgefangene Anrufe &amp; SMS (Log):"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:paddingBottom="8dp"/>
+
+    <!-- Liste / Textfeld für die Live-Ereignisse -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#1E1E1E"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/txtLogList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="[System] Warten auf erste Ereignisse...\n"
+            android:textColor="#E0E0E0"
+            android:fontFamily="monospace"
+            android:textSize="12sp"/>
+    </ScrollView>
+
+</LinearLayout>
