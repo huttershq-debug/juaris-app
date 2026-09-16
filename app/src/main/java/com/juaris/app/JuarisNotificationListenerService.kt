@@ -21,7 +21,7 @@ class JuarisNotificationListenerService : NotificationListenerService() {
         super.onNotificationPosted(sbn)
         sbn?.let { notification ->
             val packageName = notification.packageName
-            
+           
             // 1. Eigene App-Benachrichtigungen und reine System-UI ignorieren (verhindert Schleifen und Lärm)
             if (packageName == "com.juaris.app" || packageName.contains("systemui") || packageName.contains("launcher")) {
                 return
@@ -29,10 +29,10 @@ class JuarisNotificationListenerService : NotificationListenerService() {
 
             val extras = notification.notification.extras
             val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() ?: ""
-            
+           
             // 2. Universelle Textextraktion (unterstützt BigTextStyle & MessagingStyle für WhatsApp, Telegram, Signal, Outlook, Gmail etc.)
             var text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString() ?: ""
-            
+           
             val messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES)
             if (!messages.isNullOrEmpty()) {
                 val latestMessage = messages.last()
@@ -49,10 +49,10 @@ class JuarisNotificationListenerService : NotificationListenerService() {
 
             // 3. LOKALE KI-PRÜFUNG (100% On-Device AGI – Zero-Cloud Garantie)
             val isSafe = aiCore.evaluateContentSafety(fullContent, packageName)
-            
+           
             if (!isSafe) {
                 Log.w("JuarisUniversalGuard", "🚨 Betrug / Phishing in App $packageName lokal blockiert!")
-                
+               
                 // 4. Direkt fälschungssicher in die lokale Room-Datenbank schreiben
                 CoroutineScope(Dispatchers.IO).launch {
                     val db = JuarisDatabase.getDatabase(applicationContext)
@@ -69,4 +69,3 @@ class JuarisNotificationListenerService : NotificationListenerService() {
         }
     }
 }
-
