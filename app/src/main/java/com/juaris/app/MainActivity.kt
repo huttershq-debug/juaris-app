@@ -81,6 +81,9 @@ class MainActivity : ComponentActivity() {
         requestCallScreeningRoleIfNeeded()
         requestSmsRoleIfNeeded()
 
+        // Starte den persistenten 24/7 Vordergrund-Dienst sofort beim App-Start
+        startJuarisProtectionService()
+
         try {
             val masterKey = MasterKey.Builder(this)
                 .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -145,6 +148,15 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun startJuarisProtectionService() {
+        val serviceIntent = Intent(this, JuarisNotificationListenerService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
+    }
+
     private fun requestCallScreeningRoleIfNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val roleManager = getSystemService(RoleManager::class.java)
@@ -176,7 +188,6 @@ private fun Context.findActivity(): Activity? = when (this) {
     else -> null
 }
 
-// Google Play konformer Prominent Disclosure Dialog
 private fun showProminentDisclosureDialog(context: Context, onProceed: () -> Unit) {
     android.app.AlertDialog.Builder(context)
         .setTitle("Sicherheits-Wächter aktivieren")
@@ -614,7 +625,7 @@ fun StatusPage(
 
 @Composable
 fun ProtectionModulesPage(
-    prefs: SharedPreferences, 
+    prefs: SharedPreferences,
     callProtection: Boolean, onCallChange: (Boolean) -> Unit,
     smsProtection: Boolean, onSmsChange: (Boolean) -> Unit,
     emailProtection: Boolean, onEmailChange: (Boolean) -> Unit,
@@ -658,7 +669,6 @@ fun ProtectionModulesPage(
                             checked = emailProtection,
                             onCheckedChange = { newState ->
                                 if (newState) {
-                                    // Prominent Disclosure Dialog vor dem System-Zugriff
                                     showProminentDisclosureDialog(context) {
                                         onEmailChange(true)
                                         try {
@@ -805,7 +815,6 @@ fun PermissionsAuditPage() {
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
                         onClick = {
-                            // Prominent Disclosure Dialog vor dem System-Zugriff
                             showProminentDisclosureDialog(context) {
                                 try {
                                     val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
