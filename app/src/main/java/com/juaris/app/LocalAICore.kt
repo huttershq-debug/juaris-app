@@ -6,56 +6,56 @@ import kotlinx.coroutines.flow.StateFlow
 
 class LocalAICore(private val context: Context) {
 
-    private val _aiStatus = MutableStateFlow("On-Device AGI: Aktiv & Gesichert")
+    private val _aiStatus = MutableStateFlow("On-Device Intent Engine: Aktiv")
     val aiStatus: StateFlow<String> = _aiStatus
 
-    private val _threatLevel = MutableStateFlow(0) // 0 (Sicher) bis 100 (Kritisch)
+    private val _threatLevel = MutableStateFlow(0)
     val threatLevel: StateFlow<Int> = _threatLevel
 
-    // Echte On-Device Text- und Inhaltsanalyse (Ohne Cloud / Telemetrie)
     fun evaluateContentSafety(text: String, sender: String?): Boolean {
-        val normalized = erodeAndNormalizeText(text)
+        val normalized = normalizeAndClean(text)
         
-        // Toxische Betrugs-Trigger (Kombination aus Druck & Masche)
-        val coreTriggers = listOf(
-            "konto gesperrt", "kreditkarte gesperrt", "sofort handeln", 
-            "zollgebuehr", "paket zurueck", "gewinn eingeloest", "identitaet bestaetigen",
-            "bitcoinguthaben", "wallet verifizieren", "gerichtlicher mahnbescheid"
-        )
+        // 1. Psychologischer Druck & Panik-Faktor (Urgency)
+        val urgencyKeywords = listOf("sofort", "heute noch", "frist", "drohung", "sperrung", "letzte warnung", "sofortiges handeln")
+        // 2. Autoritäts-Imitierung (Authority Mimicry)
+        val authorityKeywords = listOf("zoll", "polizei", "gericht", "finanzamt", "bank", "post", "dhl", "netflix", "microsoft")
+        // 3. Handlungsfallen (Action Traps - Links / Datenabfrage)
+        val actionKeywords = listOf("http://", "https://", "bit.ly/", "tinyurl", "login", "bestaetigen", "verifizieren", "daten eingeben", "passwort")
 
         var score = 0
-        
-        for (trigger in coreTriggers) {
-            if (normalized.contains(trigger)) {
-                score += 40
-            }
-        }
 
-        if (normalized.contains("http://") || normalized.contains("bit.ly/") || normalized.contains("tinyurl")) {
-            score += 30
+        // Gewichtete psychologische Vektor-Analyse
+        if (urgencyKeywords.any { normalized.contains(it) }) score += 35
+        if (authorityKeywords.any { normalized.contains(it) }) score += 25
+        if (actionKeywords.any { normalized.contains(it) }) score += 40
+
+        // Social Engineering Kombi-Boost (Druck + Autorität = Höchste Alarmstufe)
+        if (urgencyKeywords.any { normalized.contains(it) } && authorityKeywords.any { normalized.contains(it) }) {
+            score += 25
         }
 
         val finalScore = score.coerceAtMost(100)
         _threatLevel.value = finalScore
 
-        // Schwellenwert: Ab 60 Punkten schlägt der Alarm an
         if (finalScore >= 60) {
-            _aiStatus.value = "Bedrohung lokal erkannt (Score: $finalScore)"
-            return false // Blockieren + Alarm auslösen!
+            _aiStatus.value = "Social Engineering / Phishing erkannt (Score: $finalScore)"
+            return false // Bedrohung blockieren!
         }
 
-        _aiStatus.value = "Inhalt verifiziert (Score: $finalScore)"
+        _aiStatus.value = "Kontext verifiziert (Score: $finalScore)"
         return true
     }
 
-    // Leetspeak-Bereinigung und Normalisierung
-    private fun erodeAndNormalizeText(input: String): String {
+    private fun normalizeAndClean(input: String): String {
         return input.lowercase()
             .replace("0", "o")
             .replace("4", "a")
             .replace("1", "i")
             .replace("3", "e")
             .replace("@", "a")
+            .replace("$", "s")
             .replace(Regex("[^a-zäöüß0-9\\s]"), "")
     }
 }
+
+
