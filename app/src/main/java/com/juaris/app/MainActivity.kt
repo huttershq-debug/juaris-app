@@ -613,6 +613,7 @@ fun StatusPage(
 
 @Composable
 fun ProtectionModulesPage(
+    prefs: SharedPreferences, 
     callProtection: Boolean, onCallChange: (Boolean) -> Unit,
     smsProtection: Boolean, onSmsChange: (Boolean) -> Unit,
     emailProtection: Boolean, onEmailChange: (Boolean) -> Unit,
