@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
@@ -16,7 +17,10 @@ import kotlinx.coroutines.launch
 class JuarisNotificationListenerService : NotificationListenerService() {
 
     companion object {
+        private const val TAG = "JuarisUniversalGuard"
+        const val SERVICE_CHANNEL_ID = "JuarisLiveProtectionChannel"
         private const val ALERT_CHANNEL_ID = "juaris_threat_alerts"
+        const val NOTIFICATION_ID = 1337
     }
 
     private lateinit var aiCore: LocalAICore
@@ -24,22 +28,49 @@ class JuarisNotificationListenerService : NotificationListenerService() {
     override fun onCreate() {
         super.onCreate()
         aiCore = LocalAICore(applicationContext)
+        startForegroundServiceWithNotification()
+        Log.d(TAG, "Juaris 24/7 Universal-Wächter gestartet.")
+    }
+
+    private fun startForegroundServiceWithNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                SERVICE_CHANNEL_ID,
+                "Juaris Live-Schutz",
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "Hält den Zero-Cloud Schutz aktiv und überwacht Benachrichtigungen"
+            }
+            val manager = getSystemService(NotificationManager::class.java)
+            manager?.createNotificationChannel(channel)
+        }
+
+        val notification: Notification = NotificationCompat.Builder(this, SERVICE_CHANNEL_ID)
+            .setContentTitle("Juaris Security Suite aktiv")
+            .setContentText("24/7 Live-Schutz & Lokale KI-Heuristik laufen")
+            .setSmallIcon(android.R.drawable.ic_lock_lock)
+            .setOngoing(true)
+            .build()
+
+        startForeground(NOTIFICATION_ID, notification)
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         super.onNotificationPosted(sbn)
+        
         sbn?.let { notification ->
             val packageName = notification.packageName
-           
+
+            // Eigene App und System-UI/Launcher ignorieren, um Endlosschleifen zu vermeiden
             if (packageName == "com.juaris.app" || packageName.contains("systemui") || packageName.contains("launcher")) {
                 return
             }
 
             val extras = notification.notification.extras
             val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() ?: ""
-           
             var text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString() ?: ""
-           
+
+            // Erweiterte Extraktion für Messenger (WhatsApp, Telegram etc.)
             val messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES)
             if (!messages.isNullOrEmpty()) {
                 val latestMessage = messages.last()
@@ -51,13 +82,14 @@ class JuarisNotificationListenerService : NotificationListenerService() {
             if (title.isBlank() && text.isBlank()) return
 
             val fullContent = "App: $packageName | Titel: $title | Inhalt: $text"
-            Log.d("JuarisUniversalGuard", "Nachricht abgefangen von $packageName")
+            Log.d(TAG, "Nachricht abgefangen von $packageName")
 
+            // Lokale KI-Prüfung auf Betrug / Phishing
             val isSafe = aiCore.evaluateContentSafety(fullContent, packageName)
-           
+
             if (!isSafe) {
-                Log.w("JuarisUniversalGuard", "🚨 Betrug / Phishing in App $packageName lokal blockiert!")
-               
+                Log.w(TAG, "⚠️ Betrug / Phishing in App $packageName lokal blockiert!")
+
                 // In lokale Room-Datenbank schreiben
                 CoroutineScope(Dispatchers.IO).launch {
                     val db = JuarisDatabase.getDatabase(applicationContext)
@@ -107,6 +139,10 @@ class JuarisNotificationListenerService : NotificationListenerService() {
             .build()
 
         notificationManager.notify(System.currentTimeMillis().toInt(), alertNotification)
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        return START_STICKY
     }
 }
 
