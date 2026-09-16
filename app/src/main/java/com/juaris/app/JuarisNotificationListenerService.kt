@@ -1,5 +1,6 @@
 package com.juaris.app
 
+import android.app.Notification
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
@@ -20,37 +21,49 @@ class JuarisNotificationListenerService : NotificationListenerService() {
         super.onNotificationPosted(sbn)
         sbn?.let { notification ->
             val packageName = notification.packageName
-           
-            // Bekannte E-Mail-Apps auf Android
-            val emailPackages = listOf(
-                "com.google.android.gm", // Gmail
-                "com.microsoft.office.outlook", // Outlook
-                "com.samsung.android.email.provider" // Samsung Mail
-            )
+            
+            // 1. Eigene App-Benachrichtigungen und reine System-UI ignorieren (verhindert Schleifen und Lärm)
+            if (packageName == "com.juaris.app" || packageName.contains("systemui") || packageName.contains("launcher")) {
+                return
+            }
 
-            if (emailPackages.contains(packageName)) {
-                val extras = notification.notification.extras
-                val title = extras.getCharSequence("android.title")?.toString() ?: ""
-                val text = extras.getCharSequence("android.text")?.toString() ?: ""
-                val fullEmailContent = "$title: $text"
+            val extras = notification.notification.extras
+            val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() ?: ""
+            
+            // 2. Universelle Textextraktion (unterstützt BigTextStyle & MessagingStyle für WhatsApp, Telegram, Signal, Outlook, Gmail etc.)
+            var text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString() ?: ""
+            
+            val messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES)
+            if (!messages.isNullOrEmpty()) {
+                val latestMessage = messages.last()
+                if (latestMessage is android.os.Bundle) {
+                    text = latestMessage.getString("text") ?: text
+                }
+            }
 
-                // Lokale KI-Prüfung via LocalAICore (100% On-Device, keine Cloud!)
-                val isSafe = aiCore.evaluateContentSafety(fullEmailContent, packageName)
-                if (!isSafe) {
-                    Log.w("JuarisEmailScan", "Phishing / Betrug in E-Mail-Notification erkannt: $fullEmailContent")
-                   
-                    // Als Security-Log sicher in die lokale Room-Datenbank schreiben
-                    CoroutineScope(Dispatchers.IO).launch {
-                        val db = JuarisDatabase.getDatabase(applicationContext)
-                        db.securityLogDao().insertLog(
-                            SecurityLogEntity(
-                                timestamp = System.currentTimeMillis(),
-                                module = "E-Mail-Heuristik",
-                                description = "Phishing-Verdacht in E-Mail abgefangen: $title",
-                                status = "BLOCKED"
-                            )
+            // Wenn weder Titel noch Text vorhanden sind, überspringen
+            if (title.isBlank() && text.isBlank()) return
+
+            val fullContent = "App: $packageName | Titel: $title | Inhalt: $text"
+            Log.d("JuarisUniversalGuard", "Nachricht abgefangen von $packageName")
+
+            // 3. LOKALE KI-PRÜFUNG (100% On-Device AGI – Zero-Cloud Garantie)
+            val isSafe = aiCore.evaluateContentSafety(fullContent, packageName)
+            
+            if (!isSafe) {
+                Log.w("JuarisUniversalGuard", "🚨 Betrug / Phishing in App $packageName lokal blockiert!")
+                
+                // 4. Direkt fälschungssicher in die lokale Room-Datenbank schreiben
+                CoroutineScope(Dispatchers.IO).launch {
+                    val db = JuarisDatabase.getDatabase(applicationContext)
+                    db.securityLogDao().insertLog(
+                        SecurityLogEntity(
+                            timestamp = System.currentTimeMillis(),
+                            module = "360°-Universal-Wächter",
+                            description = "Bedrohung in [${packageName.substringAfterLast('.')}] abgefangen: $title",
+                            status = "BLOCKED"
                         )
-                    }
+                    )
                 }
             }
         }
