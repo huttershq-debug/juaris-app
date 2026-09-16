@@ -1,14 +1,23 @@
 package com.juaris.app
 
 import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class JuarisNotificationListenerService : NotificationListenerService() {
+
+    companion object {
+        private const val ALERT_CHANNEL_ID = "juaris_threat_alerts"
+    }
 
     private lateinit var aiCore: LocalAICore
 
@@ -22,7 +31,6 @@ class JuarisNotificationListenerService : NotificationListenerService() {
         sbn?.let { notification ->
             val packageName = notification.packageName
            
-            // 1. Eigene App-Benachrichtigungen und reine System-UI ignorieren (verhindert Schleifen und Lärm)
             if (packageName == "com.juaris.app" || packageName.contains("systemui") || packageName.contains("launcher")) {
                 return
             }
@@ -30,7 +38,6 @@ class JuarisNotificationListenerService : NotificationListenerService() {
             val extras = notification.notification.extras
             val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() ?: ""
            
-            // 2. Universelle Textextraktion (unterstützt BigTextStyle & MessagingStyle für WhatsApp, Telegram, Signal, Outlook, Gmail etc.)
             var text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString() ?: ""
            
             val messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES)
@@ -41,19 +48,17 @@ class JuarisNotificationListenerService : NotificationListenerService() {
                 }
             }
 
-            // Wenn weder Titel noch Text vorhanden sind, überspringen
             if (title.isBlank() && text.isBlank()) return
 
             val fullContent = "App: $packageName | Titel: $title | Inhalt: $text"
             Log.d("JuarisUniversalGuard", "Nachricht abgefangen von $packageName")
 
-            // 3. LOKALE KI-PRÜFUNG (100% On-Device AGI – Zero-Cloud Garantie)
             val isSafe = aiCore.evaluateContentSafety(fullContent, packageName)
            
             if (!isSafe) {
                 Log.w("JuarisUniversalGuard", "🚨 Betrug / Phishing in App $packageName lokal blockiert!")
                
-                // 4. Direkt fälschungssicher in die lokale Room-Datenbank schreiben
+                // In lokale Room-Datenbank schreiben
                 CoroutineScope(Dispatchers.IO).launch {
                     val db = JuarisDatabase.getDatabase(applicationContext)
                     db.securityLogDao().insertLog(
@@ -65,7 +70,43 @@ class JuarisNotificationListenerService : NotificationListenerService() {
                         )
                     )
                 }
+
+                // Notfall-Alarm direkt auf den Bildschirm werfen
+                showThreatScreenAlert(
+                    applicationContext,
+                    "⚠️ Juaris Sicherheits-Warnung!",
+                    "Betrugsversuch in ${packageName.substringAfterLast('.')} erkannt: $title"
+                )
             }
         }
     }
+
+    private fun showThreatScreenAlert(context: Context, title: String, message: String) {
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                ALERT_CHANNEL_ID,
+                "Juaris Notfall-Sicherheitswarnungen",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Warnungen bei akuten Phishing- und Betrugsversuchen"
+                enableVibration(true)
+            }
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        val alertNotification = NotificationCompat.Builder(context, ALERT_CHANNEL_ID)
+            .setSmallIcon(R.drawable.hologram_avatar)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setAutoCancel(true)
+            .build()
+
+        notificationManager.notify(System.currentTimeMillis().toInt(), alertNotification)
+    }
 }
+
