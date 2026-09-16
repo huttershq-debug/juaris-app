@@ -176,6 +176,17 @@ private fun Context.findActivity(): Activity? = when (this) {
     else -> null
 }
 
+// Google Play konformer Prominent Disclosure Dialog
+private fun showProminentDisclosureDialog(context: Context, onProceed: () -> Unit) {
+    android.app.AlertDialog.Builder(context)
+        .setTitle("Sicherheits-Wächter aktivieren")
+        .setMessage("Juaris benötigt den Benachrichtigungszugriff, um eingehende Nachrichten von WhatsApp, E-Mail und Messengern lokal in Echtzeit auf Betrug und Phishing zu scannen.\n\nWichtig: Alle Daten bleiben zu 100% auf Ihrem Gerät. Es werden niemals Daten an Server oder Clouds übertragen.")
+        .setPositiveButton("Verstanden & Aktivieren") { _, _ -> onProceed() }
+        .setNegativeButton("Abbrechen", null)
+        .setCancelable(false)
+        .show()
+}
+
 @Composable
 fun WelcomeScreen() {
     Box(
@@ -644,14 +655,20 @@ fun ProtectionModulesPage(
                         Switch(
                             checked = emailProtection,
                             onCheckedChange = { newState ->
-                                onEmailChange(newState)
                                 if (newState) {
-                                    try {
-                                        val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
-                                        context.startActivity(intent)
-                                    } catch (e: Exception) {
-                                        Toast.makeText(context, "Bitte aktiviere den Notification Listener manuell.", Toast.LENGTH_LONG).show()
+                                    // Prominent Disclosure Dialog vor dem System-Zugriff
+                                    showProminentDisclosureDialog(context) {
+                                        onEmailChange(true)
+                                        try {
+                                            val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+                                            context.startActivity(intent)
+                                        } catch (e: Exception) {
+                                            Toast.makeText(context, "Bitte aktiviere den Notification Listener manuell.", Toast.LENGTH_LONG).show()
+                                        }
                                     }
+                                } else {
+                                    onEmailChange(false)
+                                    prefs.edit().putBoolean("email_prot", false).apply()
                                 }
                             }
                         )
@@ -786,11 +803,14 @@ fun PermissionsAuditPage() {
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
                         onClick = {
-                            try {
-                                val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
-                                context.startActivity(intent)
-                            } catch (e: Exception) {
-                                Toast.makeText(context, "Fehler beim Öffnen der Einstellungen", Toast.LENGTH_SHORT).show()
+                            // Prominent Disclosure Dialog vor dem System-Zugriff
+                            showProminentDisclosureDialog(context) {
+                                try {
+                                    val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    Toast.makeText(context, "Fehler beim Öffnen der Einstellungen", Toast.LENGTH_SHORT).show()
+                                }
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -946,6 +966,7 @@ fun SwarmMeshPage() {
                             bluetoothPermissionLauncher.launch(
                                 arrayOf(
                                     android.Manifest.permission.BLUETOOTH_SCAN,
+                                    android.Manifest.permission.BLUETOOTH_ADVERTISE,
                                     android.Manifest.permission.BLUETOOTH_CONNECT,
                                     android.Manifest.permission.ACCESS_FINE_LOCATION
                                 )
@@ -954,7 +975,7 @@ fun SwarmMeshPage() {
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
                     ) {
-                        Text("Mesh-Scan starten", color = Color.Black, fontWeight = FontWeight.Bold)
+                        Text("P2P-Schwarm-Node starten", color = Color.Black, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -987,5 +1008,4 @@ fun PrivacyAndLegalContent() {
         }
     }
 }
-
 
