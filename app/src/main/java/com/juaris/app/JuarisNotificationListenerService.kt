@@ -32,16 +32,21 @@ class JuarisNotificationListenerService : NotificationListenerService() {
         Log.d(TAG, "Juaris 24/7 Universal-Wächter gestartet.")
     }
 
-     override fun onListenerConnected() {
+    override fun onListenerConnected() {
         super.onListenerConnected()
         Log.d(TAG, "🟢 SYSTEM ERFOLGREICH VERBUNDEN: NotificationListenerService ist aktiv!")
-        
-        // Das zeigt dir den Erfolg direkt als Pop-up auf dem Handy-Bildschirm:
+       
+        // Visuelles Pop-up auf dem Handy-Bildschirm zur Bestätigung
         android.widget.Toast.makeText(
-            this, 
-            "🟢 Juaris: Benachrichtigungs-Zugriff verbunden!", 
+            this,
+            "🟢 Juaris: Benachrichtigungs-Zugriff verbunden!",
             android.widget.Toast.LENGTH_LONG
         ).show()
+    }
+
+    override fun onListenerDisconnected() {
+        super.onListenerDisconnected()
+        Log.w(TAG, "🔴 SYSTEM GETRENNT: Android hat den NotificationListenerService abgewiesen!")
     }
 
     private fun startForegroundServiceWithNotification() {
@@ -76,10 +81,9 @@ class JuarisNotificationListenerService : NotificationListenerService() {
         }
     }
 
-
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         super.onNotificationPosted(sbn)
-        
+       
         sbn?.let { notification ->
             val packageName = notification.packageName
 
@@ -106,13 +110,18 @@ class JuarisNotificationListenerService : NotificationListenerService() {
             val fullContent = "App: $packageName | Titel: $title | Inhalt: $text"
             Log.d(TAG, "Nachricht abgefangen von $packageName")
 
-            // Lokale KI-Prüfung auf Betrug / Phishing
+            // Lokale KI-Prüfung auf Betrug / Phishing über deinen aiCore
             val isSafe = aiCore.evaluateContentSafety(fullContent, packageName)
 
             if (!isSafe) {
                 Log.w(TAG, "⚠️ Betrug / Phishing in App $packageName lokal blockiert!")
 
-                // In lokale Room-Datenbank schreiben
+                // 1. SOFORTIGE LÖSCHUNG der Benachrichtigung vom Gerät
+                notification.key?.let { key ->
+                    cancelNotification(key)
+                }
+
+                // 2. In lokale Room-Datenbank schreiben
                 CoroutineScope(Dispatchers.IO).launch {
                     val db = JuarisDatabase.getDatabase(applicationContext)
                     db.securityLogDao().insertLog(
@@ -125,7 +134,7 @@ class JuarisNotificationListenerService : NotificationListenerService() {
                     )
                 }
 
-                // Notfall-Alarm direkt auf den Bildschirm werfen
+                // 3. Notfall-Alarm direkt auf den Bildschirm werfen
                 showThreatScreenAlert(
                     applicationContext,
                     "⚠️ Juaris Sicherheits-Warnung!",
