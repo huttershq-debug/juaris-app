@@ -60,7 +60,7 @@
 </service>
 
    <service
-    android:name=".JuarisNotificationListenerService"
+    android:name="com.juaris.app.JuarisNotificationListenerService"
     android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
     android:exported="true"
     android:foregroundServiceType="dataSync">
