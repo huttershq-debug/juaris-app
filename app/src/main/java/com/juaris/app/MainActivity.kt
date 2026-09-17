@@ -20,6 +20,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
@@ -40,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -81,7 +83,6 @@ class MainActivity : ComponentActivity() {
         requestCallScreeningRoleIfNeeded()
         requestSmsRoleIfNeeded()
 
-        // Starte den persistenten 24/7 Vordergrund-Dienst sofort beim App-Start
         startJuarisProtectionService()
 
         try {
@@ -996,6 +997,8 @@ fun SwarmMeshPage() {
 
 @Composable
 fun PrivacyAndLegalContent() {
+    val uriHandler = LocalUriHandler.current
+
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
             Text("Datenschutz & Impressum", style = MaterialTheme.typography.titleLarge, color = Color.White)
@@ -1006,14 +1009,36 @@ fun PrivacyAndLegalContent() {
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("Datenschutz", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Text("Keine Cloud, keine Server, keine Telemetrie. Alle Daten verbleiben ausschließlich verschlüsselt auf deinem Endgerät.", color = Color.White)
+                    
                     Spacer(modifier = Modifier.height(4.dp))
+                    
+                    Text(
+                        text = "🔗 Offizielle Datenschutzrichtlinie (Online)",
+                        color = NeonGiftgruen,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.clickable {
+                            uriHandler.openUri("https://huetterhq-debug.github.io/juaris-app/privacy.md")
+                        }
+                    )
+
+                    HorizontalDivider(color = Color(0xFF112211), modifier = Modifier.padding(vertical = 8.dp))
+
                     Text("Impressum", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                    Text("Entwickler: Benedikt Wolfgang Hütter", color = Color.White)
+                    Text("Angaben gemäß § 5 TMG / ECG", color = Color.Gray, fontSize = 12.sp)
+                    Text("Name / Entwickler: Benedikt Wolfgang Hütter", color = Color.White)
                     Text("Anschrift: Schulgasse 4/15, 2700 Wiener Neustadt, Österreich", color = Color.White)
                     Text("E-Mail: hutters.hq@gmail.com", color = Color.White)
+                    
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text("Verantwortlich für den Inhalt:", color = Color.Gray, fontSize = 12.sp)
+                    Text("Benedikt Wolfgang Hütter", color = Color.White)
+
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text("Design:", color = Color.Gray, fontSize = 12.sp)
+                    Text("Julia Kerschhofer", color = Color.White)
                 }
             }
         }
