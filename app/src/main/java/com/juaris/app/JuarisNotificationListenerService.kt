@@ -32,14 +32,16 @@ class JuarisNotificationListenerService : NotificationListenerService() {
         Log.d(TAG, "Juaris 24/7 Universal-Wächter gestartet.")
     }
 
-    override fun onListenerConnected() {
+     override fun onListenerConnected() {
         super.onListenerConnected()
         Log.d(TAG, "🟢 SYSTEM ERFOLGREICH VERBUNDEN: NotificationListenerService ist aktiv!")
-    }
-
-    override fun onListenerDisconnected() {
-        super.onListenerDisconnected()
-        Log.w(TAG, "🔴 SYSTEM GETRENNT: Android hat den NotificationListenerService abgewiesen!")
+        
+        // Das zeigt dir den Erfolg direkt als Pop-up auf dem Handy-Bildschirm:
+        android.widget.Toast.makeText(
+            this, 
+            "🟢 Juaris: Benachrichtigungs-Zugriff verbunden!", 
+            android.widget.Toast.LENGTH_LONG
+        ).show()
     }
 
     private fun startForegroundServiceWithNotification() {
