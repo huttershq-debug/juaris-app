@@ -61,7 +61,7 @@ import com.juaris.app.ui.SecurityLogsPage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var securePrefs: SharedPreferences
 
