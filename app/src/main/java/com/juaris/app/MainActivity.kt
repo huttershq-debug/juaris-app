@@ -1109,7 +1109,7 @@ fun PrivacyAndLegalContent() {
                     Text("Angaben gemäß § 5 TMG / ECG", color = Color.Gray, fontSize = 12.sp)
                     Text("Name / Entwickler: Benedikt Wolfgang Hütter", color = Color.White)
                     Text("Anschrift: Schulgasse 4/15, 2700 Wiener Neustadt, Österreich", color = Color.White)
-                    Text("E-Mail: hutters.hq@gmail.com", color = Color.White)
+                    Text("E-Mail: support@juaris.com", color = Color.White)
                    
                     Spacer(modifier = Modifier.height(4.dp))
                     Text("Verantwortlich für den Inhalt:", color = Color.Gray, fontSize = 12.sp)
