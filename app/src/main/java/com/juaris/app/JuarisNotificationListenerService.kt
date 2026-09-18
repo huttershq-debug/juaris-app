@@ -24,24 +24,25 @@ class JuarisNotificationListenerService : NotificationListenerService() {
     }
 
     private lateinit var aiCore: LocalAICore
+    private lateinit var acousticDetector: AcousticThreatDetector
 
     override fun onCreate() {
         super.onCreate()
         aiCore = LocalAICore(applicationContext)
+        
+        // Akustischen Wächter starten
+        acousticDetector = AcousticThreatDetector(applicationContext) {
+            triggerEmergencyProtocol("Akustischer Notfall (Schrei/Gewalt) erkannt!")
+        }
+        acousticDetector.startListening()
+
         startForegroundServiceWithNotification()
-        Log.d(TAG, "Juaris 24/7 Universal-Wächter gestartet.")
+        Log.d(TAG, "Juaris 24/7 Universal-Wächter & Mikrofon-Bodyguard gestartet.")
     }
 
     override fun onListenerConnected() {
         super.onListenerConnected()
         Log.d(TAG, "🟢 SYSTEM ERFOLGREICH VERBUNDEN: NotificationListenerService ist aktiv!")
-       
-        // Visuelles Pop-up auf dem Handy-Bildschirm zur Bestätigung
-        android.widget.Toast.makeText(
-            this,
-            "🟢 Juaris: Benachrichtigungs-Zugriff verbunden!",
-            android.widget.Toast.LENGTH_LONG
-        ).show()
     }
 
     override fun onListenerDisconnected() {
@@ -56,7 +57,7 @@ class JuarisNotificationListenerService : NotificationListenerService() {
                 "Juaris Live-Schutz",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Hält den Zero-Cloud Schutz aktiv und überwacht Benachrichtigungen"
+                description = "Hält den Zero-Cloud Schutz & Mikrofon-Wächter aktiv"
             }
             val manager = getSystemService(NotificationManager::class.java)
             manager?.createNotificationChannel(channel)
@@ -64,30 +65,39 @@ class JuarisNotificationListenerService : NotificationListenerService() {
 
         val notification: Notification = NotificationCompat.Builder(this, SERVICE_CHANNEL_ID)
             .setContentTitle("Juaris Security Suite aktiv")
-            .setContentText("24/7 Live-Schutz & Lokale KI-Heuristik laufen")
+            .setContentText("24/7 Live-Schutz, Mikrofon- & KI-Wächter aktiv")
             .setSmallIcon(android.R.drawable.ic_lock_lock)
             .setOngoing(true)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
 
-        // KRITISCH FÜR ANDROID 14+: Übergabe des Foreground-Service-Typs
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // Android 14 (API 34+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             startForeground(
                 NOTIFICATION_ID,
                 notification,
-                android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+                android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC or
+                android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
             )
         } else {
             startForeground(NOTIFICATION_ID, notification)
         }
     }
 
+    private fun triggerEmergencyProtocol(reason: String) {
+        Log.w(TAG, "🚨 NOTFALL-PROTOKOLL AUSGELÖST: $reason")
+        
+        // Broadcast an die App senden, um das Notfall-UI / den Notruf-Countdown zu öffnen
+        val intent = Intent("com.juaris.app.ACTION_EMERGENCY_TRIGGER").apply {
+            putExtra("reason", reason)
+            setPackage("com.juaris.app")
+        }
+        sendBroadcast(intent)
+    }
+
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         super.onNotificationPosted(sbn)
-       
         sbn?.let { notification ->
             val packageName = notification.packageName
-
-            // Eigene App und System-UI/Launcher ignorieren, um Endlosschleifen zu vermeiden
             if (packageName == "com.juaris.app" || packageName.contains("systemui") || packageName.contains("launcher")) {
                 return
             }
@@ -96,45 +106,24 @@ class JuarisNotificationListenerService : NotificationListenerService() {
             val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() ?: ""
             var text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString() ?: ""
 
-            // Erweiterte Extraktion für Messenger (WhatsApp, Telegram etc.)
-            val messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES)
-            if (!messages.isNullOrEmpty()) {
-                val latestMessage = messages.last()
-                if (latestMessage is android.os.Bundle) {
-                    text = latestMessage.getString("text") ?: text
-                }
-            }
-
             if (title.isBlank() && text.isBlank()) return
 
             val fullContent = "App: $packageName | Titel: $title | Inhalt: $text"
-            Log.d(TAG, "Nachricht abgefangen von $packageName")
-
-            // Lokale KI-Prüfung auf Betrug / Phishing über deinen aiCore
             val isSafe = aiCore.evaluateContentSafety(fullContent, packageName)
 
             if (!isSafe) {
-                Log.w(TAG, "⚠️ Betrug / Phishing in App $packageName lokal blockiert!")
-
-                // 1. SOFORTIGE LÖSCHUNG der Benachrichtigung vom Gerät
-                notification.key?.let { key ->
-                    cancelNotification(key)
-                }
-
-                // 2. In lokale Room-Datenbank schreiben
+                notification.key?.let { cancelNotification(it) }
                 CoroutineScope(Dispatchers.IO).launch {
                     val db = JuarisDatabase.getDatabase(applicationContext)
                     db.securityLogDao().insertLog(
                         SecurityLogEntity(
                             timestamp = System.currentTimeMillis(),
                             module = "360°-Universal-Wächter",
-                            description = "Bedrohung in [${packageName.substringAfterLast('.')}] abgefangen: $title",
+                            description = "Betrug in [${packageName.substringAfterLast('.')}] abgefangen: $title",
                             status = "BLOCKED"
                         )
                     )
                 }
-
-                // 3. Notfall-Alarm direkt auf den Bildschirm werfen
                 showThreatScreenAlert(
                     applicationContext,
                     "⚠️ Juaris Sicherheits-Warnung!",
@@ -146,7 +135,6 @@ class JuarisNotificationListenerService : NotificationListenerService() {
 
     private fun showThreatScreenAlert(context: Context, title: String, message: String) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 ALERT_CHANNEL_ID,
@@ -160,7 +148,7 @@ class JuarisNotificationListenerService : NotificationListenerService() {
         }
 
         val alertNotification = NotificationCompat.Builder(context, ALERT_CHANNEL_ID)
-            .setSmallIcon(R.drawable.hologram_avatar)
+            .setSmallIcon(android.R.drawable.stat_notify_error)
             .setContentTitle(title)
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
@@ -172,8 +160,16 @@ class JuarisNotificationListenerService : NotificationListenerService() {
         notificationManager.notify(System.currentTimeMillis().toInt(), alertNotification)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        try {
+            acousticDetector.stopListening()
+        } catch (e: Exception) {}
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         return START_STICKY
     }
 }
+
 
