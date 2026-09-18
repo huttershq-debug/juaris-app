@@ -14,7 +14,7 @@ Juaris arbeitet strikt nach dem Local-First-Prinzip.
 Für die Abwicklung des monatlichen Abonnements (1,99 €/Monat) nutzen wir den offiziellen Google Play Billing Service. Google verarbeitet dabei die Zahlungsdaten gemäß den Google-Datenschutzrichtlinien. Wir selbst erhalten keine Kreditkarten- oder Bankdaten von dir.
 
 ## 4. Kontakt
-Bei Fragen zum Datenschutz erreichst du uns unter: hutters.hq@gmail.com
+Bei Fragen zum Datenschutz erreichst du uns unter: support@juaris.com
 
 ---
 
@@ -31,7 +31,7 @@ Schulgasse 4/15
 Österreich
 
 **Kontakt:**  
-E-Mail: hutters.hq@gmail.com  
+E-Mail: support@juaris.com 
 
 **Verantwortlich für den Inhalt:**  
 Benedikt Wolfgang Hütter
