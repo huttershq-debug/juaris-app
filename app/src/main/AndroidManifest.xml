@@ -27,6 +27,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -139,6 +140,7 @@
             android:name=".JuarisVpnService"
             android:permission="android.permission.BIND_VPN_SERVICE"
             android:exported="false">
+            android:foregroundServiceType="specialUse">
             <intent-filter>
                 <action android:name="android.intent.action.VPN_SERVICE" />
             </intent-filter>
