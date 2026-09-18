@@ -180,21 +180,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun registerEmergencyReceiver() {
-        emergencyReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                if (intent?.action == "com.juaris.app.ACTION_EMERGENCY_TRIGGER") {
-                    val reason = intent.getStringExtra("reason") ?: "Sensor-Notfall"
-                    executeEmergencyProtocol(reason)
-                }
+    emergencyReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == "com.juaris.app.ACTION_EMERGENCY_TRIGGER") {
+                val reason = intent.getStringExtra("reason") ?: "Sensor-Notfall"
+                executeEmergencyProtocol(reason)
             }
         }
-        val filter = IntentFilter("com.juaris.app.ACTION_EMERGENCY_TRIGGER")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(emergencyReceiver, filter, Context.RECEIVER_EXPORTED)
-        } else {
-            registerReceiver(emergencyReceiver, filter)
-        }
     }
+    val filter = IntentFilter("com.juaris.app.ACTION_EMERGENCY_TRIGGER")
+    
+    // Für Android 13 (API 33) und neuer muss das Flag explizit gesetzt werden
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        registerReceiver(emergencyReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+    } else {
+        registerReceiver(emergencyReceiver, filter)
+    }
+}
 
     /**
      * Play-Store-konformes Notfall-Protokoll:
