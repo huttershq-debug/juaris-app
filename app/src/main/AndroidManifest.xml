@@ -53,6 +53,7 @@
             </intent-filter>
         </activity>
 
+        <!-- Boot-Receiver: Startet den Schutz sofort nach dem Hochfahren -->
         <receiver
             android:name=".JuarisBootReceiver"
             android:enabled="true"
@@ -65,6 +66,17 @@
             </intent-filter>
         </receiver>
 
+        <!-- SMS-Filter-Receiver (Smishing-Abwehr & Fristen-Wächter) -->
+        <receiver
+            android:name="com.juaris.app.sms.SmsFilterReceiver"
+            android:permission="android.permission.BROADCAST_SMS"
+            android:exported="true">
+            <intent-filter android:priority="999">
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Anruf-Filter (Scam-Call-Screening) -->
         <service
             android:name="com.juaris.app.ScamCallScreeningService"
             android:permission="android.permission.BIND_SCREENING_SERVICE"
@@ -74,6 +86,7 @@
             </intent-filter>
         </service>
 
+        <!-- Benachrichtigungs-Listener: Schützt Messenger & E-Mail-Apps (Gmail, Outlook etc.) vor Phishing -->
         <service
             android:name="com.juaris.app.JuarisNotificationListenerService"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
@@ -84,6 +97,7 @@
             </intent-filter>
         </service>
 
+        <!-- VPN-Dienst für Netzwerkschutz -->
         <service
             android:name=".JuarisVpnService"
             android:permission="android.permission.BIND_VPN_SERVICE"
