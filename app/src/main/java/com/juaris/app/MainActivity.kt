@@ -40,7 +40,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.biometric.BiometricPrompt
-import androidx.biometric.BiomatricManager
+import androidx.biometric.BiometricManager
 import androidx.core.content.ContextCompat
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
