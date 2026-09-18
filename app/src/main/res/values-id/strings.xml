@@ -5,14 +5,14 @@
     <string name="tab_logs">Log Keamanan</string>
     <string name="tab_settings">Pengaturan</string>
     <string name="call_protection_title">Perlindungan Panggilan</string>
-    <string name="log_call_incoming_blocked">Panggilan masuk diblokir: %1$s</string>
-    <string name="log_call_outgoing_blocked">Panggilan keluar berisiko dihentikan: %1$s</string>
+    <string name="log_call_incoming_blocked">Panggilan masuk diblokir: %5$s</string>
+    <string name="log_call_outgoing_blocked">Panggilan keluar berisiko dihentikan: %5$s</string>
     <string name="sms_protection_title">Filter Phishing SMS</string>
-    <string name="log_sms_incoming_blocked">SMS phishing masuk diblokir: %1$s</string>
+    <string name="log_sms_incoming_blocked">SMS phishing masuk diblokir: %5$s</string>
     <string name="log_sms_outgoing_blocked">SMS berbahaya keluar dihentikan: %1$s</string>
     <string name="email_protection_title">Keamanan Email</string>
-    <string name="log_email_incoming_blocked">Email berbahaya masuk diblokir: %1$s</string>
-    <string name="log_email_outgoing_blocked">Email keluar dihentikan (Risiko Keamanan): %1$s</string>
+    <string name="log_email_incoming_blocked">Email berbahaya masuk diblokir: %5$s</string>
+    <string name="log_email_outgoing_blocked">Email keluar dihentikan (Risiko Keamanan): %5$s</string>
     <string name="juaris_app_welcome_text">Selamat datang di juaris, aplikasi keamanan masa depan Anda. 100% transparan, 100% di ponsel Anda. Tanpa cloud. Perlindungan Anda, rumah Anda, aturan Anda. Bersama juaris, Anda memiliki perlindungan privasi paling kuat di dunia. juaris, karena Anda dan keamanan Anda penting bagi kami.</string>
     <string name="juaris_app_welcome_audio_file">platzhalter_id.m4a</string>
 </resources>
