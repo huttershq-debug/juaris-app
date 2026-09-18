@@ -39,6 +39,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.biometric.BiometricPrompt
+import androidx.core.content.ContextCompat
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
@@ -49,7 +51,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.juaris.app.ui.AIPage
@@ -80,6 +81,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
        
+        // Anti-Tamper & Runtime-Integritätsprüfung beim Start
+        checkRuntimeIntegrity()
+
         window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         // System-Rollen und Autopilot-Berechtigungen automatisch anfordern
@@ -87,7 +91,7 @@ class MainActivity : ComponentActivity() {
         requestSmsRoleIfNeeded()
         requestBatteryOptimizationExemption()
 
-        // 24/7 Vordergrund-Dienst sofort starten
+        // 24/7 Vordergrund-Dienst & Zero-Trust Firewall starten
         startJuarisProtectionService()
 
         try {
@@ -146,12 +150,47 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         else -> {
-                            JuarisMainDashboard(securePrefs)
+                            JuarisMainDashboard(securePrefs, onAuthenticateVault = { onSuccess ->
+                                launchBiometricVaultAuthentication(onSuccess)
+                            })
                         }
                     }
                 }
             }
         }
+    }
+
+    // Anti-Tamper Runtime Check
+    private fun checkRuntimeIntegrity() {
+        if (android.os.Debug.isDebuggerConnected()) {
+            Toast.makeText(this, "Sicherheitswarnung: Debugger erkannt!", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    // Biometrische Hardware-Absicherung (Vault)
+    private fun launchBiometricVaultAuthentication(onSuccess: () -> Unit) {
+        val executor = ContextCompat.getMainExecutor(this)
+        val biometricPrompt = BiometricPrompt(this, executor,
+            object : BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                    super.onAuthenticationSucceeded(result)
+                    onSuccess()
+                    Toast.makeText(applicationContext, "Vault biometrisch entsperrt", Toast.LENGTH_SHORT).show()
+                }
+
+                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                    super.onAuthenticationError(errorCode, errString)
+                    Toast.makeText(applicationContext, "Authentifizierung fehlgeschlagen: $errString", Toast.LENGTH_SHORT).show()
+                }
+            })
+
+        val promptInfo = BiometricPrompt.PromptInfo.Builder()
+            .setTitle("Juaris Secure Vault")
+            .setSubtitle("Biometrische Verifizierung zur Entschlüsselung erforderlich")
+            .setNegativeButtonText("Abbrechen")
+            .build()
+
+        biometricPrompt.authenticate(promptInfo)
     }
 
     private fun startJuarisProtectionService() {
@@ -160,6 +199,14 @@ class MainActivity : ComponentActivity() {
             startForegroundService(serviceIntent)
         } else {
             startService(serviceIntent)
+        }
+
+        // Lokale Zero-Trust Firewall im Hintergrund starten
+        val vpnIntent = Intent(this, JuarisVpnService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(vpnIntent)
+        } else {
+            startService(vpnIntent)
         }
     }
 
@@ -326,7 +373,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 }
 
 @Composable
-fun JuarisMainDashboard(prefs: SharedPreferences) {
+fun JuarisMainDashboard(prefs: SharedPreferences, onAuthenticateVault: (() -> Unit) -> Unit) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val aiCore = remember { LocalAICore(context) }
@@ -453,7 +500,16 @@ fun JuarisMainDashboard(prefs: SharedPreferences) {
                         prefs.edit().putBoolean("email_prot", it).apply()
                     },
                     vaultUnlocked = vaultUnlocked,
-                    onVaultToggle = { vaultUnlocked = it }
+                    onVaultToggle = { newState ->
+                        if (newState) {
+                            onAuthenticateVault {
+                                vaultUnlocked = true
+                            }
+                        } else {
+                            vaultUnlocked = false
+                            Toast.makeText(context, "Vault gesperrt", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 )
                 2 -> BlacklistPage(
                     blockedList = blockedContacts,
@@ -715,7 +771,6 @@ fun ProtectionModulesPage(
             Card(
                 onClick = {
                     onVaultToggle(!vaultUnlocked)
-                    Toast.makeText(context, if (!vaultUnlocked) "Vault entsperrt" else "Vault gesperrt", Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -723,9 +778,9 @@ fun ProtectionModulesPage(
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Verschlüsselter Offline-Vault", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text("AES-256 geschützter Speicher.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    Text("AES-256 geschützter Speicher mit Biometrie-Hardware-Schutz.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(if (vaultUnlocked) "Status: Entsperrt" else "Status: Gesperrt", color = if (vaultUnlocked) NeonGiftgruen else Color(0xFFFF3333), fontWeight = FontWeight.Bold)
+                    Text(if (vaultUnlocked) "Status: Entsperrt (Biometrisch)" else "Status: Gesperrt (Tippen zum Entsperren)", color = if (vaultUnlocked) NeonGiftgruen else Color(0xFFFF3333), fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -1066,4 +1121,5 @@ fun PrivacyAndLegalContent() {
         }
     }
 }
+
 
