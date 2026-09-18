@@ -179,6 +179,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @Suppress("UnspecifiedRegisterReceiverFlag")
     private fun registerEmergencyReceiver() {
     emergencyReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
