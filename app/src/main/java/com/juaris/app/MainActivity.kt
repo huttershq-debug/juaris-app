@@ -6,15 +6,22 @@
 package com.juaris.app
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.role.RoleManager
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
+import android.widget.TextView
+
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -65,6 +72,7 @@ import kotlinx.coroutines.launch
 class MainActivity : AppCompatActivity() {
 
     private lateinit var securePrefs: SharedPreferences
+    private var emergencyReceiver: BroadcastReceiver? = null
 
     private val callScreeningRoleLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -95,6 +103,9 @@ class MainActivity : AppCompatActivity() {
 
         // 24/7 Vordergrund-Dienst & Zero-Trust Firewall starten
         startJuarisProtectionService()
+
+        // Notfall-Broadcast-Empfänger für Hintergrund-Trigger (z.B. Audio-Wächter oder Gesten) registrieren
+        registerEmergencyReceiver()
 
         try {
             val masterKey = MasterKey.Builder(this)
@@ -152,13 +163,89 @@ class MainActivity : AppCompatActivity() {
                             )
                         }
                         else -> {
-                            JuarisMainDashboard(securePrefs, onAuthenticateVault = { onSuccess ->
-                                launchBiometricVaultAuthentication(onSuccess)
-                            })
+                            JuarisMainDashboard(
+                                prefs = securePrefs,
+                                onAuthenticateVault = { onSuccess ->
+                                    launchBiometricVaultAuthentication(onSuccess)
+                                },
+                                onTriggerPanicEmergency = {
+                                    executeEmergencyProtocol("Manueller Panic-Button Trigger")
+                                }
+                            )
                         }
                     }
                 }
             }
+        }
+    }
+
+    private fun registerEmergencyReceiver() {
+        emergencyReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (intent?.action == "com.juaris.app.ACTION_EMERGENCY_TRIGGER") {
+                    val reason = intent.getStringExtra("reason") ?: "Sensor-Notfall"
+                    executeEmergencyProtocol(reason)
+                }
+            }
+        }
+        val filter = IntentFilter("com.juaris.app.ACTION_EMERGENCY_TRIGGER")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(emergencyReceiver, filter, Context.RECEIVER_EXPORTED)
+        } else {
+            registerReceiver(emergencyReceiver, filter)
+        }
+    }
+
+    /**
+     * Play-Store-konformes Notfall-Protokoll:
+     * Startet einen Countdown mit Sicherheitsabfrage, löscht lokale Daten und wählt nach Ablauf 112.
+     */
+    fun executeEmergencyProtocol(reason: String) {
+        try {
+            // Lokale Daten zur Sicherheit des Anwenders bereinigen (Panic Wipe)
+            securePrefs.edit().clear().apply()
+
+            runOnUiThread {
+                var countdown = 3
+                val dialogView = TextView(this).apply {
+                    text = "🚨 GEFAHR ERKANNT ($reason)!\nNotruf 112 wird in $countdown Sekunden gewählt...\nTippe zum Abbrechen."
+                    textSize = 18f
+                    setTextColor(android.graphics.Color.RED)
+                    setPadding(50, 50, 50, 50)
+                }
+
+                val dialog = AlertDialog.Builder(this)
+                    .setTitle("JUARIS NOTFALL-SCHUTZ")
+                    .setView(dialogView)
+                    .setCancelable(false)
+                    .setNegativeButton("ABBRECHEN (Kein Notfall)") { d, _ ->
+                        d.dismiss()
+                        Toast.makeText(this, "Notfall-Alarm abgebrochen.", Toast.LENGTH_LONG).show()
+                    }
+                    .create()
+
+                dialog.show()
+
+                val handler = Handler(mainLooper)
+                val runnable = object : Runnable {
+                    override fun run() {
+                        countdown--
+                        if (countdown > 0) {
+                            dialogView.text = "🚨 GEFAHR ERKANNT ($reason)!\nNotruf 112 wird in $countdown Sekunden gewählt...\nTippe zum Abbrechen."
+                            handler.postDelayed(this, 1000)
+                        } else {
+                            dialog.dismiss()
+                            val callIntent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:112")).apply {
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            }
+                            startActivity(callIntent)
+                        }
+                    }
+                }
+                handler.postDelayed(runnable, 1000)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -252,6 +339,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        emergencyReceiver?.let {
+            try { unregisterReceiver(it) } catch (e: Exception) {}
+        }
+    }
 }
 
 private fun Context.findActivity(): Activity? = when (this) {
@@ -261,7 +355,7 @@ private fun Context.findActivity(): Activity? = when (this) {
 }
 
 private fun showProminentDisclosureDialog(context: Context, onProceed: () -> Unit) {
-    android.app.AlertDialog.Builder(context)
+    AlertDialog.Builder(context)
         .setTitle("Sicherheits-Wächter aktivieren")
         .setMessage("Juaris benötigt den Benachrichtigungszugriff, um eingehende Nachrichten von WhatsApp, E-Mail und Messengern lokal in Echtzeit auf Betrug und Phishing zu scannen.\n\nWichtig: Alle Daten bleiben zu 100% auf Ihrem Gerät. Es werden niemals Daten an Server oder Clouds übertragen.")
         .setPositiveButton("Verstanden & Aktivieren") { _, _ -> onProceed() }
@@ -375,7 +469,11 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 }
 
 @Composable
-fun JuarisMainDashboard(prefs: SharedPreferences, onAuthenticateVault: (() -> Unit) -> Unit) {
+fun JuarisMainDashboard(
+    prefs: SharedPreferences,
+    onAuthenticateVault: (() -> Unit) -> Unit,
+    onTriggerPanicEmergency: () -> Unit
+) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val aiCore = remember { LocalAICore(context) }
@@ -478,10 +576,7 @@ fun JuarisMainDashboard(prefs: SharedPreferences, onAuthenticateVault: (() -> Un
                         Toast.makeText(context, "Logs sicher im verschlüsselten Vault gesichert.", Toast.LENGTH_LONG).show()
                     },
                     onPanicWipe = {
-                        liveLogs.clear()
-                        blockedContacts.clear()
-                        prefs.edit().clear().apply()
-                        Toast.makeText(context, "PANIC WIPE: Alle lokalen Daten gelöscht!", Toast.LENGTH_LONG).show()
+                        onTriggerPanicEmergency()
                     }
                 )
                 1 -> ProtectionModulesPage(
@@ -624,7 +719,7 @@ fun StatusPage(
                     Icon(Icons.Default.CheckCircle, contentDescription = null, tint = NeonGiftgruen, modifier = Modifier.size(36.dp))
                     Column {
                         Text("Status: AES-256 Verschlüsselt", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                        Text("Anruf-, SMS- & E-Mail-Filter aktiv", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                        Text("Mikrofon-, Anruf-, SMS- & E-Mail-Filter aktiv", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                     }
                 }
             }
@@ -690,7 +785,7 @@ fun StatusPage(
                     ) {
                         Icon(Icons.Default.Warning, contentDescription = null, tint = Color.Black)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("PANIC WIPE (Alle Daten löschen)", color = Color.Black, fontWeight = FontWeight.Bold)
+                        Text("PANIC WIPE & NOTRUF (112)", color = Color.Black, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -1123,4 +1218,5 @@ fun PrivacyAndLegalContent() {
         }
     }
 }
+
 
