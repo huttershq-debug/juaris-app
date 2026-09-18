@@ -76,6 +76,43 @@
             </intent-filter>
         </receiver>
 
+         </receiver> <!-- Ende des SmsFilterReceivers (Zeile 77) -->
+
+        <!-- NEU: Zwingende System-Komponenten für Android SMS-Rolle -->
+        <receiver android:name=".sms.SmsDeliveryReceiver"
+            android:permission="android.permission.BROADCAST_SMS"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SMS_DELIVER" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".sms.WapPushDeliveryReceiver"
+            android:permission="android.permission.BROADCAST_WAP_PUSH"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.WAP_PUSH_DELIVER" />
+            </intent-filter>
+        </receiver>
+
+        <service android:name=".sms.SmsRespondService"
+            android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.telephony.action.RESPOND_VIA_MESSAGE" />
+            </intent-filter>
+        </service>
+
+        <activity android:name=".sms.SmsComposeActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.SENDTO" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="sms" />
+                <data android:scheme="smsto" />
+            </intent-filter>
+        </activity>
+
         <!-- Anruf-Filter (Scam-Call-Screening) -->
         <service
             android:name="com.juaris.app.ScamCallScreeningService"
