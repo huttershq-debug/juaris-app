@@ -10,8 +10,10 @@ import android.app.role.RoleManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -80,9 +82,12 @@ class MainActivity : ComponentActivity() {
        
         window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
+        // System-Rollen und Autopilot-Berechtigungen automatisch anfordern
         requestCallScreeningRoleIfNeeded()
         requestSmsRoleIfNeeded()
+        requestBatteryOptimizationExemption()
 
+        // 24/7 Vordergrund-Dienst sofort starten
         startJuarisProtectionService()
 
         try {
@@ -177,6 +182,23 @@ class MainActivity : ComponentActivity() {
                 if (!roleManager.isRoleHeld(RoleManager.ROLE_SMS)) {
                     val intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_SMS)
                     smsRoleLauncher.launch(intent)
+                }
+            }
+        }
+    }
+
+    private fun requestBatteryOptimizationExemption() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+            if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
+                try {
+                    val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                        data = Uri.parse("package:$packageName")
+                    }
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    val fallbackIntent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                    startActivity(fallbackIntent)
                 }
             }
         }
@@ -1012,9 +1034,9 @@ fun PrivacyAndLegalContent() {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("Datenschutz", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Text("Keine Cloud, keine Server, keine Telemetrie. Alle Daten verbleiben ausschließlich verschlüsselt auf deinem Endgerät.", color = Color.White)
-                    
+                   
                     Spacer(modifier = Modifier.height(4.dp))
-                    
+                   
                     Text(
                         text = "🔗 Offizielle Datenschutzrichtlinie (Online)",
                         color = NeonGiftgruen,
@@ -1031,7 +1053,7 @@ fun PrivacyAndLegalContent() {
                     Text("Name / Entwickler: Benedikt Wolfgang Hütter", color = Color.White)
                     Text("Anschrift: Schulgasse 4/15, 2700 Wiener Neustadt, Österreich", color = Color.White)
                     Text("E-Mail: hutters.hq@gmail.com", color = Color.White)
-                    
+                   
                     Spacer(modifier = Modifier.height(4.dp))
                     Text("Verantwortlich für den Inhalt:", color = Color.Gray, fontSize = 12.sp)
                     Text("Benedikt Wolfgang Hütter", color = Color.White)
