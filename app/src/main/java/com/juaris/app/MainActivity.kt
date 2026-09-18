@@ -358,13 +358,18 @@ private fun Context.findActivity(): Activity? = when (this) {
 }
 
 private fun showProminentDisclosureDialog(context: Context, onProceed: () -> Unit) {
-    AlertDialog.Builder(context)
-        .setTitle("Sicherheits-Wächter aktivieren")
-        .setMessage("Juaris benötigt den Benachrichtigungszugriff, um eingehende Nachrichten von WhatsApp, E-Mail und Messengern lokal in Echtzeit auf Betrug und Phishing zu scannen.\n\nWichtig: Alle Daten bleiben zu 100% auf Ihrem Gerät. Es werden niemals Daten an Server oder Clouds übertragen.")
-        .setPositiveButton("Verstanden & Aktivieren") { _, _ -> onProceed() }
-        .setNegativeButton("Abbrechen", null)
-        .setCancelable(false)
-        .show()
+    val activity = context.findActivity()
+    if (activity != null) {
+        AlertDialog.Builder(activity)
+            .setTitle("Sicherheits-Wächter aktivieren")
+            .setMessage("Juaris benötigt den Benachrichtigungszugriff, um eingehende Nachrichten von WhatsApp, E-Mail und Messengern lokal in Echtzeit auf Betrug und Phishing zu scannen.\n\nWichtig: Alle Daten bleiben zu 100% auf Ihrem Gerät. Es werden niemals Daten an Server oder Clouds übertragen.")
+            .setPositiveButton("Verstanden & Aktivieren") { _, _ -> onProceed() }
+            .setNegativeButton("Abbrechen", null)
+            .setCancelable(false)
+            .show()
+    } else {
+        Toast.makeText(context, "Fehler beim Öffnen des Dialogs", Toast.LENGTH_SHORT).show()
+    }
 }
 
 @Composable
