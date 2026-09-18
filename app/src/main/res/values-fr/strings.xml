@@ -5,14 +5,14 @@
     <string name="tab_logs">Journaux de sécurité</string>
     <string name="tab_settings">Paramètres</string>
     <string name="call_protection_title">Protection des appels</string>
-    <string name="log_call_incoming_blocked">Appel entrant bloqué : %1$s</string>
-    <string name="log_call_outgoing_blocked">Appel sortant à risques arrêté : %1$s</string>
+    <string name="log_call_incoming_blocked">Appel entrant bloqué : %7$s</string>
+    <string name="log_call_outgoing_blocked">Appel sortant à risques arrêté : %7$s</string>
     <string name="sms_protection_title">Filtre SMS Phishing</string>
-    <string name="log_sms_incoming_blocked">SMS de phishing entrant bloqué : %1$s</string>
-    <string name="log_sms_outgoing_blocked">SMS malveillant sortant arrêté : %1$s</string>
+    <string name="log_sms_incoming_blocked">SMS de phishing entrant bloqué : %7$s</string>
+    <string name="log_sms_outgoing_blocked">SMS malveillant sortant arrêté : %7$s</string>
     <string name="email_protection_title">Sécurité des e-mails</string>
-    <string name="log_email_incoming_blocked">E-mail malveillant entrant bloqué : %1$s</string>
-    <string name="log_email_outgoing_blocked">E-mail sortant arrêté (Risque de sécurité) : %1$s</string>
+    <string name="log_email_incoming_blocked">E-mail malveillant entrant bloqué : %7$s</string>
+    <string name="log_email_outgoing_blocked">E-mail sortant arrêté (Risque de sécurité) : %7$s</string>
       <string name="juaris_app_welcome_text">Bienvenue chez juaris, votre application de sécurité du futur. 100% transparente, 100% sur votre téléphone. Pas de cloud. Votre protection, votre maison, vos règles. Avec juaris, vous disposez de la protection privée la plus puissante au monde. juaris, parce que vous et votre sécurité comptez pour nous.</string>
     <string name="juaris_app_welcome_audio_file">platzhalter_fr.m4a</string>
 </resources>
