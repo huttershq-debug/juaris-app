@@ -137,13 +137,13 @@
 
         <!-- 6. VPN-Dienst für Netzwerkschutz -->
         <service
-            android:name=".JuarisVpnService"
-            android:permission="android.permission.BIND_VPN_SERVICE"
-            android:exported="false">
-            android:foregroundServiceType="specialUse">
-            <intent-filter>
-                <action android:name="android.intent.action.VPN_SERVICE" />
-            </intent-filter>
+           android:name=".JuarisVpnService"
+           android:permission="android.permission.BIND_VPN_SERVICE"
+           android:exported="false"
+           android:foregroundServiceType="specialUse">
+           <intent-filter>
+               <action android:name="android.intent.action.VPN_SERVICE" />
+           </intent-filter>
         </service>
        
     </application>
