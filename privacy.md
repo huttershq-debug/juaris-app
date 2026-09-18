@@ -35,3 +35,6 @@ E-Mail: hutters.hq@gmail.com
 
 **Verantwortlich für den Inhalt:**  
 Benedikt Wolfgang Hütter
+
+**Desgin:**
+Julia Kerschhofer
