@@ -88,96 +88,96 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-       
-        // Anti-Tamper & Runtime-Integritätsprüfung beim Start
-        checkRuntimeIntegrity()
+   override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+   
+    // Anti-Tamper & Runtime-Integritätsprüfung beim Start
+    checkRuntimeIntegrity()
 
-        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-        // System-Rollen und Autopilot-Berechtigungen automatisch anfordern
-        requestCallScreeningRoleIfNeeded()
-        requestSmsRoleIfNeeded()
-        requestBatteryOptimizationExemption()
+    // GEÄNDERT: Automatische Rollen und Dienste beim Start deaktiviert,
+    // um den Crash-Loop zu verhindern. Sie werden stattdessen über UI-Buttons gesteuert.
+    // requestCallScreeningRoleIfNeeded()
+    // requestSmsRoleIfNeeded()
+    // requestBatteryOptimizationExemption()
+    // startJuarisProtectionService()
 
-        // 24/7 Vordergrund-Dienst & Zero-Trust Firewall starten
-        startJuarisProtectionService()
+    // Notfall-Broadcast-Empfänger registrieren
+    registerEmergencyReceiver()
 
-        // Notfall-Broadcast-Empfänger für Hintergrund-Trigger (z.B. Audio-Wächter oder Gesten) registrieren
-        registerEmergencyReceiver()
+    try {
+        val masterKey = MasterKey.Builder(this)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+        securePrefs = EncryptedSharedPreferences.create(
+            this,
+            "juaris_secure_vault",
+            masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+    } catch (e: Exception) {
+        securePrefs = getPreferences(Context.MODE_PRIVATE)
+    }
 
-        try {
-            val masterKey = MasterKey.Builder(this)
-                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-                .build()
-            securePrefs = EncryptedSharedPreferences.create(
-                this,
-                "juaris_secure_vault",
-                masterKey,
-                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            )
-        } catch (e: Exception) {
-            securePrefs = getPreferences(Context.MODE_PRIVATE)
+    setContent {
+        val hackerGreenColorScheme = darkColorScheme(
+            primary = NeonGiftgruen,
+            onPrimary = Color.Black,
+            primaryContainer = Color(0xFF003311),
+            onPrimaryContainer = NeonGiftgruen,
+            background = Color.Black,
+            onBackground = NeonGiftgruen,
+            surface = Color(0xFF080808),
+            onSurface = Color(0xFFE0E0E0),
+            surfaceVariant = Color(0xFF121212),
+            onSurfaceVariant = NeonGiftgruen,
+            error = Color(0xFFFF3333)
+        )
+
+        var showIntro by remember { mutableStateOf(true) }
+        var isLoggedIn by remember { mutableStateOf(securePrefs.getBoolean("is_logged_in", false)) }
+
+        LaunchedEffect(Unit) {
+            delay(3000L)
+            showIntro = false
         }
 
-        setContent {
-            val hackerGreenColorScheme = darkColorScheme(
-                primary = NeonGiftgruen,
-                onPrimary = Color.Black,
-                primaryContainer = Color(0xFF003311),
-                onPrimaryContainer = NeonGiftgruen,
-                background = Color.Black,
-                onBackground = NeonGiftgruen,
-                surface = Color(0xFF080808),
-                onSurface = Color(0xFFE0E0E0),
-                surfaceVariant = Color(0xFF121212),
-                onSurfaceVariant = NeonGiftgruen,
-                error = Color(0xFFFF3333)
-            )
-
-            var showIntro by remember { mutableStateOf(true) }
-            var isLoggedIn by remember { mutableStateOf(securePrefs.getBoolean("is_logged_in", false)) }
-
-            LaunchedEffect(Unit) {
-                delay(3000L)
-                showIntro = false
-            }
-
-            MaterialTheme(colorScheme = hackerGreenColorScheme) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    when {
-                        showIntro -> {
-                            WelcomeScreen()
-                        }
-                        !isLoggedIn -> {
-                            LoginScreen(
-                                onLoginSuccess = {
-                                    securePrefs.edit().putBoolean("is_logged_in", true).apply()
-                                    isLoggedIn = true
-                                }
-                            )
-                        }
-                        else -> {
-                            JuarisMainDashboard(
-                                prefs = securePrefs,
-                                onAuthenticateVault = { onSuccess ->
-                                    launchBiometricVaultAuthentication(onSuccess)
-                                },
-                                onTriggerPanicEmergency = {
-                                    executeEmergencyProtocol("Manueller Panic-Button Trigger")
-                                }
-                            )
-                        }
+        MaterialTheme(colorScheme = hackerGreenColorScheme) {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
+            ) {
+                when {
+                    showIntro -> {
+                        WelcomeScreen()
+                    }
+                    !isLoggedIn -> {
+                        LoginScreen(
+                            onLoginSuccess = {
+                                securePrefs.edit().putBoolean("is_logged_in", true).apply()
+                                isLoggedIn = true
+                            }
+                        )
+                    }
+                    else -> {
+                        JuarisMainDashboard(
+                            prefs = securePrefs,
+                            onAuthenticateVault = { onSuccess ->
+                                launchBiometricVaultAuthentication(onSuccess)
+                            },
+                            onTriggerPanicEmergency = {
+                                executeEmergencyProtocol("Manueller Panic-Button Trigger")
+                            }
+                        )
                     }
                 }
             }
         }
     }
+}
+
 
     @Suppress("UnspecifiedRegisterReceiverFlag")
     private fun registerEmergencyReceiver() {
