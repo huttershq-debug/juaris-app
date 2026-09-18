@@ -20,6 +20,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -176,12 +177,12 @@ class MainActivity : AppCompatActivity() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
                     onSuccess()
-                    Toast.makeText(applicationContext, "Vault biometrisch entsperrt", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, "Vault biometrisch entsperrt", Toast.LENGTH_SHORT).show()
                 }
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     super.onAuthenticationError(errorCode, errString)
-                    Toast.makeText(applicationContext, "Authentifizierung fehlgeschlagen: $errString", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, "Authentifizierung fehlgeschlagen: $errString", Toast.LENGTH_SHORT).show()
                 }
             })
 
@@ -1122,5 +1123,4 @@ fun PrivacyAndLegalContent() {
         }
     }
 }
-
 
