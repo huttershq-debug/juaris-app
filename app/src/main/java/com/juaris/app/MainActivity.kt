@@ -21,7 +21,6 @@ import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
 import android.widget.TextView
-
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -67,6 +66,7 @@ import com.juaris.app.ui.AirGesturePage
 import com.juaris.app.ui.NeonGiftgruen
 import com.juaris.app.ui.SecurityLogsPage
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectAsState
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -88,124 +88,136 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-   override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-   
-    // Anti-Tamper & Runtime-Integritätsprüfung beim Start
-    checkRuntimeIntegrity()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+       
+        // Anti-Tamper & Runtime-Integritätsprüfung beim Start
+        checkRuntimeIntegrity()
 
-    window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-    // GEÄNDERT: Automatische Rollen und Dienste beim Start deaktiviert,
-    // um den Crash-Loop zu verhindern. Sie werden stattdessen über UI-Buttons gesteuert.
-    // requestCallScreeningRoleIfNeeded()
-    // requestSmsRoleIfNeeded()
-    // requestBatteryOptimizationExemption()
-    // startJuarisProtectionService()
+        // Notfall-Broadcast-Empfänger registrieren
+        registerEmergencyReceiver()
 
-    // Notfall-Broadcast-Empfänger registrieren
-    registerEmergencyReceiver()
-
-    try {
-        val masterKey = MasterKey.Builder(this)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
-        securePrefs = EncryptedSharedPreferences.create(
-            this,
-            "juaris_secure_vault",
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
-    } catch (e: Exception) {
-        securePrefs = getPreferences(Context.MODE_PRIVATE)
-    }
-
-    setContent {
-        val hackerGreenColorScheme = darkColorScheme(
-            primary = NeonGiftgruen,
-            onPrimary = Color.Black,
-            primaryContainer = Color(0xFF003311),
-            onPrimaryContainer = NeonGiftgruen,
-            background = Color.Black,
-            onBackground = NeonGiftgruen,
-            surface = Color(0xFF080808),
-            onSurface = Color(0xFFE0E0E0),
-            surfaceVariant = Color(0xFF121212),
-            onSurfaceVariant = NeonGiftgruen,
-            error = Color(0xFFFF3333)
-        )
-
-        var showIntro by remember { mutableStateOf(true) }
-        var isLoggedIn by remember { mutableStateOf(securePrefs.getBoolean("is_logged_in", false)) }
-
-        LaunchedEffect(Unit) {
-            delay(3000L)
-            showIntro = false
+        try {
+            val masterKey = MasterKey.Builder(this)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+            securePrefs = EncryptedSharedPreferences.create(
+                this,
+                "juaris_secure_vault",
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (e: Exception) {
+            securePrefs = getPreferences(Context.MODE_PRIVATE)
         }
 
-        MaterialTheme(colorScheme = hackerGreenColorScheme) {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.background
-            ) {
-                when {
-                    showIntro -> {
-                        WelcomeScreen()
-                    }
-                    !isLoggedIn -> {
-                        LoginScreen(
-                            onLoginSuccess = {
-                                securePrefs.edit().putBoolean("is_logged_in", true).apply()
-                                isLoggedIn = true
-                            }
-                        )
-                    }
-                    else -> {
-                        JuarisMainDashboard(
-                            prefs = securePrefs,
-                            onAuthenticateVault = { onSuccess ->
-                                launchBiometricVaultAuthentication(onSuccess)
-                            },
-                            onTriggerPanicEmergency = {
-                                executeEmergencyProtocol("Manueller Panic-Button Trigger")
-                            }
-                        )
+        // 🟢 ECHTE START-PRÜFUNG & AUTOMATISCHER BOOT DER WÄCHTER
+        checkAndBootProtectionServices()
+
+        setContent {
+            val hackerGreenColorScheme = darkColorScheme(
+                primary = NeonGiftgruen,
+                onPrimary = Color.Black,
+                primaryContainer = Color(0xFF003311),
+                onPrimaryContainer = NeonGiftgruen,
+                background = Color.Black,
+                onBackground = NeonGiftgruen,
+                surface = Color(0xFF080808),
+                onSurface = Color(0xFFE0E0E0),
+                surfaceVariant = Color(0xFF121212),
+                onSurfaceVariant = NeonGiftgruen,
+                error = Color(0xFFFF3333)
+            )
+
+            var showIntro by remember { mutableStateOf(true) }
+            var isLoggedIn by remember { mutableStateOf(securePrefs.getBoolean("is_logged_in", false)) }
+
+            LaunchedEffect(Unit) {
+                delay(3000L)
+                showIntro = false
+            }
+
+            MaterialTheme(colorScheme = hackerGreenColorScheme) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    when {
+                        showIntro -> {
+                            WelcomeScreen()
+                        }
+                        !isLoggedIn -> {
+                            LoginScreen(
+                                onLoginSuccess = {
+                                    securePrefs.edit().putBoolean("is_logged_in", true).apply()
+                                    isLoggedIn = true
+                                }
+                            )
+                        }
+                        else -> {
+                            JuarisMainDashboard(
+                                prefs = securePrefs,
+                                onAuthenticateVault = { onSuccess ->
+                                    launchBiometricVaultAuthentication(onSuccess)
+                                },
+                                onTriggerPanicEmergency = {
+                                    executeEmergencyProtocol("Manueller Panic-Button Trigger")
+                                }
+                            )
+                        }
                     }
                 }
             }
         }
     }
-}
 
+    private fun checkAndBootProtectionServices() {
+        val isListenerEnabled = Settings.Secure.getString(
+            contentResolver,
+            "enabled_notification_listeners"
+        )?.contains(packageName) == true
+
+        if (!isListenerEnabled) {
+            showProminentDisclosureDialog(this) {
+                try {
+                    val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    Toast.makeText(this, "Bitte aktiviere den Notification Listener manuell.", Toast.LENGTH_LONG).show()
+                }
+            }
+        } else {
+            startJuarisProtectionService()
+            requestCallScreeningRoleIfNeeded()
+            requestSmsRoleIfNeeded()
+            requestBatteryOptimizationExemption()
+        }
+    }
 
     @Suppress("UnspecifiedRegisterReceiverFlag")
     private fun registerEmergencyReceiver() {
-    emergencyReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent?.action == "com.juaris.app.ACTION_EMERGENCY_TRIGGER") {
-                val reason = intent.getStringExtra("reason") ?: "Sensor-Notfall"
-                executeEmergencyProtocol(reason)
+        emergencyReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (intent?.action == "com.juaris.app.ACTION_EMERGENCY_TRIGGER") {
+                    val reason = intent.getStringExtra("reason") ?: "Sensor-Notfall"
+                    executeEmergencyProtocol(reason)
+                }
             }
         }
+        val filter = IntentFilter("com.juaris.app.ACTION_EMERGENCY_TRIGGER")
+       
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(emergencyReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(emergencyReceiver, filter)
+        }
     }
-    val filter = IntentFilter("com.juaris.app.ACTION_EMERGENCY_TRIGGER")
-    
-    // Für Android 13 (API 33) und neuer muss das Flag explizit gesetzt werden
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        registerReceiver(emergencyReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
-    } else {
-        registerReceiver(emergencyReceiver, filter)
-    }
-}
 
-    /**
-     * Play-Store-konformes Notfall-Protokoll:
-     * Startet einen Countdown mit Sicherheitsabfrage, löscht lokale Daten und wählt nach Ablauf 112.
-     */
     fun executeEmergencyProtocol(reason: String) {
         try {
-            // Lokale Daten zur Sicherheit des Anwenders bereinigen (Panic Wipe)
             securePrefs.edit().clear().apply()
 
             runOnUiThread {
@@ -252,14 +264,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Anti-Tamper Runtime Check
     private fun checkRuntimeIntegrity() {
         if (android.os.Debug.isDebuggerConnected()) {
             Toast.makeText(this, "Sicherheitswarnung: Debugger erkannt!", Toast.LENGTH_LONG).show()
         }
     }
 
-    // Biometrische Hardware-Absicherung (Vault)
     private fun launchBiometricVaultAuthentication(onSuccess: () -> Unit) {
         val executor = ContextCompat.getMainExecutor(this)
         val biometricPrompt = BiometricPrompt(this, executor,
@@ -293,7 +303,6 @@ class MainActivity : AppCompatActivity() {
             startService(serviceIntent)
         }
 
-        // Lokale Zero-Trust Firewall im Hintergrund starten
         val vpnIntent = Intent(this, JuarisVpnService::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(vpnIntent)
@@ -488,6 +497,11 @@ fun JuarisMainDashboard(
     val airGestureCore = remember { AirGestureCore(context) }
     val coroutineScope = rememberCoroutineScope()
    
+    // 🟢 ECHTE ROOM-DATENBANK ANBINDUNG FÜR LIVE-LOGS
+    val db = remember { JuarisDatabase.getDatabase(context) }
+    val logsFlow = db.securityLogDao().getAllLogs()
+    val liveLogs by logsFlow.collectAsState(initial = emptyList())
+
     var gestureEnabled by remember { mutableStateOf(false) }
     var gestureStatusText by remember { mutableStateOf("Bereit") }
 
@@ -521,13 +535,6 @@ fun JuarisMainDashboard(
 
     DisposableEffect(lifecycleOwner) {
         onDispose { airGestureCore.stopGestureDetection() }
-    }
-
-    val liveLogs = remember {
-        mutableStateListOf(
-            SecurityLogEntity(timestamp = System.currentTimeMillis(), module = "Netzwerk-Monitor", description = "Verschlüsselter Lokalspeicher aktiv", status = "SAFE"),
-            SecurityLogEntity(timestamp = System.currentTimeMillis() - 15000, module = "Berechtigungs-Wächter", description = "Keine Cloud-Telemetrie festgestellt", status = "SAFE")
-        )
     }
 
     val blockedContacts = remember {
@@ -570,15 +577,17 @@ fun JuarisMainDashboard(
                 0 -> StatusPage(
                     logs = liveLogs,
                     onSimulateThreat = {
-                        val threatDescription = "E-Mail & SMS Phishing-Vektor lokal abgefangen!"
-                        val newLog = SecurityLogEntity(
-                            timestamp = System.currentTimeMillis(),
-                            module = "Local-AI-Heuristik",
-                            description = threatDescription,
-                            status = "BLOCKED"
-                        )
-                        liveLogs.add(0, newLog)
-                        Toast.makeText(context, "Bedrohung auf dem Gerät neutralisiert!", Toast.LENGTH_SHORT).show()
+                        coroutineScope.launch {
+                            db.securityLogDao().insertLog(
+                                SecurityLogEntity(
+                                    timestamp = System.currentTimeMillis(),
+                                    module = "Echtzeit-Wächter",
+                                    description = "Phishing-Angriff lokal erkannt und blockiert!",
+                                    status = "BLOCKED"
+                                )
+                            )
+                        }
+                        Toast.makeText(context, "Bedrohung auf dem Gerät neutralisiert & protokolliert!", Toast.LENGTH_SHORT).show()
                     },
                     onExportLogs = {
                         Toast.makeText(context, "Logs sicher im verschlüsselten Vault gesichert.", Toast.LENGTH_LONG).show()
@@ -631,10 +640,7 @@ fun JuarisMainDashboard(
                         Toast.makeText(context, "Nummer freigegeben", Toast.LENGTH_SHORT).show()
                     }
                 )
-                3 -> {
-                    val db = JuarisDatabase.getDatabase(LocalContext.current)
-                    SecurityLogsPage(logDao = db.securityLogDao())
-                }
+                3 -> SecurityLogsPage(logDao = db.securityLogDao())
                 4 -> ClipboardProtectionPage(
                     autoClearEnabled = clipboardAutoClear,
                     onAutoClearChange = {
@@ -644,7 +650,7 @@ fun JuarisMainDashboard(
                 )
                 5 -> PermissionsAuditPage()
                 6 -> SwarmMeshPage()
-                7 -> AIPage(aiCore = aiCore, logs = liveLogs)
+                7 -> AIPage(aiCore = aiCore, logs = liveLogs.toMutableList())
                 8 -> {
                     val cameraPermissionLauncher = rememberLauncherForActivityResult(
                         ActivityResultContracts.RequestPermission()
@@ -1226,5 +1232,4 @@ fun PrivacyAndLegalContent() {
         }
     }
 }
-
 
