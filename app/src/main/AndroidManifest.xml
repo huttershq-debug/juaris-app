@@ -129,7 +129,7 @@
             android:name="com.juaris.app.JuarisNotificationListenerService"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
             android:exported="true"
-            android:foregroundServiceType="dataSync">
+            android:foregroundServiceType="dataSync|microphone">
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
@@ -139,14 +139,17 @@
         <service
            android:name=".JuarisVpnService"
            android:permission="android.permission.BIND_VPN_SERVICE"
-           android:exported="false"
+           android:exported="true"
            android:foregroundServiceType="specialUse">
+           
+           <property
+               android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+               android:value="Wird für den permanenten Netzwerkschutz und lokalen VPN-Tunnel benötigt." />
+
            <intent-filter>
-               <action android:name="android.intent.action.VPN_SERVICE" />
+               <action android:name="android.net.VpnService" />
            </intent-filter>
         </service>
 
     </application>
 </manifest>
-
-
