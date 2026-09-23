@@ -42,8 +42,9 @@ class JuarisVpnService : VpnService() {
             vpnInterface?.close()
             vpnInterface = null
         } catch (e: Exception) {
-            Log.e(TAG, "Fehler beim Schließen der VPN-Interface: ${e.message}")
+            Log.e(TAG, "❌ Fehler beim Schließen des VPN-Tunnels: ${e.message}")
         }
     }
 }
+
 
