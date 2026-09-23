@@ -66,7 +66,7 @@ import com.juaris.app.ui.AirGesturePage
 import com.juaris.app.ui.NeonGiftgruen
 import com.juaris.app.ui.SecurityLogsPage
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectAsState
+import androidx.compose.runtime.collectAsState
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
