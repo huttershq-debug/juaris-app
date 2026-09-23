@@ -96,6 +96,9 @@ class MainActivity : AppCompatActivity() {
 
         window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
+        // 🟢 Automatische Prüfung & Start der Schutzdienste beim App-Start
+        checkAndBootProtectionServices()
+
         // Notfall-Broadcast-Empfänger registrieren
         registerEmergencyReceiver()
 
@@ -113,9 +116,6 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             securePrefs = getPreferences(Context.MODE_PRIVATE)
         }
-
-        // 🟢 ECHTE START-PRÜFUNG & AUTOMATISCHER BOOT DER WÄCHTER
-        checkAndBootProtectionServices()
 
         setContent {
             val hackerGreenColorScheme = darkColorScheme(
@@ -186,7 +186,7 @@ class MainActivity : AppCompatActivity() {
                     val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
                     startActivity(intent)
                 } catch (e: Exception) {
-                    Toast.makeText(this, "Bitte aktiviere den Notification Listener manuell.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Bitte den Benachrichtigungs-Zugriff manuell aktivieren.", Toast.LENGTH_LONG).show()
                 }
             }
         } else {
@@ -1232,4 +1232,5 @@ fun PrivacyAndLegalContent() {
         }
     }
 }
+
 
