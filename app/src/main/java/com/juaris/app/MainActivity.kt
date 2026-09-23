@@ -88,6 +88,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // 🟢 Launcher für die Android 13+ Benachrichtigungs-Berechtigung (Zwingend für Statusleisten-Icons)
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            Toast.makeText(this, "Benachrichtigungs-Berechtigung erteilt!", Toast.LENGTH_SHORT).show()
+            checkAndBootProtectionServices()
+        } else {
+            Toast.makeText(this, "Achtung: Ohne Benachrichtigungs-Berechtigung kann kein Status-Icon angezeigt werden.", Toast.LENGTH_LONG).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
        
@@ -175,6 +187,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkAndBootProtectionServices() {
+        // Schritt 1: Android 13+ (API 33+) Runtime-Berechtigung für Benachrichtigungen prüfen
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != 
+                android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                return
+            }
+        }
+
+        // Schritt 2: System-Benachrichtigungszugriff prüfen
         val isListenerEnabled = Settings.Secure.getString(
             contentResolver,
             "enabled_notification_listeners"
@@ -190,6 +212,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         } else {
+            // Schritt 3: Alles da – Dienste sicher und fehlerfrei starten
             startJuarisProtectionService()
             requestCallScreeningRoleIfNeeded()
             requestSmsRoleIfNeeded()
@@ -497,7 +520,6 @@ fun JuarisMainDashboard(
     val airGestureCore = remember { AirGestureCore(context) }
     val coroutineScope = rememberCoroutineScope()
    
-    // 🟢 ECHTE ROOM-DATENBANK ANBINDUNG FÜR LIVE-LOGS
     val db = remember { JuarisDatabase.getDatabase(context) }
     val logsFlow = db.securityLogDao().getAllLogs()
     val liveLogs by logsFlow.collectAsState(initial = emptyList())
