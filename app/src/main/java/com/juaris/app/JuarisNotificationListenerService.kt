@@ -29,12 +29,15 @@ class JuarisNotificationListenerService : NotificationListenerService() {
     override fun onCreate() {
         super.onCreate()
         aiCore = LocalAICore(applicationContext)
-        
-        // Akustischen Wächter starten
-        acousticDetector = AcousticThreatDetector(applicationContext) {
-            triggerEmergencyProtocol("Akustischer Notfall (Schrei/Gewalt) erkannt!")
+       
+        try {
+            acousticDetector = AcousticThreatDetector(applicationContext) {
+                triggerEmergencyProtocol("Akustischer Notfall (Schrei/Gewalt) erkannt!")
+            }
+            acousticDetector.startListening()
+        } catch (e: Exception) {
+            Log.e(TAG, "Fehler beim Starten des akustischen Wächters", e)
         }
-        acousticDetector.startListening()
 
         startForegroundServiceWithNotification()
         Log.d(TAG, "Juaris 24/7 Universal-Wächter & Mikrofon-Bodyguard gestartet.")
@@ -71,21 +74,23 @@ class JuarisNotificationListenerService : NotificationListenerService() {
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            startForeground(
-                NOTIFICATION_ID,
-                notification,
-                android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC 
-            )
-        } else {
-            startForeground(NOTIFICATION_ID, notification)
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                startForeground(
+                    NOTIFICATION_ID,
+                    notification,
+                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+                )
+            } else {
+                startForeground(NOTIFICATION_ID, notification)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Fehler beim Starten des Foreground Service", e)
         }
     }
 
     private fun triggerEmergencyProtocol(reason: String) {
         Log.w(TAG, "🚨 NOTFALL-PROTOKOLL AUSGELÖST: $reason")
-        
-        // Broadcast an die App senden, um das Notfall-UI / den Notruf-Countdown zu öffnen
         val intent = Intent("com.juaris.app.ACTION_EMERGENCY_TRIGGER").apply {
             putExtra("reason", reason)
             setPackage("com.juaris.app")
@@ -103,7 +108,7 @@ class JuarisNotificationListenerService : NotificationListenerService() {
 
             val extras = notification.notification.extras
             val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() ?: ""
-            var text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString() ?: ""
+            val text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString() ?: ""
 
             if (title.isBlank() && text.isBlank()) return
 
@@ -111,17 +116,22 @@ class JuarisNotificationListenerService : NotificationListenerService() {
             val isSafe = aiCore.evaluateContentSafety(fullContent, packageName)
 
             if (!isSafe) {
-                notification.key?.let { cancelNotification(it) }
+                try {
+                    notification.key?.let { cancelNotification(it) }
+                } catch (e: Exception) {}
+
                 CoroutineScope(Dispatchers.IO).launch {
-                    val db = JuarisDatabase.getDatabase(applicationContext)
-                    db.securityLogDao().insertLog(
-                        SecurityLogEntity(
-                            timestamp = System.currentTimeMillis(),
-                            module = "360°-Universal-Wächter",
-                            description = "Betrug in [${packageName.substringAfterLast('.')}] abgefangen: $title",
-                            status = "BLOCKED"
+                    try {
+                        val db = JuarisDatabase.getDatabase(applicationContext)
+                        db.securityLogDao().insertLog(
+                            SecurityLogEntity(
+                                timestamp = System.currentTimeMillis(),
+                                module = "360°-Universal-Wächter",
+                                description = "Betrug in [${packageName.substringAfterLast('.')}] abgefangen: $title",
+                                status = "BLOCKED"
+                            )
                         )
-                    )
+                    } catch (e: Exception) {}
                 }
                 showThreatScreenAlert(
                     applicationContext,
@@ -170,5 +180,4 @@ class JuarisNotificationListenerService : NotificationListenerService() {
         return START_STICKY
     }
 }
-
 
