@@ -79,7 +79,7 @@
             </intent-filter>
         </receiver>
 
-        <!-- 3. Zwingende System-Komponenten für Android SMS-Rolle & Play Store Konformität -->
+        <!-- 3. Zwingende System-Komponenten für Android SMS-Rolle -->
         <receiver android:name=".sms.SmsDeliveryReceiver"
             android:permission="android.permission.BROADCAST_SMS"
             android:exported="true">
@@ -145,7 +145,8 @@
                <action android:name="android.intent.action.VPN_SERVICE" />
            </intent-filter>
         </service>
-       
+
     </application>
 </manifest>
+
 
