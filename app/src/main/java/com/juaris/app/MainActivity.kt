@@ -89,7 +89,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Launcher für die Android 13+ Benachrichtigungs-Berechtigung
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -101,7 +100,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // NEU: Launcher für den offiziellen Android VPN-Berechtigungsdialog
     private val vpnPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -116,17 +114,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
        
-        // Anti-Tamper & Runtime-Integritätsprüfung beim Start
-        checkRuntimeIntegrity()
-
-        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
-        // Automatische Prüfung & Start der Schutzdienste beim App-Start
-        checkAndBootProtectionServices()
-
-        // Notfall-Broadcast-Empfänger registrieren
-        registerEmergencyReceiver()
-
+        // 1. Verschlüsselte Präferenzen MÜSSEN zuerst initialisiert werden
         try {
             val masterKey = MasterKey.Builder(this)
                 .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -141,6 +129,17 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             securePrefs = getPreferences(Context.MODE_PRIVATE)
         }
+
+        // Anti-Tamper & Runtime-Integritätsprüfung beim Start
+        checkRuntimeIntegrity()
+
+        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+        // Automatische Prüfung & Start der Schutzdienste
+        checkAndBootProtectionServices()
+
+        // Notfall-Broadcast-Empfänger registrieren
+        registerEmergencyReceiver()
 
         setContent {
             val hackerGreenColorScheme = darkColorScheme(
@@ -229,9 +228,15 @@ class MainActivity : AppCompatActivity() {
             }
         } else {
             startJuarisProtectionService()
-            requestCallScreeningRoleIfNeeded()
-            requestSmsRoleIfNeeded()
             requestBatteryOptimizationExemption()
+
+            // FIX: Verhindert ewige Endlosschleifen durch einmaliges Speichern des Flags
+            val alreadyAskedSms = securePrefs.getBoolean("already_asked_sms", false)
+            if (!alreadyAskedSms) {
+                securePrefs.edit().putBoolean("already_asked_sms", true).apply()
+                requestCallScreeningRoleIfNeeded()
+                requestSmsRoleIfNeeded()
+            }
         }
     }
 
@@ -334,7 +339,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startJuarisProtectionService() {
-        // 1. Notification Listener starten
         val serviceIntent = Intent(this, JuarisNotificationListenerService::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(serviceIntent)
@@ -342,7 +346,6 @@ class MainActivity : AppCompatActivity() {
             startService(serviceIntent)
         }
 
-        // 2. VPN-Berechtigung prüfen & anfordern, BEVOR der VPN-Service gestartet wird
         val vpnIntent = VpnService.prepare(this)
         if (vpnIntent != null) {
             vpnPermissionLauncher.launch(vpnIntent)
