@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // 🟢 Launcher für die Android 13+ Benachrichtigungs-Berechtigung (Zwingend für Statusleisten-Icons)
+    // Launcher für die Android 13+ Benachrichtigungs-Berechtigung
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -108,7 +108,7 @@ class MainActivity : AppCompatActivity() {
 
         window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-        // 🟢 Automatische Prüfung & Start der Schutzdienste beim App-Start
+        // Automatische Prüfung & Start der Schutzdienste beim App-Start
         checkAndBootProtectionServices()
 
         // Notfall-Broadcast-Empfänger registrieren
@@ -186,10 +186,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // 🟢 AUTO-START-ENGINE: Greift sofort, wenn der Nutzer aus den Systemeinstellungen in die App zurückkehrt
+    override fun onResume() {
+        super.onResume()
+        checkAndBootProtectionServices()
+    }
+
     private fun checkAndBootProtectionServices() {
         // Schritt 1: Android 13+ (API 33+) Runtime-Berechtigung für Benachrichtigungen prüfen
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != 
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) !=
                 android.content.pm.PackageManager.PERMISSION_GRANTED) {
                 notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
                 return
@@ -212,7 +218,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         } else {
-            // Schritt 3: Alles da – Dienste sicher und fehlerfrei starten
+            // Schritt 3: Alles da – Dienste vollautomatisch im Hintergrund starten ohne extra Klicks!
             startJuarisProtectionService()
             requestCallScreeningRoleIfNeeded()
             requestSmsRoleIfNeeded()
@@ -1254,5 +1260,4 @@ fun PrivacyAndLegalContent() {
         }
     }
 }
-
 
