@@ -84,7 +84,7 @@ class JuarisVpnService : VpnService() {
         }
     }
 
-    override onDestroy() {
+    override fun onDestroy() {
         super.onDestroy()
         try {
             vpnInterface?.close()
