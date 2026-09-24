@@ -30,6 +30,12 @@ class LocalAICore(private val context: Context) {
         }
     }
 
+    // Kompatibilitäts-Methode für den JuarisNotificationListenerService
+    fun evaluateContentSafety(text: String, sender: String?): Boolean {
+        val result = analyzeAndCategorize(text, sender)
+        return result.isSafe
+    }
+
     fun analyzeAndCategorize(text: String, sender: String?): UnifiedAnalysisResult {
         val normalized = normalizeAndClean(text)
         val stripped = normalized.replace(" ", "")
@@ -112,4 +118,3 @@ class LocalAICore(private val context: Context) {
             .replace(Regex("[^a-zäöüß0-9\\s]"), " ")
     }
 }
-
