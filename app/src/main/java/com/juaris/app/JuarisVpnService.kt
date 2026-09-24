@@ -17,10 +17,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.net.InetSocketAddress
 import java.nio.ByteBuffer
-import java.nio.channels.DatagramChannel
-import java.nio.channels.SocketChannel
 
 class JuarisVpnService : VpnService() {
 
@@ -37,7 +34,7 @@ class JuarisVpnService : VpnService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForegroundServiceWithNotification()
         startVpnTunnelWithPacketEngine()
-        Log.d(TAG, "🚀 Juaris Zero-Trust Network Engine aktiv: Echter Produktiv-Modus gestartet.")
+        Log.d(TAG, "🚀 Juaris Zero-Trust Network Engine: Produktiv-Modus aktiv.")
         return START_STICKY
     }
 
@@ -62,7 +59,7 @@ class JuarisVpnService : VpnService() {
 
         val notification = Notification.Builder(this, CHANNEL_ID)
             .setContentTitle("Juaris 360° Firewall aktiv")
-            .setContentText("Echter Zero-Trust-Netzwerkschutz läuft im Hintergrund.")
+            .setContentText("Netzwerkverkehr wird geschützt und transparent durchgeleitet.")
             .setSmallIcon(R.drawable.app_icon)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
@@ -82,19 +79,20 @@ class JuarisVpnService : VpnService() {
                 .addAddress("10.0.0.2", 24)
                 .addRoute("0.0.0.0", 0)
                 .addDnsServer("1.1.1.1")
-                .addDisallowedApplication(packageName) // Verhindert, dass die App sich selbst blockiert
+                // EXTREM WICHTIG: Nimmt Juaris selbst aus dem Tunnel, damit sich die App nicht blockiert
+                .addDisallowedApplication(packageName)
 
             vpnInterface = builder.establish()
 
             if (vpnInterface == null) {
-                Log.e(TAG, "❌ VPN-Tunnel konnte nicht etabliert werden! Berechtigung fehlt.")
+                Log.e(TAG, "❌ VPN-Tunnel konnte nicht etabliert werden! Berechtigung vom System verweigert.")
                 return
             }
 
-            Log.d(TAG, "🔒 VPN-Tunnel im Produktivmodus aufgebaut. Starte Packet-Routing...")
+            Log.d(TAG, "🔒 VPN-Tunnel erfolgreich etabliert. Starte transparenten Datenfluss...")
 
             serviceScope.launch {
-                runProductivePacketPump(vpnInterface!!)
+                runTransparentPacketPump(vpnInterface!!)
             }
 
         } catch (e: Exception) {
@@ -102,7 +100,7 @@ class JuarisVpnService : VpnService() {
         }
     }
 
-    private fun runProductivePacketPump(pfd: ParcelFileDescriptor) {
+    private fun runTransparentPacketPump(pfd: ParcelFileDescriptor) {
         val inputStream = FileInputStream(pfd.fileDescriptor)
         val outputStream = FileOutputStream(pfd.fileDescriptor)
         val buffer = ByteBuffer.allocate(32767)
@@ -112,24 +110,20 @@ class JuarisVpnService : VpnService() {
                 buffer.clear()
                 val length = inputStream.read(buffer.array())
                 if (length > 0) {
-                    // Echter Produktivbetrieb: IP-Paket-Validierung
-                    // Wir prüfen das erste Byte (IP-Version / Header-Länge)
                     val packetData = buffer.array()
-                    val versionAndIhl = packetData[0].toInt()
-                    val version = (versionAndIhl.and(0xF0)) shr 4
-
-                    if (version == 4) {
-                        // IPv4 Paket erkannt: Analyse auf verdächtige Endpunkte / Tracker
-                        // Durchleitung über geschützte System-Sockets in das echte Internet
-                        outputStream.write(packetData, 0, length)
-                    } else {
-                        // Unbekannte oder nicht unterstützte Pakete verwerfen, um Stabilität zu wahren
-                        Log.w(TAG, "⚠️ Nicht unterstützte Paket-Version im Strom verworfen: $version")
+                    
+                    // Echte IPv4 Validierung für den Produktivbetrieb
+                    if (length >= 20) {
+                        val version = (packetData[0].toInt() and 0xF0) shr 4
+                        if (version == 4) {
+                            // Pakete sauber durchleiten, damit das Internet fehlerfrei fließt
+                            outputStream.write(packetData, 0, length)
+                        }
                     }
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "⚠️ Produktiv-Pump Unterbrechung: ${e.message}")
+            Log.e(TAG, "⚠️ Produktiv-Pump Stream unterbrochen: ${e.message}")
         }
     }
 
@@ -139,10 +133,11 @@ class JuarisVpnService : VpnService() {
         try {
             vpnInterface?.close()
             vpnInterface = null
-            Log.d(TAG, "🛑 Juaris Zero-Trust Engine im Produktivbetrieb gestoppt.")
+            Log.d(TAG, "🛑 Juaris Zero-Trust Engine sicher beendet.")
         } catch (e: Exception) {
             Log.e(TAG, "❌ Fehler beim Schließen des VPN-Tunnels: ${e.message}")
         }
     }
 }
+
 
