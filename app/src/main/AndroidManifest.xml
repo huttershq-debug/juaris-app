@@ -35,6 +35,7 @@
     <uses-permission android:name="com.android.vending.BILLING" />
 
     <application
+        android:name=".JuarisApp"
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -49,6 +50,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.Juaris">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -153,3 +155,5 @@
 
     </application>
 </manifest>
+
+
