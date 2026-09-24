@@ -59,7 +59,7 @@ class JuarisNotificationListenerService : NotificationListenerService() {
             val channel = NotificationChannel(
                 SERVICE_CHANNEL_ID,
                 "Juaris Live-Schutz",
-                NotificationManager.IMPORTANCE_DEFAULT // Geändert von LOW auf DEFAULT
+                NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
                 description = "Hält den Zero-Cloud Schutz & Mikrofon-Wächter aktiv"
             }
@@ -72,9 +72,9 @@ class JuarisNotificationListenerService : NotificationListenerService() {
             .setContentText("24/7 Live-Schutz, Mikrofon- & KI-Wächter aktiv")
             .setSmallIcon(android.R.drawable.ic_lock_lock)
             .setOngoing(true)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT) // Geändert von LOW auf DEFAULT
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
-            
+           
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 startForeground(
@@ -120,14 +120,18 @@ class JuarisNotificationListenerService : NotificationListenerService() {
             if (title.isBlank() && text.isBlank()) return
 
             val fullContent = "App: $packageName | Titel: $title | Inhalt: $text"
+            val fullMessageLower = fullContent.lowercase()
+
+            // 1. KI-Sicherheitsprüfung (Erkennt Phishing, Betrug, Angriffe)
             val isSafe = aiCore.evaluateContentSafety(fullContent, packageName)
 
             if (!isSafe) {
+                // Bedrohung abfangen und blockieren
                 try {
                     notification.key?.let { cancelNotification(it) }
                 } catch (e: Exception) {}
 
-               CoroutineScope(Dispatchers.IO).launch {
+                CoroutineScope(Dispatchers.IO).launch {
                     try {
                         val db = JuarisDatabase.getDatabase(applicationContext)
                         db.securityLogDao().insertLog(
@@ -148,6 +152,20 @@ class JuarisNotificationListenerService : NotificationListenerService() {
                     "⚠️ Juaris Sicherheits-Warnung!",
                     "Betrugsversuch in ${packageName.substringAfterLast('.')} erkannt: $title"
                 )
+            } else {
+                // 2. Prioritäten- & Kalender-Filter für sichere Nachrichten
+                when {
+                    fullMessageLower.contains("mahnung") || fullMessageLower.contains("inkasso") || fullMessageLower.contains("zahlungsaufforderung") -> {
+                        showPriorityPopup("🚨 WICHTIGE MAHNUNG", text.ifEmpty { title }, "finance_high")
+                    }
+                    fullMessageLower.contains("überweisung") || fullMessageLower.contains("zahlung") || fullMessageLower.contains("rechnung") -> {
+                        showPriorityPopup("💳 Zahlungs-Hinweis", text.ifEmpty { title }, "finance_info")
+                    }
+                    packageName.contains("calendar") || packageName.contains("kalender") || packageName.contains("outlook") || 
+                    fullMessageLower.contains("termin") || fullMessageLower.contains("uhr") || fullMessageLower.contains("heute") || fullMessageLower.contains("morgen") -> {
+                        showPriorityPopup("📅 Kalender & Termin", text.ifEmpty { title }, "calendar_alert")
+                    }
+                }
             }
         }
     }
@@ -177,6 +195,35 @@ class JuarisNotificationListenerService : NotificationListenerService() {
             .build()
 
         notificationManager.notify(System.currentTimeMillis().toInt(), alertNotification)
+    }
+
+    private fun showPriorityPopup(title: String, message: String, category: String) {
+        val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                ALERT_CHANNEL_ID,
+                "Juaris Notfall- & Prioritätswarnungen",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Wichtige Termine, Mahnungen und Sicherheitsalarme"
+                enableVibration(true)
+            }
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        val priorityNotification = NotificationCompat.Builder(applicationContext, ALERT_CHANNEL_ID)
+            .setSmallIcon(android.R.drawable.ic_menu_agenda)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setAutoCancel(true)
+            .build()
+
+        notificationManager.notify(System.currentTimeMillis().toInt(), priorityNotification)
+        Log.d(TAG, "⚡ Prioritäts-Popup ausgelöst: [$title] $message")
     }
 
     override fun onDestroy() {
