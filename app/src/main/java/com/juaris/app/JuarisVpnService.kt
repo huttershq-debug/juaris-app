@@ -53,7 +53,7 @@ class JuarisVpnService : VpnService() {
         val notification = Notification.Builder(this, CHANNEL_ID)
             .setContentTitle("Juaris 360° Firewall aktiv")
             .setContentText("Netzwerkverkehr wird lokal überwacht.")
-            .setSmallIcon(android.R.drawable.ic_menu_shield) // Ersetze dies idealerweise mit deinem App-Icon
+            .setSmallIcon(R.drawable.ic_shield_fg) // Ersetze dies idealerweise mit deinem App-Icon
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .build()
