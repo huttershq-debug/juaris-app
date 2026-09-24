@@ -14,12 +14,11 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
-    <!-- Schutzmodule: Anruf-, SMS- und Notfall-Filter -->
+    <!-- Schutzmodule: Anruf- und Notfall-Filter (KEIN SMS-Senden/Empfangen direkt!) -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-feature android:name="android.hardware.telephony" android:required="false" />
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
-    <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -69,52 +68,7 @@
             </intent-filter>
         </receiver>
 
-        <!-- 2. SMS-Filter & Smishing-Wächter -->
-        <receiver
-            android:name="com.juaris.app.sms.SmsFilterReceiver"
-            android:permission="android.permission.BROADCAST_SMS"
-            android:exported="true">
-            <intent-filter android:priority="999">
-                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
-            </intent-filter>
-        </receiver>
-
-        <!-- 3. Zwingende System-Komponenten für Android SMS-Rolle -->
-        <receiver android:name=".sms.SmsDeliveryReceiver"
-            android:permission="android.permission.BROADCAST_SMS"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.provider.Telephony.SMS_DELIVER" />
-            </intent-filter>
-        </receiver>
-
-        <receiver android:name=".sms.WapPushDeliveryReceiver"
-            android:permission="android.permission.BROADCAST_WAP_PUSH"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.provider.Telephony.WAP_PUSH_DELIVER" />
-            </intent-filter>
-        </receiver>
-
-        <service android:name=".sms.SmsRespondService"
-            android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.telephony.action.RESPOND_VIA_MESSAGE" />
-            </intent-filter>
-        </service>
-
-        <activity android:name=".sms.SmsComposeActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.SENDTO" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="sms" />
-                <data android:scheme="smsto" />
-            </intent-filter>
-        </activity>
-
-        <!-- 4. Anruf-Schutz (Scam Call Screening) -->
+        <!-- 2. Anruf-Schutz (Scam Call Screening - Von Google für Security-Apps erlaubt) -->
         <service
             android:name="com.juaris.app.ScamCallScreeningService"
             android:permission="android.permission.BIND_SCREENING_SERVICE"
@@ -124,7 +78,7 @@
             </intent-filter>
         </service>
 
-        <!-- 5. Benachrichtigungs-Monitor -->
+        <!-- 3. Benachrichtigungs-Monitor (Liest SMS & Chats sicher über System-Notifications aus) -->
         <service
             android:name="com.juaris.app.JuarisNotificationListenerService"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
@@ -135,7 +89,7 @@
             </intent-filter>
         </service>
 
-        <!-- 6. VPN-Dienst für Netzwerkschutz -->
+        <!-- 4. VPN-Dienst für Netzwerkschutz -->
         <service
            android:name=".JuarisVpnService"
            android:permission="android.permission.BIND_VPN_SERVICE"
@@ -153,5 +107,4 @@
 
     </application>
 </manifest>
-
 
