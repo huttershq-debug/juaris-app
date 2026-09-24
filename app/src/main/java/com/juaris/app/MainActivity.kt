@@ -47,8 +47,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.biometric.BiometricPrompt
-import androidx.biometric.BiometricManager
 import androidx.core.content.ContextCompat
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -114,7 +112,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
        
-        // 1. Verschlüsselte Präferenzen MÜSSEN zuerst initialisiert werden
         try {
             val masterKey = MasterKey.Builder(this)
                 .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -130,15 +127,9 @@ class MainActivity : AppCompatActivity() {
             securePrefs = getPreferences(Context.MODE_PRIVATE)
         }
 
-        // Anti-Tamper & Runtime-Integritätsprüfung beim Start
         checkRuntimeIntegrity()
-
         window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
-        // Automatische Prüfung & Start der Schutzdienste
         checkAndBootProtectionServices()
-
-        // Notfall-Broadcast-Empfänger registrieren
         registerEmergencyReceiver()
 
         setContent {
@@ -230,7 +221,6 @@ class MainActivity : AppCompatActivity() {
             startJuarisProtectionService()
             requestBatteryOptimizationExemption()
 
-            // FIX: Verhindert ewige Endlosschleifen durch einmaliges Speichern des Flags
             val alreadyAskedSms = securePrefs.getBoolean("already_asked_sms", false)
             if (!alreadyAskedSms) {
                 securePrefs.edit().putBoolean("already_asked_sms", true).apply()
@@ -313,7 +303,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-      private fun launchBiometricVaultAuthentication(onSuccess: () -> Unit) {
+    // Zukunftssicherer Biometrie-Aufruf über den JuarisBiometricManager
+    private fun launchBiometricVaultAuthentication(onSuccess: () -> Unit) {
         val biometricManager = JuarisBiometricManager(this)
         biometricManager.authenticateUser(
             title = "Juaris Future-Proof Vault",
@@ -326,15 +317,6 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Sicherheitsprüfung abgebrochen: $errorMsg", Toast.LENGTH_LONG).show()
             }
         )
-    }
-
-        val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Juaris Secure Vault")
-            .setSubtitle("Biometrische Verifizierung zur Entschlüsselung erforderlich")
-            .setNegativeButtonText("Abbrechen")
-            .build()
-
-        biometricPrompt.authenticate(promptInfo)
     }
 
     private fun startJuarisProtectionService() {
@@ -409,7 +391,9 @@ class MainActivity : AppCompatActivity() {
             try { unregisterReceiver(it) } catch (e: Exception) {}
         }
     }
-}
+} // <--- Hier schließt MainActivity absolut sauber ab!
+
+// Ab hier folgen die externen Top-Level Helper & Composables:
 
 private fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
