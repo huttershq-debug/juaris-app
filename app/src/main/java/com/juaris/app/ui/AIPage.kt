@@ -12,8 +12,7 @@ import com.juaris.app.LocalAICore
 import com.juaris.app.SecurityLogEntity
 import kotlinx.coroutines.launch
 
-// Vollständig in sich geschlossene Farbdefinitionen (verhindert jegliche Unresolved Reference Fehler)
-private val NeonGiftgruen = Color(0xFF00FF66)
+// Lokale Zusatzfarben, die sonst nirgendwo definiert sind
 private val TacticalWarningRed = Color(0xFFFF3333)
 private val TacticalGray = Color(0xFF8B949E)
 
