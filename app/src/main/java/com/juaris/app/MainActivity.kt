@@ -313,21 +313,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun launchBiometricVaultAuthentication(onSuccess: () -> Unit) {
-        val executor = ContextCompat.getMainExecutor(this)
-        val biometricPrompt = BiometricPrompt(this, executor,
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    super.onAuthenticationSucceeded(result)
-                    onSuccess()
-                    Toast.makeText(this@MainActivity, "Vault biometrisch entsperrt", Toast.LENGTH_SHORT).show()
-                }
-
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    super.onAuthenticationError(errorCode, errString)
-                    Toast.makeText(this@MainActivity, "Authentifizierung fehlgeschlagen: $errString", Toast.LENGTH_SHORT).show()
-                }
-            })
+      private fun launchBiometricVaultAuthentication(onSuccess: () -> Unit) {
+        val biometricManager = JuarisBiometricManager(this)
+        biometricManager.authenticateUser(
+            title = "Juaris Future-Proof Vault",
+            subtitle = "Biometrische Verifizierung (Fingerabdruck, Gesicht, Sensor oder PIN)",
+            onSuccess = {
+                onSuccess()
+                Toast.makeText(this, "Vault erfolgreich und sicher entsperrt", Toast.LENGTH_SHORT).show()
+            },
+            onError = { errorMsg ->
+                Toast.makeText(this, "Sicherheitsprüfung abgebrochen: $errorMsg", Toast.LENGTH_LONG).show()
+            }
+        )
+    }
 
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle("Juaris Secure Vault")
