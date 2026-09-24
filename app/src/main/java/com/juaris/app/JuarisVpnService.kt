@@ -36,7 +36,7 @@ class JuarisVpnService : VpnService() {
         return START_STICKY
     }
 
-     private fun startForegroundServiceWithNotification() {
+    private fun startForegroundServiceWithNotification() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
@@ -64,7 +64,6 @@ class JuarisVpnService : VpnService() {
             .build()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            // Korrigiert: Android 14+ nutzt hier 'SPECIAL_USE' für VPN/Firewalls
             startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE)
@@ -78,7 +77,6 @@ class JuarisVpnService : VpnService() {
             val builder = Builder()
                 .setSession("Juaris DNS Shield")
                 .addAddress("10.0.0.2", 24)
-                // Leitet ausschließlich DNS-Abfragen über den lokalen Filter
                 .addDnsServer("10.0.0.2")
                 .addDisallowedApplication(packageName)
 
@@ -89,7 +87,7 @@ class JuarisVpnService : VpnService() {
                 return
             }
 
-            Log.d(TAG, "🔒 DNS-Shield etabliert. Internet läuft uneingeschränkt.")
+            Log.d(TAG, "🔒 DNS-Shield etabliert. Starte permanenten Interceptor...")
 
             serviceScope.launch {
                 runDnsInterceptor(vpnInterface!!)
@@ -102,34 +100,65 @@ class JuarisVpnService : VpnService() {
 
     private suspend fun runDnsInterceptor(pfd: ParcelFileDescriptor) {
         val inputStream = FileInputStream(pfd.fileDescriptor)
-        val buffer = ByteBuffer.allocate(32767)
+        val outputStream = FileOutputStream(pfd.fileDescriptor)
 
         try {
             val upstreamDns = InetSocketAddress("1.1.1.1", 53)
             val dnsChannel = DatagramChannel.open()
-            
-            // Schützt den Socket, damit er am VPN vorbei direkt ins echte Internet funkt
+           
+            // Schützt den Socket vor dem eigenen VPN, damit er direkt ins echte Netz funkt
             if (!protect(dnsChannel.socket())) {
                 Log.e(TAG, "⚠️ Socket-Schutz fehlgeschlagen")
             }
             dnsChannel.configureBlocking(false)
+            dnsChannel.connect(upstreamDns)
 
-            while (serviceScope.isActive) {
-                buffer.clear()
-                val length = inputStream.read(buffer.array())
-                if (length > 0) {
-                    // Hier greift die On-Device Phishing-Analyse für DNS-Abfragen
-                    // Da kein globaler 0.0.0.0/0 Zwang vorliegt, bleibt das Web extrem schnell.
-                    val packet = buffer.array()
-                    if (length > 28) { // Minimaler UDP/DNS IPv4 Header Check
-                        val targetBuffer = ByteBuffer.wrap(packet, 0, length)
-                        dnsChannel.send(targetBuffer, upstreamDns)
+            // --- COROUTINE 1: Handy -> Internet (DNS-Anfragen senden) ---
+            serviceScope.launch(Dispatchers.IO) {
+                val buffer = ByteBuffer.allocate(32767)
+                while (serviceScope.isActive) {
+                    try {
+                        buffer.clear()
+                        val length = inputStream.read(buffer.array())
+                        if (length > 0) {
+                            if (length > 28) { // Minimaler UDP/DNS IPv4 Header Check
+                                val targetBuffer = ByteBuffer.wrap(buffer.array(), 0, length)
+                                dnsChannel.write(targetBuffer)
+                            }
+                        }
+                    } catch (e: Exception) {
+                        // Netzwerkwechsel oder temporärer Ausfall: Automatisch abfangen und weiterlaufen
+                        delay(500)
                     }
                 }
-                delay(10)
             }
+
+            // --- COROUTINE 2: Internet -> Handy (DNS-Antworten empfangen & zurückgeben) ---
+            serviceScope.launch(Dispatchers.IO) {
+                val responseBuffer = ByteBuffer.allocate(32767)
+                while (serviceScope.isActive) {
+                    try {
+                        responseBuffer.clear()
+                        val responseLength = dnsChannel.read(responseBuffer)
+                        if (responseLength > 0) {
+                            outputStream.write(responseBuffer.array(), 0, responseLength)
+                        } else {
+                            delay(10)
+                        }
+                    } catch (e: Exception) {
+                        // Netzwerkwechsel oder temporärer Ausfall: Automatisch abfangen und weiterlaufen
+                        delay(500)
+                    }
+                }
+            }
+
+            // Hält den Haupt-Interceptor dauerhaft aktiv
+            while (serviceScope.isActive) {
+                delay(1000)
+            }
+
         } catch (e: Exception) {
-            Log.e(TAG, "⚠️ DNS-Interceptor unterbrochen: ${e.message}")
+            Log.e(TAG, "⚠️ Schwerwiegender Interceptor-Fehler: ${e.message}")
         }
     }
 
@@ -145,5 +174,4 @@ class JuarisVpnService : VpnService() {
         }
     }
 }
-
 
