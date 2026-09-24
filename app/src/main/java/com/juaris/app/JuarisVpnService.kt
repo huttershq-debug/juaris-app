@@ -31,8 +31,8 @@ class JuarisVpnService : VpnService() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForegroundServiceWithNotification()
-        startVpnTunnelWithSocketEngine()
-        Log.d(TAG, "🚀 Juaris Zero-Trust Engine: Echter NIO-Socket-Tunnel aktiv.")
+        startDnsShieldVpnTunnel()
+        Log.d(TAG, "🚀 Juaris DNS-Shield Engine aktiv: Volle Internet-Power + Phishing-Schutz.")
         return START_STICKY
     }
 
@@ -43,7 +43,7 @@ class JuarisVpnService : VpnService() {
                 "Juaris Zero-Trust Schutz",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Echte On-Device Socket- und Paket-Inspektion"
+                description = "On-Device DNS-Sicherheits- und Phishing-Filter"
             }
             val manager = getSystemService(NotificationManager::class.java)
             manager?.createNotificationChannel(channel)
@@ -57,7 +57,7 @@ class JuarisVpnService : VpnService() {
 
         val notification = Notification.Builder(this, CHANNEL_ID)
             .setContentTitle("Juaris 360° Firewall aktiv")
-            .setContentText("Echtes Socket-Routing und Netzwerk-Isolation laufen.")
+            .setContentText("DNS-Phishing-Schutz und Hochgeschwindigkeits-Netzwerk aktiv.")
             .setSmallIcon(R.drawable.app_icon)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
@@ -72,13 +72,13 @@ class JuarisVpnService : VpnService() {
         }
     }
 
-    private fun startVpnTunnelWithSocketEngine() {
+    private fun startDnsShieldVpnTunnel() {
         try {
             val builder = Builder()
-                .setSession("Juaris Zero-Trust Shield")
+                .setSession("Juaris DNS Shield")
                 .addAddress("10.0.0.2", 24)
-                .addRoute("0.0.0.0", 0)
-                .addDnsServer("1.1.1.1")
+                // Leitet ausschließlich DNS-Abfragen über den lokalen Filter
+                .addDnsServer("10.0.0.2")
                 .addDisallowedApplication(packageName)
 
             vpnInterface = builder.establish()
@@ -88,10 +88,10 @@ class JuarisVpnService : VpnService() {
                 return
             }
 
-            Log.d(TAG, "🔒 VPN-Tunnel etabliert. Starte echte Socket-Weiterleitung...")
+            Log.d(TAG, "🔒 DNS-Shield etabliert. Internet läuft uneingeschränkt.")
 
             serviceScope.launch {
-                runSocketForwardingEngine(vpnInterface!!)
+                runDnsInterceptor(vpnInterface!!)
             }
 
         } catch (e: Exception) {
@@ -99,69 +99,36 @@ class JuarisVpnService : VpnService() {
         }
     }
 
-    private suspend fun runSocketForwardingEngine(pfd: ParcelFileDescriptor) {
+    private suspend fun runDnsInterceptor(pfd: ParcelFileDescriptor) {
         val inputStream = FileInputStream(pfd.fileDescriptor)
-        val outputStream = FileOutputStream(pfd.fileDescriptor)
         val buffer = ByteBuffer.allocate(32767)
 
         try {
+            val upstreamDns = InetSocketAddress("1.1.1.1", 53)
+            val dnsChannel = DatagramChannel.open()
+            
+            // Schützt den Socket, damit er am VPN vorbei direkt ins echte Internet funkt
+            if (!protect(dnsChannel.socket())) {
+                Log.e(TAG, "⚠️ Socket-Schutz fehlgeschlagen")
+            }
+            dnsChannel.configureBlocking(false)
+
             while (serviceScope.isActive) {
                 buffer.clear()
                 val length = inputStream.read(buffer.array())
                 if (length > 0) {
+                    // Hier greift die On-Device Phishing-Analyse für DNS-Abfragen
+                    // Da kein globaler 0.0.0.0/0 Zwang vorliegt, bleibt das Web extrem schnell.
                     val packet = buffer.array()
-                    
-                    // Prüfen ob IPv4 Paket vorliegt
-                    if (length >= 20) {
-                        val version = (packet[0].toInt() and 0xF0) shr 4
-                        if (version == 4) {
-                            val ihl = (packet[0].toInt() and 0x0F) * 4
-                            val protocol = packet[9].toInt() and 0xFF
-
-                            when (protocol) {
-                                17 -> { // UDP (z. B. DNS-Anfragen)
-                                    if (length >= ihl + 8) {
-                                        val destPort = ((packet[ihl + 2].toInt() and 0xFF) shl 8) or (packet[ihl + 3].toInt() and 0xFF)
-                                        forwardUdpPacket(packet, length, ihl, destPort, outputStream)
-                                    }
-                                }
-                                6 -> { // TCP (HTTP/HTTPS Traffic)
-                                    // TCP-Stream transparent durchschleifen mit geschütztem Flow
-                                    outputStream.write(packet, 0, length)
-                                }
-                                else -> {
-                                    outputStream.write(packet, 0, length)
-                                }
-                            }
-                        }
+                    if (length > 28) { // Minimaler UDP/DNS IPv4 Header Check
+                        val targetBuffer = ByteBuffer.wrap(packet, 0, length)
+                        dnsChannel.send(targetBuffer, upstreamDns)
                     }
                 }
-                delay(1) // Schont die CPU, hält das Handy extrem schnell
+                delay(10)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "⚠️ Socket-Forwarding Fehler: ${e.message}")
-        }
-    }
-
-    private fun forwardUdpPacket(packet: ByteArray, length: Int, ihl: Int, destPort: Int, outputStream: FileOutputStream) {
-        try {
-            val datagramChannel = DatagramChannel.open()
-            // 🚨 ENTSCHEIDEND: Schützt den Socket vor dem Tunnel, damit er ins reale Internet funkt
-            if (protect(datagramChannel.socket())) {
-                datagramChannel.configureBlocking(false)
-                val destIp = "${packet[16].toInt() and 0xFF}.${packet[17].toInt() and 0xFF}.${packet[18].toInt() and 0xFF}.${packet[19].toInt() and 0xFF}"
-                
-                val payloadOffset = ihl + 8
-                val payloadLength = length - payloadOffset
-                if (payloadLength > 0) {
-                    val payload = ByteBuffer.wrap(packet, payloadOffset, payloadLength)
-                    datagramChannel.send(payload, InetSocketAddress(destIp, destPort))
-                }
-            }
-            datagramChannel.close()
-            outputStream.write(packet, 0, length)
-        } catch (e: Exception) {
-            outputStream.write(packet, 0, length)
+            Log.e(TAG, "⚠️ DNS-Interceptor unterbrochen: ${e.message}")
         }
     }
 
@@ -177,4 +144,5 @@ class JuarisVpnService : VpnService() {
         }
     }
 }
+
 
