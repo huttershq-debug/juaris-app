@@ -14,6 +14,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.net.Uri
+import android.net.VpnService
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -97,6 +98,18 @@ class MainActivity : AppCompatActivity() {
             checkAndBootProtectionServices()
         } else {
             Toast.makeText(this, "Achtung: Ohne Benachrichtigungs-Berechtigung kann kein Status-Icon angezeigt werden.", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    // NEU: Launcher für den offiziellen Android VPN-Berechtigungsdialog
+    private val vpnPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            Toast.makeText(this, "VPN-Berechtigung erteilt! Starte Firewall...", Toast.LENGTH_SHORT).show()
+            startVpnServiceInternal()
+        } else {
+            Toast.makeText(this, "Achtung: VPN-Berechtigung wurde abgelehnt.", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -186,14 +199,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // 🟢 AUTO-START-ENGINE: Greift sofort, wenn der Nutzer aus den Systemeinstellungen in die App zurückkehrt
     override fun onResume() {
         super.onResume()
         checkAndBootProtectionServices()
     }
 
     private fun checkAndBootProtectionServices() {
-        // Schritt 1: Android 13+ (API 33+) Runtime-Berechtigung für Benachrichtigungen prüfen
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) !=
                 android.content.pm.PackageManager.PERMISSION_GRANTED) {
@@ -202,7 +213,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Schritt 2: System-Benachrichtigungszugriff prüfen
         val isListenerEnabled = Settings.Secure.getString(
             contentResolver,
             "enabled_notification_listeners"
@@ -218,7 +228,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         } else {
-            // Schritt 3: Alles da – Dienste vollautomatisch im Hintergrund starten ohne extra Klicks!
             startJuarisProtectionService()
             requestCallScreeningRoleIfNeeded()
             requestSmsRoleIfNeeded()
@@ -325,6 +334,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startJuarisProtectionService() {
+        // 1. Notification Listener starten
         val serviceIntent = Intent(this, JuarisNotificationListenerService::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(serviceIntent)
@@ -332,6 +342,16 @@ class MainActivity : AppCompatActivity() {
             startService(serviceIntent)
         }
 
+        // 2. VPN-Berechtigung prüfen & anfordern, BEVOR der VPN-Service gestartet wird
+        val vpnIntent = VpnService.prepare(this)
+        if (vpnIntent != null) {
+            vpnPermissionLauncher.launch(vpnIntent)
+        } else {
+            startVpnServiceInternal()
+        }
+    }
+
+    private fun startVpnServiceInternal() {
         val vpnIntent = Intent(this, JuarisVpnService::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(vpnIntent)
