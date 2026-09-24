@@ -12,48 +12,93 @@ class LocalAICore(private val context: Context) {
     private val _threatLevel = MutableStateFlow(0)
     val threatLevel: StateFlow<Int> = _threatLevel
 
-    fun evaluateContentSafety(text: String, sender: String?): Boolean {
+    data class UnifiedAnalysisResult(
+        val isSafe: Boolean,
+        val threatScore: Int,
+        val priorityScore: Int,
+        val category: Category,
+        val title: String,
+        val summary: String
+    ) {
+        enum class Category {
+            PHISHING_THREAT,
+            INVOICE,
+            REMINDER,
+            PAYMENT,
+            CALENDAR,
+            GENERAL
+        }
+    }
+
+    fun analyzeAndCategorize(text: String, sender: String?): UnifiedAnalysisResult {
         val normalized = normalizeAndClean(text)
-        val stripped = normalized.replace(" ", "") // Fängt auch "B a n k" oder "K-o-n-t-o" ab
+        val stripped = normalized.replace(" ", "")
 
-        // 1. Psychologischer Druck & Panik-Faktor (Urgency)
         val urgencyKeywords = listOf("sofort", "heute noch", "frist", "drohung", "sperrung", "letzte warnung", "sofortiges handeln")
-        // 2. Autoritäts-Imitierung (Authority Mimicry)
         val authorityKeywords = listOf("zoll", "polizei", "gericht", "finanzamt", "bank", "post", "dhl", "netflix", "microsoft")
-        // 3. Handlungsfallen & Links (Action Traps)
         val actionKeywords = listOf("http://", "https://", "bit.ly", "tinyurl", "login", "bestaetigen", "verifizieren", "daten eingeben", "passwort")
+        val invoiceKeywords = listOf("rechnung", "betrag", "fällig", "zahlungsziel", "überweisung")
 
-        var score = 0
+        var threatScore = 0
+        var priorityScore = 3
 
-        // Gewichtete psychologische Vektor-Analyse (Prüfung auf normalisiert & zeichenbefreit)
-        if (urgencyKeywords.any { normalized.contains(it) || stripped.contains(it) }) score += 35
-        if (authorityKeywords.any { normalized.contains(it) || stripped.contains(it) }) score += 25
-        if (actionKeywords.any { normalized.contains(it) || stripped.contains(it) }) score += 40
+        if (urgencyKeywords.any { normalized.contains(it) || stripped.contains(it) }) threatScore += 35
+        if (authorityKeywords.any { normalized.contains(it) || stripped.contains(it) }) threatScore += 25
+        if (actionKeywords.any { normalized.contains(it) || stripped.contains(it) }) threatScore += 40
 
-        // 4. NEU: Finanzielles Diebesgut-Pattern (IBAN oder Krypto-Addressen im Text)
         val hasIbanPattern = Regex("[a-z]{2}\\d{2}[a-z0-9]{11,30}").containsMatchIn(stripped)
-        val hasCryptoPattern = Regex("(bc1|[13])[a-km-zA-HJ-NP-Z1-9]{25,39}").containsMatchIn(stripped) // Bitcoin/Crypto Wallet Check
+        val hasCryptoPattern = Regex("(bc1|[13])[a-km-zA-HJ-NP-Z1-9]{25,39}").containsMatchIn(stripped)
+        
         if (hasIbanPattern || hasCryptoPattern) {
-            score += 45 // Extrem hoher Indikator für Finanzbetrug!
+            threatScore += 45
         }
 
-        // Social Engineering Kombi-Boost (Druck + Autorität = Höchste Alarmstufe)
         val hasUrgency = urgencyKeywords.any { normalized.contains(it) || stripped.contains(it) }
         val hasAuthority = authorityKeywords.any { normalized.contains(it) || stripped.contains(it) }
         if (hasUrgency && hasAuthority) {
-            score += 25
+            threatScore += 25
         }
 
-        val finalScore = score.coerceAtMost(100)
-        _threatLevel.value = finalScore
+        threatScore = threatScore.coerceAtMost(100)
+        _threatLevel.value = threatScore
 
-        if (finalScore >= 60) {
-            _aiStatus.value = "Social Engineering / Phishing erkannt (Score: $finalScore)"
-            return false // Bedrohung blockieren!
+        val category: UnifiedAnalysisResult.Category
+        val title: String
+
+        when {
+            threatScore >= 60 -> {
+                category = UnifiedAnalysisResult.Category.PHISHING_THREAT
+                priorityScore = 10
+                title = "🚨 Phishing / Betrug erkannt!"
+            }
+            normalized.contains("mahnung") || normalized.contains("inkasso") -> {
+                category = UnifiedAnalysisResult.Category.REMINDER
+                priorityScore = 9
+                title = "⚠️ Dringende Mahnung / Frist"
+            }
+            invoiceKeywords.any { normalized.contains(it) } -> {
+                category = UnifiedAnalysisResult.Category.INVOICE
+                priorityScore = 7
+                title = "📄 Neue Rechnung eingetroffen"
+            }
+            else -> {
+                category = UnifiedAnalysisResult.Category.GENERAL
+                priorityScore = 3
+                title = "Information von ${sender ?: "Unbekannt"}"
+            }
         }
 
-        _aiStatus.value = "Kontext verifiziert (Score: $finalScore)"
-        return true
+        val isSafe = threatScore < 60
+        _aiStatus.value = if (isSafe) "System sicher (Prio-Score: $priorityScore)" else "Bedrohung geblockt (Score: $threatScore)"
+
+        return UnifiedAnalysisResult(
+            isSafe = isSafe,
+            threatScore = threatScore,
+            priorityScore = priorityScore,
+            category = category,
+            title = title,
+            summary = text.take(120) + if (text.length > 120) "..." else ""
+        )
     }
 
     private fun normalizeAndClean(input: String): String {
@@ -64,7 +109,7 @@ class LocalAICore(private val context: Context) {
             .replace("3", "e")
             .replace("@", "a")
             .replace("$", "s")
-            .replace(Regex("[^a-zäöüß0-9\\s]"), " ") // Ersetzt Sonderzeichen durch Leerzeichen statt sie zu löschen (verhindert Wortverschmelzung)
+            .replace(Regex("[^a-zäöüß0-9\\s]"), " ")
     }
 }
 
