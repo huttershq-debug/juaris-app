@@ -91,18 +91,13 @@
 
         <!-- 4. VPN-Dienst für Netzwerkschutz -->
         <service
-           android:name=".JuarisVpnService"
-           android:permission="android.permission.BIND_VPN_SERVICE"
-           android:exported="true"
-           android:foregroundServiceType="specialUse">
-           
-           <property
-               android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-               android:value="Wird für den permanenten Netzwerkschutz und lokalen VPN-Tunnel benötigt." />
-
-           <intent-filter>
-               <action android:name="android.net.VpnService" />
-           </intent-filter>
+            android:name=".JuarisVpnService"
+            android:permission="android.permission.BIND_VPN_SERVICE"
+            android:foregroundServiceType="specialUse"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.net.VpnService"/>
+            </intent-filter>
         </service>
 
     </application>
