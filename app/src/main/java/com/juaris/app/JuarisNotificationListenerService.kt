@@ -59,7 +59,7 @@ class JuarisNotificationListenerService : NotificationListenerService() {
             val channel = NotificationChannel(
                 SERVICE_CHANNEL_ID,
                 "Juaris Live-Schutz",
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_DEFAULT // Geändert von LOW auf DEFAULT
             ).apply {
                 description = "Hält den Zero-Cloud Schutz & Mikrofon-Wächter aktiv"
             }
@@ -72,9 +72,9 @@ class JuarisNotificationListenerService : NotificationListenerService() {
             .setContentText("24/7 Live-Schutz, Mikrofon- & KI-Wächter aktiv")
             .setSmallIcon(android.R.drawable.ic_lock_lock)
             .setOngoing(true)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT) // Geändert von LOW auf DEFAULT
             .build()
-
+            
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 startForeground(
@@ -127,7 +127,7 @@ class JuarisNotificationListenerService : NotificationListenerService() {
                     notification.key?.let { cancelNotification(it) }
                 } catch (e: Exception) {}
 
-                CoroutineScope(Dispatchers.IO).launch {
+               CoroutineScope(Dispatchers.IO).launch {
                     try {
                         val db = JuarisDatabase.getDatabase(applicationContext)
                         db.securityLogDao().insertLog(
@@ -138,8 +138,11 @@ class JuarisNotificationListenerService : NotificationListenerService() {
                                 status = "BLOCKED"
                             )
                         )
-                    } catch (e: Exception) {}
+                    } catch (e: Exception) {
+                        Log.e(TAG, "❌ Fehler beim Speichern des Logs in die DB: ${e.message}", e)
+                    }
                 }
+
                 showThreatScreenAlert(
                     applicationContext,
                     "⚠️ Juaris Sicherheits-Warnung!",
