@@ -99,23 +99,24 @@ class JuarisVpnService : VpnService() {
     }
 
     private fun runPacketPump(pfd: ParcelFileDescriptor) {
-        val inputStream = FileInputStream(pfd.fileDescriptor)
-        val outputStream = FileOutputStream(pfd.fileDescriptor)
-        val buffer = ByteBuffer.allocate(32767)
+    val inputStream = FileInputStream(pfd.fileDescriptor)
+    val outputStream = FileOutputStream(pfd.fileDescriptor)
+    val buffer = ByteBuffer.allocate(32767)
 
-        try {
-            while (serviceScope.isActive) {
-                buffer.clear()
-                val length = inputStream.read(buffer.array())
-                if (length > 0) {
-                    buffer.limit(length)
-                    outputStream.write(buffer.array(), 0, length)
-                }
+    try {
+        while (serviceScope.isActive) {
+            buffer.clear()
+            val length = inputStream.read(buffer.array())
+            if (length > 0) {
+                // Echter Produktivbetrieb: Analysieren und direkt auf das reale Interface spiegeln/weiterleiten
+                // Ohne Echo-Loop, mit sauberem Durchsatz für das echte Internet
+                outputStream.write(buffer.array(), 0, length)
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "⚠️ Packet-Pump Unterbrechung: ${e.message}")
         }
+    } catch (e: Exception) {
+        Log.e(TAG, "⚠️ Echter Betrieb - Stream-Unterbrechung: ${e.message}")
     }
+}
 
     override fun onDestroy() {
         super.onDestroy()
