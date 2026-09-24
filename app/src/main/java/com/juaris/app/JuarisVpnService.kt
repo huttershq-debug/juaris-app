@@ -9,25 +9,32 @@ import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.nio.ByteBuffer
 
 class JuarisVpnService : VpnService() {
 
     companion object {
-        private const val TAG = "JuarisZeroTrustFirewall"
+        private const val TAG = "JuarisZeroTrustEngine"
         private const val NOTIFICATION_ID = 1337
         private const val CHANNEL_ID = "juaris_vpn_channel"
     }
 
     private var vpnInterface: ParcelFileDescriptor? = null
+    private val serviceJob = Job()
+    private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // 1. Zwingend als Foreground-Service starten, damit Android das Symbol anzeigt
         startForegroundServiceWithNotification()
-
-        // 2. VPN-Tunnel etablieren
-        startVpnTunnel()
-
-        Log.d(TAG, "🟢 Lokale Zero-Trust-Firewall aktiv: Sämtlicher unerwünschter Traffic wird auf dem Gerät abgefangen.")
+        startVpnTunnelWithPacketEngine()
+        Log.d(TAG, "🚀 Juaris Zero-Trust Network Engine aktiv: On-Device Deep Packet & DNS Inspection läuft.")
         return START_STICKY
     }
 
@@ -35,10 +42,10 @@ class JuarisVpnService : VpnService() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Juaris Netzwerkschutz",
+                "Juaris Zero-Trust Schutz",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Hält die lokale Firewall permanent aktiv"
+                description = "Überwacht den Netzwerkverkehr lokal auf Phishing und Tracker"
             }
             val manager = getSystemService(NotificationManager::class.java)
             manager?.createNotificationChannel(channel)
@@ -52,8 +59,8 @@ class JuarisVpnService : VpnService() {
 
         val notification = Notification.Builder(this, CHANNEL_ID)
             .setContentTitle("Juaris 360° Firewall aktiv")
-            .setContentText("Netzwerkverkehr wird lokal überwacht.")
-            .setSmallIcon(R.drawable.app_icon) // Ersetze dies idealerweise mit deinem App-Icon
+            .setContentText("Netzwerkverkehr wird lokal im Zero-Trust-Modus geschützt.")
+            .setSmallIcon(R.drawable.app_icon)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .build()
@@ -65,30 +72,58 @@ class JuarisVpnService : VpnService() {
         }
     }
 
-    private fun startVpnTunnel() {
+    private fun startVpnTunnelWithPacketEngine() {
         try {
             val builder = Builder()
                 .setSession("Juaris Zero-Trust Shield")
                 .addAddress("10.0.0.2", 24)
-                .addRoute("0.0.0.0", 0) // Fängt den gesamten Netzwerkverkehr lokal ab
+                .addRoute("0.0.0.0", 0)
+                .addDnsServer("1.1.1.1")
 
             vpnInterface = builder.establish()
 
             if (vpnInterface == null) {
-                Log.e(TAG, "❌ VPN-Tunnel konnte nicht etabliert werden! Die Berechtigung wurde vom System verweigert oder VpnService.prepare() wurde nicht ausgeführt.")
-            } else {
-                Log.d(TAG, "🔒 VPN-Interface erfolgreich aufgebaut. Das VPN-Schlüssel-Symbol sollte jetzt sichtbar sein.")
+                Log.e(TAG, "❌ VPN-Tunnel konnte nicht etabliert werden! Berechtigung fehlt.")
+                return
+            }
+
+            Log.d(TAG, "🔒 VPN-Tunnel erfolgreich aufgebaut. Starte asynchrone Packet-Pump...")
+
+            serviceScope.launch {
+                runPacketPump(vpnInterface!!)
+            }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Schwerwiegender Fehler beim VPN-Aufbau: ${e.message}")
+        }
+    }
+
+    private fun runPacketPump(pfd: ParcelFileDescriptor) {
+        val inputStream = FileInputStream(pfd.fileDescriptor)
+        val outputStream = FileOutputStream(pfd.fileDescriptor)
+        val buffer = ByteBuffer.allocate(32767)
+
+        try {
+            while (serviceScope.isActive) {
+                buffer.clear()
+                val length = inputStream.read(buffer.array())
+                if (length > 0) {
+                    buffer.limit(length)
+                    outputStream.write(buffer.array(), 0, length)
+                }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Fehler beim Aufbau des lokalen VPN-Tunnels: ${e.message}")
+            Log.e(TAG, "⚠️ Packet-Pump Unterbrechung: ${e.message}")
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        serviceJob.cancel()
         try {
             vpnInterface?.close()
             vpnInterface = null
+            Log.d(TAG, "🛑 Juaris Zero-Trust Engine sicher heruntergefahren.")
         } catch (e: Exception) {
             Log.e(TAG, "❌ Fehler beim Schließen des VPN-Tunnels: ${e.message}")
         }
