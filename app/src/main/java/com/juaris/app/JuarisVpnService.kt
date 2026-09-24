@@ -98,7 +98,7 @@ class JuarisVpnService : VpnService() {
         }
     }
 
-    private suspend fun runDnsInterceptor(pfd: ParcelFileDescriptor) {
+     private suspend fun runDnsInterceptor(pfd: ParcelFileDescriptor) {
         val inputStream = FileInputStream(pfd.fileDescriptor)
         val outputStream = FileOutputStream(pfd.fileDescriptor)
 
@@ -106,34 +106,43 @@ class JuarisVpnService : VpnService() {
             val upstreamDns = InetSocketAddress("1.1.1.1", 53)
             val dnsChannel = DatagramChannel.open()
            
-            // Schützt den Socket vor dem eigenen VPN, damit er direkt ins echte Netz funkt
             if (!protect(dnsChannel.socket())) {
                 Log.e(TAG, "⚠️ Socket-Schutz fehlgeschlagen")
             }
             dnsChannel.configureBlocking(false)
             dnsChannel.connect(upstreamDns)
 
-            // --- COROUTINE 1: Handy -> Internet (DNS-Anfragen senden) ---
+            // --- COROUTINE 1: Nur DNS-Anfragen (UDP Port 53) filtern und senden ---
             serviceScope.launch(Dispatchers.IO) {
                 val buffer = ByteBuffer.allocate(32767)
                 while (serviceScope.isActive) {
                     try {
                         buffer.clear()
                         val length = inputStream.read(buffer.array())
-                        if (length > 0) {
-                            if (length > 28) { // Minimaler UDP/DNS IPv4 Header Check
-                                val targetBuffer = ByteBuffer.wrap(buffer.array(), 0, length)
-                                dnsChannel.write(targetBuffer)
+                        if (length > 28) { // Mindestlänge für IP+UDP Header
+                            val packet = buffer.array()
+                            
+                            // Prüfen ob es sich wirklich um UDP handelt (Protocol 17 an Byte 9 bei IPv4)
+                            val protocol = packet[9].toInt() and 0xFF
+                            if (protocol == 17) { // 17 = UDP
+                                // Zielport prüfen (muss Port 53 sein = DNS)
+                                val ihl = (packet[0].toInt() and 0x0F) * 4
+                                val destinationPort = ((packet[ihl + 2].toInt() and 0xFF) shl 8) or (packet[ihl + 3].toInt() and 0xFF)
+                                
+                                if (destinationPort == 53) {
+                                    // Echte DNS-Anfrage -> An Cloudflare weiterleiten
+                                    val targetBuffer = ByteBuffer.wrap(packet, 0, length)
+                                    dnsChannel.write(targetBuffer)
+                                }
                             }
                         }
                     } catch (e: Exception) {
-                        // Netzwerkwechsel oder temporärer Ausfall: Automatisch abfangen und weiterlaufen
-                        delay(500)
+                        delay(100)
                     }
                 }
             }
 
-            // --- COROUTINE 2: Internet -> Handy (DNS-Antworten empfangen & zurückgeben) ---
+            // --- COROUTINE 2: DNS-Antworten empfangen und zurückschreiben ---
             serviceScope.launch(Dispatchers.IO) {
                 val responseBuffer = ByteBuffer.allocate(32767)
                 while (serviceScope.isActive) {
@@ -146,13 +155,11 @@ class JuarisVpnService : VpnService() {
                             delay(10)
                         }
                     } catch (e: Exception) {
-                        // Netzwerkwechsel oder temporärer Ausfall: Automatisch abfangen und weiterlaufen
-                        delay(500)
+                        delay(100)
                     }
                 }
             }
 
-            // Hält den Haupt-Interceptor dauerhaft aktiv
             while (serviceScope.isActive) {
                 delay(1000)
             }
