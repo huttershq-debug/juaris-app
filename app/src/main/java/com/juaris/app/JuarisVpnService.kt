@@ -72,13 +72,14 @@ class JuarisVpnService : VpnService() {
         }
     }
 
-    private fun startDnsShieldVpnTunnel() {
+     private fun startDnsShieldVpnTunnel() {
         try {
             val builder = Builder()
                 .setSession("Juaris DNS Shield")
                 .addAddress("10.0.0.2", 24)
                 .addDnsServer("10.0.0.2")
                 .addDisallowedApplication(packageName)
+                .setMtu(1500) // 🚀 WICHTIG für Mobilfunk: Verhindert Paketverlust bei LTE/5G
 
             vpnInterface = builder.establish()
 
@@ -87,7 +88,7 @@ class JuarisVpnService : VpnService() {
                 return
             }
 
-            Log.d(TAG, "🔒 DNS-Shield etabliert. Starte permanenten Interceptor...")
+            Log.d(TAG, "🔒 DNS-Shield etabliert. Starte Mobilfunk-kompatiblen Interceptor...")
 
             serviceScope.launch {
                 runDnsInterceptor(vpnInterface!!)
@@ -95,6 +96,87 @@ class JuarisVpnService : VpnService() {
 
         } catch (e: Exception) {
             Log.e(TAG, "❌ Schwerwiegender Fehler beim VPN-Aufbau: ${e.message}")
+        }
+    }
+
+    private suspend fun runDnsInterceptor(pfd: ParcelFileDescriptor) {
+        val inputStream = FileInputStream(pfd.fileDescriptor)
+        val outputStream = FileOutputStream(pfd.fileDescriptor)
+
+        try {
+            val upstreamDns = InetSocketAddress("1.1.1.1", 53)
+            val dnsChannel = DatagramChannel.open()
+           
+            if (!protect(dnsChannel.socket())) {
+                Log.e(TAG, "⚠️ Socket-Schutz fehlgeschlagen")
+            }
+            dnsChannel.configureBlocking(false)
+            dnsChannel.connect(upstreamDns)
+
+            // --- COROUTINE 1: Handy -> Internet (Verarbeitet IPv4 UND IPv6 DNS für LTE/5G) ---
+            serviceScope.launch(Dispatchers.IO) {
+                val buffer = ByteBuffer.allocate(32767)
+                while (serviceScope.isActive) {
+                    try {
+                        buffer.clear()
+                        val length = inputStream.read(buffer.array())
+                        if (length > 40) {
+                            val packet = buffer.array()
+                            val version = (packet[0].toInt() and 0xF0) ushr 4
+                            var isDnsQuery = false
+
+                            if (version == 4) {
+                                // IPv4 Paket-Prüfung
+                                val ihl = (packet[0].toInt() and 0x0F) * 4
+                                val protocol = packet[9].toInt() and 0xFF
+                                if (protocol == 17 && length >= ihl + 4) { // 17 = UDP
+                                    val destPort = ((packet[ihl + 2].toInt() and 0xFF) shl 8) or (packet[ihl + 3].toInt() and 0xFF)
+                                    if (destPort == 53) isDnsQuery = true
+                                }
+                            } else if (version == 6) {
+                                // IPv6 Paket-Prüfung (Sehr wichtig für moderne Mobilfunknetze!)
+                                val nextHeader = packet[6].toInt() and 0xFF
+                                if (nextHeader == 17 && length >= 44) { // 40 Byte IPv6 Header + UDP Header
+                                    val destPort = ((packet[40 + 2].toInt() and 0xFF) shl 8) or (packet[40 + 3].toInt() and 0xFF)
+                                    if (destPort == 53) isDnsQuery = true
+                                }
+                            }
+
+                            if (isDnsQuery) {
+                                val targetBuffer = ByteBuffer.wrap(packet, 0, length)
+                                dnsChannel.write(targetBuffer)
+                            }
+                        }
+                    } catch (e: Exception) {
+                        delay(100)
+                    }
+                }
+            }
+
+            // --- COROUTINE 2: Internet -> Handy ---
+            serviceScope.launch(Dispatchers.IO) {
+                val responseBuffer = ByteBuffer.allocate(32767)
+                while (serviceScope.isActive) {
+                    try {
+                        responseBuffer.clear()
+                        val responseLength = dnsChannel.read(responseBuffer)
+                        if (responseLength > 0) {
+                            outputStream.write(responseBuffer.array(), 0, responseLength)
+                        } else {
+                            delay(10)
+                        }
+                    } catch (e: Exception) {
+                        delay(100)
+                    }
+                }
+            }
+
+            while (serviceScope.isActive) {
+                delay(1000)
+            }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "⚠️ Schwerwiegender Interceptor-Fehler: ${e.message}")
         }
     }
 
