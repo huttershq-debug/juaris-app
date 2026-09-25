@@ -43,6 +43,8 @@ class AcousticThreatDetector(
 
             monitoringJob = CoroutineScope(Dispatchers.IO).launch {
                 val buffer = ByteArray(bufferSize)
+                var highAmplitudeCount = 0 // Verhindert Fehlalarme durch einmaliges Klopfen/Teller fallen lassen
+
                 while (isMonitoring && isActive) {
                     val read = audioRecord?.read(buffer, 0, buffer.size) ?: 0
                     if (read > 0) {
@@ -52,13 +54,19 @@ class AcousticThreatDetector(
                             sum += abs(sample.toShort().toInt())
                         }
                         val averageAmplitude = sum / (read / 2)
-                        
-                        // Erkennung von extremen akustischen Ausschlägen (Schreie, Panik, Schläge)
-                        if (averageAmplitude > 26000) {
-                            withContext(Dispatchers.Main) {
-                                onEmergencyDetected()
+                       
+                        // Erkennung von extremen und anhaltenden akustischen Ausschlägen
+                        if (averageAmplitude > 27000) {
+                            highAmplitudeCount++
+                            if (highAmplitudeCount >= 3) { // Muss in 3 aufeinanderfolgenden Messungen anhalten
+                                withContext(Dispatchers.Main) {
+                                    onEmergencyDetected()
+                                }
+                                highAmplitudeCount = 0
+                                delay(10000) // Cooldown nach Alarmauslösung
                             }
-                            delay(8000) // Cooldown nach Alarmauslösung
+                        } else {
+                            highAmplitudeCount = (highAmplitudeCount - 1).coerceAtLeast(0)
                         }
                     }
                     delay(100)
