@@ -153,7 +153,7 @@ class JuarisVpnService : VpnService() {
                 }
             }
 
-            // --- COROUTINE 2: Upstream DNS -> Handy (Mit korrekter IP-Prüfsumme) ---
+            // --- COROUTINE 2: Upstream DNS -> Handy ---
             serviceScope.launch(Dispatchers.IO) {
                 val responseBuffer = ByteBuffer.allocate(32767)
                 while (serviceScope.isActive) {
@@ -168,7 +168,7 @@ class JuarisVpnService : VpnService() {
                             val totalLen = 20 + 8 + dnsData.size
                             val responsePacket = ByteArray(totalLen)
 
-                            // IPv4 Header (Sauber auf separate Zeilen aufgeteilt)
+                            // IPv4 Header
                             responsePacket[0] = 0x45.toByte()
                             responsePacket[1] = 0x00.toByte()
                             responsePacket[2] = (totalLen shr 8).toByte()
@@ -178,13 +178,11 @@ class JuarisVpnService : VpnService() {
                             responsePacket[6] = 0x00.toByte()
                             responsePacket[7] = 0x00.toByte()
                             responsePacket[8] = 64.toByte()
-                            responsePacket[9] = 17.toByte() // UDP
+                            responsePacket[9] = 17.toByte()
                             
-                            // IP Checksum initial auf 0 setzen
                             responsePacket[10] = 0.toByte()
                             responsePacket[11] = 0.toByte()
 
-                            // IPs
                             responsePacket[12] = 10.toByte()
                             responsePacket[13] = 0.toByte()
                             responsePacket[14] = 0.toByte()
@@ -205,10 +203,8 @@ class JuarisVpnService : VpnService() {
                             responsePacket[26] = 0.toByte()
                             responsePacket[27] = 0.toByte()
 
-                            // DNS Payload
                             System.arraycopy(dnsData, 0, responsePacket, 28, dnsData.size)
 
-                            // IP-Prüfsumme berechnen
                             val checksum = calculateIpChecksum(responsePacket, 20)
                             responsePacket[10] = (checksum.toInt() shr 8).toByte()
                             responsePacket[11] = (checksum.toInt() and 0xFF).toByte()
@@ -228,7 +224,7 @@ class JuarisVpnService : VpnService() {
             }
 
         } catch (e: Exception) {
-            Log.e(TAG, "⚠️ Schwerwiegender Interceptor-Fehler: ${e.message}")
+            Log.e(TAG, "⚠️ Interceptor-Fehler: ${e.message}")
         }
     }
 
