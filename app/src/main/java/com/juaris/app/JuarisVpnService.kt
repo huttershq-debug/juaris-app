@@ -153,7 +153,7 @@ class JuarisVpnService : VpnService() {
                 }
             }
 
-            // --- COROUTINE 2: Upstream DNS -> Handy (Mit expliziten Short-Variablen) ---
+            // --- COROUTINE 2: Upstream DNS -> Handy (100% ByteBuffer-basiert ohne Array-Klammern) ---
             serviceScope.launch(Dispatchers.IO) {
                 val responseBuffer = ByteBuffer.allocate(32767)
                 while (serviceScope.isActive) {
@@ -169,7 +169,6 @@ class JuarisVpnService : VpnService() {
                             val responsePacket = ByteArray(totalLen)
                             val bb = ByteBuffer.wrap(responsePacket)
 
-                            // Explizite Typ-Variablen zur Vermeidung jeglicher Parser-Fehler
                             val zeroVal: Short = 0
                             val oneVal: Short = 1
                             val portVal: Short = 53
@@ -183,7 +182,7 @@ class JuarisVpnService : VpnService() {
                             bb.putShort(zeroVal)
                             bb.put(64.toByte())
                             bb.put(17.toByte())
-                            bb.putShort(zeroVal)
+                            bb.putShort(zeroVal) // Platzhalter für Prüfsumme bei Index 10-11
                             bb.putInt(0x0A000002)
                             bb.putInt(0x0A000002)
 
@@ -196,10 +195,10 @@ class JuarisVpnService : VpnService() {
                             // DNS Payload
                             bb.put(dnsData)
 
-                            // Korrekte IP-Prüfsumme berechnen und eintragen
+                            // IP-Prüfsumme berechnen und sauber über ByteBuffer.put(index, val) eintragen
                             val checksum = calculateIpChecksum(responsePacket, 20)
-                            responsePacket[10] = (checksum.toInt() shr 8).toByte()
-                            responsePacket[11] = (checksum.toInt() and 0xFF).toByte()
+                            bb.put(10, (checksum.toInt() shr 8).toByte())
+                            bb.put(11, (checksum.toInt() and 0xFF).toByte())
 
                             outputStream.write(responsePacket, 0, totalLen)
                         } else {
