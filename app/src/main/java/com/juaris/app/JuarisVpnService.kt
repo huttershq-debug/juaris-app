@@ -153,7 +153,7 @@ class JuarisVpnService : VpnService() {
                 }
             }
 
-            // --- COROUTINE 2: Upstream DNS -> Handy (Sauber und fehlerfrei) ---
+            // --- COROUTINE 2: Upstream DNS -> Handy (100% ByteBuffer-native) ---
             serviceScope.launch(Dispatchers.IO) {
                 val responseBuffer = ByteBuffer.allocate(32767)
                 while (serviceScope.isActive) {
@@ -195,10 +195,9 @@ class JuarisVpnService : VpnService() {
                             // DNS Payload
                             bb.put(dnsData)
 
-                            // IP-Prüfsumme berechnen und sauber aufteilen auf separate Zeilen
+                            // IP-Prüfsumme direkt absolut über den ByteBuffer eintragen (kein Array-Zugriff nötig)
                             val checksum = calculateIpChecksum(responsePacket, 20)
-                            responsePacket[10] = (checksum.toInt() shr 8).toByte()
-                            responsePacket[11] = (checksum.toInt() and 0xFF).toByte()
+                            bb.putShort(10, checksum)
 
                             outputStream.write(responsePacket, 0, totalLen)
                         } else {
@@ -248,4 +247,5 @@ class JuarisVpnService : VpnService() {
         }
     }
 }
+
 
