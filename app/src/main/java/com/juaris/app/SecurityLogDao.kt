@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SecurityLogDao {
-    @Query("SELECT * FROM security_logs ORDER BY timestamp DESC")
+    @Query("SELECT * FROM security_logs ORDER BY CASE status WHEN 'BLOCKED' THEN 1 ELSE 2 END ASC, timestamp DESC")
     fun getAllLogs(): Flow<List<SecurityLogEntity>>
 
     @Insert
@@ -16,3 +16,4 @@ interface SecurityLogDao {
     @Query("DELETE FROM security_logs")
     suspend fun clearLogs()
 }
+
