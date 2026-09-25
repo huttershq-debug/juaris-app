@@ -113,7 +113,7 @@ class JuarisVpnService : VpnService() {
             dnsChannel.configureBlocking(false)
             dnsChannel.connect(upstreamDns)
 
-            // --- COROUTINE 1: Handy -> Upstream DNS (DNS abfangen) ---
+            // --- COROUTINE 1: Handy -> Upstream DNS ---
             serviceScope.launch(Dispatchers.IO) {
                 val buffer = ByteBuffer.allocate(32767)
                 while (serviceScope.isActive) {
@@ -153,7 +153,7 @@ class JuarisVpnService : VpnService() {
                 }
             }
 
-            // --- COROUTINE 2: Upstream DNS -> Handy (DNS-Antworten zurückschreiben!) ---
+            // --- COROUTINE 2: Upstream DNS -> Handy (Mit korrekter IP-Prüfsumme) ---
             serviceScope.launch(Dispatchers.IO) {
                 val responseBuffer = ByteBuffer.allocate(32767)
                 while (serviceScope.isActive) {
@@ -165,7 +165,6 @@ class JuarisVpnService : VpnService() {
                             responseBuffer.flip()
                             responseBuffer.get(dnsData)
 
-                            // IP- und UDP-Paket für die Antwort an das Handy konstruieren
                             val totalLen = 20 + 8 + dnsData.size
                             val responsePacket = ByteArray(totalLen)
 
@@ -178,9 +177,11 @@ class JuarisVpnService : VpnService() {
                             responsePacket[6] = 0x00; responsePacket[7] = 0x00
                             responsePacket[8] = 64
                             responsePacket[9] = 17 // UDP
+                            
+                            // IP Checksum initial auf 0 setzen vor Berechnung
                             responsePacket[10] = 0; responsePacket[11] = 0
 
-                            // IPs (Loopback/Tunnel-IPs)
+                            // IPs
                             responsePacket[12] = 10; responsePacket[13] = 0; responsePacket[14] = 0; responsePacket[15] = 2
                             responsePacket[16] = 10; responsePacket[17] = 0; responsePacket[18] = 0; responsePacket[19] = 2
 
@@ -192,10 +193,14 @@ class JuarisVpnService : VpnService() {
                             responsePacket[25] = (udpLen and 0xFF).toByte()
                             responsePacket[26] = 0; responsePacket[27] = 0
 
-                            // DNS Payload einfügen
+                            // DNS Payload
                             System.arraycopy(dnsData, 0, responsePacket, 28, dnsData.size)
 
-                            // WICHTIG: Antwort zurück an das System senden!
+                            // IP-Prüfsumme berechnen (Verhindert das Verwerfen durch den Android-Kernel)
+                            val checksum = calculateIpChecksum(responsePacket, 20)
+                            responsePacket[10] = (checksum.toInt() shr 8).toByte()
+                            responsePacket[11] = (checksum.toInt() and 0xFF).toByte()
+
                             outputStream.write(responsePacket, 0, totalLen)
                         } else {
                             delay(10)
@@ -213,6 +218,23 @@ class JuarisVpnService : VpnService() {
         } catch (e: Exception) {
             Log.e(TAG, "⚠️ Schwerwiegender Interceptor-Fehler: ${e.message}")
         }
+    }
+
+    private fun calculateIpChecksum(packet: ByteArray, headerLength: Int): Short {
+        var sum = 0
+        var i = 0
+        while (i < headerLength) {
+            if (i == 10) {
+                i += 2
+                continue
+            }
+            sum += ((packet[i].toInt() and 0xFF) shl 8) or (packet[i + 1].toInt() and 0xFF)
+            i += 2
+        }
+        while ((sum ushr 16) > 0) {
+            sum = (sum and 0xFFFF) + (sum ushr 16)
+        }
+        return (~sum and 0xFFFF).toShort()
     }
 
     override fun onDestroy() {
