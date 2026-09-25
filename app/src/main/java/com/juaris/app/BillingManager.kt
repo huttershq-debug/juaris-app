@@ -10,9 +10,9 @@ class BillingManager(
     private val onSubscriptionActive: () -> Unit
 ) : PurchasesUpdatedListener {
 
-    // ⚠️ HIER MIT EINEM KLICK AUF TRUE STELLEN ZUM TESTEN AUF DEM HANDY
-    // Vor dem Upload in die Google Play Console auf FALSE setzen!
     companion object {
+        // ⚠️ WICHTIG FÜR DEN STORE-RELEASE:
+        // Vor dem Hochladen in den Google Play Store unbedingt auf FALSE stellen!
         var IS_BETA_BYPASS_ACTIVE: Boolean = true
     }
 
@@ -37,7 +37,7 @@ class BillingManager(
             }
 
             override fun onBillingServiceDisconnected() {
-                // Retry logic / Neuverbindung bei Bedarf
+                // Automatischer Reconnect bei Bedarf
             }
         })
     }
@@ -100,4 +100,5 @@ class BillingManager(
         }
     }
 }
+
 
