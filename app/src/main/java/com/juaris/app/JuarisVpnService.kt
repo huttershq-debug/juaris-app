@@ -219,12 +219,12 @@ class JuarisVpnService : VpnService() {
         var sum = 0
         var i = 0
         while (i < headerLength) {
-            if (i == 10) {
-                i += 2
-                continue
+            if (i != 10) {
+                val high = packet[i].toInt() and 0xFF
+                val low = packet[i + 1].toInt() and 0xFF
+                sum = sum + ((high shl 8) or low)
             }
-            sum += ((packet[i].toInt() and 0xFF) shl 8) or (packet[i + 1].toInt() and 0xFF)
-            i += 2
+            i = i + 2
         }
         while ((sum ushr 16) > 0) {
             sum = (sum and 0xFFFF) + (sum ushr 16)
