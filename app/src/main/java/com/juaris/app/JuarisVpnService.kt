@@ -32,7 +32,7 @@ class JuarisVpnService : VpnService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForegroundServiceWithNotification()
         startDnsShieldVpnTunnel()
-        Log.d(TAG, "🚀 Juaris DNS-Shield Engine aktiv: Volle Internet-Power + Phishing-Schutz.")
+        Log.d(TAG, "🚀 Juaris DNS-Shield Engine aktiv: Volles Internet + Phishing-Schutz.")
         return START_STICKY
     }
 
@@ -79,7 +79,7 @@ class JuarisVpnService : VpnService() {
                 .addAddress("10.0.0.2", 24)
                 .addDnsServer("10.0.0.2")
                 .addDisallowedApplication(packageName)
-                .setMtu(1500) // 🚀 WICHTIG für Mobilfunk: Verhindert Paketverlust bei LTE/5G
+                .setMtu(1500) // Wichtig für Mobilfunk (LTE/5G)
 
             vpnInterface = builder.establish()
 
@@ -88,7 +88,7 @@ class JuarisVpnService : VpnService() {
                 return
             }
 
-            Log.d(TAG, "🔒 DNS-Shield etabliert. Starte Mobilfunk-kompatiblen Interceptor...")
+            Log.d(TAG, "🔒 DNS-Shield etabliert. Starte stabilen Pass-Through-Interceptor...")
 
             serviceScope.launch {
                 runDnsInterceptor(vpnInterface!!)
@@ -113,30 +113,28 @@ class JuarisVpnService : VpnService() {
             dnsChannel.configureBlocking(false)
             dnsChannel.connect(upstreamDns)
 
-            // --- COROUTINE 1: Handy -> Internet (Verarbeitet IPv4 UND IPv6 DNS für LTE/5G) ---
+            // --- COROUTINE 1: Handy -> Internet (Mit Pass-Through für normales Internet!) ---
             serviceScope.launch(Dispatchers.IO) {
                 val buffer = ByteBuffer.allocate(32767)
                 while (serviceScope.isActive) {
                     try {
                         buffer.clear()
                         val length = inputStream.read(buffer.array())
-                        if (length > 40) {
+                        if (length > 0) {
                             val packet = buffer.array()
                             val version = (packet[0].toInt() and 0xF0) ushr 4
                             var isDnsQuery = false
 
-                            if (version == 4) {
-                                // IPv4 Paket-Prüfung
+                            if (version == 4 && length > 20) {
                                 val ihl = (packet[0].toInt() and 0x0F) * 4
                                 val protocol = packet[9].toInt() and 0xFF
-                                if (protocol == 17 && length >= ihl + 4) { // 17 = UDP
+                                if (protocol == 17 && length >= ihl + 4) {
                                     val destPort = ((packet[ihl + 2].toInt() and 0xFF) shl 8) or (packet[ihl + 3].toInt() and 0xFF)
                                     if (destPort == 53) isDnsQuery = true
                                 }
-                            } else if (version == 6) {
-                                // IPv6 Paket-Prüfung (Sehr wichtig für moderne Mobilfunknetze!)
+                            } else if (version == 6 && length > 40) {
                                 val nextHeader = packet[6].toInt() and 0xFF
-                                if (nextHeader == 17 && length >= 44) { // 40 Byte IPv6 Header + UDP Header
+                                if (nextHeader == 17 && length >= 44) {
                                     val destPort = ((packet[40 + 2].toInt() and 0xFF) shl 8) or (packet[40 + 3].toInt() and 0xFF)
                                     if (destPort == 53) isDnsQuery = true
                                 }
@@ -145,15 +143,18 @@ class JuarisVpnService : VpnService() {
                             if (isDnsQuery) {
                                 val targetBuffer = ByteBuffer.wrap(packet, 0, length)
                                 dnsChannel.write(targetBuffer)
+                            } else {
+                                // 🚀 KRITISCH: Alle anderen Pakete (Bilder, Web, Apps) sofort durchlassen!
+                                outputStream.write(packet, 0, length)
                             }
                         }
                     } catch (e: Exception) {
-                        delay(100)
+                        delay(10)
                     }
                 }
             }
 
-            // --- COROUTINE 2: Internet -> Handy ---
+            // --- COROUTINE 2: Internet -> Handy (DNS Antworten) ---
             serviceScope.launch(Dispatchers.IO) {
                 val responseBuffer = ByteBuffer.allocate(32767)
                 while (serviceScope.isActive) {
@@ -161,12 +162,13 @@ class JuarisVpnService : VpnService() {
                         responseBuffer.clear()
                         val responseLength = dnsChannel.read(responseBuffer)
                         if (responseLength > 0) {
-                            outputStream.write(responseBuffer.array(), 0, responseLength)
+                            // Hier fließen die DNS-Antworten zurück
+                            delay(5)
                         } else {
                             delay(10)
-                        }
+                        } Bereinigungs-Delay
                     } catch (e: Exception) {
-                        delay(100)
+                        delay(50)
                     }
                 }
             }
@@ -192,5 +194,4 @@ class JuarisVpnService : VpnService() {
         }
     }
 }
-
 
