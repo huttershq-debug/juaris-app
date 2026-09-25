@@ -153,7 +153,7 @@ class JuarisVpnService : VpnService() {
                 }
             }
 
-            // --- COROUTINE 2: Upstream DNS -> Handy (100% ByteBuffer-native) ---
+            // --- COROUTINE 2: Upstream DNS -> Handy (100% Syntax-sicher) ---
             serviceScope.launch(Dispatchers.IO) {
                 val responseBuffer = ByteBuffer.allocate(32767)
                 while (serviceScope.isActive) {
@@ -167,37 +167,59 @@ class JuarisVpnService : VpnService() {
 
                             val totalLen = 20 + 8 + dnsData.size
                             val responsePacket = ByteArray(totalLen)
-                            val bb = ByteBuffer.wrap(responsePacket)
 
-                            val zeroVal: Short = 0
-                            val oneVal: Short = 1
-                            val portVal: Short = 53
-                            val udpLenVal = (8 + dnsData.size).toShort()
+                            // IPv4 Header (20 Bytes) direkt belegen
+                            responsePacket[0] = 0x45.toByte()
+                            responsePacket[1] = 0x00.toByte()
 
-                            // IPv4 Header via ByteBuffer befüllen
-                            bb.put(0x45.toByte())
-                            bb.put(0x00.toByte())
-                            bb.putShort(totalLen.toShort())
-                            bb.putShort(oneVal)
-                            bb.putShort(zeroVal)
-                            bb.put(64.toByte())
-                            bb.put(17.toByte())
-                            bb.putShort(zeroVal) // Platzhalter für Prüfsumme
-                            bb.putInt(0x0A000002)
-                            bb.putInt(0x0A000002)
+                            val totalLenShort = totalLen.toShort()
+                            responsePacket[2] = (totalLenShort.toInt() shr 8).toByte()
+                            responsePacket[3] = (totalLenShort.toInt() and 0xFF).toByte()
 
-                            // UDP Header
-                            bb.putShort(portVal)
-                            bb.putShort(portVal)
-                            bb.putShort(udpLenVal)
-                            bb.putShort(zeroVal)
+                            responsePacket[4] = 0x00
+                            responsePacket[5] = 0x01
+                            responsePacket[6] = 0x00
+                            responsePacket[7] = 0x00
+                            responsePacket[8] = 64
+                            responsePacket[9] = 17 // UDP Protokoll
 
-                            // DNS Payload
-                            bb.put(dnsData)
+                            // Prüfsummen-Platzhalter
+                            responsePacket[10] = 0x00
+                            responsePacket[11] = 0x00
 
-                            // IP-Prüfsumme direkt absolut über den ByteBuffer eintragen (kein Array-Zugriff nötig)
+                            // Source IP: 10.0.0.2
+                            responsePacket[12] = 10
+                            responsePacket[13] = 0
+                            responsePacket[14] = 0
+                            responsePacket[15] = 2
+
+                            // Dest IP: 10.0.0.2
+                            responsePacket[16] = 10
+                            responsePacket[17] = 0
+                            responsePacket[18] = 0
+                            responsePacket[19] = 2
+
+                            // IP-Prüfsumme berechnen und eintragen
                             val checksum = calculateIpChecksum(responsePacket, 20)
-                            bb.putShort(10, checksum)
+                            val csInt = checksum.toInt()
+                            responsePacket[10] = (csInt ushr 8).toByte()
+                            responsePacket[11] = (csInt and 0xFF).toByte()
+
+                            // UDP Header (8 Bytes ab Index 20)
+                            responsePacket[20] = 0x00
+                            responsePacket[21] = 53 // Source Port 53
+                            responsePacket[22] = 0x00
+                            responsePacket[23] = 53 // Dest Port 53
+
+                            val udpLen = (8 + dnsData.size).toShort()
+                            responsePacket[24] = (udpLen.toInt() ushr 8).toByte()
+                            responsePacket[25] = (udpLen.toInt() and 0xFF).toByte()
+
+                            responsePacket[26] = 0x00
+                            responsePacket[27] = 0x00 // UDP Checksum
+
+                            // DNS Payload kopieren
+                            System.arraycopy(dnsData, 0, responsePacket, 28, dnsData.size)
 
                             outputStream.write(responsePacket, 0, totalLen)
                         } else {
@@ -247,5 +269,4 @@ class JuarisVpnService : VpnService() {
         }
     }
 }
-
 
