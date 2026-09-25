@@ -169,23 +169,23 @@ class JuarisVpnService : VpnService() {
                             val responsePacket = ByteArray(totalLen)
                             val bb = ByteBuffer.wrap(responsePacket)
 
-                            // IPv4 Header via ByteBuffer befüllen
+                            // IPv4 Header via ByteBuffer befüllen (mit eingeklammerten Short-Casts)
                             bb.put(0x45.toByte())
                             bb.put(0x00.toByte())
                             bb.putShort(totalLen.toShort())
-                            bb.putShort(1.toShort())
-                            bb.putShort(0.toShort())
+                            bb.putShort((1).toShort())
+                            bb.putShort((0).toShort())
                             bb.put(64.toByte())
                             bb.put(17.toByte())
-                            bb.putShort(0.toShort())
+                            bb.putShort((0).toShort())
                             bb.putInt(0x0A000002)
                             bb.putInt(0x0A000002)
 
                             // UDP Header
-                            bb.putShort(53.toShort())
-                            bb.putShort(53.toShort())
+                            bb.putShort((53).toShort())
+                            bb.putShort((53).toShort())
                             bb.putShort((8 + dnsData.size).toShort())
-                            bb.putShort(0.toShort())
+                            bb.putShort((0).toShort())
 
                             // DNS Payload
                             bb.put(dnsData)
