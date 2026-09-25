@@ -1260,7 +1260,7 @@ fun PrivacyAndLegalContent() {
 
                     Spacer(modifier = Modifier.height(4.dp))
                     Text("Design:", color = Color.Gray, fontSize = 12.sp)
-                    Text("Julia Kerschhofer", color = Color.White)
+                    Text("Benedikt Wolfgang Hütter", color = Color.White)
                 }
             }
         }
