@@ -229,7 +229,7 @@ class JuarisVpnService : VpnService() {
         while ((sum ushr 16) > 0) {
             sum = (sum and 0xFFFF) + (sum ushr 16)
         }
-        return (~sum and 0xFFFF).toShort()
+        return (sum.inv() and 0xFFFF).toShort()
     }
 
     override fun onDestroy() {
