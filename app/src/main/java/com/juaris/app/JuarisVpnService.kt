@@ -153,7 +153,7 @@ class JuarisVpnService : VpnService() {
                 }
             }
 
-            // --- COROUTINE 2: Upstream DNS -> Handy (Buffer-Position-Engine) ---
+            // --- COROUTINE 2: Upstream DNS -> Handy ---
             serviceScope.launch(Dispatchers.IO) {
                 val responseBuffer = ByteBuffer.allocate(32767)
                 while (serviceScope.isActive) {
@@ -217,7 +217,7 @@ class JuarisVpnService : VpnService() {
 
     private fun calculateIpChecksum(packet: ByteArray, headerLength: Int): Short {
         var sum = 0
-        var i = `0`
+        var i = 0
         while (i < headerLength) {
             if (i == 10) {
                 i += 2
