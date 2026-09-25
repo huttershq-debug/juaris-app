@@ -153,7 +153,7 @@ class JuarisVpnService : VpnService() {
                 }
             }
 
-            // --- COROUTINE 2: Upstream DNS -> Handy (Sauber mit ByteBuffer) ---
+            // --- COROUTINE 2: Upstream DNS -> Handy (Mit expliziten Short-Variablen) ---
             serviceScope.launch(Dispatchers.IO) {
                 val responseBuffer = ByteBuffer.allocate(32767)
                 while (serviceScope.isActive) {
@@ -169,23 +169,29 @@ class JuarisVpnService : VpnService() {
                             val responsePacket = ByteArray(totalLen)
                             val bb = ByteBuffer.wrap(responsePacket)
 
-                            // IPv4 Header via ByteBuffer befüllen (mit eingeklammerten Short-Casts)
+                            // Explizite Typ-Variablen zur Vermeidung jeglicher Parser-Fehler
+                            val zeroVal: Short = 0
+                            val oneVal: Short = 1
+                            val portVal: Short = 53
+                            val udpLenVal = (8 + dnsData.size).toShort()
+
+                            // IPv4 Header via ByteBuffer befüllen
                             bb.put(0x45.toByte())
                             bb.put(0x00.toByte())
                             bb.putShort(totalLen.toShort())
-                            bb.putShort((1).toShort())
-                            bb.putShort((0).toShort())
+                            bb.putShort(oneVal)
+                            bb.putShort(zeroVal)
                             bb.put(64.toByte())
                             bb.put(17.toByte())
-                            bb.putShort((0).toShort())
+                            bb.putShort(zeroVal)
                             bb.putInt(0x0A000002)
                             bb.putInt(0x0A000002)
 
                             // UDP Header
-                            bb.putShort((53).toShort())
-                            bb.putShort((53).toShort())
-                            bb.putShort((8 + dnsData.size).toShort())
-                            bb.putShort((0).toShort())
+                            bb.putShort(portVal)
+                            bb.putShort(portVal)
+                            bb.putShort(udpLenVal)
+                            bb.putShort(zeroVal)
 
                             // DNS Payload
                             bb.put(dnsData)
