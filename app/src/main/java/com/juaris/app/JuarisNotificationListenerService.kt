@@ -3,6 +3,7 @@ package com.juaris.app
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
@@ -20,7 +21,7 @@ class JuarisNotificationListenerService : NotificationListenerService() {
     companion object {
         private const val TAG = "JuarisUniversalGuard"
         const val SERVICE_CHANNEL_ID = "JuarisLiveProtectionChannel"
-        private const val ALERT_CHANNEL_ID = "juaris_threat_alerts"
+        private const val ALERT_CHANNEL_ID = "juaris_threat_alerts_v2"
         const val NOTIFICATION_ID = 1337
     }
 
@@ -161,7 +162,7 @@ class JuarisNotificationListenerService : NotificationListenerService() {
                     fullMessageLower.contains("überweisung") || fullMessageLower.contains("zahlung") || fullMessageLower.contains("rechnung") -> {
                         showPriorityPopup("💳 Zahlungs-Hinweis", text.ifEmpty { title }, "finance_info")
                     }
-                    packageName.contains("calendar") || packageName.contains("kalender") || packageName.contains("outlook") || 
+                    packageName.contains("calendar") || packageName.contains("kalender") || packageName.contains("outlook") ||
                     fullMessageLower.contains("termin") || fullMessageLower.contains("uhr") || fullMessageLower.contains("heute") || fullMessageLower.contains("morgen") -> {
                         showPriorityPopup("📅 Kalender & Termin", text.ifEmpty { title }, "calendar_alert")
                     }
@@ -184,6 +185,14 @@ class JuarisNotificationListenerService : NotificationListenerService() {
             notificationManager.createNotificationChannel(channel)
         }
 
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context, 0, intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
         val alertNotification = NotificationCompat.Builder(context, ALERT_CHANNEL_ID)
             .setSmallIcon(android.R.drawable.stat_notify_error)
             .setContentTitle(title)
@@ -191,6 +200,7 @@ class JuarisNotificationListenerService : NotificationListenerService() {
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .build()
 
@@ -199,7 +209,7 @@ class JuarisNotificationListenerService : NotificationListenerService() {
 
     private fun showPriorityPopup(title: String, message: String, category: String) {
         val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        
+       
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 ALERT_CHANNEL_ID,
@@ -212,6 +222,14 @@ class JuarisNotificationListenerService : NotificationListenerService() {
             notificationManager.createNotificationChannel(channel)
         }
 
+        val intent = Intent(applicationContext, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            applicationContext, 0, intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
         val priorityNotification = NotificationCompat.Builder(applicationContext, ALERT_CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_menu_agenda)
             .setContentTitle(title)
@@ -219,6 +237,7 @@ class JuarisNotificationListenerService : NotificationListenerService() {
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .build()
 
