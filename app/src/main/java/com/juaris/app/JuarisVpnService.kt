@@ -72,7 +72,7 @@ class JuarisVpnService : VpnService() {
         }
     }
 
-     private fun startDnsShieldVpnTunnel() {
+    private fun startDnsShieldVpnTunnel() {
         try {
             val builder = Builder()
                 .setSession("Juaris DNS Shield")
@@ -180,77 +180,6 @@ class JuarisVpnService : VpnService() {
         }
     }
 
-     private suspend fun runDnsInterceptor(pfd: ParcelFileDescriptor) {
-        val inputStream = FileInputStream(pfd.fileDescriptor)
-        val outputStream = FileOutputStream(pfd.fileDescriptor)
-
-        try {
-            val upstreamDns = InetSocketAddress("1.1.1.1", 53)
-            val dnsChannel = DatagramChannel.open()
-           
-            if (!protect(dnsChannel.socket())) {
-                Log.e(TAG, "⚠️ Socket-Schutz fehlgeschlagen")
-            }
-            dnsChannel.configureBlocking(false)
-            dnsChannel.connect(upstreamDns)
-
-            // --- COROUTINE 1: Nur DNS-Anfragen (UDP Port 53) filtern und senden ---
-            serviceScope.launch(Dispatchers.IO) {
-                val buffer = ByteBuffer.allocate(32767)
-                while (serviceScope.isActive) {
-                    try {
-                        buffer.clear()
-                        val length = inputStream.read(buffer.array())
-                        if (length > 28) { // Mindestlänge für IP+UDP Header
-                            val packet = buffer.array()
-                            
-                            // Prüfen ob es sich wirklich um UDP handelt (Protocol 17 an Byte 9 bei IPv4)
-                            val protocol = packet[9].toInt() and 0xFF
-                            if (protocol == 17) { // 17 = UDP
-                                // Zielport prüfen (muss Port 53 sein = DNS)
-                                val ihl = (packet[0].toInt() and 0x0F) * 4
-                                val destinationPort = ((packet[ihl + 2].toInt() and 0xFF) shl 8) or (packet[ihl + 3].toInt() and 0xFF)
-                                
-                                if (destinationPort == 53) {
-                                    // Echte DNS-Anfrage -> An Cloudflare weiterleiten
-                                    val targetBuffer = ByteBuffer.wrap(packet, 0, length)
-                                    dnsChannel.write(targetBuffer)
-                                }
-                            }
-                        }
-                    } catch (e: Exception) {
-                        delay(100)
-                    }
-                }
-            }
-
-            // --- COROUTINE 2: DNS-Antworten empfangen und zurückschreiben ---
-            serviceScope.launch(Dispatchers.IO) {
-                val responseBuffer = ByteBuffer.allocate(32767)
-                while (serviceScope.isActive) {
-                    try {
-                        responseBuffer.clear()
-                        val responseLength = dnsChannel.read(responseBuffer)
-                        if (responseLength > 0) {
-                            outputStream.write(responseBuffer.array(), 0, responseLength)
-                        } else {
-                            delay(10)
-                        }
-                    } catch (e: Exception) {
-                        delay(100)
-                    }
-                }
-            }
-
-            while (serviceScope.isActive) {
-                delay(1000)
-            }
-
-        } catch (e: Exception) {
-            Log.e(TAG, "⚠️ Schwerwiegender Interceptor-Fehler: ${e.message}")
-        }
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         serviceJob.cancel()
@@ -263,4 +192,5 @@ class JuarisVpnService : VpnService() {
         }
     }
 }
+
 
