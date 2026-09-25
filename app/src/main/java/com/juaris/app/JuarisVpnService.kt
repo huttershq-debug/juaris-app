@@ -153,7 +153,7 @@ class JuarisVpnService : VpnService() {
                 }
             }
 
-            // --- COROUTINE 2: Upstream DNS -> Handy ---
+            // --- COROUTINE 2: Upstream DNS -> Handy (Sauber mit ByteBuffer) ---
             serviceScope.launch(Dispatchers.IO) {
                 val responseBuffer = ByteBuffer.allocate(32767)
                 while (serviceScope.isActive) {
@@ -167,44 +167,30 @@ class JuarisVpnService : VpnService() {
 
                             val totalLen = 20 + 8 + dnsData.size
                             val responsePacket = ByteArray(totalLen)
+                            val bb = ByteBuffer.wrap(responsePacket)
 
-                            // IPv4 Header
-                            responsePacket[0] = 0x45.toByte()
-                            responsePacket[1] = 0x00.toByte()
-                            responsePacket[2] = (totalLen shr 8).toByte()
-                            responsePacket[3] = (totalLen and 0xFF).toByte()
-                            responsePacket[4] = 0x00.toByte()
-                            responsePacket[5] = 0x01.toByte()
-                            responsePacket[6] = 0x00.toByte()
-                            responsePacket[7] = 0x00.toByte()
-                            responsePacket[8] = 64.toByte()
-                            responsePacket[9] = 17.toByte()
-                            
-                            responsePacket[10] = 0.toByte()
-                            responsePacket[11] = 0.toByte()
-
-                            responsePacket[12] = 10.toByte()
-                            responsePacket[13] = 0.toByte()
-                            responsePacket[14] = 0.toByte()
-                            responsePacket[15] = 2.toByte()
-                            responsePacket[16] = 10.toByte()
-                            responsePacket[17] = 0.toByte()
-                            responsePacket[18] = 0.toByte()
-                            responsePacket[19] = 2.toByte()
+                            // IPv4 Header via ByteBuffer befüllen
+                            bb.put(0x45.toByte())
+                            bb.put(0x00.toByte())
+                            bb.putShort(totalLen.toShort())
+                            bb.putShort(1.toShort())
+                            bb.putShort(0.toShort())
+                            bb.put(64.toByte())
+                            bb.put(17.toByte())
+                            bb.putShort(0.toShort())
+                            bb.putInt(0x0A000002)
+                            bb.putInt(0x0A000002)
 
                             // UDP Header
-                            responsePacket[20] = 0.toByte()
-                            responsePacket[21] = 53.toByte()
-                            responsePacket[22] = 0.toByte()
-                            responsePacket[23] = 53.toByte()
-                            val udpLen = 8 + dnsData.size
-                            responsePacket[24] = (udpLen shr 8).toByte()
-                            responsePacket[25] = (udpLen and 0xFF).toByte()
-                            responsePacket[26] = 0.toByte()
-                            responsePacket[27] = 0.toByte()
+                            bb.putShort(53.toShort())
+                            bb.putShort(53.toShort())
+                            bb.putShort((8 + dnsData.size).toShort())
+                            bb.putShort(0.toShort())
 
-                            System.arraycopy(dnsData, 0, responsePacket, 28, dnsData.size)
+                            // DNS Payload
+                            bb.put(dnsData)
 
+                            // Korrekte IP-Prüfsumme berechnen und eintragen
                             val checksum = calculateIpChecksum(responsePacket, 20)
                             responsePacket[10] = (checksum.toInt() shr 8).toByte()
                             responsePacket[11] = (checksum.toInt() and 0xFF).toByte()
