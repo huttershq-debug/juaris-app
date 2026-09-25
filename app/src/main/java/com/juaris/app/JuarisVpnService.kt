@@ -106,14 +106,14 @@ class JuarisVpnService : VpnService() {
         try {
             val upstreamDns = InetSocketAddress("1.1.1.1", 53)
             val dnsChannel = DatagramChannel.open()
-           
+
             if (!protect(dnsChannel.socket())) {
                 Log.e(TAG, "⚠️ Socket-Schutz fehlgeschlagen")
             }
             dnsChannel.configureBlocking(false)
             dnsChannel.connect(upstreamDns)
 
-            // --- COROUTINE 1: Handy -> Internet (Mit Pass-Through für normales Internet) ---
+            // --- COROUTINE 1: Handy -> Upstream DNS (DNS abfangen) ---
             serviceScope.launch(Dispatchers.IO) {
                 val buffer = ByteBuffer.allocate(32767)
                 while (serviceScope.isActive) {
@@ -124,27 +124,26 @@ class JuarisVpnService : VpnService() {
                             val packet = buffer.array()
                             val version = (packet[0].toInt() and 0xF0) ushr 4
                             var isDnsQuery = false
+                            var ipHeaderLen = 20
 
                             if (version == 4 && length > 20) {
-                                val ihl = (packet[0].toInt() and 0x0F) * 4
+                                ipHeaderLen = (packet[0].toInt() and 0x0F) * 4
                                 val protocol = packet[9].toInt() and 0xFF
-                                if (protocol == 17 && length >= ihl + 4) {
-                                    val destPort = ((packet[ihl + 2].toInt() and 0xFF) shl 8) or (packet[ihl + 3].toInt() and 0xFF)
-                                    if (destPort == 53) isDnsQuery = true
-                                }
-                            } else if (version == 6 && length > 40) {
-                                val nextHeader = packet[6].toInt() and 0xFF
-                                if (nextHeader == 17 && length >= 44) {
-                                    val destPort = ((packet[40 + 2].toInt() and 0xFF) shl 8) or (packet[40 + 3].toInt() and 0xFF)
+                                if (protocol == 17 && length >= ipHeaderLen + 8) {
+                                    val destPort = ((packet[ipHeaderLen + 2].toInt() and 0xFF) shl 8) or (packet[ipHeaderLen + 3].toInt() and 0xFF)
                                     if (destPort == 53) isDnsQuery = true
                                 }
                             }
 
                             if (isDnsQuery) {
-                                val targetBuffer = ByteBuffer.wrap(packet, 0, length)
-                                dnsChannel.write(targetBuffer)
+                                val udpHeaderOffset = ipHeaderLen
+                                val dnsPayloadOffset = udpHeaderOffset + 8
+                                if (length > dnsPayloadOffset) {
+                                    val dnsPayloadLen = length - dnsPayloadOffset
+                                    val targetBuffer = ByteBuffer.wrap(packet, dnsPayloadOffset, dnsPayloadLen)
+                                    dnsChannel.write(targetBuffer)
+                                }
                             } else {
-                                // Alle anderen Pakete (Bilder, Web, Apps) direkt durchlassen
                                 outputStream.write(packet, 0, length)
                             }
                         }
@@ -154,7 +153,7 @@ class JuarisVpnService : VpnService() {
                 }
             }
 
-            // --- COROUTINE 2: Internet -> Handy (DNS Antworten) ---
+            // --- COROUTINE 2: Upstream DNS -> Handy (DNS-Antworten zurückschreiben!) ---
             serviceScope.launch(Dispatchers.IO) {
                 val responseBuffer = ByteBuffer.allocate(32767)
                 while (serviceScope.isActive) {
@@ -162,12 +161,47 @@ class JuarisVpnService : VpnService() {
                         responseBuffer.clear()
                         val responseLength = dnsChannel.read(responseBuffer)
                         if (responseLength > 0) {
-                            delay(5)
+                            val dnsData = ByteArray(responseLength)
+                            responseBuffer.flip()
+                            responseBuffer.get(dnsData)
+
+                            // IP- und UDP-Paket für die Antwort an das Handy konstruieren
+                            val totalLen = 20 + 8 + dnsData.size
+                            val responsePacket = ByteArray(totalLen)
+
+                            // IPv4 Header
+                            responsePacket[0] = 0x45
+                            responsePacket[1] = 0x00
+                            responsePacket[2] = (totalLen shr 8).toByte()
+                            responsePacket[3] = (totalLen and 0xFF).toByte()
+                            responsePacket[4] = 0x00; responsePacket[5] = 0x01
+                            responsePacket[6] = 0x00; responsePacket[7] = 0x00
+                            responsePacket[8] = 64
+                            responsePacket[9] = 17 // UDP
+                            responsePacket[10] = 0; responsePacket[11] = 0
+
+                            // IPs (Loopback/Tunnel-IPs)
+                            responsePacket[12] = 10; responsePacket[13] = 0; responsePacket[14] = 0; responsePacket[15] = 2
+                            responsePacket[16] = 10; responsePacket[17] = 0; responsePacket[18] = 0; responsePacket[19] = 2
+
+                            // UDP Header
+                            responsePacket[20] = 0; responsePacket[21] = 53
+                            responsePacket[22] = 0; responsePacket[23] = 53
+                            val udpLen = 8 + dnsData.size
+                            responsePacket[24] = (udpLen shr 8).toByte()
+                            responsePacket[25] = (udpLen and 0xFF).toByte()
+                            responsePacket[26] = 0; responsePacket[27] = 0
+
+                            // DNS Payload einfügen
+                            System.arraycopy(dnsData, 0, responsePacket, 28, dnsData.size)
+
+                            // WICHTIG: Antwort zurück an das System senden!
+                            outputStream.write(responsePacket, 0, totalLen)
                         } else {
                             delay(10)
                         }
                     } catch (e: Exception) {
-                        delay(50)
+                        delay(20)
                     }
                 }
             }
