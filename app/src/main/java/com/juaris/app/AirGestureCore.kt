@@ -15,7 +15,6 @@ class AirGestureCore(private val context: Context) {
     private var cameraProvider: ProcessCameraProvider? = null
     private val analysisExecutor = Executors.newSingleThreadExecutor()
 
-    // Einzig notwendige Aktion: Jede Handbewegung triggert exakt einen Schritt
     enum class GestureAction {
         NONE, TRIGGERED
     }
@@ -50,7 +49,8 @@ class AirGestureCore(private val context: Context) {
             .build()
 
         var lastLuminance = 0.0
-        var coolDownFrames = 0 // Sperrzeit auf ~1.2 - 1.3 Sekunden angepasst (40 Frames)
+        var coolDownFrames = 0
+        var consecutiveTriggers = 0 // Multi-Frame Validierung gegen Schatten/Fehlalarme
 
         imageAnalysis.setAnalyzer(analysisExecutor) { imageProxy ->
             try {
@@ -65,10 +65,16 @@ class AirGestureCore(private val context: Context) {
                     val delta = currentLuminance - lastLuminance
                     onDebugInfo("Sensor aktiv | Delta: %.1f".format(delta))
 
-                    // Löst bei jeder starken Helligkeitsänderung (Schattenwurf vor Linse) aus
-                    if (abs(delta) > 12.0) {
-                        onGestureDetected(GestureAction.TRIGGERED)
-                        coolDownFrames = 40 // ca. 1,2 bis 1,3 Sekunden Pause
+                    // Striktere Prüfung: Verlangt echte plötzliche Helligkeitsänderung
+                    if (abs(delta) > 15.0) {
+                        consecutiveTriggers++
+                        if (consecutiveTriggers >= 2) { // Muss über 2 Frames bestätigt werden
+                            onGestureDetected(GestureAction.TRIGGERED)
+                            coolDownFrames = 50 // ca. 1.5 Sekunden Cooldown
+                            consecutiveTriggers = 0
+                        }
+                    } else {
+                        consecutiveTriggers = (consecutiveTriggers - 1).coerceAtLeast(0)
                     }
                 }
                 lastLuminance = currentLuminance
