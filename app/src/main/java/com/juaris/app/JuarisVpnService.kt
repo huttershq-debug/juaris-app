@@ -153,7 +153,7 @@ class JuarisVpnService : VpnService() {
                 }
             }
 
-            // --- COROUTINE 2: Upstream DNS -> Handy (100% Syntax-sicher) ---
+            // --- COROUTINE 2: Upstream DNS -> Handy (High-Performance Direct Indexing) ---
             serviceScope.launch(Dispatchers.IO) {
                 val responseBuffer = ByteBuffer.allocate(32767)
                 while (serviceScope.isActive) {
@@ -168,59 +168,55 @@ class JuarisVpnService : VpnService() {
                             val totalLen = 20 + 8 + dnsData.size
                             val responsePacket = ByteArray(totalLen)
 
-                            // IPv4 Header (20 Bytes) direkt belegen
-                            responsePacket[0] = 0x45.toByte()
-                            responsePacket[1] = 0x00.toByte()
+                            // 1. IPv4 Header (20 Bytes)
+                            responsePacket[0] = 0x45.toByte() // Version 4, IHL 5
+                            responsePacket[1] = 0x00.toByte() // TOS / DSCP
+                            responsePacket[2] = (totalLen shr 8).toByte()
+                            responsePacket[3] = (totalLen and 0xFF).toByte()
+                            responsePacket[4] = 0x00.toByte()
+                            responsePacket[5] = 0x01.toByte()
+                            responsePacket[6] = 0x00.toByte()
+                            responsePacket[7] = 0x00.toByte()
+                            responsePacket[8] = 64.toByte() // TTL
+                            responsePacket[9] = 17.toByte() // Protocol: UDP
 
-                            val totalLenShort = totalLen.toShort()
-                            responsePacket[2] = (totalLenShort.toInt() shr 8).toByte()
-                            responsePacket[3] = (totalLenShort.toInt() and 0xFF).toByte()
-
-                            responsePacket[4] = 0x00
-                            responsePacket[5] = 0x01
-                            responsePacket[6] = 0x00
-                            responsePacket[7] = 0x00
-                            responsePacket[8] = 64
-                            responsePacket[9] = 17 // UDP Protokoll
-
-                            // Prüfsummen-Platzhalter
-                            responsePacket[10] = 0x00
-                            responsePacket[11] = 0x00
+                            // Platzhalter Prüfsumme (wird gleich berechnet)
+                            responsePacket[10] = 0x00.toByte()
+                            responsePacket[11] = 0x00.toByte()
 
                             // Source IP: 10.0.0.2
-                            responsePacket[12] = 10
-                            responsePacket[13] = 0
-                            responsePacket[14] = 0
-                            responsePacket[15] = 2
+                            responsePacket[12] = 10.toByte()
+                            responsePacket[13] = 0.toByte()
+                            responsePacket[14] = 0.toByte()
+                            responsePacket[15] = 2.toByte()
 
-                            // Dest IP: 10.0.0.2
-                            responsePacket[16] = 10
-                            responsePacket[17] = 0
-                            responsePacket[18] = 0
-                            responsePacket[19] = 2
+                            // Destination IP: 10.0.0.2
+                            responsePacket[16] = 10.toByte()
+                            responsePacket[17] = 0.toByte()
+                            responsePacket[18] = 0.toByte()
+                            responsePacket[19] = 2.toByte()
 
-                            // IP-Prüfsumme berechnen und eintragen
+                            // Echte IP-Prüfsumme berechnen und eintragen
                             val checksum = calculateIpChecksum(responsePacket, 20)
-                            val csInt = checksum.toInt()
-                            responsePacket[10] = (csInt ushr 8).toByte()
-                            responsePacket[11] = (csInt and 0xFF).toByte()
+                            responsePacket[10] = (checksum.toInt() ushr 8).toByte()
+                            responsePacket[11] = (checksum.toInt() and 0xFF).toByte()
 
-                            // UDP Header (8 Bytes ab Index 20)
-                            responsePacket[20] = 0x00
-                            responsePacket[21] = 53 // Source Port 53
-                            responsePacket[22] = 0x00
-                            responsePacket[23] = 53 // Dest Port 53
+                            // 2. UDP Header (8 Bytes)
+                            responsePacket[20] = 0x00.toByte() // Source Port High (53)
+                            responsePacket[21] = 53.toByte() // Source Port Low
+                            responsePacket[22] = 0x00.toByte() // Dest Port High (53)
+                            responsePacket[23] = 53.toByte() // Dest Port Low
 
-                            val udpLen = (8 + dnsData.size).toShort()
-                            responsePacket[24] = (udpLen.toInt() ushr 8).toByte()
-                            responsePacket[25] = (udpLen.toInt() and 0xFF).toByte()
+                            val udpLen = 8 + dnsData.size
+                            responsePacket[24] = (udpLen shr 8).toByte()
+                            responsePacket[25] = (udpLen and 0xFF).toByte()
+                            responsePacket[26] = 0x00.toByte() // UDP Checksum (optional bei IPv4)
+                            responsePacket[27] = 0x00.toByte()
 
-                            responsePacket[26] = 0x00
-                            responsePacket[27] = 0x00 // UDP Checksum
-
-                            // DNS Payload kopieren
+                            // 3. DNS Payload anhängen
                             System.arraycopy(dnsData, 0, responsePacket, 28, dnsData.size)
 
+                            // An das VPN-Interface übergeben
                             outputStream.write(responsePacket, 0, totalLen)
                         } else {
                             delay(10)
