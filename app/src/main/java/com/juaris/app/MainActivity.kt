@@ -334,14 +334,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun startVpnServiceInternal() {
-        val vpnIntent = Intent(this, JuarisVpnService::class.java)
+     private fun startVpnServiceInternal() {
+        val intent = Intent(this, JuarisVpnService::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(vpnIntent)
+            startForegroundService(intent)
         } else {
-            startService(vpnIntent)
+            startService(intent)
         }
+        Toast.makeText(this, "Juaris DNS-Shield Firewall gestartet!", Toast.LENGTH_SHORT).show()
     }
+}
 
     private fun requestCallScreeningRoleIfNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
