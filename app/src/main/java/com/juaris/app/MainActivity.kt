@@ -303,7 +303,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Zukunftssicherer Biometrie-Aufruf über den JuarisBiometricManager
     private fun launchBiometricVaultAuthentication(onSuccess: () -> Unit) {
         val biometricManager = JuarisBiometricManager(this)
         biometricManager.authenticateUser(
@@ -391,9 +390,7 @@ class MainActivity : AppCompatActivity() {
             try { unregisterReceiver(it) } catch (e: Exception) {}
         }
     }
-} // <--- Hier schließt MainActivity absolut sauber ab!
-
-// Ab hier folgen die externen Top-Level Helper & Composables:
+}
 
 private fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
@@ -506,7 +503,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                 Text(text = "Abo starten (Google Play Billing)", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.Black)
             }
 
-            if (com.juaris.app.BuildConfig.DEBUG) {
+            if (BuildConfig.DEBUG) {
                 Spacer(modifier = Modifier.height(24.dp))
                 OutlinedButton(
                     onClick = { onLoginSuccess() },
@@ -1266,4 +1263,3 @@ fun PrivacyAndLegalContent() {
         }
     }
 }
-
