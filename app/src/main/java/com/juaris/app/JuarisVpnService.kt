@@ -79,7 +79,7 @@ class JuarisVpnService : VpnService() {
                 .addAddress("10.0.0.2", 24)
                 .addDnsServer("10.0.0.2")
                 .addDisallowedApplication(packageName)
-                .setMtu(1500) // Wichtig für Mobilfunk (LTE/5G)
+                .setMtu(1500)
 
             vpnInterface = builder.establish()
 
@@ -113,7 +113,7 @@ class JuarisVpnService : VpnService() {
             dnsChannel.configureBlocking(false)
             dnsChannel.connect(upstreamDns)
 
-            // --- COROUTINE 1: Handy -> Internet (Mit Pass-Through für normales Internet!) ---
+            // --- COROUTINE 1: Handy -> Internet (Mit Pass-Through für normales Internet) ---
             serviceScope.launch(Dispatchers.IO) {
                 val buffer = ByteBuffer.allocate(32767)
                 while (serviceScope.isActive) {
@@ -144,7 +144,7 @@ class JuarisVpnService : VpnService() {
                                 val targetBuffer = ByteBuffer.wrap(packet, 0, length)
                                 dnsChannel.write(targetBuffer)
                             } else {
-                                // 🚀 KRITISCH: Alle anderen Pakete (Bilder, Web, Apps) sofort durchlassen!
+                                // Alle anderen Pakete (Bilder, Web, Apps) direkt durchlassen
                                 outputStream.write(packet, 0, length)
                             }
                         }
@@ -162,11 +162,10 @@ class JuarisVpnService : VpnService() {
                         responseBuffer.clear()
                         val responseLength = dnsChannel.read(responseBuffer)
                         if (responseLength > 0) {
-                            // Hier fließen die DNS-Antworten zurück
                             delay(5)
                         } else {
                             delay(10)
-                        } Bereinigungs-Delay
+                        }
                     } catch (e: Exception) {
                         delay(50)
                     }
