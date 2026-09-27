@@ -48,9 +48,10 @@ class EmailScanWorker(appContext: Context, workerParams: WorkerParameters) : Wor
                     db.securityLogDao().insertLog(
                         SecurityLogEntity(
                             timestamp = System.currentTimeMillis(),
+                            status = "BLOCKED",
                             module = "E-Mail-Heuristik",
-                            description = "Phishing-Mail blockiert von $sender",
-                            status = "BLOCKED"
+                            description = "Phishing-Mail blockiert von Absender: $sender",
+                            details = "Betreff: $subject"
                         )
                     )
                 }
@@ -65,9 +66,10 @@ class EmailScanWorker(appContext: Context, workerParams: WorkerParameters) : Wor
                     db.securityLogDao().insertLog(
                         SecurityLogEntity(
                             timestamp = System.currentTimeMillis(),
+                            status = "IMPORTANT",
                             module = "E-Mail-Fristen-Wächter",
-                            description = "Wichtiges Dokument/Frist von $sender: $subject",
-                            status = "IMPORTANT"
+                            description = "Wichtiges Dokument / Frist erkannt",
+                            details = "Absender: $sender | Betreff: $subject"
                         )
                     )
                 }
@@ -111,4 +113,5 @@ class EmailScanWorker(appContext: Context, workerParams: WorkerParameters) : Wor
         notificationManager.notify(System.currentTimeMillis().toInt(), notification)
     }
 }
+
 
