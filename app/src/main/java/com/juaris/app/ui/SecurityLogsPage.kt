@@ -1,11 +1,13 @@
 package com.juaris.app.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.juaris.app.SecurityLogDao
 import java.text.SimpleDateFormat
@@ -23,12 +25,12 @@ fun SecurityLogsPage(logDao: SecurityLogDao) {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "Sicherheits-Logs & Ereignisse",
+            text = "Life-Hub & Sicherheits-Logs",
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.primary
         )
         Text(
-            text = "Hier siehst du alle protokollierten Sicherheitsvorfälle und Blockierungen deines Geräts (100% lokal).",
+            text = "Hier siehst du alle blockierten Bedrohungen sowie deine wichtigen Kalender-Einträge, Geburtstage und Fristen (100% lokal).",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -39,7 +41,7 @@ fun SecurityLogsPage(logDao: SecurityLogDao) {
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Text(
-                    text = "Keine Sicherheits-Ereignisse protokolliert. Dein Gerät ist sicher!",
+                    text = "Keine Einträge vorhanden. Dein Alltags- und Schutz-Hub ist bereit!",
                     modifier = Modifier.padding(16.dp),
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -50,15 +52,26 @@ fun SecurityLogsPage(logDao: SecurityLogDao) {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(logs) { log ->
+                    // Visuelle Unterscheidung nach Status
+                    val isImportant = log.status == "IMPORTANT"
+                    val isBlocked = log.status == "BLOCKED" || log.status == "QUARANTINE"
+
+                    val borderColor = when {
+                        isImportant -> Color(0xFFFFD700) // Edles Gold für Geburtstage, Hochzeitstage & Fristen
+                        isBlocked -> Color(0xFFFF3333) // Rot für Blockaden
+                        else -> NeonGiftgruen // Grün für normale Statusmeldungen
+                    }
+
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                        border = BorderStroke(1.dp, borderColor.copy(alpha = 0.5f))
                     ) {
                         Column(
                             modifier = Modifier.padding(16.dp),
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            // Kopfzeile: Modul & Status
+                            // Kopfzeile: Modul & Status-Badge
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
@@ -66,39 +79,42 @@ fun SecurityLogsPage(logDao: SecurityLogDao) {
                                 Text(
                                     text = "Modul: ${log.module}",
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = NeonGiftgruen
                                 )
-                                Text(
-                                    text = log.status,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = if (log.status == "BLOCKED" || log.status == "QUARANTINE")
-                                        MaterialTheme.colorScheme.error
-                                    else
-                                        MaterialTheme.colorScheme.secondary
-                                )
+                                Surface(
+                                    shape = MaterialTheme.shapes.small,
+                                    color = borderColor.copy(alpha = 0.2f)
+                                ) {
+                                    Text(
+                                        text = log.status,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = borderColor
+                                    )
+                                }
                             }
 
-                            // Hauptbeschreibung
+                            // Hauptbeschreibung (z.B. "🎂 Geburtstag heute!")
                             Text(
                                 text = log.description,
                                 style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = Color.White
                             )
 
-                            // Zusätzliche Details (falls vorhanden)
+                            // Zusätzliche Details (z.B. Ereignis-Name & Notizen)
                             if (!log.details.isNullOrBlank()) {
                                 Text(
-                                    text = "Details: ${log.details}",
+                                    text = log.details,
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = Color(0xFFB0BEC5)
                                 )
                             }
 
-                            // Zeitstempel am Ende
+                            // Zeitstempel
                             Text(
                                 text = SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault()).format(Date(log.timestamp)),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = Color.Gray
                             )
                         }
                     }
@@ -107,4 +123,3 @@ fun SecurityLogsPage(logDao: SecurityLogDao) {
         }
     }
 }
-
