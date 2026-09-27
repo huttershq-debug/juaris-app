@@ -9,5 +9,8 @@ data class SecurityLogEntity(
     val id: Long = 0,
     val timestamp: Long,
     val status: String,
+    val module: String,
+    val description: String,
     val details: String
 )
+
