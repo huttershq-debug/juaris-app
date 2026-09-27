@@ -1,12 +1,20 @@
 package com.juaris.app
 
-import android.os.Build
 import android.net.Uri
+import android.os.Build
 import android.provider.ContactsContract
 import android.telecom.Call
 import android.telecom.CallScreeningService
+import androidx.annotation.RequiresApi
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.N)
 class ScamCallScreeningService : CallScreeningService() {
+
+    private val scope = CoroutineScope(Dispatchers.IO)
+
     override fun onScreenCall(callDetails: Call.Details) {
         // Nur eingehende Anrufe prüfen (API-Check für getCallDirection ab API 29)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -17,14 +25,29 @@ class ScamCallScreeningService : CallScreeningService() {
         }
 
         val phoneNumber = callDetails.handle?.schemeSpecificPart
+        val securityEngine = SecurityEngine(applicationContext)
+        val db = JuarisDatabase.getDatabase(applicationContext)
+
         if (phoneNumber.isNullOrEmpty()) {
-            // Unterdrückte / private Nummern ohne Kennung behandeln
+            // Unterdrückte / private Nummern ohne Kennung hart abwehren und loggen
             val response = CallResponse.Builder()
                 .setRejectCall(true)
                 .setSkipCallLog(false)
                 .setSkipNotification(false)
                 .build()
             respondToCall(callDetails, response)
+
+            scope.launch {
+                db.securityLogDao().insertLog(
+                    SecurityLogEntity(
+                        timestamp = System.currentTimeMillis(),
+                        status = "BLOCKED",
+                        module = "Anruf-Schutz",
+                        description = "Unterdrückte/anonyme Nummer blockiert",
+                        details = "Keine Rufnummer vom Provider übermittelt"
+                    )
+                )
+            }
             return
         }
 
@@ -34,15 +57,35 @@ class ScamCallScreeningService : CallScreeningService() {
             return
         }
 
-        // 2. LOKALE BETRUGSERKENNUNG (100% On-Device, ohne Cloud)
-        if (isLocalFraudDetected(phoneNumber)) {
-            // Zero-Ring-Drop: Kein Klingeln, kein Ton, wird sofort hart abgewehrt
+        // 2. Blacklist-Prüfung über die SecurityEngine
+        val isExplicitlyBlocked = securityEngine.isNumberBlocked(phoneNumber)
+
+        // 3. Lokale Betrugsheuristik (Risiko-Vorwahlen, unnatürliche Länge)
+        val isFraudDetected = isLocalFraudDetected(phoneNumber)
+
+        if (isExplicitlyBlocked || isFraudDetected) {
             val response = CallResponse.Builder()
+                .setDisallowCall(true)
                 .setRejectCall(true)
                 .setSkipCallLog(false)
-                .setSkipNotification(true)
+                .setSkipNotification(false)
                 .build()
+
             respondToCall(callDetails, response)
+
+            val reasonDesc = if (isExplicitlyBlocked) "Nummer steht auf der manuellen Sperrliste" else "Lokale Betrugsheuristik (Risiko-Vorwahl oder Länge)"
+            
+            scope.launch {
+                db.securityLogDao().insertLog(
+                    SecurityLogEntity(
+                        timestamp = System.currentTimeMillis(),
+                        status = "BLOCKED",
+                        module = "Anruf-Schutz",
+                        description = "Spam-/Betrugsanruf blockiert",
+                        details = "Rufnummer: $phoneNumber | Grund: $reasonDesc"
+                    )
+                )
+            }
         } else {
             // Unbekannt, aber unauffällig -> normal durchlassen
             respondToCall(callDetails, CallResponse.Builder().setDisallowCall(false).build())
@@ -66,7 +109,7 @@ class ScamCallScreeningService : CallScreeningService() {
     private fun isLocalFraudDetected(phoneNumber: String): Boolean {
         val cleanNumber = phoneNumber.replace(Regex("[^\\d+]"), "")
 
-        // Lokale Heuristik für bekannte Risiko-Vorwahlen (z.B. Zypern +357 oder ähnliche Spam-Fälle)
+        // Lokale Heuristik für bekannte Risiko-Vorwahlen (z.B. Zypern +357, Tunesien +216, Kongo +243)
         val highRiskPrefixes = listOf("+357", "+216", "+243")
         if (highRiskPrefixes.any { cleanNumber.startsWith(it) }) {
             return true
