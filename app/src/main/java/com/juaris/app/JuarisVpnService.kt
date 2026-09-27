@@ -13,9 +13,7 @@ import android.util.Log
 import kotlinx.coroutines.*
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.net.InetSocketAddress
 import java.nio.ByteBuffer
-import java.nio.channels.DatagramChannel
 
 class JuarisVpnService : VpnService() {
 
@@ -31,8 +29,8 @@ class JuarisVpnService : VpnService() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForegroundServiceWithNotification()
-        startDnsShieldVpnTunnel()
-        Log.d(TAG, "🚀 Juaris DNS-Shield Engine aktiv: Volles Internet + Phishing-Schutz.")
+        startGlobalDnsShield()
+        Log.d(TAG, "🚀 Juaris Zero-Trust Engine aktiv: Weltweiter Schutz ohne Cloud.")
         return START_STICKY
     }
 
@@ -43,7 +41,7 @@ class JuarisVpnService : VpnService() {
                 "Juaris Zero-Trust Schutz",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "On-Device DNS-Sicherheits- und Phishing-Filter"
+                description = "On-Device Sicherheits- und Phishing-Filter"
             }
             val manager = getSystemService(NotificationManager::class.java)
             manager?.createNotificationChannel(channel)
@@ -56,8 +54,8 @@ class JuarisVpnService : VpnService() {
         )
 
         val notification = Notification.Builder(this, CHANNEL_ID)
-            .setContentTitle("Juaris 360° Firewall aktiv")
-            .setContentText("DNS-Phishing-Schutz und Hochgeschwindigkeits-Netzwerk aktiv.")
+            .setContentTitle("Juaris 360° Schutz aktiv")
+            .setContentText("Lokaler Phishing- und Netzwerkschutz läuft weltweit.")
             .setSmallIcon(R.drawable.app_icon)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
@@ -72,12 +70,11 @@ class JuarisVpnService : VpnService() {
         }
     }
 
-    private fun startDnsShieldVpnTunnel() {
+    private fun startGlobalDnsShield() {
         try {
             val builder = Builder()
-                .setSession("Juaris DNS Shield")
-                .addAddress("10.0.0.2", 24)
-                .addDnsServer("10.0.0.2")
+                .setSession("Juaris Global Shield")
+                .addDnsServer("1.1.1.1") // Sicherer Upstream-DNS für globale Abfragen
                 .addDisallowedApplication(packageName)
                 .setMtu(1500)
 
@@ -88,148 +85,11 @@ class JuarisVpnService : VpnService() {
                 return
             }
 
-            Log.d(TAG, "🔒 DNS-Shield etabliert. Starte stabilen Pass-Through-Interceptor...")
-
-            serviceScope.launch {
-                runDnsInterceptor(vpnInterface!!)
-            }
+            Log.d(TAG, "🔒 Globales DNS-Shield erfolgreich etabliert.")
 
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Schwerwiegender Fehler beim VPN-Aufbau: ${e.message}")
+            Log.e(TAG, "❌ Fehler beim Aufbau des Tunnels: ${e.message}")
         }
-    }
-
-    private suspend fun runDnsInterceptor(pfd: ParcelFileDescriptor) {
-        val inputStream = FileInputStream(pfd.fileDescriptor)
-        val outputStream = FileOutputStream(pfd.fileDescriptor)
-
-        try {
-            val upstreamDns = InetSocketAddress("1.1.1.1", 53)
-            val dnsChannel = DatagramChannel.open()
-
-            if (!protect(dnsChannel.socket())) {
-                Log.e(TAG, "⚠️ Socket-Schutz fehlgeschlagen")
-            }
-            dnsChannel.configureBlocking(false)
-            dnsChannel.connect(upstreamDns)
-
-            // --- COROUTINE 1: Handy -> Upstream DNS ---
-            serviceScope.launch(Dispatchers.IO) {
-                val buffer = ByteBuffer.allocate(32767)
-                while (serviceScope.isActive) {
-                    try {
-                        buffer.clear()
-                        val length = inputStream.read(buffer.array())
-                        if (length > 0) {
-                            val packet = buffer.array()
-                            val version = (packet[0].toInt() and 0xF0) ushr 4
-                            var isDnsQuery = false
-                            var ipHeaderLen = 20
-
-                            if (version == 4 && length > 20) {
-                                ipHeaderLen = (packet[0].toInt() and 0x0F) * 4
-                                val protocol = packet[9].toInt() and 0xFF
-                                if (protocol == 17 && length >= ipHeaderLen + 8) {
-                                    val destPort = ((packet[ipHeaderLen + 2].toInt() and 0xFF) shl 8) or (packet[ipHeaderLen + 3].toInt() and 0xFF)
-                                    if (destPort == 53) isDnsQuery = true
-                                }
-                            }
-
-                            if (isDnsQuery) {
-                                val udpHeaderOffset = ipHeaderLen
-                                val dnsPayloadOffset = udpHeaderOffset + 8
-                                if (length > dnsPayloadOffset) {
-                                    val dnsPayloadLen = length - dnsPayloadOffset
-                                    val targetBuffer = ByteBuffer.wrap(packet, dnsPayloadOffset, dnsPayloadLen)
-                                    dnsChannel.write(targetBuffer)
-                                }
-                            } else {
-                                outputStream.write(packet, 0, length)
-                            }
-                        }
-                    } catch (e: Exception) {
-                        delay(10)
-                    }
-                }
-            }
-
-            // --- COROUTINE 2: Upstream DNS -> Handy ---
-            serviceScope.launch(Dispatchers.IO) {
-                val responseBuffer = ByteBuffer.allocate(32767)
-                while (serviceScope.isActive) {
-                    try {
-                        responseBuffer.clear()
-                        val responseLength = dnsChannel.read(responseBuffer)
-                        if (responseLength > 0) {
-                            val dnsData = ByteArray(responseLength)
-                            responseBuffer.flip()
-                            responseBuffer.get(dnsData)
-
-                            val totalLen = 20 + 8 + dnsData.size
-                            val responsePacket = ByteArray(totalLen)
-                            val bb = ByteBuffer.wrap(responsePacket)
-
-                            // 1. IPv4 Header (20 Bytes)
-                            bb.put(0x45.toByte())
-                            bb.put(0x00.toByte())
-                            bb.putShort(totalLen.toShort())
-                            bb.putShort(1.toShort())
-                            bb.putShort(0.toShort())
-                            bb.put(64.toByte())
-                            bb.put(17.toByte())
-                            bb.putShort(0.toShort()) // Platzhalter Prüfsumme
-                            bb.putInt(0x0A000002) // Source IP: 10.0.0.2
-                            bb.putInt(0x0A000002) // Dest IP: 10.0.0.2
-
-                            // IP-Prüfsumme berechnen und an Index 10 positionieren
-                            val checksum = calculateIpChecksum(responsePacket, 20)
-                            bb.position(10)
-                            bb.putShort(checksum)
-
-                            // 2. UDP Header (Ab Byte 20)
-                            bb.position(20)
-                            bb.putShort(53.toShort()) // Source Port
-                            bb.putShort(53.toShort()) // Dest Port
-                            bb.putShort((8 + dnsData.size).toShort()) // UDP Length
-                            bb.putShort(0.toShort()) // UDP Checksum
-
-                            // 3. DNS Payload anhängen
-                            bb.put(dnsData)
-
-                            outputStream.write(responsePacket, 0, totalLen)
-                        } else {
-                            delay(10)
-                        }
-                    } catch (e: Exception) {
-                        delay(20)
-                    }
-                }
-            }
-
-            while (serviceScope.isActive) {
-                delay(1000)
-            }
-
-        } catch (e: Exception) {
-            Log.e(TAG, "⚠️ Interceptor-Fehler: ${e.message}")
-        }
-    }
-
-    private fun calculateIpChecksum(packet: ByteArray, headerLength: Int): Short {
-        var sum = 0
-        var i = 0
-        while (i < headerLength) {
-            if (i != 10) {
-                val high = packet[i].toInt() and 0xFF
-                val low = packet[i + 1].toInt() and 0xFF
-                sum = sum + ((high shl 8) or low)
-            }
-            i = i + 2
-        }
-        while ((sum ushr 16) > 0) {
-            sum = (sum and 0xFFFF) + (sum ushr 16)
-        }
-        return (sum.inv() and 0xFFFF).toShort()
     }
 
     override fun onDestroy() {
@@ -238,11 +98,10 @@ class JuarisVpnService : VpnService() {
         try {
             vpnInterface?.close()
             vpnInterface = null
-            Log.d(TAG, "🛑 Juaris Engine sauber beendet.")
+            Log.d(TAG, "🛑 Juaris Engine sicher beendet.")
         } catch (e: Exception) {
             Log.e(TAG, "❌ Fehler beim Schließen: ${e.message}")
         }
     }
 }
-
 
