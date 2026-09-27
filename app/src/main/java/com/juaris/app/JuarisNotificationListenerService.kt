@@ -140,7 +140,7 @@ class JuarisNotificationListenerService : NotificationListenerService() {
                                 timestamp = System.currentTimeMillis(),
                                 module = "360°-Universal-Wächter",
                                 description = "Betrug in [${packageName.substringAfterLast('.')}] abgefangen: $title",
-                                status = "BLOCKED"
+                                status = "BLOCKED",
                                 details = "Automatisch abgefangene Benachrichtigungen von $packageName"
                             )
                         )
