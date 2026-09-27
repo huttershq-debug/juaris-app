@@ -98,6 +98,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+        private val calendarPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            Toast.makeText(this, "Kalender-Zugriff erlaubt! Fristen-Wächter aktiv.", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "Hinweis: Ohne Kalender-Zugriff kann Juaris Geburtstage nicht automatisch scannen.", Toast.LENGTH_LONG).show()
+        }
+    }
+
     private val vpnPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
