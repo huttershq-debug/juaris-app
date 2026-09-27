@@ -71,9 +71,9 @@ fun SecurityLogsPage(logDao: SecurityLogDao) {
                                 Text(
                                     text = log.status,
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = if (log.status == "BLOCKED" || log.status == "QUARANTINE") 
-                                        MaterialTheme.colorScheme.error 
-                                    else 
+                                    color = if (log.status == "BLOCKED" || log.status == "QUARANTINE")
+                                        MaterialTheme.colorScheme.error
+                                    else
                                         MaterialTheme.colorScheme.secondary
                                 )
                             }
@@ -107,5 +107,4 @@ fun SecurityLogsPage(logDao: SecurityLogDao) {
         }
     }
 }
-
 
