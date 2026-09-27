@@ -1,8 +1,3 @@
-
-Benedikt Wolfgang Hütter <hutters.hq@gmail.com>
-15:31 (vor 0 Minuten)
-an mich
-
 package com.juaris.app
 
 import android.app.NotificationChannel
