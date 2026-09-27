@@ -203,6 +203,22 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+         // Autonomen Kalender-Worker im Hintergrund registrieren
+        val calendarWorkRequest = androidx.work.PeriodicWorkRequestBuilder<CalendarScanWorker>(6, java.util.concurrent.TimeUnit.HOURS)
+            .setConstraints(
+                androidx.work.Constraints.Builder()
+                    .setRequiredNetworkType(androidx.work.NetworkType.NOT_REQUIRED) // 100% Offline!
+                    .build()
+            )
+            .build()
+
+        androidx.work.WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
+            "JuarisCalendarAutonomousScan",
+            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+            calendarWorkRequest
+        )
+
+
         val isListenerEnabled = Settings.Secure.getString(
             contentResolver,
             "enabled_notification_listeners"
