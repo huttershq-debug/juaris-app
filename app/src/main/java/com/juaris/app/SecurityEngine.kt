@@ -160,15 +160,16 @@ class SecurityEngine(private val context: Context) {
     /**
      * Protokolliert einen Sicherheitsvorfall direkt in der lokalen Room-Datenbank.
      */
-    suspend fun logThreatToDatabase(module: String, description: String, status: String) {
+     suspend fun logThreatToDatabase(module: String, description: String, status: String, details: String = "Lokale Heuristik-Prüfung aktiv") {
         withContext(Dispatchers.IO) {
             try {
                 val db = JuarisDatabase.getDatabase(context)
                 val logEntity = SecurityLogEntity(
                     timestamp = System.currentTimeMillis(),
+                    status = status,
                     module = module,
                     description = description,
-                    status = status
+                    details = details
                 )
                 db.securityLogDao().insertLog(logEntity)
             } catch (e: Exception) {
@@ -176,6 +177,7 @@ class SecurityEngine(private val context: Context) {
             }
         }
     }
+
 
     // Anruf- und SMS-Filter
     fun getBlockedNumbers(): Set<String> {
