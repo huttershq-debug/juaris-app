@@ -9,7 +9,7 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
-object JuarisLocalEngine {
+object SecurityEngine {
 
     private const val TAG = "JuarisLocalEngine"
     private const val ALGORITHM = "AES/GCM/NoPadding"
