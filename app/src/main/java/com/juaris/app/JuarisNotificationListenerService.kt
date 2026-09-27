@@ -141,6 +141,7 @@ class JuarisNotificationListenerService : NotificationListenerService() {
                                 module = "360°-Universal-Wächter",
                                 description = "Betrug in [${packageName.substringAfterLast('.')}] abgefangen: $title",
                                 status = "BLOCKED"
+                                details = "Automatisch abgefangene Benachrichtigungen von $packageName"
                             )
                         )
                     } catch (e: Exception) {
