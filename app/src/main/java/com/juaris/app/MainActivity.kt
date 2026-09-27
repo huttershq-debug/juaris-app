@@ -606,16 +606,17 @@ fun JuarisMainDashboard(
             modifier = Modifier.fillMaxSize().padding(innerPadding)
         ) { page ->
             when (page) {
-                0 -> StatusPage(
+                 0 -> StatusPage(
                     logs = liveLogs,
                     onSimulateThreat = {
                         coroutineScope.launch {
                             db.securityLogDao().insertLog(
                                 SecurityLogEntity(
                                     timestamp = System.currentTimeMillis(),
+                                    status = "BLOCKED",
                                     module = "Echtzeit-Wächter",
                                     description = "Phishing-Angriff lokal erkannt und blockiert!",
-                                    status = "BLOCKED"
+                                    details = "Simulierter Testlauf erfolgreich ausgeführt."
                                 )
                             )
                         }
