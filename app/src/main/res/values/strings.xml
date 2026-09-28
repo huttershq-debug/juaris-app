@@ -1,27 +1,29 @@
 <resources>
-    <!-- App General -->
     <string name="app_name">Juaris</string>
     <string name="status_protected">Device is fully protected (In &amp; Out)</string>
     <string name="status_warning">Security warning detected</string>
-
-    <!-- Navigation & UI -->
-    <string name="tab_logs">Security Logs</string>
+    <string name="tab_status">Status</string>
+    <string name="tab_protection">Protection</string>
+    <string name="tab_locks">Locks</string>
+    <string name="tab_clipboard">Clipboard</string>
+    <string name="tab_permissions">Permissions</string>
+    <string name="tab_swarm">Swarm</string>
+    <string name="tab_ai">AI</string>
+    <string name="tab_gestures">Gestures</string>
+    <string name="tab_info">Info</string>
     <string name="tab_settings">Settings</string>
-
-    <!-- Call Protection (In & Out) -->
+    <string name="air_gesture_title">Air Gesture Control</string>
+    <string name="camera_scanner_label">Camera Scanner</string>
+    <string name="live_camera_status">Live Camera Active</string>
     <string name="call_protection_title">Call Protection</string>
     <string name="log_call_incoming_blocked">Incoming call blocked: %1$s</string>
     <string name="log_call_outgoing_blocked">Outgoing risk call stopped: %1$s</string>
-
-    <!-- SMS Protection (In & Out) -->
     <string name="sms_protection_title">SMS Phishing Filter</string>
     <string name="log_sms_incoming_blocked">Incoming phishing SMS blocked: %1$s</string>
     <string name="log_sms_outgoing_blocked">Outgoing malicious SMS stopped: %1$s</string>
-
-    <!-- Email Protection (In & Out) -->
     <string name="email_protection_title">Email Security</string>
     <string name="log_email_incoming_blocked">Incoming malicious email blocked: %1$s</string>
     <string name="log_email_outgoing_blocked">Outgoing email stopped (Security Risk): %1$s</string>
-     <string name="juaris_app_welcome_text">Welcome to Juaris, your security app of the future. 100% transparent, 100% on your phone. No cloud. Your protection, your home, your rules. With Juaris, you have the most powerful private protection in the world. Juaris, because you and your security are important to us.</string>
+    <string name="juaris_app_welcome_text">Welcome to Juaris, your security app of the future. 100% transparent, 100% on your phone. No cloud. Your protection, your home, your rules.</string>
     <string name="juaris_app_welcome_audio_file">platzhalter_en.m4a</string>
 </resources>
