@@ -2,8 +2,19 @@
     <string name="app_name">أمان جواريس</string>
     <string name="status_protected">الجهاز محمي بالكامل (وارد وصادر)</string>
     <string name="status_warning">تم اكتشاف تحذير أمني</string>
-    <string name="tab_logs">سجلات الأمان</string>
+    <string name="tab_status">الحالة</string>
+    <string name="tab_protection">الحماية</string>
+    <string name="tab_locks">الأقفال</string>
+    <string name="tab_clipboard">الحافظة</string>
+    <string name="tab_permissions">الصلاحيات</string>
+    <string name="tab_swarm">سوارم</string>
+    <string name="tab_ai">الذكاء الاصطناعي</string>
+    <string name="tab_gestures">الإيماءات</string>
+    <string name="tab_info">معلومات</string>
     <string name="tab_settings">الإعدادات</string>
+    <string name="air_gesture_title">تحكم بالإيماءات الهوائية</string>
+    <string name="camera_scanner_label">ماسح الكاميرا</string>
+    <string name="live_camera_status">الكاميرا الحية نشطة</string>
     <string name="call_protection_title">حماية المكالمات</string>
     <string name="log_call_incoming_blocked">تم حظر المكالمة الواردة: %1$s</string>
     <string name="log_call_outgoing_blocked">تم إيقاف المكالمة الصادرة الخطرة: %1$s</string>
@@ -13,7 +24,6 @@
     <string name="email_protection_title">أمان البريد الإلكتروني</string>
     <string name="log_email_incoming_blocked">تم حظر البريد الإلكتروني الضار الوارد: %1$s</string>
     <string name="log_email_outgoing_blocked">تم إيقاف البريد الإلكتروني الصادر (خطر أمني): %1$s</string>
-    <string name="juaris_app_welcome_text">مرحباً بك في جواريس، تطبيق الأمان الخاص بك للمستقبل. 100% شفاف، 100% على هاتفك. لا توجد سحابة الكترونية. حمايتك، بيتك، قواعدك. مع جواريس، لديك أقوى حماية خاصة في العالم. جواريس، لأنك أنت وأمانك تهماننا.</string>
+    <string name="juaris_app_welcome_text">مرحباً بك في جواريس، تطبيق الأمان الخاص بك للمستقبل. 100% شفاف، 100% على هاتفك. لا توجد سحابة الكترونية. حمايتك، بيتك، قواعدك.</string>
     <string name="juaris_app_welcome_audio_file">platzhalter_ar.m4a</string>
-
 </resources>
