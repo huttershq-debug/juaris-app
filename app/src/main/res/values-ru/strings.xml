@@ -5,6 +5,7 @@
     <string name="tab_status">Статус</string>
     <string name="tab_protection">Защита</string>
     <string name="tab_locks">Блокировки</string>
+    <string name="tab_logs">Журналы</string>
     <string name="tab_clipboard">Буфер обмена</string>
     <string name="tab_permissions">Разрешения</string>
     <string name="tab_swarm">Сварм</string>
@@ -24,6 +25,6 @@
     <string name="email_protection_title">Безопасность электронной почты</string>
     <string name="log_email_incoming_blocked">Заблокировано входящее вредоносное письмо: %1$s</string>
     <string name="log_email_outgoing_blocked">Исходящее письмо остановлено (угроза безопасности): %1$s</string>
-    <string name="juaris_app_welcome_text">Добро пожаловать в Juaris — ваше приложение безопасности будущего. 100% прозрачно, 100% на вашем телефоне. Никакого облака. Ваша защита, ваш дом, ваши правила.</string>
+    <string name="juaris_app_welcome_text" formatted="false">Добро пожаловать в Juaris — ваше приложение безопасности будущего. 100% прозрачно, 100% на вашем телефоне. Никакого облака. Ваша защита, ваш дом, ваши правила.</string>
     <string name="juaris_app_welcome_audio_file">platzhalter_ru.m4a</string>
 </resources>
