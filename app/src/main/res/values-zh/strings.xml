@@ -2,18 +2,28 @@
     <string name="app_name">Juaris</string>
     <string name="status_protected">设备已完全保护（进出双向）</string>
     <string name="status_warning">检测到安全警告</string>
-    <string name="tab_logs">安全日志</string>
+    <string name="tab_status">状态</string>
+    <string name="tab_protection">保护</string>
+    <string name="tab_locks">锁定</string>
+    <string name="tab_clipboard">剪贴板</string>
+    <string name="tab_permissions">权限</string>
+    <string name="tab_swarm">Swarm</string>
+    <string name="tab_ai">AI</string>
+    <string name="tab_gestures">手势</string>
+    <string name="tab_info">信息</string>
     <string name="tab_settings">设置</string>
+    <string name="air_gesture_title">空中手势控制</string>
+    <string name="camera_scanner_label">相机扫描仪</string>
+    <string name="live_camera_status">实时相机激活</string>
     <string name="call_protection_title">来电保护</string>
-    <string name="log_call_incoming_blocked">已拦截来电：%2$s</string>
-    <string name="log_call_outgoing_blocked">已阻止高风险去电：%2$s</string>
+    <string name="log_call_incoming_blocked">已拦截来电：%1$s</string>
+    <string name="log_call_outgoing_blocked">已阻止高风险去电：%1$s</string>
     <string name="sms_protection_title">短信钓鱼过滤</string>
-    <string name="log_sms_incoming_blocked">已拦截钓鱼短信：%2$s</string>
-    <string name="log_sms_outgoing_blocked">已阻止恶意发信：%2$s</string>
+    <string name="log_sms_incoming_blocked">已拦截钓鱼短信：%1$s</string>
+    <string name="log_sms_outgoing_blocked">已阻止恶意发信：%1$s</string>
     <string name="email_protection_title">电子邮件安全</string>
-    <string name="log_email_incoming_blocked">已拦截恶意电子邮件：%2$s</string>
-    <string name="log_email_outgoing_blocked">已阻止外发邮件（安全风险）：%2$s</string>
-    <string name="juaris_app_welcome_text">欢迎来到 Juaris——您面向未来的安全应用程序。100% 透明，100% 在您的手机上。无需云端。您的保护，您的家，您的规则。有了 Juaris，您就拥有了世界上最强大的隐私保护。Juaris，因为您和您的安全至关重要。</string>
+    <string name="log_email_incoming_blocked">已拦截恶意电子邮件：%1$s</string>
+    <string name="log_email_outgoing_blocked">已阻止外发邮件（安全风险）：%1$s</string>
+    <string name="juaris_app_welcome_text">欢迎来到 Juaris——您面向未来的安全应用程序。100% 透明，100% 在您的手机上。无需云端。您的保护，您的家，您的规则。</string>
     <string name="juaris_app_welcome_audio_file">platzhalter_zh.m4a</string>
-
 </resources>
