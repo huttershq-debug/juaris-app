@@ -5,6 +5,7 @@
     <string name="tab_status">Status</string>
     <string name="tab_protection">Protection</string>
     <string name="tab_locks">Locks</string>
+    <string name="tab_logs">Logs</string>
     <string name="tab_clipboard">Clipboard</string>
     <string name="tab_permissions">Permissions</string>
     <string name="tab_swarm">Swarm</string>
@@ -24,6 +25,7 @@
     <string name="email_protection_title">Email Security</string>
     <string name="log_email_incoming_blocked">Incoming malicious email blocked: %1$s</string>
     <string name="log_email_outgoing_blocked">Outgoing email stopped (Security Risk): %1$s</string>
-    <string name="juaris_app_welcome_text">Welcome to Juaris, your security app of the future. 100% transparent, 100% on your phone. No cloud. Your protection, your home, your rules.</string>
+    <string name="juaris_app_welcome_text" formatted="false">Welcome to Juaris, your security app of the future. 100% transparent, 100% on your phone. No cloud. Your protection, your home, your rules.</string>
     <string name="juaris_app_welcome_audio_file">platzhalter_en.m4a</string>
 </resources>
+
