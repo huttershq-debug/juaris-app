@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,7 +43,6 @@ fun DashboardScreen() {
     val pagerState = rememberPagerState(pageCount = { 10 })
     var gestureEnabled by remember { mutableStateOf(false) }
    
-    // Visueller Status direkt auf dem Handy-Bildschirm
     var debugStatusText by remember { mutableStateOf("Warte auf Aktivierung...") }
 
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
@@ -67,7 +67,6 @@ fun DashboardScreen() {
             gestureCore.startGestureDetection(
                 lifecycleOwner = lifecycleOwner,
                 onGestureDetected = { action ->
-                    // Schutz vor Überspringen: Nur triggern, wenn Pager gerade NICHT scrollt
                     if (action == AirGestureCore.GestureAction.TRIGGERED) {
                         if (!pagerState.isScrollInProgress) {
                             coroutineScope.launch {
@@ -94,7 +93,6 @@ fun DashboardScreen() {
             .background(Color.Black)
             .padding(16.dp)
     ) {
-        // DER NEUE EDLE HOLOGRAMM-HEADER ALS BLICKFANG OBEN
         JuarisHeroHeader(currentPage = pagerState.currentPage)
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -151,7 +149,6 @@ fun JuarisHeroHeader(currentPage: Int) {
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.padding(12.dp)
         ) {
-            // Hologramm-Avatar aus deinen Ressourcen
             Image(
                 painter = painterResource(id = R.drawable.hologram_avatar),
                 contentDescription = "Juaris Hologramm",
@@ -160,7 +157,6 @@ fun JuarisHeroHeader(currentPage: Int) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Der fette Markenname
             Text(
                 text = "JUARIS",
                 color = Color.White,
@@ -171,7 +167,6 @@ fun JuarisHeroHeader(currentPage: Int) {
 
             Spacer(modifier = Modifier.height(2.dp))
 
-            // Dynamischer Status mit aktuellem Tab
             Text(
                 text = "SECURITY CENTER • TAB ${currentPage + 1} / 10",
                 color = NeonGiftgruen,
@@ -238,7 +233,7 @@ fun AirGestureControlView(isGestureActive: Boolean, debugText: String, onToggle:
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Wischgesten vor der Frontkamera",
+            text = stringResource(R.string.air_gesture_title),
             color = Color.White,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
@@ -249,7 +244,7 @@ fun AirGestureControlView(isGestureActive: Boolean, debugText: String, onToggle:
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(text = "Kamera-Scanner: ", color = Color.Gray)
+            Text(text = stringResource(R.string.camera_scanner_label), color = Color.Gray)
             Switch(
                 checked = isGestureActive,
                 onCheckedChange = { onToggle(it) }
@@ -272,7 +267,7 @@ fun AirGestureControlView(isGestureActive: Boolean, debugText: String, onToggle:
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "LIVE-KAMERA STATUS:",
+                        text = stringResource(R.string.live_camera_status),
                         color = Color.Gray,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold
