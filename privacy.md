@@ -37,4 +37,4 @@ E-Mail: support@juaris.com
 Benedikt Wolfgang Hütter
 
 **Desgin:**
-Julia Kerschhofer
+Benedikt Wolfgang Hütter
