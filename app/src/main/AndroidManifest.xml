@@ -56,6 +56,13 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".EmergencyActivity"
+            android:exported="false"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:theme="@style/Theme.Juaris" />
+
         <!-- 1. Autostart-Schutz nach Systemstart -->
         <receiver
             android:name=".JuarisBootReceiver"
