@@ -22,7 +22,7 @@ import com.juaris.app.NearbyMeshManager
 import com.juaris.app.JuarisDatabase
 
 @Composable
-fun SwarmMeshPage(meshManager: NearbyMeshManager? = null) {
+fun SwarmMeshPage() {
     val context = LocalContext.current
     val db = remember { JuarisDatabase.getDatabase(context) }
     val postsFlow = remember { db.meshDao().getAllActivePosts() }
@@ -32,14 +32,49 @@ fun SwarmMeshPage(meshManager: NearbyMeshManager? = null) {
     var isEphemeral by remember { mutableStateOf(false) }
     var statusMessage by remember { mutableStateOf("") }
     var scanStatusText by remember { mutableStateOf("Bereit") }
+    var discoveredCount by remember { mutableStateOf(0) }
+
+    // RICHTIG: NearbyMeshManager wird direkt hier instanziiert und ist nie null!
+    val meshManager = remember {
+        NearbyMeshManager(
+            context = context,
+            onDeviceDiscovered = { endpointId ->
+                discoveredCount++
+                scanStatusText = "Verbunden mit: $endpointId ($discoveredCount Geräte)"
+                Toast.makeText(context, "Neues Schwarm-Gerät im Raum erkannt!", Toast.LENGTH_SHORT).show()
+            },
+            onDeviceLost = { endpointId ->
+                discoveredCount = (discoveredCount - 1).coerceAtLeast(0)
+                scanStatusText = if (discoveredCount > 0) "Verbunden ($discoveredCount Geräte)" else "Mesh aktiv (Suche...)"
+            },
+            onMessageReceived = { _, message ->
+                // Eingehende Nachricht direkt in den lokalen Schwarm-Feed einspeisen
+                GlobalMeshEngine.broadcastToSwarm(
+                    context = context,
+                    content = message,
+                    isEphemeral = false,
+                    meshManager = null,
+                    onBlocked = {},
+                    onSuccess = {}
+                )
+            }
+        )
+    }
+
+    // Beim Verlassen der Seite den Mesh-Node sauber herunterfahren
+    DisposableEffect(Unit) {
+        onDispose {
+            meshManager.stopMeshNode()
+        }
+    }
 
     // SICHERHEIT: Bluetooth- & Standortberechtigungen vor dem Start anfordern
     val bluetoothPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         if (permissions.values.all { it }) {
-            meshManager?.startMeshNode()
-            scanStatusText = "Mesh-Knoten aktiv"
+            meshManager.startMeshNode()
+            scanStatusText = "Mesh-Knoten aktiv (Suche...)"
             Toast.makeText(context, "P2P-Schwarm erfolgreich gestartet!", Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(context, "Bluetooth- & Standort-Berechtigungen fehlen für den Schwarm.", Toast.LENGTH_LONG).show()
@@ -76,7 +111,7 @@ fun SwarmMeshPage(meshManager: NearbyMeshManager? = null) {
                         Button(
                             onClick = {
                                 if (inputMessage.isNotBlank()) {
-                                    meshManager?.broadcastMessage(inputMessage)
+                                    meshManager.broadcastMessage(inputMessage)
                                     GlobalMeshEngine.broadcastToSwarm(
                                         context = context,
                                         content = inputMessage,
