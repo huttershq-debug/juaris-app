@@ -56,6 +56,7 @@
             </intent-filter>
         </activity>
 
+        <!-- Notfall-Vollbild-Aktivität für Sperrbildschirm -->
         <activity
             android:name=".EmergencyActivity"
             android:exported="false"
