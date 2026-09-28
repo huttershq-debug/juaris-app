@@ -78,17 +78,29 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
                         val description = if (descIdx != -1) it.getString(descIdx) ?: "" else ""
                         val combined = "$title $description".lowercase()
 
-                        // 1. Meilensteine & Beziehungen (Hochzeitstag, Jahrestag, Geburtstag)
+                        // 🚫 SCHRITT 1: Strikter Werbe-, Spam- und Junk-Filter
+                        val spamKeywords = listOf(
+                            "gewinn", "gutschein", "casino", "krypto", "bitcoin", "gratis",
+                            "rabatt", "deal", "werbung", "newsletter", "angebot", "cashback",
+                            "lotterie", "million", "gewonnen", "kostenlos", "sale", "voucher",
+                            "promo", "gewinnspiel", "click", "subscribe", "abonnieren"
+                        )
+                        val isSpamOrAd = spamKeywords.any { spamWord -> combined.contains(spamWord) }
+                        if (isSpamOrAd) {
+                            continue // Überspringt Werbung und Spam komplett!
+                        }
+
+                        // 2. Meilensteine & Beziehungen (Hochzeitstag, Jahrestag, Geburtstag)
                         val isAnniversary = combined.contains("hochzeitstag") || combined.contains("jahrestag") || combined.contains("jubiläum")
                         val isBirthday = combined.contains("geburtstag") || combined.contains("birthday")
                        
-                        // 2. Gesundheit & Termine
+                        // 3. Gesundheit & Termine
                         val isMedical = combined.contains("arzt") || combined.contains("zahnarzt") || combined.contains("termin") || combined.contains("klinik") || combined.contains("therapie")
                        
-                        // 3. Finanzen, Rechnungen & Fristen (Höchste Priorität -> status = "WARNING" -> Rot)
+                        // 4. Finanzen, Rechnungen & Fristen (Höchste Priorität -> status = "WARNING" -> Rot)
                         val isFinancial = combined.contains("rechnung") || combined.contains("mahnung") || combined.contains("inkasso") || combined.contains("frist") || combined.contains("steuer") || combined.contains("bescheid") || combined.contains("zahlung")
 
-                        // 4. Reisen & Mobilität
+                        // 5. Reisen & Mobilität
                         val isTravel = combined.contains("flug") || combined.contains("reise") || combined.contains("hotel") || combined.contains("zug") || combined.contains("ticket")
 
                         val isImportant = isAnniversary || isBirthday || isMedical || isFinancial || isTravel
@@ -103,7 +115,7 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
                                 else -> Pair("📅 Wichtiger Tages-Eintrag", "INFO")
                             }
 
-                            // SICHERES SCHREIBEN: Wartet im IO-Kontext, bis die DB den Eintrag gespeichert hat
+                            // In die lokale verschlüsselte Room-Datenbank schreiben
                             db.securityLogDao().insertLog(
                                 SecurityLogEntity(
                                     timestamp = System.currentTimeMillis(),
