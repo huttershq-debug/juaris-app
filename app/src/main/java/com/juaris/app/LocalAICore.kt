@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 class LocalAICore(private val context: Context) {
 
-    private val _aiStatus = MutableStateFlow("On-Device Intent Engine: Aktiv (Vollschutz)")
+    private val _aiStatus = MutableStateFlow("On-Device Intent Engine: Global Multi-Language Active")
     val aiStatus: StateFlow<String> = _aiStatus
 
     private val _threatLevel = MutableStateFlow(0)
@@ -21,12 +21,12 @@ class LocalAICore(private val context: Context) {
         val summary: String
     ) {
         enum class Category {
-            PHISHING_THREAT, // Rot: Betrug, Phishing, Angriffe
-            INVOICE_FINANCIAL, // Rot/Gelb: Rechnungen, Mahnungen, Inkasso
-            SERVICE_UTILITY, // Gold: EVN, Gas, Strom, Wasser, Zähler, Handwerker
-            HEALTH_APPOINTMENT, // Gold: Arzt, Klinik, Therapie
-            PERSONAL_REMINDER, // Gold: Geburtstag, Hochzeitstag, Jahrestag
-            DELIVERY_PARCEL, // Info: DHL, Post, Paketdienste
+            PHISHING_THREAT, // Red: Fraud, Phishing, Attacks
+            INVOICE_FINANCIAL, // Orange: Bills, Overdue, Collections
+            SERVICE_UTILITY, // Gold: Power, Gas, Water, Meter, Maintenance
+            HEALTH_APPOINTMENT, // Gold: Doctor, Clinic, Medical
+            PERSONAL_REMINDER, // Gold: Birthday, Anniversary, Events
+            DELIVERY_PARCEL, // Info: Logistics, Post
             GENERAL // Standard
         }
     }
@@ -36,35 +36,57 @@ class LocalAICore(private val context: Context) {
         return result.isSafe
     }
 
-    // Universal-Analyse für das gesamte Handy (Benachrichtigungen, E-Mails, Kalender, SMS)
+    // Universelle, sprachübergreifende Analyse für den Weltmarkt (12+ Sprachräume)
     fun analyzeAndCategorize(text: String, sender: String?): UnifiedAnalysisResult {
         val normalized = normalizeAndClean(text)
         val stripped = normalized.replace(" ", "")
 
-        // 1. Bedrohungs- & Phishing-Keywords (Rot)
-        val urgencyKeywords = listOf("sofort", "heute noch", "frist", "drohung", "sperrung", "letzte warnung", "sofortiges handeln", "kontosperrung")
-        val authorityKeywords = listOf("zoll", "polizei", "gericht", "finanzamt", "bank", "post", "dhl", "netflix", "microsoft")
-        val actionKeywords = listOf("http://", "https://", "bit.ly", "tinyurl", "login", "bestaetigen", "verifizieren", "daten eingeben", "passwort")
+        // 1. Phishing & Dringlichkeit (Multilingual: EN, DE, ES, FR, PT, RU, AR, ZH, HI, BN, UR, ID)
+        val urgencyKeywords = listOf(
+            "sofort", "urgent", "urgente", "immediato", "срочно", "عاجل", "紧急", "तुरंत", "জরুরি", "فوری", "segera",
+            "frist", "deadline", "vencimiento", "échéance", "срок", "مهلة", "期限", "समय सीमा", "সময়সীমা", "مقررہ تاریخ", "tenggat",
+            "sperrung", "suspension", "bloqué", "blokiert", "блокировка", "حظر", "冻结", "ब्लॉक", "ব্লক", "بند", "blokir"
+        )
 
-        // 2. Finanz- & Rechnungs-Keywords (Rot/Orange)
-        val invoiceKeywords = listOf("rechnung", "betrag", "fällig", "zahlungsziel", "überweisung", "mahnung", "inkasso", "lastschrift", "bescheid")
+        val authorityKeywords = listOf(
+            "police", "polizei", "zoll", "court", "gericht", "tax", "finanzamt", "hacienda", "полиция", "налог", 
+            "شرطة", "ضريبة", "警察", "税务", "पुलिस", "পুলিশ", "پولیس", "polisi",
+            "bank", "post", "dhl", "netflix", "microsoft", "apple", "google"
+        )
 
-        // 3. Versorger-, Energie- & Handwerker-Keywords (Gold - inkl. EVN & Gas!)
-        val utilityKeywords = listOf("evn", "gas", "strom", "wasser", "zähler", "ausbau", "ablesung", "wartung", "handwerker", "installateur", "service", "energie", "netz")
+        // 2. Rechnungen & Finanzen (Multilingual)
+        val invoiceKeywords = listOf(
+            "rechnung", "invoice", "factura", "facture", "fatura", "счет", "فاتورة", "发票", "चालान", "বিল", "انوائس", "faktur",
+            "bill", "amount", "betrag", "montant", "valor", "сумма", "مبلغ", "金额", "राशि", "পরিমাণ", "رقم", "jumlah",
+            "fällig", "due", "vencimiento", "échéance", "vencimento", "оплата", "استحقاق", "到期", "देय", "বকেয়া", "واجب الادا", "jatuh tempo",
+            "mahnung", "reminder", "overdue", "inkasso", "задолженность", "تذكير", "催款", "स्मारक", "স্মারক", "یاد دہانی", "pengingat"
+        )
 
-        // 4. Gesundheits- & Termin-Keywords (Gold)
-        val healthKeywords = listOf("arzt", "zahnarzt", "termin", "klinik", "therapie", "krankenhaus", "befund", "praxis")
+        // 3. Versorger, Energie, Wasser & Zähler (Multilingual - Weltweiter Schutz für EVN, Stadtwerke, EDF, Con Edison etc.)
+        val utilityKeywords = listOf(
+            "utility", "utilities", "energy", "power", "electricity", "electricidad", "électricité", "energia", "энергия", "طاقة", "能源", "ऊर्जा", "শক্তি", "توانائی", "energi",
+            "gas", "gás", "газ", "غاز", "燃气", "गैस", "গ্যাস", "گیس",
+            "water", "agua", "eau", "água", "вода", "ماء", "水", "पानी", "পানি", "پانی", "air",
+            "meter", "zähler", "contador", "compteur", "medidor", "счетчик", "عداد", "电表", "मीटर", "মিটার", "میٹر", "meteran",
+            "reading", "ablesung", "relevé", "leitura", "показания", "قراءة", "抄表", "रीडिंग", "পঠন", "ریڈنگ", "pembacaan",
+            "outage", "grid", "netz", "network", "red", "réseau", "сеть", "شبكة", "电网", "नेटवर्क", "নেটওয়ার্ক", "جال", "jaringan",
+            "maintenance", "wartung", "mantenimiento", "maintenance", "manutenção", "ремонт", "صيانة", "维护", "रखरखाव", "রক্ষণাবেক্ষণ", "تھام بھال", "pemeliharaan"
+        )
 
-        // 5. Persönliche Ereignisse (Gold)
-        val personalKeywords = listOf("geburtstag", "hochzeitstag", "jahrestag", "jubiläum")
+        // 4. Gesundheit & Termine
+        val healthKeywords = listOf(
+            "doctor", "arzt", "médecin", "médico", "врач", "طبيب", "医生", "डॉक्टर", "ডাক্তার", "ڈاکٹر", "dokter",
+            "hospital", "clinic", "klinik", "clinique", "больница", "клиника", "مستشفى", "医院", "अस्पताल", "হাসপাতাল", "اسپتال", "rumah sakit",
+            "appointment", "termin", "cita", "rendez-vous", "consulta", "запись", "موعد", "预约", "अपॉइंटमेंट", "অ্যাপয়েন্টমেন্ট", "ملاقات", "janji temu"
+        )
 
         var threatScore = 0
         var priorityScore = 3
 
         if (urgencyKeywords.any { normalized.contains(it) || stripped.contains(it) }) threatScore += 35
         if (authorityKeywords.any { normalized.contains(it) || stripped.contains(it) }) threatScore += 25
-        if (actionKeywords.any { normalized.contains(it) || stripped.contains(it) }) threatScore += 40
-
+        
+        // Globale Finanz-Muster (IBAN, Krypto-Wallets funktionieren weltweit plattformunabhängig)
         val hasIbanPattern = Regex("[a-z]{2}\\d{2}[a-z0-9]{11,30}").containsMatchIn(stripped)
         val hasCryptoPattern = Regex("(bc1|[13])[a-km-zA-HJ-NP-Z1-9]{25,39}").containsMatchIn(stripped)
        
@@ -82,42 +104,37 @@ class LocalAICore(private val context: Context) {
             threatScore >= 60 -> {
                 category = UnifiedAnalysisResult.Category.PHISHING_THREAT
                 priorityScore = 10
-                title = "🚨 Phishing / Betrug erkannt!"
+                title = "🚨 Security Threat / Phishing Detected!"
             }
-            normalized.contains("mahnung") || normalized.contains("inkasso") -> {
+            invoiceKeywords.any { normalized.contains(it) && (normalized.contains("mahnung") || normalized.contains("overdue") || normalized.contains("срочно") || normalized.contains("عاجل")) } -> {
                 category = UnifiedAnalysisResult.Category.INVOICE_FINANCIAL
                 priorityScore = 9
-                title = "⚠️ Dringende Mahnung / Frist"
+                title = "⚠️ Urgent Overdue / Payment Notice"
             }
             invoiceKeywords.any { normalized.contains(it) } -> {
                 category = UnifiedAnalysisResult.Category.INVOICE_FINANCIAL
                 priorityScore = 7
-                title = "📄 Neue Rechnung eingetroffen"
+                title = "📄 Invoice / Financial Statement"
             }
             utilityKeywords.any { normalized.contains(it) } -> {
                 category = UnifiedAnalysisResult.Category.SERVICE_UTILITY
                 priorityScore = 8
-                title = "🔧 Versorger- & Zähler-Termin (EVN/Gas)"
+                title = "🔧 Utility & Service Notice (Power/Gas/Water)"
             }
             healthKeywords.any { normalized.contains(it) } -> {
                 category = UnifiedAnalysisResult.Category.HEALTH_APPOINTMENT
                 priorityScore = 8
-                title = "🩺 Medizinischer Termin"
-            }
-            personalKeywords.any { normalized.contains(it) } -> {
-                category = UnifiedAnalysisResult.Category.PERSONAL_REMINDER
-                priorityScore = 8
-                title = "🎉 Wichtiger Jahrestag / Geburtstag"
+                title = "🩺 Medical Appointment / Health"
             }
             else -> {
                 category = UnifiedAnalysisResult.Category.GENERAL
                 priorityScore = 3
-                title = "Information von ${sender ?: "System"}"
+                title = "Notification from ${sender ?: "System"}"
             }
         }
 
         val isSafe = threatScore < 60
-        _aiStatus.value = if (isSafe) "System sicher (Prio: $priorityScore)" else "Bedrohung geblockt (Score: $threatScore)"
+        _aiStatus.value = if (isSafe) "System Secure (Priority: $priorityScore)" else "Threat Blocked (Score: $threatScore)"
 
         return UnifiedAnalysisResult(
             isSafe = isSafe,
@@ -131,7 +148,7 @@ class LocalAICore(private val context: Context) {
 
     fun clearMemory() {
         _threatLevel.value = 0
-        _aiStatus.value = "On-Device Intent Engine: Arbeitsspeicher bereinigt"
+        _aiStatus.value = "On-Device Intent Engine: Memory Cleared"
     }
 
     private fun normalizeAndClean(input: String): String {
@@ -142,8 +159,7 @@ class LocalAICore(private val context: Context) {
             .replace("3", "e")
             .replace("@", "a")
             .replace("$", "s")
-            .replace(Regex("[^a-zäöüß0-9\\s]"), " ")
+            .replace(Regex("[^\\p{L}\\p{Nd}\\s]"), " ") // Unicode-sicher für kyrillisch, arabisch, chinesisch etc.
     }
 }
-
 
