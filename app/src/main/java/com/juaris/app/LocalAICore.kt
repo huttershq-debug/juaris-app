@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 class LocalAICore(private val context: Context) {
 
-    private val _aiStatus = MutableStateFlow("On-Device Intent Engine: Aktiv")
+    private val _aiStatus = MutableStateFlow("On-Device Intent Engine: Aktiv (Vollschutz)")
     val aiStatus: StateFlow<String> = _aiStatus
 
     private val _threatLevel = MutableStateFlow(0)
@@ -21,29 +21,42 @@ class LocalAICore(private val context: Context) {
         val summary: String
     ) {
         enum class Category {
-            PHISHING_THREAT,
-            INVOICE,
-            REMINDER,
-            PAYMENT,
-            CALENDAR,
-            GENERAL
+            PHISHING_THREAT, // Rot: Betrug, Phishing, Angriffe
+            INVOICE_FINANCIAL, // Rot/Gelb: Rechnungen, Mahnungen, Inkasso
+            SERVICE_UTILITY, // Gold: EVN, Gas, Strom, Wasser, Zähler, Handwerker
+            HEALTH_APPOINTMENT, // Gold: Arzt, Klinik, Therapie
+            PERSONAL_REMINDER, // Gold: Geburtstag, Hochzeitstag, Jahrestag
+            DELIVERY_PARCEL, // Info: DHL, Post, Paketdienste
+            GENERAL // Standard
         }
     }
 
-    // Kompatibilitäts-Methode für den JuarisNotificationListenerService
     fun evaluateContentSafety(text: String, sender: String?): Boolean {
         val result = analyzeAndCategorize(text, sender)
         return result.isSafe
     }
 
+    // Universal-Analyse für das gesamte Handy (Benachrichtigungen, E-Mails, Kalender, SMS)
     fun analyzeAndCategorize(text: String, sender: String?): UnifiedAnalysisResult {
         val normalized = normalizeAndClean(text)
         val stripped = normalized.replace(" ", "")
 
-        val urgencyKeywords = listOf("sofort", "heute noch", "frist", "drohung", "sperrung", "letzte warnung", "sofortiges handeln")
+        // 1. Bedrohungs- & Phishing-Keywords (Rot)
+        val urgencyKeywords = listOf("sofort", "heute noch", "frist", "drohung", "sperrung", "letzte warnung", "sofortiges handeln", "kontosperrung")
         val authorityKeywords = listOf("zoll", "polizei", "gericht", "finanzamt", "bank", "post", "dhl", "netflix", "microsoft")
         val actionKeywords = listOf("http://", "https://", "bit.ly", "tinyurl", "login", "bestaetigen", "verifizieren", "daten eingeben", "passwort")
-        val invoiceKeywords = listOf("rechnung", "betrag", "fällig", "zahlungsziel", "überweisung")
+
+        // 2. Finanz- & Rechnungs-Keywords (Rot/Orange)
+        val invoiceKeywords = listOf("rechnung", "betrag", "fällig", "zahlungsziel", "überweisung", "mahnung", "inkasso", "lastschrift", "bescheid")
+
+        // 3. Versorger-, Energie- & Handwerker-Keywords (Gold - inkl. EVN & Gas!)
+        val utilityKeywords = listOf("evn", "gas", "strom", "wasser", "zähler", "ausbau", "ablesung", "wartung", "handwerker", "installateur", "service", "energie", "netz")
+
+        // 4. Gesundheits- & Termin-Keywords (Gold)
+        val healthKeywords = listOf("arzt", "zahnarzt", "termin", "klinik", "therapie", "krankenhaus", "befund", "praxis")
+
+        // 5. Persönliche Ereignisse (Gold)
+        val personalKeywords = listOf("geburtstag", "hochzeitstag", "jahrestag", "jubiläum")
 
         var threatScore = 0
         var priorityScore = 3
@@ -54,15 +67,9 @@ class LocalAICore(private val context: Context) {
 
         val hasIbanPattern = Regex("[a-z]{2}\\d{2}[a-z0-9]{11,30}").containsMatchIn(stripped)
         val hasCryptoPattern = Regex("(bc1|[13])[a-km-zA-HJ-NP-Z1-9]{25,39}").containsMatchIn(stripped)
-        
+       
         if (hasIbanPattern || hasCryptoPattern) {
             threatScore += 45
-        }
-
-        val hasUrgency = urgencyKeywords.any { normalized.contains(it) || stripped.contains(it) }
-        val hasAuthority = authorityKeywords.any { normalized.contains(it) || stripped.contains(it) }
-        if (hasUrgency && hasAuthority) {
-            threatScore += 25
         }
 
         threatScore = threatScore.coerceAtMost(100)
@@ -78,24 +85,39 @@ class LocalAICore(private val context: Context) {
                 title = "🚨 Phishing / Betrug erkannt!"
             }
             normalized.contains("mahnung") || normalized.contains("inkasso") -> {
-                category = UnifiedAnalysisResult.Category.REMINDER
+                category = UnifiedAnalysisResult.Category.INVOICE_FINANCIAL
                 priorityScore = 9
                 title = "⚠️ Dringende Mahnung / Frist"
             }
             invoiceKeywords.any { normalized.contains(it) } -> {
-                category = UnifiedAnalysisResult.Category.INVOICE
+                category = UnifiedAnalysisResult.Category.INVOICE_FINANCIAL
                 priorityScore = 7
                 title = "📄 Neue Rechnung eingetroffen"
+            }
+            utilityKeywords.any { normalized.contains(it) } -> {
+                category = UnifiedAnalysisResult.Category.SERVICE_UTILITY
+                priorityScore = 8
+                title = "🔧 Versorger- & Zähler-Termin (EVN/Gas)"
+            }
+            healthKeywords.any { normalized.contains(it) } -> {
+                category = UnifiedAnalysisResult.Category.HEALTH_APPOINTMENT
+                priorityScore = 8
+                title = "🩺 Medizinischer Termin"
+            }
+            personalKeywords.any { normalized.contains(it) } -> {
+                category = UnifiedAnalysisResult.Category.PERSONAL_REMINDER
+                priorityScore = 8
+                title = "🎉 Wichtiger Jahrestag / Geburtstag"
             }
             else -> {
                 category = UnifiedAnalysisResult.Category.GENERAL
                 priorityScore = 3
-                title = "Information von ${sender ?: "Unbekannt"}"
+                title = "Information von ${sender ?: "System"}"
             }
         }
 
         val isSafe = threatScore < 60
-        _aiStatus.value = if (isSafe) "System sicher (Prio-Score: $priorityScore)" else "Bedrohung geblockt (Score: $threatScore)"
+        _aiStatus.value = if (isSafe) "System sicher (Prio: $priorityScore)" else "Bedrohung geblockt (Score: $threatScore)"
 
         return UnifiedAnalysisResult(
             isSafe = isSafe,
@@ -105,6 +127,11 @@ class LocalAICore(private val context: Context) {
             title = title,
             summary = text.take(120) + if (text.length > 120) "..." else ""
         )
+    }
+
+    fun clearMemory() {
+        _threatLevel.value = 0
+        _aiStatus.value = "On-Device Intent Engine: Arbeitsspeicher bereinigt"
     }
 
     private fun normalizeAndClean(input: String): String {
@@ -118,3 +145,5 @@ class LocalAICore(private val context: Context) {
             .replace(Regex("[^a-zäöüß0-9\\s]"), " ")
     }
 }
+
+
