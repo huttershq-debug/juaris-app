@@ -98,13 +98,17 @@ class JuarisNotificationListenerService : NotificationListenerService() {
     }
 
     private fun triggerEmergencyProtocol(reason: String) {
-        Log.w(TAG, "🚨 NOTFALL-PROTOKOLL AUSGELÖST: $reason")
-        val intent = Intent("com.juaris.app.ACTION_EMERGENCY_TRIGGER").apply {
+    Log.w(TAG, "🚨 NOTFALL-PROTOKOLL AUSGELÖST: $reason")
+    try {
+        val intent = Intent(applicationContext, EmergencyActivity::class.java).apply {
             putExtra("reason", reason)
-            setPackage("com.juaris.app")
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
-        sendBroadcast(intent)
+        applicationContext.startActivity(intent)
+    } catch (e: Exception) {
+        Log.e(TAG, "Fehler beim Starten der EmergencyActivity aus dem Hintergrund", e)
     }
+}
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         super.onNotificationPosted(sbn)
