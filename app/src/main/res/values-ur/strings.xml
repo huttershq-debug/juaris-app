@@ -5,6 +5,7 @@
     <string name="tab_status">حالت</string>
     <string name="tab_protection">تحفظ</string>
     <string name="tab_locks">تالا</string>
+    <string name="tab_logs">لاگز</string>
     <string name="tab_clipboard">کلپ بورڈ</string>
     <string name="tab_permissions">اجازتیں</string>
     <string name="tab_swarm">سوارم</string>
@@ -24,6 +25,6 @@
     <string name="email_protection_title">ای میل سیکیورٹی</string>
     <string name="log_email_incoming_blocked">آنے والا نقصان دہ ای میل مسدود کر دیا گیا: %1$s</string>
     <string name="log_email_outgoing_blocked">جانے والا ای میل روک دیا گیا (سیکیورٹی رسک): %1$s</string>
-    <string name="juaris_app_welcome_text">جوارس میں خوش آمدید، مستقبل کی آپ کی سیکیورٹی ایپ۔ 100% شفاف، 100% آپ کے فون پر۔ کوئی کلاؤڈ نہیں۔ آپ کی حفاظت، آپ کا گھر، آپ کے قوانین۔</string>
+    <string name="juaris_app_welcome_text" formatted="false">جوارس میں خوش آمدید، مستقبل کی آپ کی سیکیورٹی ایپ۔ 100% شفاف، 100% آپ کے فون پر۔ کوئی کلاؤڈ نہیں۔ آپ کی حفاظت، آپ کا گھر، آپ کے قوانین۔</string>
     <string name="juaris_app_welcome_audio_file">platzhalter_ur.m4a</string>
 </resources>
