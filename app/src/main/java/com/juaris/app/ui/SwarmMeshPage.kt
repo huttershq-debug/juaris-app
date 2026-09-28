@@ -1,5 +1,8 @@
 package com.juaris.app.ui
 
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -10,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -19,7 +23,7 @@ import com.juaris.app.JuarisDatabase
 
 @Composable
 fun SwarmMeshPage(meshManager: NearbyMeshManager? = null) {
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
     val db = remember { JuarisDatabase.getDatabase(context) }
     val postsFlow = remember { db.meshDao().getAllActivePosts() }
     val posts by postsFlow.collectAsState(initial = emptyList())
@@ -28,6 +32,19 @@ fun SwarmMeshPage(meshManager: NearbyMeshManager? = null) {
     var isEphemeral by remember { mutableStateOf(false) }
     var statusMessage by remember { mutableStateOf("") }
     var scanStatusText by remember { mutableStateOf("Bereit") }
+
+    // SICHERHEIT: Bluetooth- & Standortberechtigungen vor dem Start anfordern
+    val bluetoothPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        if (permissions.values.all { it }) {
+            meshManager?.startMeshNode()
+            scanStatusText = "Mesh-Knoten aktiv"
+            Toast.makeText(context, "P2P-Schwarm erfolgreich gestartet!", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "Bluetooth- & Standort-Berechtigungen fehlen für den Schwarm.", Toast.LENGTH_LONG).show()
+        }
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -78,6 +95,10 @@ fun SwarmMeshPage(meshManager: NearbyMeshManager? = null) {
                             Text("Broadcast", color = Color.Black, fontWeight = FontWeight.Bold)
                         }
                     }
+                    if (statusMessage.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(statusMessage, color = NeonGiftgruen, fontSize = 12.sp)
+                    }
                 }
             }
         }
@@ -98,8 +119,15 @@ fun SwarmMeshPage(meshManager: NearbyMeshManager? = null) {
                     Text("Status: $scanStatusText", color = Color.White)
                     Button(
                         onClick = {
-                            meshManager?.startMeshNode()
-                            scanStatusText = "Mesh-Knoten aktiv"
+                            // Berechtigungsabfrage beim Klick starten
+                            bluetoothPermissionLauncher.launch(
+                                arrayOf(
+                                    android.Manifest.permission.BLUETOOTH_SCAN,
+                                    android.Manifest.permission.BLUETOOTH_ADVERTISE,
+                                    android.Manifest.permission.BLUETOOTH_CONNECT,
+                                    android.Manifest.permission.ACCESS_FINE_LOCATION
+                                )
+                            )
                         },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
@@ -111,3 +139,4 @@ fun SwarmMeshPage(meshManager: NearbyMeshManager? = null) {
         }
     }
 }
+
