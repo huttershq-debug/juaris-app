@@ -19,9 +19,9 @@ import kotlinx.coroutines.launch
 class JuarisNotificationListenerService : NotificationListenerService() {
 
     companion object {
-        private const val TAG = "JuarisUniversalGuard"
+        private const val TAG = "JuarisOmniGuard"
         const val SERVICE_CHANNEL_ID = "JuarisLiveProtectionChannel"
-        private const val ALERT_CHANNEL_ID = "juaris_threat_alerts_v2"
+        private const val ALERT_CHANNEL_ID = "juaris_threat_alerts_v3"
         const val NOTIFICATION_ID = 1337
     }
 
@@ -42,27 +42,27 @@ class JuarisNotificationListenerService : NotificationListenerService() {
         }
 
         startForegroundServiceWithNotification()
-        Log.d(TAG, "Juaris 24/7 Universal-Wächter & Mikrofon-Bodyguard gestartet.")
+        Log.d(TAG, "Juaris Omni-Wächter (Maximaler App- & E-Mail-Scan) gestartet.")
     }
 
     override fun onListenerConnected() {
         super.onListenerConnected()
-        Log.d(TAG, "🟢 SYSTEM ERFOLGREICH VERBUNDEN: NotificationListenerService ist aktiv!")
+        Log.d(TAG, "🟢 OMNI-WÄCHTER VERBUNDEN: NotificationListenerService aktiv!")
     }
 
     override fun onListenerDisconnected() {
         super.onListenerDisconnected()
-        Log.w(TAG, "🔴 SYSTEM GETRENNT: Android hat den NotificationListenerService abgewiesen!")
+        Log.w(TAG, "🔴 OMNI-WÄCHTER GETRENNT durch Android!")
     }
 
     private fun startForegroundServiceWithNotification() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 SERVICE_CHANNEL_ID,
-                "Juaris Live-Schutz",
+                "Juaris Omni-Schutz",
                 NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
-                description = "Hält den Zero-Cloud Schutz & Mikrofon-Wächter aktiv"
+                description = "Hält die absolute 24/7 Geräteschutz-Engine aktiv"
             }
             val manager = getSystemService(NotificationManager::class.java)
             manager?.createNotificationChannel(channel)
@@ -70,7 +70,7 @@ class JuarisNotificationListenerService : NotificationListenerService() {
 
         val notification: Notification = NotificationCompat.Builder(this, SERVICE_CHANNEL_ID)
             .setContentTitle("Juaris Security Suite aktiv")
-            .setContentText("24/7 Live-Schutz, Mikrofon- & KI-Wächter aktiv")
+            .setContentText("Omni-Wächter scannt alle Apps, E-Mails & Fristen in Echtzeit")
             .setSmallIcon(android.R.drawable.ic_lock_lock)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -106,7 +106,7 @@ class JuarisNotificationListenerService : NotificationListenerService() {
             }
             applicationContext.startActivity(intent)
         } catch (e: Exception) {
-            Log.e(TAG, "Fehler beim Starten der EmergencyActivity aus dem Hintergrund", e)
+            Log.e(TAG, "Fehler beim Starten der EmergencyActivity", e)
         }
     }
 
@@ -121,35 +121,41 @@ class JuarisNotificationListenerService : NotificationListenerService() {
             val extras = notification.notification.extras
             val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() ?: ""
             val text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString() ?: ""
+            val bigText = extras.getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString() ?: ""
 
-            if (title.isBlank() && text.isBlank()) return
+            val combinedContent = "$title $text $bigText"
+            if (combinedContent.isBlank()) return
 
-            val fullContent = "App: $packageName | Titel: $title | Inhalt: $text"
-            val fullMessageLower = fullContent.lowercase()
+            val fullContentString = "App: $packageName | Titel: $title | Inhalt: $combinedContent"
+            val contentLower = fullContentString.lowercase()
 
-            val isSafe = aiCore.evaluateContentSafety(fullContent, packageName)
+            // 🚫 ULTRA-STRIKTER SPAM- & WERBEFILTER (Blockiert Marketing, Social-Media-Müll, Shopping etc.)
+            val adKeywords = listOf(
+                "gewinn", "gutschein", "casino", "krypto", "bitcoin", "gratis", "rabatt", "deal",
+                "newsletter", "cashback", "lotterie", "gewonnen", "sale", "voucher", "promo",
+                "followers", "likes", "tiktok", "instagram", "snapchat", "netflix", "prime day",
+                "prozent", "spar-", "empfehlung", "code:", "rabattcode", "lieferung unterwegs",
+                "cashback", "sonderangebot", "werbung"
+            )
+            if (adKeywords.any { contentLower.contains(it) }) {
+                return // Ignoriert Werbung und Spam vollständig
+            }
+
+            // 1. KI-Sicherheitsprüfung (Erkennt Phishing, Betrug, Angriffe)
+            val isSafe = aiCore.evaluateContentSafety(fullContentString, packageName)
 
             if (!isSafe) {
                 try {
                     notification.key?.let { cancelNotification(it) }
                 } catch (e: Exception) {}
 
-                CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        val db = JuarisDatabase.getDatabase(applicationContext)
-                        db.securityLogDao().insertLog(
-                            SecurityLogEntity(
-                                timestamp = System.currentTimeMillis(),
-                                module = "360°-Universal-Wächter",
-                                description = "Betrug in [${packageName.substringAfterLast('.')}] abgefangen: $title",
-                                status = "BLOCKED",
-                                details = "Automatisch abgefangene Benachrichtigungen von $packageName"
-                            )
-                        )
-                    } catch (e: Exception) {
-                        Log.e(TAG, "❌ Fehler beim Speichern des Logs in die DB: ${e.message}", e)
-                    }
-                }
+                saveNotificationToDb(
+                    "360°-Omni-Wächter",
+                    "Betrug in [${packageName.substringAfterLast('.')}] abgefangen: $title",
+                    title,
+                    combinedContent,
+                    "BLOCKED"
+                )
 
                 showThreatScreenAlert(
                     applicationContext,
@@ -157,18 +163,57 @@ class JuarisNotificationListenerService : NotificationListenerService() {
                     "Betrugsversuch in ${packageName.substringAfterLast('.')} erkannt: $title"
                 )
             } else {
+                // 2. MAXIMALE E-MAIL-, TERMIN- & VERSORGER-ANALYSE (GMX, Gmail, Outlook, Banking, Kalender etc.)
                 when {
-                    fullMessageLower.contains("mahnung") || fullMessageLower.contains("inkasso") || fullMessageLower.contains("zahlungsaufforderung") -> {
-                        showPriorityPopup("🚨 WICHTIGE MAHNUNG", text.ifEmpty { title }, "finance_high")
+                    // Finanzen, Rechnungen & Mahnungen (Rot / WARNING)
+                    contentLower.contains("mahnung") || contentLower.contains("inkasso") || contentLower.contains("zahlungsaufforderung") || contentLower.contains("letzte frist") -> {
+                        showPriorityPopup("🚨 WICHTIGE MAHNUNG", combinedContent.take(120), "finance_high")
+                        saveNotificationToDb("Finanz-Wächter", "🚨 Mahnung & Zahlungsfrist", title, combinedContent, "WARNING")
                     }
-                    fullMessageLower.contains("überweisung") || fullMessageLower.contains("zahlung") || fullMessageLower.contains("rechnung") -> {
-                        showPriorityPopup("💳 Zahlungs-Hinweis", text.ifEmpty { title }, "finance_info")
+                    contentLower.contains("überweisung") || contentLower.contains("zahlung") || contentLower.contains("rechnung") || contentLower.contains("lastschrift") || contentLower.contains("bescheid") || contentLower.contains("konto") -> {
+                        showPriorityPopup("💳 Rechnungs- & Zahlungs-Hinweis", combinedContent.take(120), "finance_info")
+                        saveNotificationToDb("Finanz-Wächter", "💳 Rechnung / Zahlung", title, combinedContent, "WARNING")
                     }
-                    packageName.contains("calendar") || packageName.contains("kalender") || packageName.contains("outlook") ||
-                    fullMessageLower.contains("termin") || fullMessageLower.contains("uhr") || fullMessageLower.contains("heute") || fullMessageLower.contains("morgen") -> {
-                        showPriorityPopup("📅 Kalender & Termin", text.ifEmpty { title }, "calendar_alert")
+
+                    // Versorger, Gas, Strom, Wasser, Zähler, Ausbau, Handwerker, Termine, E-Mails (Gold / IMPORTANT)
+                    contentLower.contains("gas") || contentLower.contains("strom") || contentLower.contains("wasser") || 
+                    contentLower.contains("zähler") || contentLower.contains("ausbau") || contentLower.contains("ablesung") || 
+                    contentLower.contains("wartung") || contentLower.contains("handwerker") || contentLower.contains("installateur") || 
+                    contentLower.contains("termin") || contentLower.contains("arzt") || contentLower.contains("klinik") ||
+                    contentLower.contains("geburtstag") || contentLower.contains("hochzeitstag") ||
+                    packageName.contains("gmx") || packageName.contains("mail") || packageName.contains("outlook") || packageName.contains("gmail") -> {
+                        
+                        val alertHeading = when {
+                            contentLower.contains("gas") || contentLower.contains("strom") || contentLower.contains("wasser") || contentLower.contains("zähler") || contentLower.contains("ausbau") -> "🔧 Versorger- & Zähler-Termin"
+                            contentLower.contains("arzt") || contentLower.contains("klinik") || contentLower.contains("therapie") -> "🩺 Gesundheit & Arzt-Termin"
+                            contentLower.contains("geburtstag") -> "🎂 Geburtstag heute!"
+                            contentLower.contains("hochzeitstag") || contentLower.contains("jahrestag") -> "💍 Wichtiger Jahrestag!"
+                            else -> "📅 Wichtige Nachricht / E-Mail"
+                        }
+
+                        showPriorityPopup(alertHeading, combinedContent.take(120), "service_alert")
+                        saveNotificationToDb("Life-Companion", alertHeading, title, combinedContent, "IMPORTANT")
                     }
                 }
+            }
+        }
+    }
+
+    private fun saveNotificationToDb(moduleName: String, description: String, title: String, text: String, status: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val db = JuarisDatabase.getDatabase(applicationContext)
+                db.securityLogDao().insertLog(
+                    SecurityLogEntity(
+                        timestamp = System.currentTimeMillis(),
+                        module = moduleName,
+                        description = description,
+                        status = status,
+                        details = "Titel: $title | Inhalt: $text"
+                    )
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "Fehler beim Speichern in die DB", e)
             }
         }
     }
