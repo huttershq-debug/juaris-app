@@ -98,17 +98,17 @@ class JuarisNotificationListenerService : NotificationListenerService() {
     }
 
     private fun triggerEmergencyProtocol(reason: String) {
-    Log.w(TAG, "🚨 NOTFALL-PROTOKOLL AUSGELÖST: $reason")
-    try {
-        val intent = Intent(applicationContext, EmergencyActivity::class.java).apply {
-            putExtra("reason", reason)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        Log.w(TAG, "🚨 NOTFALL-PROTOKOLL AUSGELÖST: $reason")
+        try {
+            val intent = Intent(applicationContext, EmergencyActivity::class.java).apply {
+                putExtra("reason", reason)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            applicationContext.startActivity(intent)
+        } catch (e: Exception) {
+            Log.e(TAG, "Fehler beim Starten der EmergencyActivity aus dem Hintergrund", e)
         }
-        applicationContext.startActivity(intent)
-    } catch (e: Exception) {
-        Log.e(TAG, "Fehler beim Starten der EmergencyActivity aus dem Hintergrund", e)
     }
-}
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         super.onNotificationPosted(sbn)
@@ -127,11 +127,9 @@ class JuarisNotificationListenerService : NotificationListenerService() {
             val fullContent = "App: $packageName | Titel: $title | Inhalt: $text"
             val fullMessageLower = fullContent.lowercase()
 
-            // 1. KI-Sicherheitsprüfung (Erkennt Phishing, Betrug, Angriffe)
             val isSafe = aiCore.evaluateContentSafety(fullContent, packageName)
 
             if (!isSafe) {
-                // Bedrohung abfangen und blockieren
                 try {
                     notification.key?.let { cancelNotification(it) }
                 } catch (e: Exception) {}
@@ -159,7 +157,6 @@ class JuarisNotificationListenerService : NotificationListenerService() {
                     "Betrugsversuch in ${packageName.substringAfterLast('.')} erkannt: $title"
                 )
             } else {
-                // 2. Prioritäten- & Kalender-Filter für sichere Nachrichten
                 when {
                     fullMessageLower.contains("mahnung") || fullMessageLower.contains("inkasso") || fullMessageLower.contains("zahlungsaufforderung") -> {
                         showPriorityPopup("🚨 WICHTIGE MAHNUNG", text.ifEmpty { title }, "finance_high")
@@ -247,7 +244,6 @@ class JuarisNotificationListenerService : NotificationListenerService() {
             .build()
 
         notificationManager.notify(System.currentTimeMillis().toInt(), priorityNotification)
-        Log.d(TAG, "⚡ Prioritäts-Popup ausgelöst: [$title] $message")
     }
 
     override fun onDestroy() {
@@ -261,4 +257,5 @@ class JuarisNotificationListenerService : NotificationListenerService() {
         return START_STICKY
     }
 }
+
 
