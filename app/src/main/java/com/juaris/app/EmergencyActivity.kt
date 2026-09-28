@@ -25,7 +25,7 @@ class EmergencyActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // WICHTIG: Weckt das Display auf und legt die Aktivität über den Sperrbildschirm
+        // Sperrbildschirm umgehen & App in den Vordergrund zwingen (Vollbild-Alarm)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
             setTurnScreenOn(true)
@@ -37,59 +37,55 @@ class EmergencyActivity : ComponentActivity() {
             )
         }
 
-        val reason = intent.getStringExtra("reason") ?: "Kritischer Notfall erkannt"
+        val reason = intent.getStringExtra("reason") ?: "Sicherheits-Notfall erkannt"
 
         setContent {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = Color.Black
-            ) {
-                EmergencyCountdownScreen(
-                    reason = reason,
-                    onCancel = {
-                        finish() // Bricht den Alarm ab und schließt das Fenster
-                    },
-                    onTimeOut = {
-                        triggerEmergencyCall()
-                    }
-                )
-            }
+            EmergencyAlarmScreen(
+                reason = reason,
+                onCancel = {
+                    finish()
+                },
+                onTriggerCall = {
+                    executeEmergencyCall()
+                }
+            )
         }
     }
 
-    private fun triggerEmergencyCall() {
+    private fun executeEmergencyCall() {
         try {
-            val callIntent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:112")).apply {
+            // SICHERER NOTRUF: Öffnet den Wählhebel mit der Notrufnummer 112
+            val dialIntent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:112")).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
-            startActivity(callIntent)
+            startActivity(dialIntent)
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        finish()
     }
 }
 
 @Composable
-fun EmergencyCountdownScreen(
+fun EmergencyAlarmScreen(
     reason: String,
     onCancel: () -> Unit,
-    onTimeOut: () -> Unit
+    onTriggerCall: () -> Unit
 ) {
-    var timeLeft by remember { mutableStateOf(6) } // Exakt 6 Sekunden Countdown
+    var countdown by remember { mutableStateOf(6) }
 
     LaunchedEffect(Unit) {
-        while (timeLeft > 0) {
+        while (countdown > 0) {
             delay(1000L)
-            timeLeft--
+            countdown--
         }
-        onTimeOut()
+        // Wenn der Countdown bei 0 ist, Notruf automatisch auslösen
+        onTriggerCall()
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF330000)), // Markanter Dunkelrot-Alarmhintergrund
+            .background(Color(0xFFCC0000)), // Aggressives Notfall-Rot
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -98,47 +94,51 @@ fun EmergencyCountdownScreen(
             modifier = Modifier.padding(24.dp)
         ) {
             Text(
-                text = "🚨 NOTFALL ERKANNT 🚨",
-                color = Color.Red,
-                fontSize = 28.sp,
+                text = "🚨 KRITISCHER NOTFALL 🚨",
+                color = Color.White,
+                fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = reason,
-                color = Color.White,
+                color = Color.Yellow,
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(48.dp))
             Text(
-                text = "$timeLeft",
-                color = Color.Red,
-                fontSize = 72.sp,
+                text = "$countdown",
+                color = Color.White,
+                fontSize = 80.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Sekunden bis zum automatischen Notruf (112)",
-                color = Color.LightGray,
+                text = "Sekunden bis automatischer Notruf (112)",
+                color = Color.White,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(64.dp))
+
             Button(
-                onClick = onCancel,
+                onClick = onTriggerCall,
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
+                modifier = Modifier.fillMaxWidth().height(56.dp)
             ) {
-                Text(
-                    text = "ABBRECHEN (Kein Notfall)",
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
-                )
+                Text(text = "📞 JETZT NOTRUF WÄHLEN (112)", color = Color.Red, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedButton(
+                onClick = onCancel,
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                modifier = Modifier.fillMaxWidth().height(50.dp)
+            ) {
+                Text(text = "Abbrechen (Kein Notfall)", color = Color.White, fontWeight = FontWeight.Bold)
             }
         }
     }
