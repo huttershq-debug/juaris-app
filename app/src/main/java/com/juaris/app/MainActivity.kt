@@ -104,7 +104,7 @@ class MainActivity : AppCompatActivity() {
         if (isGranted) {
             Toast.makeText(this, "Kalender-Zugriff erlaubt! Fristen-Wächter aktiv.", Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(this, "Hinweis: Ohne Kalender-Zugriff kann Juaris Geburtstage nicht automatisch scannen.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Hinweis: Ohne Kalender-Zugriff kann Juaris Termine nicht automatisch scannen.", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -213,6 +213,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_CALENDAR) !=
+            android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            calendarPermissionLauncher.launch(android.Manifest.permission.READ_CALENDAR)
+        }
+
         val calendarWorkRequest = androidx.work.PeriodicWorkRequestBuilder<CalendarScanWorker>(6, java.util.concurrent.TimeUnit.HOURS)
             .setConstraints(
                 androidx.work.Constraints.Builder()
@@ -273,7 +278,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Saubere Übergabe an die EmergencyActivity (Vollbild über Lockscreen mit 6s Countdown)
     fun executeEmergencyProtocol(reason: String) {
         try {
             securePrefs.edit().clear().apply()
@@ -446,19 +450,7 @@ fun WelcomeScreen() {
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit) {
     val context = LocalContext.current
-    var isBillingActive by remember { mutableStateOf(false) }
-
-    val billingManager = remember {
-        BillingManager(context, "juaris_monats_abo") {
-            onLoginSuccess()
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        billingManager.startConnection {
-            isBillingActive = true
-        }
-    }
+    val activity = context.findActivity()
 
     Box(
         modifier = Modifier.fillMaxSize().background(Color.Black),
@@ -475,25 +467,37 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Post-Quantum Security Suite\n1,99 € / Monat (Jederzeit kündbar)",
+                text = "Post-Quantum Security • 100% Offline",
                 color = Color.Gray,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(64.dp))
 
+            // REINER BIOMETRISCHER LOGIN (Keine Registrierung erforderlich)
             Button(
                 onClick = {
-                    context.findActivity()?.let { act ->
-                        billingManager.launchBillingFlow(act)
+                    if (activity != null) {
+                        val biometricManager = JuarisBiometricManager(activity)
+                        biometricManager.authenticateUser(
+                            title = "Juaris Biometrischer Login",
+                            subtitle = "Verifiziere deinen Fingerabdruck zum Entsperren",
+                            onSuccess = {
+                                Toast.makeText(context, "Erfolgreich eingeloggt!", Toast.LENGTH_SHORT).show()
+                                onLoginSuccess()
+                            },
+                            onError = { error ->
+                                Toast.makeText(context, "Login abgebrochen: $error", Toast.LENGTH_SHORT).show()
+                            }
+                        )
                     }
                 },
-                modifier = Modifier.fillMaxWidth().height(54.dp),
+                modifier = Modifier.fillMaxWidth().height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen, contentColor = Color.Black)
             ) {
-                Text(text = "Abo starten (Google Play Billing)", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.Black)
+                Text(text = "🔓 Mit Fingerabdruck anmelden", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.Black)
             }
 
             if (BuildConfig.DEBUG) {
@@ -503,7 +507,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                     border = BorderStroke(1.dp, Color(0xFFFF9900))
                 ) {
-                    Text(text = "[DEBUG] Entwickler-Bypass (Aktiv zum Testen)", color = Color(0xFFFF9900), fontSize = 12.sp)
+                    Text(text = "[DEBUG] Entwickler-Bypass", color = Color(0xFFFF9900), fontSize = 12.sp)
                 }
             }
         }
