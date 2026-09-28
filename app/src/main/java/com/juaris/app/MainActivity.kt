@@ -159,7 +159,8 @@ class MainActivity : AppCompatActivity() {
             )
 
             var showIntro by remember { mutableStateOf(true) }
-            var isLoggedIn by remember { mutableStateOf(securePrefs.getBoolean("is_logged_in", false)) }
+            // IMMER false beim App-Start -> Zwingt zu Biometrie bei jedem Öffnen!
+            var isLoggedIn by remember { mutableStateOf(false) }
 
             LaunchedEffect(Unit) {
                 delay(3000L)
@@ -178,7 +179,6 @@ class MainActivity : AppCompatActivity() {
                         !isLoggedIn -> {
                             LoginScreen(
                                 onLoginSuccess = {
-                                    securePrefs.edit().putBoolean("is_logged_in", true).apply()
                                     isLoggedIn = true
                                 }
                             )
@@ -390,7 +390,6 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-// Hilfsfunktionen für den Kontext
 private fun Context.findFragmentActivity(): FragmentActivity? = when (this) {
     is FragmentActivity -> this
     is android.content.ContextWrapper -> baseContext.findFragmentActivity()
@@ -459,6 +458,23 @@ fun WelcomeScreen() {
 fun LoginScreen(onLoginSuccess: () -> Unit) {
     val context = LocalContext.current
 
+    // Biometrie-Prompt beim Erscheinen des Login-Screens AUTOMATISCH starten
+    LaunchedEffect(Unit) {
+        val activity = context.findFragmentActivity()
+        if (activity != null) {
+            val biometricManager = JuarisBiometricManager(activity)
+            biometricManager.authenticateUser(
+                title = "Juaris Biometrischer Login",
+                subtitle = "Verifiziere deinen Fingerabdruck zum Entsperren",
+                onSuccess = {
+                    Toast.makeText(context, "Erfolgreich eingeloggt!", Toast.LENGTH_SHORT).show()
+                    onLoginSuccess()
+                },
+                onError = { _ -> }
+            )
+        }
+    }
+
     Box(
         modifier = Modifier.fillMaxSize().background(Color.Black),
         contentAlignment = Alignment.Center
@@ -483,7 +499,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(64.dp))
 
-            // REINER BIOMETRISCHER LOGIN (Sicherer FragmentActivity-Cast)
             Button(
                 onClick = {
                     val activity = context.findFragmentActivity()
@@ -500,8 +515,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                                 Toast.makeText(context, "Login abgebrochen: $error", Toast.LENGTH_SHORT).show()
                             }
                         )
-                    } else {
-                        Toast.makeText(context, "Fehler: Aktivität nicht gefunden", Toast.LENGTH_SHORT).show()
                     }
                 },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
