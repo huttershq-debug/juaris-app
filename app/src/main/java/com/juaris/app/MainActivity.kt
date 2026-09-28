@@ -275,18 +275,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun executeEmergencyProtocol(reason: String) {
-        try {
-            securePrefs.edit().clear().apply()
+   fun executeEmergencyProtocol(reason: String) {
+    try {
+        securePrefs.edit().clear().apply() // Vault aus Sicherheitsgründen sofort bereinigen
 
-            runOnUiThread {
-                var countdown = 3
-                val dialogView = TextView(this).apply {
-                    text = "🚨 GEFAHR ERKANNT ($reason)!\nNotruf 112 wird in $countdown Sekunden gewählt...\nTippe zum Abbrechen."
-                    textSize = 18f
-                    setTextColor(android.graphics.Color.RED)
-                    setPadding(50, 50, 50, 50)
-                }
+        val emergencyIntent = Intent(this, EmergencyActivity::class.java).apply {
+            putExtra("reason", reason)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        startActivity(emergencyIntent)
+
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
 
                 val dialog = AlertDialog.Builder(this)
                     .setTitle("JUARIS NOTFALL-SCHUTZ")
