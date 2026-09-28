@@ -2,18 +2,28 @@
     <string name="app_name">Juaris</string>
     <string name="status_protected">Устройство полностью защищено (Вкл. &amp; Выкл.)</string>
     <string name="status_warning">Обнаружено предупреждение безопасности</string>
-    <string name="tab_logs">Журналы безопасности</string>
+    <string name="tab_status">Статус</string>
+    <string name="tab_protection">Защита</string>
+    <string name="tab_locks">Блокировки</string>
+    <string name="tab_clipboard">Буфер обмена</string>
+    <string name="tab_permissions">Разрешения</string>
+    <string name="tab_swarm">Сварм</string>
+    <string name="tab_ai">ИИ</string>
+    <string name="tab_gestures">Жесты</string>
+    <string name="tab_info">Информация</string>
     <string name="tab_settings">Настройки</string>
+    <string name="air_gesture_title">Управление жестами в воздухе</string>
+    <string name="camera_scanner_label">Сканер камеры</string>
+    <string name="live_camera_status">Живая камера активна</string>
     <string name="call_protection_title">Защита вызовов</string>
-    <string name="log_call_incoming_blocked">Заблокирован входящий вызов: %3$s</string>
-    <string name="log_call_outgoing_blocked">Остановлен исходящий рискованный вызов: %3$s</string>
+    <string name="log_call_incoming_blocked">Заблокирован входящий вызов: %1$s</string>
+    <string name="log_call_outgoing_blocked">Остановлен исходящий рискованный вызов: %1$s</string>
     <string name="sms_protection_title">Фильтр SMS-фишинга</string>
-    <string name="log_sms_incoming_blocked">Заблокировано входящее фишинговое SMS: %3$s</string>
-    <string name="log_sms_outgoing_blocked">Остановлено исходящее вредоносное SMS: %3$s</string>
+    <string name="log_sms_incoming_blocked">Заблокировано входящее фишинговое SMS: %1$s</string>
+    <string name="log_sms_outgoing_blocked">Остановлено исходящее вредоносное SMS: %1$s</string>
     <string name="email_protection_title">Безопасность электронной почты</string>
-    <string name="log_email_incoming_blocked">Заблокировано входящее вредоносное письмо: %3$s</string>
-    <string name="log_email_outgoing_blocked">Исходящее письмо остановлено (угроза безопасности): %3$s</string>
-     <string name="juaris_app_welcome_text">Добро пожаловать в juaris — ваше приложение безопасности будущего. 100% прозрачно, 100% на вашем телефоне. Никакого облака. Ваша защита, ваш дом, ваши правила. С juaris у вас есть самая мощная приватная защита в мире. juaris, потому что вы и ваша безопасность важны для нас.</string>
+    <string name="log_email_incoming_blocked">Заблокировано входящее вредоносное письмо: %1$s</string>
+    <string name="log_email_outgoing_blocked">Исходящее письмо остановлено (угроза безопасности): %1$s</string>
+    <string name="juaris_app_welcome_text">Добро пожаловать в Juaris — ваше приложение безопасности будущего. 100% прозрачно, 100% на вашем телефоне. Никакого облака. Ваша защита, ваш дом, ваши правила.</string>
     <string name="juaris_app_welcome_audio_file">platzhalter_ru.m4a</string>
-
 </resources>
