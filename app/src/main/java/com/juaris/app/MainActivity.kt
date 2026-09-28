@@ -28,6 +28,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -389,6 +390,13 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
+// Hilfsfunktionen für den Kontext
+private fun Context.findFragmentActivity(): FragmentActivity? = when (this) {
+    is FragmentActivity -> this
+    is android.content.ContextWrapper -> baseContext.findFragmentActivity()
+    else -> null
+}
+
 private fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
     is android.content.ContextWrapper -> baseContext.findActivity()
@@ -450,7 +458,6 @@ fun WelcomeScreen() {
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit) {
     val context = LocalContext.current
-    val activity = context.findActivity()
 
     Box(
         modifier = Modifier.fillMaxSize().background(Color.Black),
@@ -476,9 +483,10 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(64.dp))
 
-            // REINER BIOMETRISCHER LOGIN (Keine Registrierung erforderlich)
+            // REINER BIOMETRISCHER LOGIN (Sicherer FragmentActivity-Cast)
             Button(
                 onClick = {
+                    val activity = context.findFragmentActivity()
                     if (activity != null) {
                         val biometricManager = JuarisBiometricManager(activity)
                         biometricManager.authenticateUser(
@@ -492,6 +500,8 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                                 Toast.makeText(context, "Login abgebrochen: $error", Toast.LENGTH_SHORT).show()
                             }
                         )
+                    } else {
+                        Toast.makeText(context, "Fehler: Aktivität nicht gefunden", Toast.LENGTH_SHORT).show()
                     }
                 },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
