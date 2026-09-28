@@ -30,7 +30,7 @@ fun SecurityLogsPage(logDao: SecurityLogDao) {
             color = MaterialTheme.colorScheme.primary
         )
         Text(
-            text = "Hier siehst du alle blockierten Bedrohungen sowie deine wichtigen Kalender-Einträge, Geburtstage und Fristen (100% lokal).",
+            text = "Vollständiger On-Device Überblick über all deine Apps, E-Mails, Fristen, Versorger und blockierten Bedrohungen (100% lokal).",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -41,7 +41,7 @@ fun SecurityLogsPage(logDao: SecurityLogDao) {
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Text(
-                    text = "Keine Einträge vorhanden. Dein Alltags- und Schutz-Hub ist bereit!",
+                    text = "Keine Einträge vorhanden. Der Omni-Wächter ist aktiv und scannt den Datenstrom!",
                     modifier = Modifier.padding(16.dp),
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -58,9 +58,9 @@ fun SecurityLogsPage(logDao: SecurityLogDao) {
                                     log.status.equals("WARNING", ignoreCase = true)
 
                     val borderColor = when {
-                        isImportant -> Color(0xFFFFD700) // Edles Gold für Geburtstage, Hochzeitstage & Fristen
-                        isBlocked -> Color(0xFFFF3333) // Rot für Blockaden & finanzielle Warnungen
-                        else -> NeonGiftgruen // Neon-Grün für normale Statusmeldungen
+                        isImportant -> Color(0xFFFFD700) // Edles Gold für Termine, Zähler, Geburtstage & E-Mails
+                        isBlocked -> Color(0xFFFF3333) // Rot für Mahnungen & Phishing-Blockaden
+                        else -> NeonGiftgruen // Neon-Grün für Systemmeldungen
                     }
 
                     Card(
@@ -72,7 +72,6 @@ fun SecurityLogsPage(logDao: SecurityLogDao) {
                             modifier = Modifier.padding(16.dp),
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            // Kopfzeile: Modul & Status-Badge
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
@@ -95,14 +94,12 @@ fun SecurityLogsPage(logDao: SecurityLogDao) {
                                 }
                             }
 
-                            // Hauptbeschreibung
                             Text(
                                 text = log.description,
                                 style = MaterialTheme.typography.titleMedium,
                                 color = Color.White
                             )
 
-                            // Zusätzliche Details
                             if (!log.details.isNullOrBlank()) {
                                 Text(
                                     text = log.details,
@@ -111,7 +108,6 @@ fun SecurityLogsPage(logDao: SecurityLogDao) {
                                 )
                             }
 
-                            // Zeitstempel
                             Text(
                                 text = SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault()).format(Date(log.timestamp)),
                                 style = MaterialTheme.typography.bodySmall,
