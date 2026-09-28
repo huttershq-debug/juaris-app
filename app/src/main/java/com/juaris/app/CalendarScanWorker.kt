@@ -45,7 +45,7 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
                 set(Calendar.MILLISECOND, 0)
             }
             val startOfDay = calendar.timeInMillis
-            
+           
             calendar.set(Calendar.HOUR_OF_DAY, 23)
             calendar.set(Calendar.MINUTE, 59)
             calendar.set(Calendar.SECOND, 59)
@@ -81,11 +81,11 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
                     // 1. Meilensteine & Beziehungen (Hochzeitstag, Jahrestag, Geburtstag)
                     val isAnniversary = combined.contains("hochzeitstag") || combined.contains("jahrestag") || combined.contains("jubiläum")
                     val isBirthday = combined.contains("geburtstag") || combined.contains("birthday")
-                    
+                   
                     // 2. Gesundheit & Termine
                     val isMedical = combined.contains("arzt") || combined.contains("zahnarzt") || combined.contains("termin") || combined.contains("klinik") || combined.contains("therapie")
-                    
-                    // 3. Finanzen, Rechnungen & Fristen
+                   
+                    // 3. Finanzen, Rechnungen & Fristen (Höchste Priorität -> status = "WARNING" -> Rot)
                     val isFinancial = combined.contains("rechnung") || combined.contains("mahnung") || combined.contains("inkasso") || combined.contains("frist") || combined.contains("steuer") || combined.contains("bescheid") || combined.contains("zahlung")
 
                     // 4. Reisen & Mobilität
@@ -94,21 +94,21 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
                     val isImportant = isAnniversary || isBirthday || isMedical || isFinancial || isTravel
 
                     if (isImportant) {
-                        val alertTitle = when {
-                            isAnniversary -> "💍 Wichtiger Jahrestag / Hochzeitstag heute!"
-                            isBirthday -> "🎂 Geburtstag heute!"
-                            isMedical -> "🩺 Wichtiger Arzt- oder Gesundheitstermin"
-                            isFinancial -> "🚨 Wichtige finanzielle Frist / Rechnung"
-                            isTravel -> "✈️ Reise- oder Mobilitäts-Termin"
-                            else -> "📅 Wichtiger Tages-Eintrag"
+                        val (alertTitle, dbStatus) = when {
+                            isFinancial -> Pair("🚨 Wichtige finanzielle Frist / Rechnung", "WARNING") // Rot in Logs
+                            isAnniversary -> Pair("💍 Wichtiger Jahrestag / Hochzeitstag heute!", "IMPORTANT") // Orange/Wichtig
+                            isBirthday -> Pair("🎂 Geburtstag heute!", "IMPORTANT")
+                            isMedical -> Pair("🩺 Wichtiger Arzt- oder Gesundheitstermin", "IMPORTANT")
+                            isTravel -> Pair("✈️ Reise- oder Mobilitäts-Termin", "IMPORTANT")
+                            else -> Pair("📅 Wichtiger Tages-Eintrag", "INFO")
                         }
 
-                        // In die lokale verschlüsselte Datenbank schreiben
+                        // In die lokale verschlüsselte Datenbank schreiben mit passendem Status für die Farbgebung
                         CoroutineScope(Dispatchers.IO).launch {
                             db.securityLogDao().insertLog(
                                 SecurityLogEntity(
                                     timestamp = System.currentTimeMillis(),
-                                    status = "IMPORTANT",
+                                    status = dbStatus,
                                     module = "Life-Companion-Wächter",
                                     description = alertTitle,
                                     details = "Ereignis: $title | Notiz: $description"
@@ -165,4 +165,5 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
         notificationManager.notify((System.currentTimeMillis() % 10000).toInt(), notification)
     }
 }
+
 
