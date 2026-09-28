@@ -52,14 +52,15 @@ fun SecurityLogsPage(logDao: SecurityLogDao) {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(logs) { log ->
-                    // Visuelle Unterscheidung nach Status
-                    val isImportant = log.status == "IMPORTANT"
-                    val isBlocked = log.status == "BLOCKED" || log.status == "QUARANTINE"
+                    val isImportant = log.status.equals("IMPORTANT", ignoreCase = true)
+                    val isBlocked = log.status.equals("BLOCKED", ignoreCase = true) || 
+                                    log.status.equals("QUARANTINE", ignoreCase = true) || 
+                                    log.status.equals("WARNING", ignoreCase = true)
 
                     val borderColor = when {
                         isImportant -> Color(0xFFFFD700) // Edles Gold für Geburtstage, Hochzeitstage & Fristen
-                        isBlocked -> Color(0xFFFF3333) // Rot für Blockaden
-                        else -> NeonGiftgruen // Grün für normale Statusmeldungen
+                        isBlocked -> Color(0xFFFF3333) // Rot für Blockaden & finanzielle Warnungen
+                        else -> NeonGiftgruen // Neon-Grün für normale Statusmeldungen
                     }
 
                     Card(
@@ -94,14 +95,14 @@ fun SecurityLogsPage(logDao: SecurityLogDao) {
                                 }
                             }
 
-                            // Hauptbeschreibung (z.B. "🎂 Geburtstag heute!")
+                            // Hauptbeschreibung
                             Text(
                                 text = log.description,
                                 style = MaterialTheme.typography.titleMedium,
                                 color = Color.White
                             )
 
-                            // Zusätzliche Details (z.B. Ereignis-Name & Notizen)
+                            // Zusätzliche Details
                             if (!log.details.isNullOrBlank()) {
                                 Text(
                                     text = log.details,
@@ -123,3 +124,4 @@ fun SecurityLogsPage(logDao: SecurityLogDao) {
         }
     }
 }
+
