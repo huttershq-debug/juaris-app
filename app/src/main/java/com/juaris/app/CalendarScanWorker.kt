@@ -11,100 +11,99 @@ import android.os.Build
 import android.provider.CalendarContract
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import androidx.work.Worker
+import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 
-class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : Worker(appContext, workerParams) {
+class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : CoroutineWorker(appContext, workerParams) {
 
     companion object {
         private const val CHANNEL_ID = "juaris_life_companion_alerts"
     }
 
-    override fun doWork(): Result {
-        return try {
-            val context = applicationContext
-            val db = JuarisDatabase.getDatabase(context)
+    override suspend fun doWork(): Result {
+        return withContext(Dispatchers.IO) {
+            try {
+                val context = applicationContext
+                val db = JuarisDatabase.getDatabase(context)
 
-            if (ContextCompat.checkSelfPermission(
-                    context,
-                    android.Manifest.permission.READ_CALENDAR
-                ) != android.content.pm.PackageManager.PERMISSION_GRANTED
-            ) {
-                return Result.success()
-            }
+                if (ContextCompat.checkSelfPermission(
+                        context,
+                        android.Manifest.permission.READ_CALENDAR
+                    ) != android.content.pm.PackageManager.PERMISSION_GRANTED
+                ) {
+                    return@withContext Result.success()
+                }
 
-            // Zeitfenster für den heutigen Tag definieren (00:00 bis 23:59 Uhr)
-            val calendar = Calendar.getInstance().apply {
-                set(Calendar.HOUR_OF_DAY, 0)
-                set(Calendar.MINUTE, 0)
-                set(Calendar.SECOND, 0)
-                set(Calendar.MILLISECOND, 0)
-            }
-            val startOfDay = calendar.timeInMillis
-           
-            calendar.set(Calendar.HOUR_OF_DAY, 23)
-            calendar.set(Calendar.MINUTE, 59)
-            calendar.set(Calendar.SECOND, 59)
-            val endOfDay = calendar.timeInMillis
+                // Zeitfenster für den heutigen Tag definieren (00:00 bis 23:59 Uhr)
+                val calendar = Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+                val startOfDay = calendar.timeInMillis
+               
+                calendar.set(Calendar.HOUR_OF_DAY, 23)
+                calendar.set(Calendar.MINUTE, 59)
+                calendar.set(Calendar.SECOND, 59)
+                val endOfDay = calendar.timeInMillis
 
-            val builder = CalendarContract.Instances.CONTENT_URI.buildUpon()
-            ContentUris.appendId(builder, startOfDay)
-            ContentUris.appendId(builder, endOfDay)
+                val builder = CalendarContract.Instances.CONTENT_URI.buildUpon()
+                ContentUris.appendId(builder, startOfDay)
+                ContentUris.appendId(builder, endOfDay)
 
-            val projection = arrayOf(
-                CalendarContract.Instances.TITLE,
-                CalendarContract.Instances.BEGIN,
-                CalendarContract.Instances.DESCRIPTION
-            )
+                val projection = arrayOf(
+                    CalendarContract.Instances.TITLE,
+                    CalendarContract.Instances.BEGIN,
+                    CalendarContract.Instances.DESCRIPTION
+                )
 
-            val cursor: Cursor? = context.contentResolver.query(
-                builder.build(),
-                projection,
-                null,
-                null,
-                "${CalendarContract.Instances.BEGIN} ASC"
-            )
+                val cursor: Cursor? = context.contentResolver.query(
+                    builder.build(),
+                    projection,
+                    null,
+                    null,
+                    "${CalendarContract.Instances.BEGIN} ASC"
+                )
 
-            cursor?.use {
-                val titleIdx = it.getColumnIndex(CalendarContract.Instances.TITLE)
-                val descIdx = it.getColumnIndex(CalendarContract.Instances.DESCRIPTION)
+                cursor?.use {
+                    val titleIdx = it.getColumnIndex(CalendarContract.Instances.TITLE)
+                    val descIdx = it.getColumnIndex(CalendarContract.Instances.DESCRIPTION)
 
-                while (it.moveToNext()) {
-                    val title = if (titleIdx != -1) it.getString(titleIdx) ?: "" else ""
-                    val description = if (descIdx != -1) it.getString(descIdx) ?: "" else ""
-                    val combined = "$title $description".lowercase()
+                    while (it.moveToNext()) {
+                        val title = if (titleIdx != -1) it.getString(titleIdx) ?: "" else ""
+                        val description = if (descIdx != -1) it.getString(descIdx) ?: "" else ""
+                        val combined = "$title $description".lowercase()
 
-                    // 1. Meilensteine & Beziehungen (Hochzeitstag, Jahrestag, Geburtstag)
-                    val isAnniversary = combined.contains("hochzeitstag") || combined.contains("jahrestag") || combined.contains("jubiläum")
-                    val isBirthday = combined.contains("geburtstag") || combined.contains("birthday")
-                   
-                    // 2. Gesundheit & Termine
-                    val isMedical = combined.contains("arzt") || combined.contains("zahnarzt") || combined.contains("termin") || combined.contains("klinik") || combined.contains("therapie")
-                   
-                    // 3. Finanzen, Rechnungen & Fristen (Höchste Priorität -> status = "WARNING" -> Rot)
-                    val isFinancial = combined.contains("rechnung") || combined.contains("mahnung") || combined.contains("inkasso") || combined.contains("frist") || combined.contains("steuer") || combined.contains("bescheid") || combined.contains("zahlung")
+                        // 1. Meilensteine & Beziehungen (Hochzeitstag, Jahrestag, Geburtstag)
+                        val isAnniversary = combined.contains("hochzeitstag") || combined.contains("jahrestag") || combined.contains("jubiläum")
+                        val isBirthday = combined.contains("geburtstag") || combined.contains("birthday")
+                       
+                        // 2. Gesundheit & Termine
+                        val isMedical = combined.contains("arzt") || combined.contains("zahnarzt") || combined.contains("termin") || combined.contains("klinik") || combined.contains("therapie")
+                       
+                        // 3. Finanzen, Rechnungen & Fristen (Höchste Priorität -> status = "WARNING" -> Rot)
+                        val isFinancial = combined.contains("rechnung") || combined.contains("mahnung") || combined.contains("inkasso") || combined.contains("frist") || combined.contains("steuer") || combined.contains("bescheid") || combined.contains("zahlung")
 
-                    // 4. Reisen & Mobilität
-                    val isTravel = combined.contains("flug") || combined.contains("reise") || combined.contains("hotel") || combined.contains("zug") || combined.contains("ticket")
+                        // 4. Reisen & Mobilität
+                        val isTravel = combined.contains("flug") || combined.contains("reise") || combined.contains("hotel") || combined.contains("zug") || combined.contains("ticket")
 
-                    val isImportant = isAnniversary || isBirthday || isMedical || isFinancial || isTravel
+                        val isImportant = isAnniversary || isBirthday || isMedical || isFinancial || isTravel
 
-                    if (isImportant) {
-                        val (alertTitle, dbStatus) = when {
-                            isFinancial -> Pair("🚨 Wichtige finanzielle Frist / Rechnung", "WARNING") // Rot in Logs
-                            isAnniversary -> Pair("💍 Wichtiger Jahrestag / Hochzeitstag heute!", "IMPORTANT") // Orange/Wichtig
-                            isBirthday -> Pair("🎂 Geburtstag heute!", "IMPORTANT")
-                            isMedical -> Pair("🩺 Wichtiger Arzt- oder Gesundheitstermin", "IMPORTANT")
-                            isTravel -> Pair("✈️ Reise- oder Mobilitäts-Termin", "IMPORTANT")
-                            else -> Pair("📅 Wichtiger Tages-Eintrag", "INFO")
-                        }
+                        if (isImportant) {
+                            val (alertTitle, dbStatus) = when {
+                                isFinancial -> Pair("🚨 Wichtige finanzielle Frist / Rechnung", "WARNING") // Rot in Logs
+                                isAnniversary -> Pair("💍 Wichtiger Jahrestag / Hochzeitstag heute!", "IMPORTANT") // Gold/Wichtig
+                                isBirthday -> Pair("🎂 Geburtstag heute!", "IMPORTANT")
+                                isMedical -> Pair("🩺 Wichtiger Arzt- oder Gesundheitstermin", "IMPORTANT")
+                                isTravel -> Pair("✈️ Reise- oder Mobilitäts-Termin", "IMPORTANT")
+                                else -> Pair("📅 Wichtiger Tages-Eintrag", "INFO")
+                            }
 
-                        // In die lokale verschlüsselte Datenbank schreiben mit passendem Status für die Farbgebung
-                        CoroutineScope(Dispatchers.IO).launch {
+                            // SICHERES SCHREIBEN: Wartet im IO-Kontext, bis die DB den Eintrag gespeichert hat
                             db.securityLogDao().insertLog(
                                 SecurityLogEntity(
                                     timestamp = System.currentTimeMillis(),
@@ -114,17 +113,18 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
                                     details = "Ereignis: $title | Notiz: $description"
                                 )
                             )
-                        }
 
-                        // Sofortiges High-Priority Popup für den Nutzer
-                        showLifePopup(context, alertTitle, title.ifEmpty { "Eintrag im Kalender gefunden" })
+                            // Sofortiges High-Priority Popup für den Nutzer
+                            showLifePopup(context, alertTitle, title.ifEmpty { "Eintrag im Kalender gefunden" })
+                        }
                     }
                 }
-            }
 
-            Result.success()
-        } catch (e: Exception) {
-            Result.failure()
+                Result.success()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Result.failure()
+            }
         }
     }
 
@@ -165,5 +165,4 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
         notificationManager.notify((System.currentTimeMillis() % 10000).toInt(), notification)
     }
 }
-
 
