@@ -2,8 +2,19 @@
     <string name="app_name">جوارس سیکیورٹی</string>
     <string name="status_protected">آلہ مکمل طور پر محفوظ ہے (آنے اور جانے والا)</string>
     <string name="status_warning">سیکیورٹی کی تنبیہ کا پتہ چلا</string>
-    <string name="tab_logs">سیکیورٹی لاگز</string>
+    <string name="tab_status">حالت</string>
+    <string name="tab_protection">تحفظ</string>
+    <string name="tab_locks">تالا</string>
+    <string name="tab_clipboard">کلپ بورڈ</string>
+    <string name="tab_permissions">اجازتیں</string>
+    <string name="tab_swarm">سوارم</string>
+    <string name="tab_ai">AI</string>
+    <string name="tab_gestures">اشارے</string>
+    <string name="tab_info">معلومات</string>
     <string name="tab_settings">ترتیبات</string>
+    <string name="air_gesture_title">ایئر جسچر کنٹرول</string>
+    <string name="camera_scanner_label">کیمرہ اسکینر</string>
+    <string name="live_camera_status">لائیو کیمرہ فعال</string>
     <string name="call_protection_title">کال پروٹیکشن</string>
     <string name="log_call_incoming_blocked">آنے والی کال مسدود کر دی گئی: %1$s</string>
     <string name="log_call_outgoing_blocked">خطرناک جانے والی کال روک دی گئی: %1$s</string>
@@ -13,6 +24,6 @@
     <string name="email_protection_title">ای میل سیکیورٹی</string>
     <string name="log_email_incoming_blocked">آنے والا نقصان دہ ای میل مسدود کر دیا گیا: %1$s</string>
     <string name="log_email_outgoing_blocked">جانے والا ای میل روک دیا گیا (سیکیورٹی رسک): %1$s</string>
-     <string name="juaris_app_welcome_text">جوارس (juaris) میں خوش آمدید، مستقبل کی آپ کی سیکیورٹی ایپ۔ %100 شفاف، %100 آپ کے فون پر۔ کوئی کلاؤڈ نہیں۔ آپ کی حفاظت، آپ کا گھر، آپ کے قوانین۔ جوارس کے ساتھ آپ کے पास दुनिया की सबसे ताकतवर निजी सुरक्षा है। جوارس، کیونکہ آپ اور آپ کی سیکیورٹی ہمارے لیے اہم ہیں۔</string>
+    <string name="juaris_app_welcome_text">جوارس میں خوش آمدید، مستقبل کی آپ کی سیکیورٹی ایپ۔ 100% شفاف، 100% آپ کے فون پر۔ کوئی کلاؤڈ نہیں۔ آپ کی حفاظت، آپ کا گھر، آپ کے قوانین۔</string>
     <string name="juaris_app_welcome_audio_file">platzhalter_ur.m4a</string>
 </resources>
