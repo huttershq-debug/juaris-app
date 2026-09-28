@@ -98,7 +98,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-        private val calendarPermissionLauncher = registerForActivityResult(
+    private val calendarPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
@@ -213,11 +213,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-         // Autonomen Kalender-Worker im Hintergrund registrieren
         val calendarWorkRequest = androidx.work.PeriodicWorkRequestBuilder<CalendarScanWorker>(6, java.util.concurrent.TimeUnit.HOURS)
             .setConstraints(
                 androidx.work.Constraints.Builder()
-                    .setRequiredNetworkType(androidx.work.NetworkType.NOT_REQUIRED) // 100% Offline!
+                    .setRequiredNetworkType(androidx.work.NetworkType.NOT_REQUIRED)
                     .build()
             )
             .build()
@@ -227,7 +226,6 @@ class MainActivity : AppCompatActivity() {
             androidx.work.ExistingPeriodicWorkPolicy.KEEP,
             calendarWorkRequest
         )
-
 
         val isListenerEnabled = Settings.Secure.getString(
             contentResolver,
@@ -275,51 +273,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-   fun executeEmergencyProtocol(reason: String) {
-    try {
-        securePrefs.edit().clear().apply() // Vault aus Sicherheitsgründen sofort bereinigen
+    // Saubere Übergabe an die EmergencyActivity (Vollbild über Lockscreen mit 6s Countdown)
+    fun executeEmergencyProtocol(reason: String) {
+        try {
+            securePrefs.edit().clear().apply()
 
-        val emergencyIntent = Intent(this, EmergencyActivity::class.java).apply {
-            putExtra("reason", reason)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-        }
-        startActivity(emergencyIntent)
-
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-}
-
-                val dialog = AlertDialog.Builder(this)
-                    .setTitle("JUARIS NOTFALL-SCHUTZ")
-                    .setView(dialogView)
-                    .setCancelable(false)
-                    .setNegativeButton("ABBRECHEN (Kein Notfall)") { d, _ ->
-                        d.dismiss()
-                        Toast.makeText(this, "Notfall-Alarm abgebrochen.", Toast.LENGTH_LONG).show()
-                    }
-                    .create()
-
-                dialog.show()
-
-                val handler = Handler(mainLooper)
-                val runnable = object : Runnable {
-                    override fun run() {
-                        countdown--
-                        if (countdown > 0) {
-                            dialogView.text = "🚨 GEFAHR ERKANNT ($reason)!\nNotruf 112 wird in $countdown Sekunden gewählt...\nTippe zum Abbrechen."
-                            handler.postDelayed(this, 1000)
-                        } else {
-                            dialog.dismiss()
-                            val callIntent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:112")).apply {
-                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                            }
-                            startActivity(callIntent)
-                        }
-                    }
-                }
-                handler.postDelayed(runnable, 1000)
+            val emergencyIntent = Intent(this, EmergencyActivity::class.java).apply {
+                putExtra("reason", reason)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
+            startActivity(emergencyIntent)
+
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -634,7 +598,7 @@ fun JuarisMainDashboard(
             modifier = Modifier.fillMaxSize().padding(innerPadding)
         ) { page ->
             when (page) {
-                 0 -> StatusPage(
+                0 -> StatusPage(
                     logs = liveLogs,
                     onSimulateThreat = {
                         coroutineScope.launch {
@@ -770,7 +734,11 @@ fun StatusPage(
     onExportLogs: () -> Unit,
     onPanicWipe: () -> Unit
 ) {
-    val blockedCount = logs.count { h -> h.status == "BLOCKED" || h.status == "QUARANTINE" }
+    val blockedCount = logs.count { h -> 
+        h.status.equals("BLOCKED", ignoreCase = true) || 
+        h.status.equals("QUARANTINE", ignoreCase = true) ||
+        h.status.equals("WARNING", ignoreCase = true)
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(16.dp),
