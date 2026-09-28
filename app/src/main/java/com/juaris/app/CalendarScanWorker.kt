@@ -37,7 +37,6 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
                     return@withContext Result.success()
                 }
 
-                // Zeitfenster für den heutigen Tag definieren (00:00 bis 23:59 Uhr)
                 val calendar = Calendar.getInstance().apply {
                     set(Calendar.HOUR_OF_DAY, 0)
                     set(Calendar.MINUTE, 0)
@@ -78,44 +77,39 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
                         val description = if (descIdx != -1) it.getString(descIdx) ?: "" else ""
                         val combined = "$title $description".lowercase()
 
-                        // 🚫 SCHRITT 1: Strikter Werbe-, Spam- und Junk-Filter
+                        // 🚫 SPAM- & WERBEFILTER
                         val spamKeywords = listOf(
                             "gewinn", "gutschein", "casino", "krypto", "bitcoin", "gratis",
                             "rabatt", "deal", "werbung", "newsletter", "angebot", "cashback",
-                            "lotterie", "million", "gewonnen", "kostenlos", "sale", "voucher",
-                            "promo", "gewinnspiel", "click", "subscribe", "abonnieren"
+                            "lotterie", "million", "gewonnen", "kostenlos", "sale", "voucher"
                         )
-                        val isSpamOrAd = spamKeywords.any { spamWord -> combined.contains(spamWord) }
-                        if (isSpamOrAd) {
-                            continue // Überspringt Werbung und Spam komplett!
+                        if (spamKeywords.any { spamWord -> combined.contains(spamWord) }) {
+                            continue
                         }
 
-                        // 2. Meilensteine & Beziehungen (Hochzeitstag, Jahrestag, Geburtstag)
                         val isAnniversary = combined.contains("hochzeitstag") || combined.contains("jahrestag") || combined.contains("jubiläum")
                         val isBirthday = combined.contains("geburtstag") || combined.contains("birthday")
-                       
-                        // 3. Gesundheit & Termine
                         val isMedical = combined.contains("arzt") || combined.contains("zahnarzt") || combined.contains("termin") || combined.contains("klinik") || combined.contains("therapie")
-                       
-                        // 4. Finanzen, Rechnungen & Fristen (Höchste Priorität -> status = "WARNING" -> Rot)
                         val isFinancial = combined.contains("rechnung") || combined.contains("mahnung") || combined.contains("inkasso") || combined.contains("frist") || combined.contains("steuer") || combined.contains("bescheid") || combined.contains("zahlung")
-
-                        // 5. Reisen & Mobilität
                         val isTravel = combined.contains("flug") || combined.contains("reise") || combined.contains("hotel") || combined.contains("zug") || combined.contains("ticket")
+                        val isServiceOrHome = combined.contains("gas") || combined.contains("strom") || combined.contains("wasser") || 
+                                              combined.contains("zähler") || combined.contains("ausbau") || combined.contains("ablesung") || 
+                                              combined.contains("wartung") || combined.contains("handwerker") || combined.contains("installateur") || 
+                                              combined.contains("service") || combined.contains("reparatur")
 
-                        val isImportant = isAnniversary || isBirthday || isMedical || isFinancial || isTravel
+                        val isImportant = isAnniversary || isBirthday || isMedical || isFinancial || isTravel || isServiceOrHome
 
                         if (isImportant) {
                             val (alertTitle, dbStatus) = when {
-                                isFinancial -> Pair("🚨 Wichtige finanzielle Frist / Rechnung", "WARNING") // Rot in Logs
-                                isAnniversary -> Pair("💍 Wichtiger Jahrestag / Hochzeitstag heute!", "IMPORTANT") // Gold/Wichtig
+                                isFinancial -> Pair("🚨 Wichtige finanzielle Frist / Rechnung", "WARNING")
+                                isServiceOrHome -> Pair("🔧 Wichtiger Versorger- oder Zähltermin", "IMPORTANT")
+                                isAnniversary -> Pair("💍 Wichtiger Jahrestag / Hochzeitstag heute!", "IMPORTANT")
                                 isBirthday -> Pair("🎂 Geburtstag heute!", "IMPORTANT")
                                 isMedical -> Pair("🩺 Wichtiger Arzt- oder Gesundheitstermin", "IMPORTANT")
                                 isTravel -> Pair("✈️ Reise- oder Mobilitäts-Termin", "IMPORTANT")
                                 else -> Pair("📅 Wichtiger Tages-Eintrag", "INFO")
                             }
 
-                            // In die lokale verschlüsselte Room-Datenbank schreiben
                             db.securityLogDao().insertLog(
                                 SecurityLogEntity(
                                     timestamp = System.currentTimeMillis(),
@@ -126,7 +120,6 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
                                 )
                             )
 
-                            // Sofortiges High-Priority Popup für den Nutzer
                             showLifePopup(context, alertTitle, title.ifEmpty { "Eintrag im Kalender gefunden" })
                         }
                     }
@@ -149,7 +142,7 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
                 "Juaris Life Companion & Fristen",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = "Unverzichtbare Alarme für Hochzeitstage, Geburtstage, Termine und Fristen"
+                description = "Unverzichtbare Alarme für Termine und Fristen"
                 enableVibration(true)
             }
             notificationManager.createNotificationChannel(channel)
@@ -177,4 +170,5 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
         notificationManager.notify((System.currentTimeMillis() % 10000).toInt(), notification)
     }
 }
+
 
