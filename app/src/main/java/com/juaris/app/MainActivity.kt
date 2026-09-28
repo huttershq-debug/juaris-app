@@ -17,11 +17,7 @@ import android.net.Uri
 import android.net.VpnService
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.os.PowerManager
 import android.provider.Settings
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -35,6 +31,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -159,7 +156,6 @@ class MainActivity : AppCompatActivity() {
             )
 
             var showIntro by remember { mutableStateOf(true) }
-            // IMMER false beim App-Start -> Zwingt zu Biometrie bei jedem Öffnen!
             var isLoggedIn by remember { mutableStateOf(false) }
 
             LaunchedEffect(Unit) {
@@ -458,7 +454,6 @@ fun WelcomeScreen() {
 fun LoginScreen(onLoginSuccess: () -> Unit) {
     val context = LocalContext.current
 
-    // Biometrie-Prompt beim Erscheinen des Login-Screens AUTOMATISCH starten
     LaunchedEffect(Unit) {
         val activity = context.findFragmentActivity()
         if (activity != null) {
@@ -557,8 +552,16 @@ fun JuarisMainDashboard(
     var gestureStatusText by remember { mutableStateOf("Bereit") }
 
     val tabs = listOf(
-        "Status", "Schutz", "Sperren", "Logs", "Clipboard",
-        "Rechte", "Schwarm", "KI", "Gesten", "Info"
+        stringResource(R.string.tab_status),
+        stringResource(R.string.tab_protection),
+        stringResource(R.string.tab_locks),
+        stringResource(R.string.tab_logs),
+        stringResource(R.string.tab_clipboard),
+        stringResource(R.string.tab_permissions),
+        stringResource(R.string.tab_swarm),
+        stringResource(R.string.tab_ai),
+        stringResource(R.string.tab_gestures),
+        stringResource(R.string.tab_info)
     )
 
     val pagerState = rememberPagerState(pageCount = { tabs.size })
@@ -602,7 +605,7 @@ fun JuarisMainDashboard(
     Scaffold(
         topBar = {
             Column {
-                TopAppBar(title = { Text("Juaris Security Suite (Local-First)") })
+                TopAppBar(title = { Text(stringResource(R.string.app_name)) })
                 ScrollableTabRow(
                     selectedTabIndex = pagerState.currentPage,
                     edgePadding = 16.dp,
@@ -761,8 +764,8 @@ fun StatusPage(
     onExportLogs: () -> Unit,
     onPanicWipe: () -> Unit
 ) {
-    val blockedCount = logs.count { h -> 
-        h.status.equals("BLOCKED", ignoreCase = true) || 
+    val blockedCount = logs.count { h ->
+        h.status.equals("BLOCKED", ignoreCase = true) ||
         h.status.equals("QUARANTINE", ignoreCase = true) ||
         h.status.equals("WARNING", ignoreCase = true)
     }
@@ -1288,4 +1291,5 @@ fun PrivacyAndLegalContent() {
         }
     }
 }
+
 
