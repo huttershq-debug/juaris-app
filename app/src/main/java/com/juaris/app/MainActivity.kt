@@ -1268,7 +1268,7 @@ fun PrivacyAndLegalContent() {
                         color = NeonGiftgruen,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.clickable {
-                            uriHandler.openUri("https://huetterhq-debug.github.io/juaris-app/privacy.md")
+                            uriHandler.openUri("https://juaris.com/privacy")
                         }
                     )
 
