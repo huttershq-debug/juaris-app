@@ -32,6 +32,7 @@ Schulgasse 4/15
 
 **Kontakt:**  
 E-Mail: support@juaris.com 
+Web: www.juaris.com
 
 **Verantwortlich für den Inhalt:**  
 Benedikt Wolfgang Hütter
