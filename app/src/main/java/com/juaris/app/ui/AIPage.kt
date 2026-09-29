@@ -1,6 +1,7 @@
 package com.juaris.app.ui
 
 import android.content.ContentUris
+import android.net.Uri
 import android.provider.CalendarContract
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,7 +28,7 @@ fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
     val context = LocalContext.current
     val aiStatus by aiCore.aiStatus.collectAsState()
     val threatLevel by aiCore.threatLevel.collectAsState()
-    var aiInsights by remember { mutableStateOf("Local AI Core Online. Bereit für den vollständigen Gerätescan (Room-DB & Kalender).") }
+    var aiInsights by remember { mutableStateOf("Local AI Core Online. Bereit für den vollständigen Gerätescan (Room-DB, Kalender & SMS).") }
     val coroutineScope = rememberCoroutineScope()
     val db = remember { JuarisDatabase.getDatabase(context) }
 
@@ -50,13 +51,13 @@ fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
                     Button(
                         onClick = {
                             coroutineScope.launch {
-                                aiInsights = "⏳ Deep-Scan läuft: Durchsuche gesamte Room-Datenbank und den Gerätekalender..."
+                                aiInsights = "⏳ Deep-Scan läuft: Durchsuche Room-DB, Kalender und SMS-Posteingang..."
 
                                 val resultReport = withContext(Dispatchers.IO) {
                                     val reportBuilder = StringBuilder()
                                     var totalFound = 0
 
-                                    // 1. SCHRITT: Durchsuche alle Logs in der Room-Datenbank
+                                    // 1. SCHRITT: Durchsuche alle Logs in der Room-Datenbank (Multilingual & Global)
                                     val allLogs = try {
                                         db.securityLogDao().getAllLogsSync()
                                     } catch (e: Exception) {
@@ -65,9 +66,13 @@ fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
 
                                     val matchingLogs = allLogs.filter { log ->
                                         val content = "${log.module} ${log.description} ${log.details}".lowercase()
-                                        content.contains("evn") || content.contains("gas") || content.contains("strom") ||
-                                        content.contains("wasser") || content.contains("zähler") || content.contains("ausbau") ||
-                                        content.contains("rechnung") || content.contains("mahnung") || content.contains("termin")
+                                        content.contains("evn") || content.contains("energy") || content.contains("strom") || 
+                                        content.contains("power") || content.contains("gas") || content.contains("water") || 
+                                        content.contains("wasser") || content.contains("utility") || content.contains("meter") || 
+                                        content.contains("zähler") || content.contains("bill") || content.contains("invoice") || 
+                                        content.contains("rechnung") || content.contains("notice") || content.contains("mahnung") || 
+                                        content.contains("appointment") || content.contains("termin") || content.contains("ausbau") || 
+                                        content.contains("ablesung")
                                     }
 
                                     if (matchingLogs.isNotEmpty()) {
@@ -78,12 +83,12 @@ fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
                                         totalFound += matchingLogs.size
                                     }
 
-                                    // 2. SCHRITT: Durchsuche den gesamten Gerätekalender (30 Tage zurück bis 90 Tage voraus)
+                                    // 2. SCHRITT: Durchsuche den gesamten Gerätekalender (30 Tage zurück bis 150 Tage voraus)
                                     try {
                                         val cal = Calendar.getInstance()
                                         cal.add(Calendar.DAY_OF_YEAR, -30)
                                         val startTime = cal.timeInMillis
-                                        cal.add(Calendar.DAY_OF_YEAR, 120) // total window 150 days
+                                        cal.add(Calendar.DAY_OF_YEAR, 150)
                                         val endTime = cal.timeInMillis
 
                                         val builder = CalendarContract.Instances.CONTENT_URI.buildUpon()
@@ -105,9 +110,12 @@ fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
                                                 val desc = if (descIdx != -1) it.getString(descIdx) ?: "" else ""
                                                 val combined = "$title $desc".lowercase()
 
-                                                if (combined.contains("evn") || combined.contains("gas") || combined.contains("strom") ||
-                                                    combined.contains("zähler") || combined.contains("ausbau") || combined.contains("ablesung") ||
-                                                    combined.contains("termin") || combined.contains("rechnung") || combined.contains("mahnung")) {
+                                                if (combined.contains("evn") || combined.contains("energy") || combined.contains("strom") ||
+                                                    combined.contains("power") || combined.contains("gas") || combined.contains("water") ||
+                                                    combined.contains("wasser") || combined.contains("utility") || combined.contains("meter") ||
+                                                    combined.contains("zähler") || combined.contains("bill") || combined.contains("invoice") ||
+                                                    combined.contains("rechnung") || combined.contains("notice") || combined.contains("mahnung") ||
+                                                    combined.contains("termin") || combined.contains("ausbau") || combined.contains("ablesung")) {
                                                     matchingEvents.add(title.ifEmpty { "Unbenannter Termin" })
                                                 }
                                             }
@@ -124,8 +132,50 @@ fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
                                         reportBuilder.append("\n⚠️ Kalender-Zugriff eingeschränkt oder nicht erlaubt.\n")
                                     }
 
+                                    // 3. SCHRITT: Durchsuche den SMS-Posteingang (Findet echte Nachrichten wie die EVN-SMS)
+                                    try {
+                                        val smsUri = Uri.parse("content://sms/inbox")
+                                        val cursor = context.contentResolver.query(
+                                            smsUri,
+                                            arrayOf("address", "body", "date"),
+                                            null, null, "date DESC"
+                                        )
+
+                                        cursor?.use {
+                                            val addressIdx = it.getColumnIndex("address")
+                                            val bodyIdx = it.getColumnIndex("body")
+                                            val matchingSms = mutableListOf<String>()
+
+                                            var count = 0
+                                            while (it.moveToNext() && count < 100) {
+                                                count++
+                                                val sender = if (addressIdx != -1) it.getString(addressIdx) ?: "Unbekannt" else "Unbekannt"
+                                                val body = if (bodyIdx != -1) it.getString(bodyIdx) ?: "" else ""
+                                                val combined = "$sender $body".lowercase()
+
+                                                if (combined.contains("evn") || combined.contains("energy") || combined.contains("strom") ||
+                                                    combined.contains("power") || combined.contains("gas") || combined.contains("water") ||
+                                                    combined.contains("wasser") || combined.contains("utility") || combined.contains("bill") ||
+                                                    combined.contains("invoice") || combined.contains("rechnung") || combined.contains("mahnung") ||
+                                                    combined.contains("ablesung") || combined.contains("ausbau")) {
+                                                    matchingSms.add("Absender: $sender | Text: ${body.take(60)}...")
+                                                }
+                                            }
+
+                                            if (matchingSms.isNotEmpty()) {
+                                                reportBuilder.append("\n💬 **SMS-Posteingang Treffer (${matchingSms.size}):**\n")
+                                                matchingSms.forEach { sms ->
+                                                    reportBuilder.append("• $sms\n")
+                                                }
+                                                totalFound += matchingSms.size
+                                            }
+                                        }
+                                    } catch (e: Exception) {
+                                        reportBuilder.append("\n⚠️ SMS-Zugriff nicht erlaubt oder Berechtigung fehlt.\n")
+                                    }
+
                                     if (totalFound == 0) {
-                                        "🔍 Deep-Scan abgeschlossen: Keine kritischen Einträge oder Versorger-Daten (EVN/Gas) auf dem Gerät gefunden."
+                                        "🔍 Deep-Scan abgeschlossen: Keine kritischen Einträge oder lokalen Versorger-Daten (Utility & Energy) im System gefunden."
                                     } else {
                                         "🚨 **Full-Device Scan erfolgreich!** $totalFound relevante Einträge im System verifiziert:\n\n$reportBuilder"
                                     }
