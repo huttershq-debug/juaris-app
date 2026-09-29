@@ -133,6 +133,13 @@
                 android:resource="@xml/juaris_widget_info" />
         </receiver>
 
+        <!-- 7. Lokale NPU- und Anomalie-Erkennungs-Engine -->
+        <service
+            android:name=".JuarisNpuAnomalyEngine"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
     </application>
 </manifest>
+
 
