@@ -27,5 +27,9 @@
     <string name="log_email_outgoing_blocked">Outgoing email stopped (Security Risk): %1$s</string>
     <string name="juaris_app_welcome_text" formatted="false">Welcome to Juaris, your security app of the future. 100% transparent, 100% on your phone. No cloud. Your protection, your home, your rules.</string>
     <string name="juaris_app_welcome_audio_file">platzhalter_en.m4a</string>
+    <string name="vpn_disclosure_title">Juaris VPN Security Notice</string>
+    <string name="vpn_disclosure_message">Juaris uses a local VpnService to detect phishing and malware directly on your device.\n\nAll data remains 100% local. Nothing is sent to external servers or clouds.</string>
+    <string name="btn_understood">Understood &amp; Activate</string>
+    <string name="btn_cancel">Cancel</string>
 </resources>
 
