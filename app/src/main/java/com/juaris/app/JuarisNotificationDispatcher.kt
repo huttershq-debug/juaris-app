@@ -1,5 +1,6 @@
 package com.juaris.app
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -14,6 +15,7 @@ object JuarisNotificationDispatcher {
     private const val CHANNEL_ID = "juaris_priority_channel"
     private const val NOTIFICATION_ID_HIGH = 9999
 
+    @SuppressLint("MissingPermission")
     fun sendPriorityAlert(context: Context, title: String, message: String, isCritical: Boolean) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
