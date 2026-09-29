@@ -320,11 +320,14 @@ class MainActivity : AppCompatActivity() {
             startService(serviceIntent)
         }
 
-        val vpnIntent = VpnService.prepare(this)
-        if (vpnIntent != null) {
-            vpnPermissionLauncher.launch(vpnIntent)
-        } else {
-            startVpnServiceInternal()
+        // GEÄNDERT: Zeigt zwingend vor dem Android VPN-Systemdialog den Google-konformen Hinweis
+        showVpnProminentDisclosureDialog {
+            val vpnIntent = VpnService.prepare(this)
+            if (vpnIntent != null) {
+                vpnPermissionLauncher.launch(vpnIntent)
+            } else {
+                startVpnServiceInternal()
+            }
         }
     }
 
@@ -411,6 +414,22 @@ private fun showProminentDisclosureDialog(context: Context, onProceed: () -> Uni
             .show()
     } else {
         Toast.makeText(context, "Fehler beim Öffnen des Dialogs", Toast.LENGTH_SHORT).show()
+    }
+}
+
+// NEU: Lokalisierter Prominent Disclosure Dialog für den VpnService
+private fun Context.showVpnProminentDisclosureDialog(onConfirmed: () -> Unit) {
+    val activity = this.findActivity()
+    if (activity != null) {
+        AlertDialog.Builder(activity)
+            .setTitle(R.string.vpn_disclosure_title)
+            .setMessage(R.string.vpn_disclosure_message)
+            .setPositiveButton(R.string.btn_understood) { _, _ -> onConfirmed() }
+            .setNegativeButton(R.string.btn_cancel, null)
+            .setCancelable(false)
+            .show()
+    } else {
+        Toast.makeText(this, "Fehler beim Öffnen des VPN-Dialogs", Toast.LENGTH_SHORT).show()
     }
 }
 
@@ -1268,13 +1287,13 @@ fun PrivacyAndLegalContent() {
                         color = NeonGiftgruen,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.clickable {
-                            uriHandler.openUri("https://juaris.com/privacy")
+                            uriHandler.openUri("https://juaris.com/privacy.")
                         }
                     )
 
                     HorizontalDivider(color = Color(0xFF112211), modifier = Modifier.padding(vertical = 8.dp))
 
-                    Text("Impressum", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text("Impressum", style = MaterialTheme.typography.titleMedium, colorNeonGiftgruen = NeonGiftgruen)
                     Text("Angaben gemäß § 5 TMG / ECG", color = Color.Gray, fontSize = 12.sp)
                     Text("Name / Entwickler: Benedikt Wolfgang Hütter", color = Color.White)
                     Text("Anschrift: Schulgasse 4/15, 2700 Wiener Neustadt, Österreich", color = Color.White)
@@ -1292,5 +1311,4 @@ fun PrivacyAndLegalContent() {
         }
     }
 }
-
 
