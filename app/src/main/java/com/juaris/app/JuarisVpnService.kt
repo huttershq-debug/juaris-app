@@ -55,7 +55,7 @@ class JuarisVpnService : VpnService() {
 
         val notification = Notification.Builder(this, CHANNEL_ID)
             .setContentTitle("Juaris 360° Schutz aktiv")
-            .setContentText("Lokaler Phishing- und Netzwerkschutz läuft weltweit.")
+            .setContentText("Lokaler Phishing- und Netzwerkschutz läuft.")
             .setSmallIcon(R.drawable.app_icon)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
@@ -74,19 +74,35 @@ class JuarisVpnService : VpnService() {
         try {
             val builder = Builder()
                 .setSession("Juaris Global Shield")
-                .addDnsServer("1.1.1.1") // Sicherer Upstream-DNS für globale Abfragen
-                .addDisallowedApplication(packageName)
+                .addAddress("10.0.0.2", 24)
+                .addDnsServer("1.1.1.1")
+                .addRoute("0.0.0.0", 0)
                 .setMtu(1500)
 
             vpnInterface = builder.establish()
 
-            if (vpnInterface == null) {
-                Log.e(TAG, "❌ VPN-Tunnel verweigert. System-Berechtigung fehlt.")
-                return
+            vpnInterface?.let { pfd ->
+                serviceScope.launch(Dispatchers.IO) {
+                    try {
+                        val inputStream = FileInputStream(pfd.fileDescriptor)
+                        val outputStream = FileOutputStream(pfd.fileDescriptor)
+                        val buffer = ByteBuffer.allocate(32767)
+
+                        while (isActive && vpnInterface != null) {
+                            val length = inputStream.read(buffer.array())
+                            if (length > 0) {
+                                // Non-blocking high-speed packet bypass
+                                outputStream.write(buffer.array(), 0, length)
+                            } else {
+                                delay(2)
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "VPN I/O Fehler: ${e.message}")
+                    }
+                }
             }
-
             Log.d(TAG, "🔒 Globales DNS-Shield erfolgreich etabliert.")
-
         } catch (e: Exception) {
             Log.e(TAG, "❌ Fehler beim Aufbau des Tunnels: ${e.message}")
         }
