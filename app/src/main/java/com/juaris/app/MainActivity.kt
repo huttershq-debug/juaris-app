@@ -320,7 +320,6 @@ class MainActivity : AppCompatActivity() {
             startService(serviceIntent)
         }
 
-        // GEÄNDERT: Zeigt zwingend vor dem Android VPN-Systemdialog den Google-konformen Hinweis
         showVpnProminentDisclosureDialog {
             val vpnIntent = VpnService.prepare(this)
             if (vpnIntent != null) {
@@ -417,7 +416,6 @@ private fun showProminentDisclosureDialog(context: Context, onProceed: () -> Uni
     }
 }
 
-// NEU: Lokalisierter Prominent Disclosure Dialog für den VpnService
 private fun Context.showVpnProminentDisclosureDialog(onConfirmed: () -> Unit) {
     val activity = this.findActivity()
     if (activity != null) {
@@ -1293,18 +1291,18 @@ fun PrivacyAndLegalContent() {
 
                     HorizontalDivider(color = Color(0xFF112211), modifier = Modifier.padding(vertical = 8.dp))
 
-                    Text("Impressum", style = MaterialTheme.typography.titleMedium, colorNeonGiftgruen = NeonGiftgruen)
-                    Text("Angaben gemäß § 5 TMG / ECG", color = Color.Gray, fontSize = 12.sp)
+                    Text("Impressum", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text("Angaben gemäß § 5 TMG / ECG", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                     Text("Name / Entwickler: Benedikt Wolfgang Hütter", color = Color.White)
                     Text("Anschrift: Schulgasse 4/15, 2700 Wiener Neustadt, Österreich", color = Color.White)
                     Text("E-Mail: support@juaris.com", color = Color.White)
                    
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text("Verantwortlich für den Inhalt:", color = Color.Gray, fontSize = 12.sp)
+                    Text("Verantwortlich für den Inhalt:", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                     Text("Benedikt Wolfgang Hütter", color = Color.White)
 
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text("Design:", color = Color.Gray, fontSize = 12.sp)
+                    Text("Design:", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                     Text("Benedikt Wolfgang Hütter", color = Color.White)
                 }
             }
