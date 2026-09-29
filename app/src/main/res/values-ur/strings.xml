@@ -27,4 +27,8 @@
     <string name="log_email_outgoing_blocked">جانے والا ای میل روک دیا گیا (سیکیورٹی رسک): %1$s</string>
     <string name="juaris_app_welcome_text" formatted="false">جوارس میں خوش آمدید، مستقبل کی آپ کی سیکیورٹی ایپ۔ 100% شفاف، 100% آپ کے فون پر۔ کوئی کلاؤڈ نہیں۔ آپ کی حفاظت، آپ کا گھر، آپ کے قوانین۔</string>
     <string name="juaris_app_welcome_audio_file">platzhalter_ur.m4a</string>
+    <string name="vpn_disclosure_title">Juaris VPN سیکیورٹی نوٹس</string>
+    <string name="vpn_disclosure_message">Juaris آپ کے آلے پر براہ راست فشنگ اور میلویئر کا پتہ لگانے کے لیے ایک مقامی VpnService استعمال کرتا ہے۔\n\nتمام ڈیٹا 100% مقامی رہتا ہے۔ کسی بھی بیرونی سرور یا کلاؤڈ پر کچھ نہیں بھیجا جاتا۔</string>
+    <string name="btn_understood">سمجھ گیا اور فعال کریں</string>
+    <string name="btn_cancel">منسوخ کریں</string>
 </resources>
