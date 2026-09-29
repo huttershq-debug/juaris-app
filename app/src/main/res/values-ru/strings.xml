@@ -27,4 +27,8 @@
     <string name="log_email_outgoing_blocked">Исходящее письмо остановлено (угроза безопасности): %1$s</string>
     <string name="juaris_app_welcome_text" formatted="false">Добро пожаловать в Juaris — ваше приложение безопасности будущего. 100% прозрачно, 100% на вашем телефоне. Никакого облака. Ваша защита, ваш дом, ваши правила.</string>
     <string name="juaris_app_welcome_audio_file">platzhalter_ru.m4a</string>
+    <string name="vpn_disclosure_title">Уведомление безопасности Juaris VPN</string>
+    <string name="vpn_disclosure_message">Juaris использует локальный VpnService для обнаружения фишинга и вредоносных программ прямо на вашем устройстве.\n\nВсе данные остаются локальными на 100%. Ничего не отправляется на внешние серверы или в облако.</string>
+    <string name="btn_understood">Понятно и Активировать</string>
+    <string name="btn_cancel">Отмена</string>
 </resources>
