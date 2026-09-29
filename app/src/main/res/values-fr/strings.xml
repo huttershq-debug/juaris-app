@@ -28,7 +28,7 @@
     <string name="juaris_app_welcome_text" formatted="false">Bienvenue chez Juaris, votre application de sécurité du futur. 100% transparente, 100% sur votre téléphone. Pas de cloud. Votre protection, votre maison, vos règles.</string>
     <string name="juaris_app_welcome_audio_file">platzhalter_fr.m4a</string>
     <string name="vpn_disclosure_title">Avis de sécurité Juaris VPN</string>
-    <string name="vpn_disclosure_message">Juaris utilise un VpnService local pour détecter le phishing et les logiciels malveillants directement sur votre appareil.\n\nDonnées 100% locales. Rien n'est envoyé vers des serveurs externes ou le cloud.</string>
+    <string name="vpn_disclosure_message">Juaris utilise un VpnService local pour détecter le phishing et les logiciels malveillants directement sur votre appareil.\n\nDonnées 100% locales. Rien n\'est envoyé vers des serveurs externes ou le cloud.</string>
     <string name="btn_understood">Compris et Activer</string>
     <string name="btn_cancel">Annuler</string>
 </resources>
