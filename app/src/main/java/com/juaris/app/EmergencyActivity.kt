@@ -1,5 +1,10 @@
 package com.juaris.app
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -61,6 +66,49 @@ class EmergencyActivity : ComponentActivity() {
             startActivity(dialIntent)
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    companion object {
+        /**
+         * Zwingt die EmergencyActivity sofort aus dem Hintergrund auf den Bildschirm –
+         * selbst bei gesperrtem Display oder ausgeschaltetem Gerät.
+         */
+        fun triggerEmergencyAlarm(context: Context, reason: String) {
+            val intent = Intent(context, EmergencyActivity::class.java).apply {
+                putExtra("reason", reason)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+
+            val pendingIntent = PendingIntent.getActivity(
+                context, 999, intent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+
+            val channelId = "juaris_emergency_channel"
+            val notificationManager = context.getSystemService(NotificationManager::class.java)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channel = NotificationChannel(
+                    channelId,
+                    "Kritischer Notfall-Alarm",
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    setSound(null, null)
+                    enableVibration(true)
+                }
+                notificationManager?.createNotificationChannel(channel)
+            }
+
+            val notification = Notification.Builder(context, channelId)
+                .setContentTitle("🚨 KRITISCHER SICHERHEITS-NOTFALL")
+                .setContentText("Notruf-Countdown gestartet!")
+                .setSmallIcon(R.drawable.app_icon)
+                .setFullScreenIntent(pendingIntent, true) // <--- ERZWINGT DAS ÖFFNEN IM VORDERGRUND!
+                .setAutoCancel(true)
+                .build()
+
+            notificationManager?.notify(999, notification)
         }
     }
 }
