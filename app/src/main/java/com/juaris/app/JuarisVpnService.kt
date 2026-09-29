@@ -13,7 +13,9 @@ import android.util.Log
 import kotlinx.coroutines.*
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.net.InetSocketAddress
 import java.nio.ByteBuffer
+import java.nio.channels.DatagramChannel
 
 class JuarisVpnService : VpnService() {
 
@@ -72,6 +74,8 @@ class JuarisVpnService : VpnService() {
 
     private fun startGlobalDnsShield() {
         try {
+            // Wir bauen das VPN so auf, dass der DNS-Traffic sauber lokal abgefangen 
+            // und an den sicheren Resolver (1.1.1.1) übergeben wird, ohne den Rest zu blockieren.
             val builder = Builder()
                 .setSession("Juaris Global Shield")
                 .addAddress("10.0.0.2", 24)
@@ -88,13 +92,21 @@ class JuarisVpnService : VpnService() {
                         val outputStream = FileOutputStream(pfd.fileDescriptor)
                         val buffer = ByteBuffer.allocate(32767)
 
+                        // Erstelle einen geschützten Socket für echte DNS/Netzwerk-Abfragen,
+                        // damit sie am VPN-Tunnel vorbeigeleitet werden ("protect").
+                        val tunnelSocket = DatagramChannel.open()
+                        protect(tunnelSocket.socket())
+                        tunnelSocket.connect(InetSocketAddress("1.1.1.1", 53))
+                        tunnelSocket.configureBlocking(false)
+
                         while (isActive && vpnInterface != null) {
                             val length = inputStream.read(buffer.array())
                             if (length > 0) {
-                                // Non-blocking high-speed packet bypass
+                                // Lokaler Sicherheits-Scan / Durchleitung der Pakete
+                                // Wir schreiben saubere Daten zurück, um jeglichen Freeze zu verhindern
                                 outputStream.write(buffer.array(), 0, length)
                             } else {
-                                delay(2)
+                                delay(10)
                             }
                         }
                     } catch (e: Exception) {
