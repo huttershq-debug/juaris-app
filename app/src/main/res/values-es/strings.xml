@@ -27,5 +27,9 @@
     <string name="log_email_outgoing_blocked">Correo electrónico saliente detenido (Riesgo de seguridad): %1$s</string>
     <string name="juaris_app_welcome_text" formatted="false">Bienvenido a Juaris, tu app de seguridad del futuro. 100% transparente, 100% en tu móvil. Sin nube. Tu protección, tu hogar, tus reglas.</string>
     <string name="juaris_app_welcome_audio_file">platzhalter_es.m4a</string>
+    <string name="vpn_disclosure_title">Aviso de seguridad de Juaris VPN</string>
+    <string name="vpn_disclosure_message">Juaris utiliza un VpnService local para detectar phishing y malware directamente en tu dispositivo.\n\nTodos los datos permanecen 100% locales. No se envía nada a servidores externos o nubes.</string>
+    <string name="btn_understood">Entendido y Activar</string>
+    <string name="btn_cancel">Cancelar</string>
 </resources>
 
