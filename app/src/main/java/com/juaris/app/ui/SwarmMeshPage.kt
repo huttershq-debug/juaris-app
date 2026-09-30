@@ -15,12 +15,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.juaris.app.GlobalMeshEngine
 import com.juaris.app.NearbyMeshManager
 import com.juaris.app.JuarisDatabase
+import com.juaris.app.R // Wichtig für den Zugriff auf deine strings.xml-Keys!
 
 @Composable
 fun SwarmMeshPage() {
@@ -29,23 +31,39 @@ fun SwarmMeshPage() {
     val postsFlow = remember { db.meshDao().getAllActivePosts() }
     val posts by postsFlow.collectAsState(initial = emptyList())
 
+    // Lokalisierte Standard-Werte für die Initialisierung laden
+    val statusReadyText = stringResource(R.string.status_ready)
+    val statusMeshActiveText = stringResource(R.string.status_mesh_active_search)
+
     var inputMessage by remember { mutableStateOf("") }
     var isEphemeral by remember { mutableStateOf(false) }
     var statusMessage by remember { mutableStateOf("") }
-    var scanStatusText by remember { mutableStateOf("Bereit") }
+    var scanStatusText by remember { mutableStateOf(statusReadyText) }
     var discoveredCount by remember { mutableStateOf(0) }
+
+    // Lokalisierte Strings für Toasts und Statusmeldungen innerhalb anonymer Callbacks sichern
+    val toastDeviceDiscovered = stringResource(R.string.toast_mesh_device_discovered)
+    val statusConnectedTemplate = stringResource(R.string.status_mesh_connected_format)
+    val statusConnectedDevicesTemplate = stringResource(R.string.status_mesh_connected_devices_format)
+    val statusSentText = stringResource(R.string.status_sent)
+    val toastP2pStartedText = stringResource(R.string.toast_p2p_started)
+    val toastBluetoothMissingText = stringResource(R.string.toast_bluetooth_missing)
 
     val meshManager = remember {
         NearbyMeshManager(
             context = context,
             onDeviceDiscovered = { endpointId ->
                 discoveredCount++
-                scanStatusText = "Verbunden mit: $endpointId ($discoveredCount Geräte)"
-                Toast.makeText(context, "Neues Schwarm-Gerät im Raum erkannt!", Toast.LENGTH_SHORT).show()
+                scanStatusText = String.format(statusConnectedTemplate, endpointId, discoveredCount)
+                Toast.makeText(context, toastDeviceDiscovered, Toast.LENGTH_SHORT).show()
             },
-            onDeviceLost = { endpointId ->
+            onDeviceLost = { _ ->
                 discoveredCount = (discoveredCount - 1).coerceAtLeast(0)
-                scanStatusText = if (discoveredCount > 0) "Verbunden ($discoveredCount Geräte)" else "Mesh aktiv (Suche...)"
+                scanStatusText = if (discoveredCount > 0) {
+                    String.format(statusConnectedDevicesTemplate, discoveredCount)
+                } else {
+                    statusMeshActiveText
+                }
             },
             onMessageReceived = { _, message ->
                 GlobalMeshEngine.broadcastToSwarm(
@@ -66,16 +84,15 @@ fun SwarmMeshPage() {
         }
     }
 
-    // Android-Versionsprüfung für Berechtigungs-Ergebnis
     val bluetoothPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         if (permissions.values.all { it }) {
             meshManager.startMeshNode()
-            scanStatusText = "Mesh-Knoten aktiv (Suche...)"
-            Toast.makeText(context, "P2P-Schwarm erfolgreich gestartet!", Toast.LENGTH_SHORT).show()
+            scanStatusText = statusMeshActiveText
+            Toast.makeText(context, toastP2pStartedText, Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(context, "Bluetooth-Berechtigungen fehlen für den Schwarm.", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, toastBluetoothMissingText, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -84,17 +101,18 @@ fun SwarmMeshPage() {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            Text("P2P-Schwarm & Live-Feed", style = MaterialTheme.typography.titleLarge, color = Color.White)
-            Text("Dezentraler Offline-Austausch.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            // KORREKTUR 1: Alle statischen UI-Texte an dein 12 Weltsprachen-Ressourcensystem gekoppelt!
+            Text(stringResource(R.string.p2p_swarm_title), style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text(stringResource(R.string.p2p_swarm_subtitle), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
             TacticalPulseCard {
                 Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Nachricht broadcasten", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text(stringResource(R.string.mesh_broadcast_title), style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     OutlinedTextField(
                         value = inputMessage,
                         onValueChange = { inputMessage = it },
-                        label = { Text("Nachricht...", color = Color.Gray) },
+                        label = { Text(stringResource(R.string.label_message_placeholder), color = Color.Gray) },
                         modifier = Modifier.fillMaxWidth()
                     )
                     Row(
@@ -104,7 +122,7 @@ fun SwarmMeshPage() {
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Checkbox(checked = isEphemeral, onCheckedChange = { isEphemeral = it })
-                            Text("Ephemer", color = Color.LightGray, fontSize = 12.sp)
+                            Text(stringResource(R.string.checkbox_ephemeral), color = Color.LightGray, fontSize = 12.sp)
                         }
                         Button(
                             onClick = {
@@ -117,7 +135,7 @@ fun SwarmMeshPage() {
                                         meshManager = meshManager,
                                         onBlocked = { reason -> statusMessage = reason },
                                         onSuccess = { _ ->
-                                            statusMessage = "Gesendet!"
+                                            statusMessage = statusSentText
                                             inputMessage = ""
                                         }
                                     )
@@ -125,7 +143,7 @@ fun SwarmMeshPage() {
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
                         ) {
-                            Text("Broadcast", color = Color.Black, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.btn_broadcast), color = Color.Black, fontWeight = FontWeight.Bold)
                         }
                     }
                     if (statusMessage.isNotBlank()) {
@@ -135,7 +153,7 @@ fun SwarmMeshPage() {
                 }
             }
         }
-        item { Text("Schwarm-Pakete (${posts.size})", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen) }
+        item { Text(stringResource(R.string.mesh_packets_count, posts.size), style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen) }
         items(posts) { post ->
             TacticalPulseCard {
                 Column(modifier = Modifier.fillMaxWidth().padding(4.dp)) {
@@ -148,11 +166,10 @@ fun SwarmMeshPage() {
         item {
             TacticalPulseCard {
                 Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Bluetooth Mesh Hardware", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                    Text("Status: $scanStatusText", color = Color.White)
+                    Text(stringResource(R.string.mesh_hardware_title), style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text(stringResource(R.string.mesh_status_format, scanStatusText), color = Color.White)
                     Button(
                         onClick = {
-                            // Berechtigungen passend zur bereinigten Manifest-Datei abfragen
                             val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                 arrayOf(
                                     android.Manifest.permission.BLUETOOTH_SCAN,
@@ -169,7 +186,7 @@ fun SwarmMeshPage() {
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
                     ) {
-                        Text("Mesh-Scan starten", color = Color.Black, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.btn_start_mesh_node), color = Color.Black, fontWeight = FontWeight.Bold)
                     }
                 }
             }
