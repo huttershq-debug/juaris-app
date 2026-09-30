@@ -31,6 +31,7 @@
     <string name="vpn_disclosure_message">Juaris सीधे आपके डिवाइस पर फ़िशिंग और मैलवेयर का पता लगाने के लिए एक स्थानीय VpnService का उपयोग करता है।\n\nसभी डेटा 100% स्थानीय रहता है। बाहरी सर्वर या क्लाउड पर कुछ भी नहीं भेजा जाता है।</string>
     <string name="btn_understood">समझ गया और सक्रिय करें</string>
     <string name="btn_cancel">रद्द करें</string>
+    
     <!-- P2P Swarm & Mesh Strings -->
     <string name="p2p_swarm_title">जुआरिस स्वार्म मेश (P2P)</string>
     <string name="p2p_swarm_subtitle">इंटरनेट के बिना सुरक्षित, विकेंद्रीकृत संचार</string>
@@ -42,7 +43,6 @@
     <string name="mesh_hardware_title">P2P हार्डवेयर और कनेक्शन</string>
     <string name="mesh_status_format">स्थिति: %s</string>
     <string name="btn_start_mesh_node">P2P मेश नोड शुरू करें</string>
-    
     <string name="status_ready">स्वार्म कनेक्शन के लिए तैयार</string>
     <string name="status_mesh_active_search">स्वार्म नोड्स की खोज जारी है...</string>
     <string name="toast_mesh_device_discovered">नया स्वार्म डिवाइस खोजा गया!</string>
@@ -57,6 +57,7 @@
     <string name="logs_page_subtitle">सभी अवरोधित खतरों और घटनाओं का अवलोकन</string>
     <string name="logs_empty_message">अभी तक कोई घटना दर्ज नहीं की गई है। आपका सिस्टम सुरक्षित है।</string>
     <string name="logs_module_prefix">मॉड्यूल: %s</string>
+
     <!-- Privacy & Imprint Strings -->
     <string name="privacy_text">गोपनीयता नीति</string>
     <string name="privacy_link">गोपनीयता नीति पढ़ें</string>
@@ -72,10 +73,10 @@
     <string name="imprint_name_y">अस्वीकरण</string>
     <string name="company_footer">जुआरिस सिक्योरिटी - सर्वाधिकार सुरक्षित</string>
 
-    <!-- Air Gesture Strings -->
-    <string name="air_gesture_title">एयर जेस्चर कंट्रोल</string>
+    <!-- Air Gesture Additional Strings -->
     <string name="air_gesture_subtitle">हाथ के इशारों से अपने डिवाइस को नियंत्रित करें</string>
     <string name="air_gesture_desc">नेविगेट करने के लिए संपर्क रहित इशारों का उपयोग करें</string>
     <string name="air_gesture_status">सेंसर तैयार है</string>
     <string name="air_gesture_action">एक्शन ट्रिगर करें</string>
 </resources>
+
