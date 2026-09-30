@@ -46,7 +46,7 @@
     <string name="status_ready">Ready for swarm connection</string>
     <string name="status_mesh_active_search">Searching for swarm nodes...</string>
     <string name="toast_mesh_device_discovered">New swarm device discovered!</string>
-    <string name="status_mesh_connected_format">Connected to %s (Devices: %d)</string>
+    <string name="status_mesh_connected_format" formatted="false">Connected to %s (Devices: %d)</string>
     <string name="status_mesh_connected_devices_format">Connected devices: %d</string>
     <string name="status_sent">Message successfully sent to swarm</string>
     <string name="toast_p2p_started">P2P Mesh node started successfully!</string>
