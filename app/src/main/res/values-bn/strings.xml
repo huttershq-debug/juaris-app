@@ -31,4 +31,30 @@
     <string name="vpn_disclosure_message">Juaris আপনার ডিভাইসেই ফিশিং এবং মেলওয়্যার সনাক্ত করতে একটি স্থানীয় VpnService ব্যবহার করে।\n\nসমস্ত ডেটা ১০০% স্থানীয় থাকে। বাহ্যিক সার্ভার বা ক্লাউডে কিছুই পাঠানো হয় না।</string>
     <string name="btn_understood">বুঝেছি এবং সক্রিয় করুন</string>
     <string name="btn_cancel">বাতিল</string>
+    <!-- P2P Swarm & Mesh Strings -->
+    <string name="p2p_swarm_title">জুয়ারিস সোয়ার্ম মেশ (P2P)</string>
+    <string name="p2p_swarm_subtitle">ইন্টারনেট ছাড়াই নিরাপদ, বিকেন্দ্রীকৃত যোগাযোগ</string>
+    <string name="mesh_broadcast_title">সোয়ার্মে বার্তা সম্প্রচার করুন</string>
+    <string name="label_message_placeholder">বার্তা লিখুন...</string>
+    <string name="checkbox_ephemeral">পড়ার পর বার্তা মুছে ফেলুন (ক্ষণস্থায়ী)</string>
+    <string name="btn_broadcast">সোয়ার্মে পাঠান</string>
+    <string name="mesh_packets_count">সক্রিয় সোয়ার্ম প্যাকেট (%d)</string>
+    <string name="mesh_hardware_title">P2P হার্ডওয়্যার এবং সংযোগ</string>
+    <string name="mesh_status_format">স্ট্যাটাস: %s</string>
+    <string name="btn_start_mesh_node">P2P মেশ নোড শুরু করুন</string>
+    
+    <string name="status_ready">সোয়ার্ম সংযোগের জন্য প্রস্তুত</string>
+    <string name="status_mesh_active_search">সোয়ার্ম নোড খোঁজা হচ্ছে...</string>
+    <string name="toast_mesh_device_discovered">নতুন সোয়ার্ম ডিভাইস আবিষ্কৃত হয়েছে!</string>
+    <string name="status_mesh_connected_format">%s এর সাথে সংযুক্ত (ডিভাইস: %d)</string>
+    <string name="status_mesh_connected_devices_format">সংযুক্ত ডিভাইস: %d</string>
+    <string name="status_sent">সফলভাবে সোয়ার্মে বার্তা পাঠানো হয়েছে</string>
+    <string name="toast_p2p_started">P2P মেশ নোড সফলভাবে শুরু হয়েছে!</string>
+    <string name="toast_bluetooth_missing">ব্লুটুথ অনুমতি প্রয়োজন!</string>
+
+    <!-- Security Logs Strings -->
+    <string name="logs_page_title">সুরক্ষা লগ</string>
+    <string name="logs_page_subtitle">সমস্ত বাধাগ্রস্ত হুমকি এবং ইভেন্টের সংক্ষিপ্ত বিবরণ</string>
+    <string name="logs_empty_message">এখনও কোনো ইভেন্ট রেকর্ড করা হয়নি। আপনার সিস্টেম নিরাপদ।</string>
+    <string name="logs_module_prefix">মডিউল: %s</string>
 </resources>
