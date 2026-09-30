@@ -6,7 +6,7 @@ class LocalPhishingAnalyzer(private val context: Context? = null) {
 
     private val urgencyTriggers = listOf(
         "konto gesperrt", "sofort handeln", "verifizierung", "aktualisieren",
-        "gewinn", "überweisung", "sicherheit", "warnung", "krypto"
+        "gewinn", "ueberweisung", "sicherheit", "warnung", "krypto", "konto"
     )
 
     fun analyze(content: String): Boolean {
@@ -14,26 +14,41 @@ class LocalPhishingAnalyzer(private val context: Context? = null) {
     }
 
     fun analyzeText(rawText: String): PhishingResult {
-        val cleanedText = erodeAndNormalizeText(rawText)
+        // 1. Gesamte Erosion für den direkten "contains"-Check (erwischt k-o-n-t-o)
+        val fullCleanedText = erodeAndNormalizeText(rawText, removeSpaces = true)
        
         var score = 0
         val detectedTriggers = mutableListOf<String>()
 
-        // 2. FUZZY-MATCHING: Prüft auf semantische Nähe zu den Mustern
+        // Direkter globaler Muster-Check
         for (trigger in urgencyTriggers) {
-            if (cleanedText.contains(trigger)) {
+            val cleanTrigger = trigger.replace(" ", "")
+            if (fullCleanedText.contains(cleanTrigger)) {
                 score += 25
                 detectedTriggers.add(trigger)
-            } else {
-                // Erwischt auch leichte Abwandlungen
-                if (levenshteinDistance(cleanedText, trigger) < 3) {
-                    score += 15
-                    detectedTriggers.add(trigger)
+            }
+        }
+
+        // 2. KORREKTUR: Wort-für-Wort-Vergleich für die Levenshtein-Fuzzy-Logik (erwischt Tippfehler wie krypTo)
+        // Hier behalten wir die Leerzeichen, um die Nachricht in einzelne Wörter zu splitten
+        val wordsText = erodeAndNormalizeText(rawText, removeSpaces = false)
+        val distinctWords = wordsText.split(" ").filter { it.length >= 4 }
+
+        for (trigger in urgencyTriggers) {
+            val cleanTrigger = trigger.replace(" ", "")
+            // Wenn der globale Check nicht schon angeschlagen hat, prüfen wir die einzelnen Wörter per Fuzzy-Logik
+            if (!detectedTriggers.contains(trigger)) {
+                for (word in distinctWords) {
+                    if (levenshteinDistance(word, cleanTrigger) < 2) { // Max. 1 Buchstabe Unterschied bei Wörtern
+                        score += 15
+                        detectedTriggers.add(trigger)
+                        break // Ein Treffer pro Trigger reicht
+                    }
                 }
             }
         }
 
-        // Sicherheitsfaktor für unverschlüsselte Links
+        // Sicherheitsfaktor für unverschlüsselte, gefährliche Links
         if (rawText.contains("http://", ignoreCase = true)) {
             score += 30
         }
@@ -48,8 +63,11 @@ class LocalPhishingAnalyzer(private val context: Context? = null) {
         return PhishingResult(isSuspicious, score, recommendation)
     }
 
-    // Filtert Leetspeak (0 -> o, 4 -> a, @ -> a) und jegliche Sonderzeichen-Tricks heraus
-    private fun erodeAndNormalizeText(text: String): String {
+    /**
+     * Filtert Leetspeak (0 -> o, 4 -> a, @ -> a) und jegliche Sonderzeichen-Tricks heraus.
+     * Flexibel steuerbar, ob Leerzeichen entfernt werden sollen oder nicht.
+     */
+    private fun erodeAndNormalizeText(text: String, removeSpaces: Boolean): String {
         val normalized = text.lowercase()
             .replace("0", "o")
             .replace("4", "a")
@@ -59,9 +77,16 @@ class LocalPhishingAnalyzer(private val context: Context? = null) {
             .replace("@", "a")
             .replace("$", "s")
             .replace("9", "g")
+            .replace("ü", "ue")
+            .replace("ä", "ae")
+            .replace("ö", "oe")
            
-        // Entfernt alle Leerzeichen und Trennzeichen, um "k-o-n-t-o" zu "konto" zu verschmelzen
-        return normalized.replace(Regex("[^a-z]"), "")
+        return if (removeSpaces) {
+            normalized.replace(Regex("[^a-z]"), "")
+        } else {
+            // Behält einzelne Leerzeichen zwischen den Wörtern für den Split, entfernt aber doppelte Leerzeichen und Sonderzeichen
+            normalized.replace(Regex("[^a-z\\s]"), "").replace(Regex("\\s+"), " ")
+        }
     }
 
     private fun levenshteinDistance(s1: String, s2: String): Int {
@@ -87,3 +112,5 @@ class LocalPhishingAnalyzer(private val context: Context? = null) {
         val recommendation: String
     )
 }
+
+
