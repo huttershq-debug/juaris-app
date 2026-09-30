@@ -31,6 +31,7 @@
     <string name="vpn_disclosure_message">O Juaris usa um VpnService local para detectar phishing e malware diretamente no seu dispositivo.\n\nTodos os dados permanecem 100% locais. Nada é enviado para servidores externos ou nuvem.</string>
     <string name="btn_understood">Entendido e Ativar</string>
     <string name="btn_cancel">Cancelar</string>
+    
     <!-- P2P Swarm & Mesh Strings -->
     <string name="p2p_swarm_title">Malha de Enxame Juaris (P2P)</string>
     <string name="p2p_swarm_subtitle">Comunicação segura e descentralizada sem internet</string>
@@ -42,7 +43,6 @@
     <string name="mesh_hardware_title">Hardware P2P e Conexões</string>
     <string name="mesh_status_format">Status: %s</string>
     <string name="btn_start_mesh_node">Iniciar nó de malha P2P</string>
-    
     <string name="status_ready">Pronto para conexão de enxame</string>
     <string name="status_mesh_active_search">Procurando nós de enxame...</string>
     <string name="toast_mesh_device_discovered">Novo dispositivo de enxame descoberto!</string>
@@ -57,6 +57,7 @@
     <string name="logs_page_subtitle">Visão geral de todas as ameaças e eventos interceptados</string>
     <string name="logs_empty_message">Nenhum evento registrado ainda. Seu sistema está seguro.</string>
     <string name="logs_module_prefix">Módulo: %s</string>
+
     <!-- Privacy & Imprint Strings -->
     <string name="privacy_text">Política de privacidade</string>
     <string name="privacy_link">Ler política de privacidade</string>
@@ -72,10 +73,10 @@
     <string name="imprint_name_y">Isenção de responsabilidade</string>
     <string name="company_footer">Juaris Security - Todos os direitos reservados</string>
 
-    <!-- Air Gesture Strings -->
-    <string name="air_gesture_title">Controle por gestos no ar</string>
+    <!-- Air Gesture Additional Strings -->
     <string name="air_gesture_subtitle">Controle seu dispositivo com movimentos das mãos</string>
     <string name="air_gesture_desc">Use gestos sem contato para navegar</string>
     <string name="air_gesture_status">Sensor pronto</string>
     <string name="air_gesture_action">Disparar ação</string>
 </resources>
+
