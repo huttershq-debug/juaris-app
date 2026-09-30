@@ -31,4 +31,30 @@
     <string name="vpn_disclosure_message">Juaris использует локальный VpnService для обнаружения фишинга и вредоносных программ прямо на вашем устройстве.\n\nВсе данные остаются локальными на 100%. Ничего не отправляется на внешние серверы или в облако.</string>
     <string name="btn_understood">Понятно и Активировать</string>
     <string name="btn_cancel">Отмена</string>
+    <!-- P2P Swarm & Mesh Strings -->
+    <string name="p2p_swarm_title">Роевая ячеистая сеть Juaris (P2P)</string>
+    <string name="p2p_swarm_subtitle">Безопасная децентрализованная связь без интернета</string>
+    <string name="mesh_broadcast_title">Передать сообщение в рой</string>
+    <string name="label_message_placeholder">Введите сообщение...</string>
+    <string name="checkbox_ephemeral">Удалить сообщение после прочтения (Исчезающее)</string>
+    <string name="btn_broadcast">Отправить в рой</string>
+    <string name="mesh_packets_count">Активные пакеты роя (%d)</string>
+    <string name="mesh_hardware_title">P2P-оборудование и соединения</string>
+    <string name="mesh_status_format">Статус: %s</string>
+    <string name="btn_start_mesh_node">Запустить узел P2P-сети</string>
+    
+    <string name="status_ready">Готово к подключению к рою</string>
+    <string name="status_mesh_active_search">Поиск узлов роя...</string>
+    <string name="toast_mesh_device_discovered">Обнаружено новое устройство роя!</string>
+    <string name="status_mesh_connected_format">Подключено к %s (Устройств: %d)</string>
+    <string name="status_mesh_connected_devices_format">Подключенные устройства: %d</string>
+    <string name="status_sent">Сообщение успешно отправлено в рой</string>
+    <string name="toast_p2p_started">Узел P2P-сети успешно запущен!</string>
+    <string name="toast_bluetooth_missing">Требуются разрешения Bluetooth!</string>
+
+    <!-- Security Logs Strings -->
+    <string name="logs_page_title">Журналы безопасности</string>
+    <string name="logs_page_subtitle">Обзор всех перехваченных угроз и событий</string>
+    <string name="logs_empty_message">Событий пока нет. Ваша система защищена.</string>
+    <string name="logs_module_prefix">Модуль: %s</string>
 </resources>
