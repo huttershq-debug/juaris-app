@@ -5,9 +5,10 @@ pluginManagement {
         gradlePluginPortal()
     }
     plugins {
+        // Das unerschütterliche Fundament für deinen Release-Build am 15. Oktober
         id 'com.android.application' version '8.2.2'
-        id 'org.jetbrains.kotlin.android' version '1.9.22'
-        id 'com.google.devtools.ksp' version '1.9.22-1.0.17'
+        id 'org.jetbrains.kotlin.android' version '1.9.23' // KORREKTUR 1: Aktualisiert auf Kotlin 1.9.23
+        id 'com.google.devtools.ksp' version '1.9.23-1.0.19' // KORREKTUR 2: Passgenaue KSP-Compilerversion
     }
 }
 
