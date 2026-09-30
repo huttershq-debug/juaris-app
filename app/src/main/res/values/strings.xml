@@ -31,5 +31,31 @@
     <string name="vpn_disclosure_message">Juaris uses a local VpnService to detect phishing and malware directly on your device.\n\nAll data remains 100% local. Nothing is sent to external servers or clouds.</string>
     <string name="btn_understood">Understood &amp; Activate</string>
     <string name="btn_cancel">Cancel</string>
+    <!-- P2P Swarm & Mesh Strings -->
+    <string name="p2p_swarm_title">Juaris Swarm Mesh (P2P)</string>
+    <string name="p2p_swarm_subtitle">Secure, decentralized communication without internet</string>
+    <string name="mesh_broadcast_title">Broadcast message to swarm</string>
+    <string name="label_message_placeholder">Enter message...</string>
+    <string name="checkbox_ephemeral">Delete message after reading (Ephemeral)</string>
+    <string name="btn_broadcast">Send to Swarm</string>
+    <string name="mesh_packets_count">Active Swarm Packets (%d)</string>
+    <string name="mesh_hardware_title">P2P Hardware &amp; Connections</string>
+    <string name="mesh_status_format">Status: %s</string>
+    <string name="btn_start_mesh_node">Start P2P Mesh Node</string>
+    
+    <string name="status_ready">Ready for swarm connection</string>
+    <string name="status_mesh_active_search">Searching for swarm nodes...</string>
+    <string name="toast_mesh_device_discovered">New swarm device discovered!</string>
+    <string name="status_mesh_connected_format">Connected to %s (Devices: %d)</string>
+    <string name="status_mesh_connected_devices_format">Connected devices: %d</string>
+    <string name="status_sent">Message successfully sent to swarm</string>
+    <string name="toast_p2p_started">P2P Mesh node started successfully!</string>
+    <string name="toast_bluetooth_missing">Bluetooth permissions are required!</string>
+
+    <!-- Security Logs Strings -->
+    <string name="logs_page_title">Security Logs</string>
+    <string name="logs_page_subtitle">Overview of all intercepted threats and events</string>
+    <string name="logs_empty_message">No events recorded yet. Your system is secure.</string>
+    <string name="logs_module_prefix">Module: %s</string>
 </resources>
 
