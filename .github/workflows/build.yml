@@ -1,3 +1,8 @@
+
+Benedikt Wolfgang Hütter <hutters.hq@gmail.com>
+11:38 (vor 0 Minuten)
+an mich
+
 name: Build and Release Juaris
 
 on:
@@ -21,10 +26,15 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      # KORREKTUR 1: Nutze den im Android-Projekt integrierten Gradle-Wrapper anstatt wget-Downloads.
-      # Das garantiert maximale Stabilität und nutzt exakt die Version aus deinem Projekt!
-      - name: Make Gradle Wrapper Executable
-        run: chmod +x ./gradlew
+      - name: Generate and Make Gradle Wrapper Executable
+        run: |
+          if [ ! -f "./gradlew" ]; then
+            echo "Gradle wrapper not found, generating it automatically..."
+            wget -q https://services.gradle.org/distributions/gradle-8.5-bin.zip
+            unzip -q gradle-8.5-bin.zip
+            ./gradle-8.5/bin/gradle wrapper --gradle-version 8.5
+          fi
+          chmod +x ./gradlew
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -95,5 +105,4 @@ jobs:
           name: "Juaris Release v1.0.0-${{ github.run_number }} (AAB & APK)"
           body: "Dieses Release enthält sowohl die .aab-Datei für den Google Play Store als auch die .apk-Datei zum direkten Installieren auf dem Handy."
           token: ${{ secrets.GITHUB_TOKEN }}
-
 
