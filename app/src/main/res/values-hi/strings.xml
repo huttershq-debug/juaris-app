@@ -46,7 +46,7 @@
     <string name="status_ready">स्वार्म कनेक्शन के लिए तैयार</string>
     <string name="status_mesh_active_search">स्वार्म नोड्स की खोज जारी है...</string>
     <string name="toast_mesh_device_discovered">नया स्वार्म डिवाइस खोजा गया!</string>
-    <string name="status_mesh_connected_format">%s से कनेक्टेड (डिवाइस: %d)</string>
+    <string name="status_mesh_connected_format" formatted="false">%s से कनेक्टेड (डिवाइस: %d)</string>
     <string name="status_mesh_connected_devices_format">कनेक्टेड डिवाइस: %d</string>
     <string name="status_sent">संदेश सफलतापूर्वक स्वार्म को भेजा गया</string>
     <string name="toast_p2p_started">P2P मेश नोड सफलतापूर्वक शुरू हो गया!</string>
