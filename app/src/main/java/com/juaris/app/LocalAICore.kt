@@ -88,7 +88,7 @@ class LocalAICore(private val context: Context) {
         if (authorityKeywords.any { normalized.contains(it) || stripped.contains(it) }) threatScore += 25
        
         // Roh-Text ohne Leerzeichen für exakte Krypto- und IBAN-Muster (Zahlen nicht verfälschen!)
-        val strippedRaw = input.replace(" ", "").lowercase()
+        val strippedRaw = text.replace(" ", "").lowercase()
         val hasIbanPattern = Regex("[a-z]{2}\\d{2}[a-z0-9]{11,30}").containsMatchIn(strippedRaw)
         val hasCryptoPattern = Regex("(bc1|[13])[a-km-zA-HJ-NP-Z1-9]{25,39}").containsMatchIn(strippedRaw)
        
