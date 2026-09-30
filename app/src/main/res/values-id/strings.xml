@@ -31,4 +31,30 @@
     <string name="vpn_disclosure_message">Juaris menggunakan VpnService lokal untuk mendeteksi phishing dan malware langsung di perangkat Anda.\n\nSemua data tetap 100% lokal. Tidak ada yang dikirim ke server eksternal atau cloud.</string>
     <string name="btn_understood">Mengerti &amp; Aktifkan</string>
     <string name="btn_cancel">Batal</string>
+    <!-- P2P Swarm & Mesh Strings -->
+    <string name="p2p_swarm_title">Mesh Swarm Juaris (P2P)</string>
+    <string name="p2p_swarm_subtitle">Komunikasi terdesentralisasi yang aman tanpa internet</string>
+    <string name="mesh_broadcast_title">Siarkan pesan ke swarm</string>
+    <string name="label_message_placeholder">Masukkan pesan...</string>
+    <string name="checkbox_ephemeral">Hapus pesan setelah dibaca (Ephemeral)</string>
+    <string name="btn_broadcast">Kirim ke Swarm</string>
+    <string name="mesh_packets_count">Paket Swarm Aktif (%d)</string>
+    <string name="mesh_hardware_title">Perangkat &amp; Koneksi P2P</string>
+    <string name="mesh_status_format">Status: %s</string>
+    <string name="btn_start_mesh_node">Mulai Node Mesh P2P</string>
+    
+    <string name="status_ready">Siap untuk koneksi swarm</string>
+    <string name="status_mesh_active_search">Mencari node swarm...</string>
+    <string name="toast_mesh_device_discovered">Perangkat swarm baru ditemukan!</string>
+    <string name="status_mesh_connected_format">Terhubung ke %s (Perangkat: %d)</string>
+    <string name="status_mesh_connected_devices_format">Perangkat terhubung: %d</string>
+    <string name="status_sent">Pesan berhasil dikirim ke swarm</string>
+    <string name="toast_p2p_started">Node Mesh P2P berhasil dimulai!</string>
+    <string name="toast_bluetooth_missing">Izin Bluetooth diperlukan!</string>
+
+    <!-- Security Logs Strings -->
+    <string name="logs_page_title">Log Keamanan</string>
+    <string name="logs_page_subtitle">Ringkasan semua ancaman dan peristiwa yang dicegat</string>
+    <string name="logs_empty_message">Belum ada peristiwa yang dicatat. Sistem Anda aman.</string>
+    <string name="logs_module_prefix">Modul: %s</string>
 </resources>
