@@ -1,6 +1,5 @@
 package com.juaris.app
 
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -19,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -35,6 +35,7 @@ class EmergencyActivity : ComponentActivity() {
             setShowWhenLocked(true)
             setTurnScreenOn(true)
         } else {
+            @Suppress("DEPRECATION")
             window.addFlags(
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
@@ -42,7 +43,9 @@ class EmergencyActivity : ComponentActivity() {
             )
         }
 
-        val reason = intent.getStringExtra("reason") ?: "Sicherheits-Notfall erkannt"
+        // KORREKTUR 1: Standard-Grund dynamisch aus deinen 12 Weltsprachen laden!
+        val defaultReason = getString(R.string.emergency_reason_default)
+        val reason = intent.getStringExtra("reason") ?: defaultReason
 
         setContent {
             EmergencyAlarmScreen(
@@ -69,7 +72,7 @@ class EmergencyActivity : ComponentActivity() {
         }
     }
 
-     companion object {
+    companion object {
         /**
          * Zwingt die EmergencyActivity sofort aus dem Hintergrund auf den Bildschirm –
          * absolut regelkonform und sicher für den Google Play Store Review.
@@ -91,7 +94,7 @@ class EmergencyActivity : ComponentActivity() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val channel = NotificationChannel(
                     channelId,
-                    "Kritischer Notfall-Alarm",
+                    context.getString(R.string.emergency_channel_name),
                     NotificationManager.IMPORTANCE_HIGH
                 ).apply {
                     setSound(null, null)
@@ -100,12 +103,12 @@ class EmergencyActivity : ComponentActivity() {
                 notificationManager.createNotificationChannel(channel)
             }
 
-            // Nutze NotificationCompat – Garantiert das Öffnen im Vordergrund auf allen Android-Versionen!
+            // KORREKTUR 2: System-Benachrichtigungen an deine strings.xml gekoppelt!
             val notification = androidx.core.app.NotificationCompat.Builder(context, channelId)
-                .setContentTitle("🚨 KRITISCHER SICHERHEITS-NOTFALL")
-                .setContentText("Notruf-Countdown gestartet!")
+                .setContentTitle(context.getString(R.string.emergency_notification_title))
+                .setContentText(context.getString(R.string.emergency_notification_text))
                 .setSmallIcon(R.drawable.app_icon)
-                .setFullScreenIntent(pendingIntent, true) // <--- ERZWINGT DAS ÖFFNEN IM VOLLBILD
+                .setFullScreenIntent(pendingIntent, true) // ERZWINGT DAS ÖFFNEN IM VOLLBILD
                 .setCategory(androidx.core.app.NotificationCompat.CATEGORY_ALARM)
                 .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true)
@@ -114,6 +117,7 @@ class EmergencyActivity : ComponentActivity() {
             notificationManager.notify(999, notification)
         }
     }
+}
 
 @Composable
 fun EmergencyAlarmScreen(
@@ -128,7 +132,6 @@ fun EmergencyAlarmScreen(
             delay(1000L)
             countdown--
         }
-        // Wenn der Countdown bei 0 ist, Notruf automatisch auslösen
         onTriggerCall()
     }
 
@@ -143,8 +146,9 @@ fun EmergencyAlarmScreen(
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.padding(24.dp)
         ) {
+            // KORREKTUR 3: Alle UI-Texte sprachenunabhängig für den Weltmarkt deklariert!
             Text(
-                text = "🚨 KRITISCHER NOTFALL 🚨",
+                text = stringResource(R.string.emergency_screen_heading),
                 color = Color.White,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
@@ -166,7 +170,7 @@ fun EmergencyAlarmScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Sekunden bis automatischer Notruf (112)",
+                text = stringResource(R.string.emergency_screen_countdown_desc),
                 color = Color.White,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
@@ -178,7 +182,7 @@ fun EmergencyAlarmScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                 modifier = Modifier.fillMaxWidth().height(56.dp)
             ) {
-                Text(text = "📞 JETZT NOTRUF WÄHLEN (112)", color = Color.Red, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(text = stringResource(R.string.btn_emergency_call_now), color = Color.Red, fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -188,10 +192,9 @@ fun EmergencyAlarmScreen(
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
                 modifier = Modifier.fillMaxWidth().height(50.dp)
             ) {
-                Text(text = "Abbrechen (Kein Notfall)", color = Color.White, fontWeight = FontWeight.Bold)
+                Text(text = stringResource(R.string.btn_emergency_cancel), color = Color.White, fontWeight = FontWeight.Bold)
             }
         }
     }
 }
-
 
