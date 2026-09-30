@@ -1,3 +1,5 @@
+JUARIS
+
 Datenschutzerklärung (Privacy Policy)
 
 Stand: 15. Oktober 2026
