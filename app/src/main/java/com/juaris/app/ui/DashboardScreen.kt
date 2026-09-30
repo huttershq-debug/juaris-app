@@ -59,9 +59,11 @@ fun DashboardScreen() {
         }
     }
 
+    // KORREKTUR 1: Instanz außerhalb des Effekts fixieren, um die Re-Composition-Schleife zu brechen!
+    val gestureCore = remember { AirGestureCore(context) }
+
     if (gestureEnabled) {
         DisposableEffect(lifecycleOwner) {
-            val gestureCore = AirGestureCore(context)
             debugStatusText = "Starte AirGestureCore..."
            
             gestureCore.startGestureDetection(
@@ -245,6 +247,7 @@ fun AirGestureControlView(isGestureActive: Boolean, debugText: String, onToggle:
             horizontalArrangement = Arrangement.Center
         ) {
             Text(text = stringResource(R.string.camera_scanner_label), color = Color.Gray)
+            Spacer(modifier = Modifier.width(12.dp)) // KORREKTUR 2: Optischer Abstand für den Switch eingebaut
             Switch(
                 checked = isGestureActive,
                 onCheckedChange = { onToggle(it) }
@@ -284,5 +287,4 @@ fun AirGestureControlView(isGestureActive: Boolean, debugText: String, onToggle:
         }
     }
 }
-
 
