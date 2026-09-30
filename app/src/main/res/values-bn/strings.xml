@@ -46,7 +46,7 @@
     <string name="status_ready">সোয়ার্ম সংযোগের জন্য প্রস্তুত</string>
     <string name="status_mesh_active_search">সোয়ার্ম নোড খোঁজা হচ্ছে...</string>
     <string name="toast_mesh_device_discovered">নতুন সোয়ার্ম ডিভাইস আবিষ্কৃত হয়েছে!</string>
-    <string name="status_mesh_connected_format">%s এর সাথে সংযুক্ত (ডিভাইস: %d)</string>
+    <string name="status_mesh_connected_format" formatted="false">%s এর সাথে সংযুক্ত (ডিভাইস: %d)</string>
     <string name="status_mesh_connected_devices_format">সংযুক্ত ডিভাইস: %d</string>
     <string name="status_sent">সফলভাবে সোয়ার্মে বার্তা পাঠানো হয়েছে</string>
     <string name="toast_p2p_started">P2P মেশ নোড সফলভাবে শুরু হয়েছে!</string>
