@@ -560,7 +560,14 @@ fun JuarisMainDashboard(
     val aiCore = remember { LocalAICore(context) }
     val airGestureCore = remember { AirGestureCore(context) }
     val coroutineScope = rememberCoroutineScope()
-   
+    LaunchedEffect(Unit) {
+    JuarisEventBus.events.collect { event ->
+        // HIER reagierst du auf das Ereignis (z.B. UI aktualisieren oder Toast anzeigen)
+        if (event == "Manueller Panic-Button Trigger") {
+            executeEmergencyProtocol(event)
+        }
+    }
+}  
     val db = remember { JuarisDatabase.getDatabase(context) }
     val logsFlow = db.securityLogDao().getAllLogs()
     val liveLogs by logsFlow.collectAsState(initial = emptyList())
