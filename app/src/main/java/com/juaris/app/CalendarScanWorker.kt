@@ -68,18 +68,16 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
                     "${CalendarContract.Instances.BEGIN} ASC"
                 )
 
-                 cursor?.use {
+                cursor?.use {
                     val titleIdx = it.getColumnIndex(CalendarContract.Instances.TITLE)
                     val descIdx = it.getColumnIndex(CalendarContract.Instances.DESCRIPTION)
 
                     while (it.moveToNext()) {
-                        // Absolut absturzsicheres Auslesen der Spalten – Fängt jeden Index-Fehler ab!
                         val title = if (titleIdx >= 0) it.getString(titleIdx) ?: "" else ""
                         val description = if (descIdx >= 0) it.getString(descIdx) ?: "" else ""
                         val combined = "$title $description".lowercase()
 
-
-                        // 🚫 SPAM- & WERBEFILTER
+                        // 🚫 SPAM- & WERBEFILTER (100% On-Device)
                         val spamKeywords = listOf(
                             "gewinn", "gutschein", "casino", "krypto", "bitcoin", "gratis",
                             "rabatt", "deal", "werbung", "newsletter", "angebot", "cashback",
@@ -94,22 +92,23 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
                         val isMedical = combined.contains("arzt") || combined.contains("zahnarzt") || combined.contains("termin") || combined.contains("klinik") || combined.contains("therapie")
                         val isFinancial = combined.contains("rechnung") || combined.contains("mahnung") || combined.contains("inkasso") || combined.contains("frist") || combined.contains("steuer") || combined.contains("bescheid") || combined.contains("zahlung")
                         val isTravel = combined.contains("flug") || combined.contains("reise") || combined.contains("hotel") || combined.contains("zug") || combined.contains("ticket")
-                        val isServiceOrHome = combined.contains("gas") || combined.contains("strom") || combined.contains("wasser") || 
-                                              combined.contains("zähler") || combined.contains("ausbau") || combined.contains("ablesung") || 
-                                              combined.contains("wartung") || combined.contains("handwerker") || combined.contains("installateur") || 
+                        val isServiceOrHome = combined.contains("gas") || combined.contains("strom") || combined.contains("wasser") ||
+                                              combined.contains("zähler") || combined.contains("ausbau") || combined.contains("ablesung") ||
+                                              combined.contains("wartung") || combined.contains("handwerker") || combined.contains("installateur") ||
                                               combined.contains("service") || combined.contains("reparatur")
 
                         val isImportant = isAnniversary || isBirthday || isMedical || isFinancial || isTravel || isServiceOrHome
 
                         if (isImportant) {
+                            // KORREKTUR 1: Lädt alle Titel und Zuweisungen dynamisch aus deinen 12 Sprachdateien (strings.xml)!
                             val (alertTitle, dbStatus) = when {
-                                isFinancial -> Pair("🚨 Wichtige finanzielle Frist / Rechnung", "WARNING")
-                                isServiceOrHome -> Pair("🔧 Wichtiger Versorger- oder Zähltermin", "IMPORTANT")
-                                isAnniversary -> Pair("💍 Wichtiger Jahrestag / Hochzeitstag heute!", "IMPORTANT")
-                                isBirthday -> Pair("🎂 Geburtstag heute!", "IMPORTANT")
-                                isMedical -> Pair("🩺 Wichtiger Arzt- oder Gesundheitstermin", "IMPORTANT")
-                                isTravel -> Pair("✈️ Reise- oder Mobilitäts-Termin", "IMPORTANT")
-                                else -> Pair("📅 Wichtiger Tages-Eintrag", "INFO")
+                                isFinancial -> Pair(context.getString(R.string.alert_financial_title), "WARNING")
+                                isServiceOrHome -> Pair(context.getString(R.string.alert_service_title), "IMPORTANT")
+                                isAnniversary -> Pair(context.getString(R.string.alert_anniversary_title), "IMPORTANT")
+                                isBirthday -> Pair(context.getString(R.string.alert_birthday_title), "IMPORTANT")
+                                isMedical -> Pair(context.getString(R.string.alert_medical_title), "IMPORTANT")
+                                isTravel -> Pair(context.getString(R.string.alert_travel_title), "IMPORTANT")
+                                else -> Pair(context.getString(R.string.alert_general_title), "INFO")
                             }
 
                             db.securityLogDao().insertLog(
@@ -122,7 +121,7 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
                                 )
                             )
 
-                            showLifePopup(context, alertTitle, title.ifEmpty { "Eintrag im Kalender gefunden" })
+                            showLifePopup(context, alertTitle, title.ifEmpty { context.getString(R.string.logs_empty_message) })
                         }
                     }
                 }
@@ -159,7 +158,7 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
         )
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.hologram_avatar)
+            .setSmallIcon(R.drawable.app_icon) // KORREKTUR 2: Nutzt das transparente Vektor-Icon zur absoluten System-Stabilität!
             .setContentTitle(title)
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
@@ -172,5 +171,4 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
         notificationManager.notify((System.currentTimeMillis() % 10000).toInt(), notification)
     }
 }
-
 
