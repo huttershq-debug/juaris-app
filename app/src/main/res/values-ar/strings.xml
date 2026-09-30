@@ -31,5 +31,31 @@
     <string name="vpn_disclosure_message">تستخدم Juaris خدمة شبكة VPN محلية لاكتشاف البرامج الضارة والتصيد الاحتيالي مباشرة على جهازك.\n\nتظل جميع البيانات محلية بنسبة 100%. لا يتم إرسال أي شيء إلى خوادم خارجية أو السحابة.</string>
     <string name="btn_understood">فهمت والتفعيل</string>
     <string name="btn_cancel">إلغاء</string>
+    <!-- P2P Swarm & Mesh Strings -->
+    <string name="p2p_swarm_title">شبكة سُحُب جواريس (P2P)</string>
+    <string name="p2p_swarm_subtitle">اتصالات آمنة لامركزية بدون إنترنت</string>
+    <string name="mesh_broadcast_title">بث رسالة إلى الشبكة</string>
+    <string name="label_message_placeholder">أدخل رسالة...</string>
+    <string name="checkbox_ephemeral">حذف الرسالة بعد القراءة (مؤقتة)</string>
+    <string name="btn_broadcast">إرسال إلى الشبكة</string>
+    <string name="mesh_packets_count">حزم الشبكة النشطة (%d)</string>
+    <string name="mesh_hardware_title">أجهزة P2P والاتصالات</string>
+    <string name="mesh_status_format">الحالة: %s</string>
+    <string name="btn_start_mesh_node">بدء عقدة شبكة P2P</string>
+    
+    <string name="status_ready">جاهز للاتصال بالشبكة</string>
+    <string name="status_mesh_active_search">البحث عن عقد الشبكة...</string>
+    <string name="toast_mesh_device_discovered">تم اكتشاف جهاز شبكة جديد!</string>
+    <string name="status_mesh_connected_format">متصل بـ %s (الأجهزة: %d)</string>
+    <string name="status_mesh_connected_devices_format">الأجهزة المتصلة: %d</string>
+    <string name="status_sent">تم إرسال الرسالة بنجاح إلى الشبكة</string>
+    <string name="toast_p2p_started">تم بدء عقدة شبكة P2P بنجاح!</string>
+    <string name="toast_bluetooth_missing">أذونات البلوتوث مطلوبة!</string>
+
+    <!-- Security Logs Strings -->
+    <string name="logs_page_title">سجلات الأمان</string>
+    <string name="logs_page_subtitle">نظرة عامة على جميع التهديدات والأحداث التي تم اعتراضها</string>
+    <string name="logs_empty_message">لم يتم تسجيل أي أحداث حتى الآن. نظامك آمن.</string>
+    <string name="logs_module_prefix">الوحدة: %s</string>
 </resources>
 
