@@ -31,5 +31,31 @@
     <string name="vpn_disclosure_message">Juaris utilise un VpnService local pour détecter le phishing et les logiciels malveillants directement sur votre appareil.\n\nDonnées 100% locales. Rien n\'est envoyé vers des serveurs externes ou le cloud.</string>
     <string name="btn_understood">Compris et Activer</string>
     <string name="btn_cancel">Annuler</string>
+     <!-- P2P Swarm & Mesh Strings -->
+    <string name="p2p_swarm_title">Mesh d'essaim Juaris (P2P)</string>
+    <string name="p2p_swarm_subtitle">Communication sécurisée et décentralisée sans Internet</string>
+    <string name="mesh_broadcast_title">Diffuser un message à l'essaim</string>
+    <string name="label_message_placeholder">Entrer un message...</string>
+    <string name="checkbox_ephemeral">Supprimer le message après lecture (Éphémère)</string>
+    <string name="btn_broadcast">Envoyer à l'essaim</string>
+    <string name="mesh_packets_count">Paquets d'essaim actifs (%d)</string>
+    <string name="mesh_hardware_title">Matériel P2P et Connexions</string>
+    <string name="mesh_status_format">Statut : %s</string>
+    <string name="btn_start_mesh_node">Démarrer le nœud Mesh P2P</string>
+    
+    <string name="status_ready">Prêt pour la connexion en essaim</string>
+    <string name="status_mesh_active_search">Recherche de nœuds d'essaim...</string>
+    <string name="toast_mesh_device_discovered">Nouvel appareil d'essaim découvert !</string>
+    <string name="status_mesh_connected_format">Connecté à %s (Appareils : %d)</string>
+    <string name="status_mesh_connected_devices_format">Appareils connectés : %d</string>
+    <string name="status_sent">Message envoyé avec succès à l'essaim</string>
+    <string name="toast_p2p_started">Nœud Mesh P2P démarré avec succès !</string>
+    <string name="toast_bluetooth_missing">Les autorisations Bluetooth sont requises !</string>
+
+    <!-- Security Logs Strings -->
+    <string name="logs_page_title">Journaux de sécurité</string>
+    <string name="logs_page_subtitle">Aperçu de toutes les menaces et événements interceptés</string>
+    <string name="logs_empty_message">Aucun événement enregistré pour l'instant. Votre système est sécurisé.</string>
+    <string name="logs_module_prefix">Module : %s</string>
 </resources>
 
