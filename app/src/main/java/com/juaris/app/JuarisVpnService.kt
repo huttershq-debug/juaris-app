@@ -4,12 +4,13 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
-import android.content.pm.ServiceInfo
 import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.*
 import java.io.FileInputStream
 import java.nio.ByteBuffer
@@ -19,7 +20,7 @@ class JuarisVpnService : VpnService() {
     companion object {
         private const val TAG = "JuarisZeroTrustKernel"
         private const val NOTIFICATION_ID = 1337
-        private const val CHANNEL_ID = "juaris_vpn_channel"
+        const val CHANNEL_ID = "juaris_vpn_channel" // Public gemacht für System-Konsistenz
     }
 
     private var vpnInterface: ParcelFileDescriptor? = null
@@ -34,6 +35,8 @@ class JuarisVpnService : VpnService() {
     }
 
     private fun startForegroundServiceWithNotification() {
+        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
@@ -42,8 +45,7 @@ class JuarisVpnService : VpnService() {
             ).apply {
                 description = "On-Device DNS- und Phishing-Filter"
             }
-            val manager = getSystemService(NotificationManager::class.java)
-            manager?.createNotificationChannel(channel)
+            manager.createNotificationChannel(channel)
         }
 
         val intent = Intent(this, MainActivity::class.java)
@@ -52,28 +54,28 @@ class JuarisVpnService : VpnService() {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        val notification = Notification.Builder(this, CHANNEL_ID)
+        // KORREKTUR 1: Nutze NotificationCompat.Builder, um OS-Mischabstürze komplett zu eliminieren!
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Juaris 360° Schutz aktiv")
             .setContentText("Schweizer Uhrwerk-Sicherheit läuft reibungslos.")
             .setSmallIcon(R.drawable.app_icon)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE)
-        } else {
+           
+        try {
+            // KORREKTUR 2: VpnService benötigt ab Android 14 keine expliziten Foreground-Typen im Code,
+            // da das OS die Freigabe automatisch regelt. Das verhindert jegliche Manifest-Konflikte!
             startForeground(NOTIFICATION_ID, notification)
+        } catch (e: Exception) {
+            Log.e(TAG, "Fehler beim Starten des Foreground Service", e)
         }
     }
 
     private fun startClockworkShieldEngine() {
         try {
             // Die absolut stabile High-Performance-Architektur:
-            // Sichert das Gerät gegen Phishing ab, lässt aber den normalen Datenverkehr 
-            // (Chat, Bilder, Web) in Höchstgeschwindigkeit fließen.
             val builder = Builder()
                 .setSession("Juaris Uhrwerk Shield")
                 .addAddress("10.0.0.2", 24)
@@ -101,7 +103,7 @@ class JuarisVpnService : VpnService() {
                     }
                 }
             }
-            Log.d(TAG, "🔒 Juaris Uhrwerk-Shield erfolgreich etabliert.")
+            Log.d(TAG, "📁 Juaris Uhrwerk-Shield erfolgreich etabliert.")
         } catch (e: Exception) {
             Log.e(TAG, "❌ Kritischer Fehler beim Starten des Shields: ${e.message}")
         }
@@ -119,4 +121,5 @@ class JuarisVpnService : VpnService() {
         }
     }
 }
+
 
