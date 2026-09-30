@@ -560,14 +560,15 @@ fun JuarisMainDashboard(
     val aiCore = remember { LocalAICore(context) }
     val airGestureCore = remember { AirGestureCore(context) }
     val coroutineScope = rememberCoroutineScope()
+    
     LaunchedEffect(Unit) {
-    JuarisEventBus.events.collect { event ->
-        // HIER reagierst du auf das Ereignis (z.B. UI aktualisieren oder Toast anzeigen)
-        if (event == "Manueller Panic-Button Trigger") {
-            executeEmergencyProtocol(event)
+        JuarisEventBus.events.collect { event ->
+            if (event == "Manueller Panic-Button Trigger") {
+                (context.findActivity() as? MainActivity)?.executeEmergencyProtocol(event)
+            }
         }
-    }
-}  
+    }  
+    
     val db = remember { JuarisDatabase.getDatabase(context) }
     val logsFlow = db.securityLogDao().getAllLogs()
     val liveLogs by logsFlow.collectAsState(initial = emptyList())
@@ -616,7 +617,7 @@ fun JuarisMainDashboard(
     }
 
     val blockedContacts = remember {
-        val savedList = prefs.getStringSet("blocked_numbers", setOf("+43123456789", "Spam-Nummern")) ?: setOf()
+        val savedList = prefs.getStringSet("blocked_numbers", setOf("+43123456789", context.getString(R.string.default_spam_label))) ?: setOf()
         mutableStateListOf(*savedList.toTypedArray())
     }
 
@@ -690,10 +691,10 @@ fun JuarisMainDashboard(
                     emailProtection = emailProtection,
                     onEmailChange = {
                         emailProtection = it
-                        applicationcontext.getSharedPreferences("juaris_public_prefs", Context.MODE_PRIVATE)
-                        .edit()
-                        .putBoolean("email_prot", it)
-                        .apply()
+                        context.applicationContext.getSharedPreferences("juaris_public_prefs", Context.MODE_PRIVATE)
+                            .edit()
+                            .putBoolean("email_prot", it)
+                            .apply()
                     },
                     vaultUnlocked = vaultUnlocked,
                     onVaultToggle = { newState ->
@@ -1322,4 +1323,5 @@ fun PrivacyAndLegalContent() {
         }
     }
 }
+
 
