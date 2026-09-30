@@ -31,4 +31,30 @@
     <string name="vpn_disclosure_message">Juaris nutzt einen lokalen VpnService, um Phishing und Malware direkt auf deinem Gerät zu erkennen.\n\nAlle Daten bleiben zu 100% lokal. Es wird absolut nichts an externe Server oder Clouds gesendet.</string>
     <string name="btn_understood">Verstanden &amp; Aktivieren</string>
     <string name="btn_cancel">Abbrechen</string>
+     <!-- P2P Swarm & Mesh Strings -->
+    <string name="p2p_swarm_title">Juaris Schwarm-Mesh (P2P)</string>
+    <string name="p2p_swarm_subtitle">Sichere, dezentrale Kommunikation ohne Internet</string>
+    <string name="mesh_broadcast_title">Nachricht in den Schwarm senden</string>
+    <string name="label_message_placeholder">Nachricht eingeben...</string>
+    <string name="checkbox_ephemeral">Nachricht nach Lesung löschen (Ephemeral)</string>
+    <string name="btn_broadcast">An Schwarm senden</string>
+    <string name="mesh_packets_count">Aktive Schwarm-Pakete (%d)</string>
+    <string name="mesh_hardware_title">P2P-Hardware &amp; Verbindungen</string>
+    <string name="mesh_status_format">Status: %s</string>
+    <string name="btn_start_mesh_node">P2P-Mesh Knoten starten</string>
+    
+    <string name="status_ready">Bereit für Schwarm-Verbindung</string>
+    <string name="status_mesh_active_search">Suche nach Schwarm-Knoten...</string>
+    <string name="toast_mesh_device_discovered">Neues Schwarm-Gerät entdeckt!</string>
+    <string name="status_mesh_connected_format">Verbunden mit %s (Geräte: %d)</string>
+    <string name="status_mesh_connected_devices_format">Verbundene Geräte: %d</string>
+    <string name="status_sent">Nachricht erfolgreich an Schwarm gesendet</string>
+    <string name="toast_p2p_started">P2P-Mesh Knoten erfolgreich gestartet!</string>
+    <string name="toast_bluetooth_missing">Bluetooth-Berechtigungen werden benötigt!</string>
+
+    <!-- Security Logs Strings -->
+    <string name="logs_page_title">Sicherheits-Logs</string>
+    <string name="logs_page_subtitle">Alle abgefangenen Bedrohungen und Ereignisse im Überblick</string>
+    <string name="logs_empty_message">Bisher keine Ereignisse verzeichnet. Ihr System ist sicher.</string>
+    <string name="logs_module_prefix">Modul: %s</string>
 </resources>
