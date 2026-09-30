@@ -57,4 +57,25 @@
     <string name="logs_page_subtitle">সমস্ত বাধাগ্রস্ত হুমকি এবং ইভেন্টের সংক্ষিপ্ত বিবরণ</string>
     <string name="logs_empty_message">এখনও কোনো ইভেন্ট রেকর্ড করা হয়নি। আপনার সিস্টেম নিরাপদ।</string>
     <string name="logs_module_prefix">মডিউল: %s</string>
+    <!-- Privacy & Imprint Strings -->
+    <string name="privacy_text">গোপনীয়তা নীতি</string>
+    <string name="privacy_link">গোপনীয়তা নীতি পড়ুন</string>
+    <string name="imprint_title">ইমপ্রিন্ট (আইনি তথ্য)</string>
+    <string name="imprint_subtitle">আইনি তথ্য</string>
+    <string name="imprint_name">কোম্পানির নাম</string>
+    <string name="imprint_address">ঠিকানা</string>
+    <string name="imprint_email">যোগাযোগের ইমেইল</string>
+    <string name="imprint_responsible">দায়িত্বপ্রাপ্ত ব্যক্তি</string>
+    <string name="imprint_name_v">অনুমোদিত প্রতিনিধি</string>
+    <string name="imprint_design">ডিজাইন ও বাস্তবায়ন</string>
+    <string name="imprint_name_va">অতিরিক্ত প্রকাশ</string>
+    <string name="imprint_name_y">দায়মুক্তি (Disclaimer)</string>
+    <string name="company_footer">জুয়ারিস সিকিউরিটি - সর্বস্বত্ব সংরক্ষিত</string>
+
+    <!-- Air Gesture Strings -->
+    <string name="air_gesture_title">এয়ার গেসচার কন্ট্রোল</string>
+    <string name="air_gesture_subtitle">হাতের ইশারায় আপনার ডিভাইস নিয়ন্ত্রণ করুন</string>
+    <string name="air_gesture_desc">নেভিগেট করতে কন্ট্যাক্টলেস ইশারা ব্যবহার করুন</string>
+    <string name="air_gesture_status">সেন্সর প্রস্তুত</string>
+    <string name="air_gesture_action">অ্যাকশন ট্রিগার করুন</string>
 </resources>
