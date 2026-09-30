@@ -57,4 +57,25 @@
     <string name="logs_page_subtitle">सभी अवरोधित खतरों और घटनाओं का अवलोकन</string>
     <string name="logs_empty_message">अभी तक कोई घटना दर्ज नहीं की गई है। आपका सिस्टम सुरक्षित है।</string>
     <string name="logs_module_prefix">मॉड्यूल: %s</string>
+    <!-- Privacy & Imprint Strings -->
+    <string name="privacy_text">गोपनीयता नीति</string>
+    <string name="privacy_link">गोपनीयता नीति पढ़ें</string>
+    <string name="imprint_title">छाप (इंप्रिंट)</string>
+    <string name="imprint_subtitle">कानूनी जानकारी</string>
+    <string name="imprint_name">कंपनी का नाम</string>
+    <string name="imprint_address">पत्ता</string>
+    <string name="imprint_email">संपर्क ईमेल</string>
+    <string name="imprint_responsible">जिम्मेदार व्यक्ति</string>
+    <string name="imprint_name_v">अधिकृत प्रतिनिधि</string>
+    <string name="imprint_design">डज़ाइन और कार्यान्वयन</string>
+    <string name="imprint_name_va">अतिरिक्त खुलासे</string>
+    <string name="imprint_name_y">अस्वीकरण</string>
+    <string name="company_footer">जुआरिस सिक्योरिटी - सर्वाधिकार सुरक्षित</string>
+
+    <!-- Air Gesture Strings -->
+    <string name="air_gesture_title">एयर जेस्चर कंट्रोल</string>
+    <string name="air_gesture_subtitle">हाथ के इशारों से अपने डिवाइस को नियंत्रित करें</string>
+    <string name="air_gesture_desc">नेविगेट करने के लिए संपर्क रहित इशारों का उपयोग करें</string>
+    <string name="air_gesture_status">सेंसर तैयार है</string>
+    <string name="air_gesture_action">एक्शन ट्रिगर करें</string>
 </resources>
