@@ -46,7 +46,7 @@
     <string name="status_ready">Prêt pour la connexion en essaim</string>
     <string name="status_mesh_active_search">Recherche de nœuds d'essaim...</string>
     <string name="toast_mesh_device_discovered">Nouvel appareil d'essaim découvert !</string>
-    <string name="status_mesh_connected_format">Connecté à %s (Appareils : %d)</string>
+    <string name="status_mesh_connected_format" formatted="false">Connecté à %s (Appareils : %d)</string>
     <string name="status_mesh_connected_devices_format">Appareils connectés : %d</string>
     <string name="status_sent">Message envoyé avec succès à l'essaim</string>
     <string name="toast_p2p_started">Nœud Mesh P2P démarré avec succès !</string>
