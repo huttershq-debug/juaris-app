@@ -690,7 +690,10 @@ fun JuarisMainDashboard(
                     emailProtection = emailProtection,
                     onEmailChange = {
                         emailProtection = it
-                        prefs.edit().putBoolean("email_prot", it).apply()
+                        context.getSharedPreferences("juaris_public_prefs", Context.MODE_PRIVATE)
+                        .edit()
+                        .putBoolean("email_prot", it)
+                        .apply()
                     },
                     vaultUnlocked = vaultUnlocked,
                     onVaultToggle = { newState ->
