@@ -21,6 +21,11 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      # KORREKTUR 1: Nutze den im Android-Projekt integrierten Gradle-Wrapper anstatt wget-Downloads.
+      # Das garantiert maximale Stabilität und nutzt exakt die Version aus deinem Projekt!
+      - name: Make Gradle Wrapper Executable
+        run: chmod +x ./gradlew
+
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
@@ -44,16 +49,10 @@ jobs:
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > $GITHUB_WORKSPACE/juaris-release-key.jks
 
-      - name: Download Gradle 8.4
-        run: |
-          echo "Lade Gradle 8.4 herunter..."
-          wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
-          unzip -q gradle-8.4-bin.zip
-
       - name: Run Android Lint (Statische Code-Analyse)
         run: |
           echo "Scanne den Code nach Fehlern und Problemen..."
-          ./gradle-8.4/bin/gradle lintRelease --stacktrace
+          ./gradlew lintRelease --stacktrace
 
       - name: Upload Lint Reports
         if: always()
@@ -65,7 +64,7 @@ jobs:
       - name: Run Unit Tests
         run: |
           echo "Führe Unit-Tests aus..."
-          ./gradle-8.4/bin/gradle testDebugUnitTest --stacktrace
+          ./gradlew testDebugUnitTest --stacktrace
 
       - name: Upload Unit Test Results
         if: always()
@@ -77,10 +76,10 @@ jobs:
       - name: Build Both AAB and APK
         run: |
           echo "kompiliere APK und AAB mit 3GB Heap..."
-          ./gradle-8.4/bin/gradle assembleRelease bundleRelease --stacktrace \
+          ./gradlew assembleRelease bundleRelease --stacktrace \
             -Dorg.gradle.jvmargs="-Xmx3g" \
             -Pandroid.useAndroidX=true \
-            -Pandroid.enableJetifier=true \
+            -Pandroid.enableJetifier=false \
             -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/juaris-release-key.jks" \
             -Pandroid.injected.signing.storePassword="${{ secrets.KEYSTORE_PASSWORD }}" \
             -Pandroid.injected.signing.keyAlias="${{ secrets.KEY_ALIAS }}" \
@@ -96,4 +95,5 @@ jobs:
           name: "Juaris Release v1.0.0-${{ github.run_number }} (AAB & APK)"
           body: "Dieses Release enthält sowohl die .aab-Datei für den Google Play Store als auch die .apk-Datei zum direkten Installieren auf dem Handy."
           token: ${{ secrets.GITHUB_TOKEN }}
+
 
