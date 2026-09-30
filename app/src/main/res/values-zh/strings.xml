@@ -57,5 +57,26 @@
     <string name="logs_page_subtitle">拦截的所有威胁与事件概览</string>
     <string name="logs_empty_message">暂无记录的事件。您的系统非常安全。</string>
     <string name="logs_module_prefix">模块：%s</string>
+     <!-- Privacy & Imprint Strings -->
+    <string name="privacy_text">隐私政策</string>
+    <string name="privacy_link">阅读隐私政策</string>
+    <string name="imprint_title">版权声明 / 法律说明</string>
+    <string name="imprint_subtitle">法律信息</string>
+    <string name="imprint_name">公司名称</string>
+    <string name="imprint_address">地址</string>
+    <string name="imprint_email">联系邮箱</string>
+    <string name="imprint_responsible">负责人</string>
+    <string name="imprint_name_v">授权代表</string>
+    <string name="imprint_design">设计与实现</string>
+    <string name="imprint_name_va">附加披露</string>
+    <string name="imprint_name_y">免责声明</string>
+    <string name="company_footer">Juaris Security - 保留所有权利</string>
+
+    <!-- Air Gesture Strings -->
+    <string name="air_gesture_title">空中手势控制</string>
+    <string name="air_gesture_subtitle">通过手部动作控制您的设备</string>
+    <string name="air_gesture_desc">使用非接触式手势进行导航</string>
+    <string name="air_gesture_status">传感器就绪</string>
+    <string name="air_gesture_action">触发动作</string>
 </resources>
 
