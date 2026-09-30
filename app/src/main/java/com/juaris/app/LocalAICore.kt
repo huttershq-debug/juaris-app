@@ -83,12 +83,14 @@ class LocalAICore(private val context: Context) {
         var threatScore = 0
         var priorityScore = 3
 
+       // 1. Dringlichkeit & Phishing-Muster prüfen
         if (urgencyKeywords.any { normalized.contains(it) || stripped.contains(it) }) threatScore += 35
         if (authorityKeywords.any { normalized.contains(it) || stripped.contains(it) }) threatScore += 25
-        
-        // Globale Finanz-Muster (IBAN, Krypto-Wallets funktionieren weltweit plattformunabhängig)
-        val hasIbanPattern = Regex("[a-z]{2}\\d{2}[a-z0-9]{11,30}").containsMatchIn(stripped)
-        val hasCryptoPattern = Regex("(bc1|[13])[a-km-zA-HJ-NP-Z1-9]{25,39}").containsMatchIn(stripped)
+       
+        // Roh-Text ohne Leerzeichen für exakte Krypto- und IBAN-Muster (Zahlen nicht verfälschen!)
+        val strippedRaw = input.replace(" ", "").lowercase()
+        val hasIbanPattern = Regex("[a-z]{2}\\d{2}[a-z0-9]{11,30}").containsMatchIn(strippedRaw)
+        val hasCryptoPattern = Regex("(bc1|[13])[a-km-zA-HJ-NP-Z1-9]{25,39}").containsMatchIn(strippedRaw)
        
         if (hasIbanPattern || hasCryptoPattern) {
             threatScore += 45
@@ -100,22 +102,27 @@ class LocalAICore(private val context: Context) {
         val category: UnifiedAnalysisResult.Category
         val title: String
 
+        // 2. Kategorisierung und Prioritäts-Vergabe
+        val containsInvoice = invoiceKeywords.any { normalized.contains(it) }
+        val containsUrgency = urgencyKeywords.any { normalized.contains(it) || stripped.contains(it) }
+
         when {
             threatScore >= 60 -> {
                 category = UnifiedAnalysisResult.Category.PHISHING_THREAT
                 priorityScore = 10
                 title = "🚨 Security Threat / Phishing Detected!"
             }
-            invoiceKeywords.any { normalized.contains(it) && (normalized.contains("mahnung") || normalized.contains("overdue") || normalized.contains("срочно") || normalized.contains("عاجل")) } -> {
+            containsInvoice && containsUrgency -> {
                 category = UnifiedAnalysisResult.Category.INVOICE_FINANCIAL
                 priorityScore = 9
                 title = "⚠️ Urgent Overdue / Payment Notice"
             }
-            invoiceKeywords.any { normalized.contains(it) } -> {
+            containsInvoice -> {
                 category = UnifiedAnalysisResult.Category.INVOICE_FINANCIAL
                 priorityScore = 7
                 title = "📄 Invoice / Financial Statement"
             }
+
             utilityKeywords.any { normalized.contains(it) } -> {
                 category = UnifiedAnalysisResult.Category.SERVICE_UTILITY
                 priorityScore = 8
