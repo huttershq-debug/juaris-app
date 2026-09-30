@@ -57,5 +57,26 @@
     <string name="logs_page_subtitle">"Aperçu de toutes les menaces et événements interceptés"</string>
     <string name="logs_empty_message">"Aucun événement enregistré pour l'instant. Votre système est sécurisé."</string>
     <string name="logs_module_prefix">"Module : %s"</string>
+     <!-- Privacy & Imprint Strings -->
+    <string name="privacy_text">"Politique de confidentialité"</string>
+    <string name="privacy_link">"Lire la politique de confidentialité"</string>
+    <string name="imprint_title">"Mentions légales"</string>
+    <string name="imprint_subtitle">"Informations légales"</string>
+    <string name="imprint_name">"Nom de l'entreprise"</string>
+    <string name="imprint_address">"Adresse"</string>
+    <string name="imprint_email">"E-mail de contact"</string>
+    <string name="imprint_responsible">"Personne responsable"</string>
+    <string name="imprint_name_v">"Représentant autorisé"</string>
+    <string name="imprint_design">"Design et mise en œuvre"</string>
+    <string name="imprint_name_va">"Mentions supplémentaires"</string>
+    <string name="imprint_name_y">"Clause de non-responsabilité"</string>
+    <string name="company_footer">"Juaris Security - Tous droits réservés"</string>
+
+    <!-- Air Gesture Strings -->
+    <string name="air_gesture_title">"Contrôle par gestes aériens"</string>
+    <string name="air_gesture_subtitle">"Contrôlez votre appareil avec des mouvements de main"</string>
+    <string name="air_gesture_desc">"Utilisez des gestes sans contact pour naviguer"</string>
+    <string name="air_gesture_status">"Capteur prêt"</string>
+    <string name="air_gesture_action">"Déclencher l'action"</string>
 </resources>
 
