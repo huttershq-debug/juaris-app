@@ -57,4 +57,25 @@
     <string name="logs_page_subtitle">Обзор всех перехваченных угроз и событий</string>
     <string name="logs_empty_message">Событий пока нет. Ваша система защищена.</string>
     <string name="logs_module_prefix">Модуль: %s</string>
+    <!-- Privacy & Imprint Strings -->
+    <string name="privacy_text">Политика конфиденциальности</string>
+    <string name="privacy_link">Читать политику конфиденциальности</string>
+    <string name="imprint_title">Импрессум (О сайте)</string>
+    <string name="imprint_subtitle">Правовая информация</string>
+    <string name="imprint_name">Название компании</string>
+    <string name="imprint_address">Адрес</string>
+    <string name="imprint_email">Контактный email</string>
+    <string name="imprint_responsible">Ответственное лицо</string>
+    <string name="imprint_name_v">Уполномоченный представитель</string>
+    <string name="imprint_design">Дизайн и реализация</string>
+    <string name="imprint_name_va">Дополнительная информация</string>
+    <string name="imprint_name_y">Отказ от ответственности</string>
+    <string name="company_footer">Juaris Security – Все права защищены</string>
+
+    <!-- Air Gesture Strings -->
+    <string name="air_gesture_title">Управление воздушными жестами</string>
+    <string name="air_gesture_subtitle">Управляйте устройством движениями рук</string>
+    <string name="air_gesture_desc">Используйте бесконтактные жесты для навигации</string>
+    <string name="air_gesture_status">Датчик готов</string>
+    <string name="air_gesture_action">Выполнить действие</string>
 </resources>
