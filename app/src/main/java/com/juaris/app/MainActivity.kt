@@ -690,7 +690,7 @@ fun JuarisMainDashboard(
                     emailProtection = emailProtection,
                     onEmailChange = {
                         emailProtection = it
-                        context.getSharedPreferences("juaris_public_prefs", Context.MODE_PRIVATE)
+                        applicationcontext.getSharedPreferences("juaris_public_prefs", Context.MODE_PRIVATE)
                         .edit()
                         .putBoolean("email_prot", it)
                         .apply()
