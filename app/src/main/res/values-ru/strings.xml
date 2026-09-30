@@ -31,6 +31,7 @@
     <string name="vpn_disclosure_message">Juaris использует локальный VpnService для обнаружения фишинга и вредоносных программ прямо на вашем устройстве.\n\nВсе данные остаются локальными на 100%. Ничего не отправляется на внешние серверы или в облако.</string>
     <string name="btn_understood">Понятно и Активировать</string>
     <string name="btn_cancel">Отмена</string>
+    
     <!-- P2P Swarm & Mesh Strings -->
     <string name="p2p_swarm_title">Роевая ячеистая сеть Juaris (P2P)</string>
     <string name="p2p_swarm_subtitle">Безопасная децентрализованная связь без интернета</string>
@@ -42,7 +43,6 @@
     <string name="mesh_hardware_title">P2P-оборудование и соединения</string>
     <string name="mesh_status_format">Статус: %s</string>
     <string name="btn_start_mesh_node">Запустить узел P2P-сети</string>
-    
     <string name="status_ready">Готово к подключению к рою</string>
     <string name="status_mesh_active_search">Поиск узлов роя...</string>
     <string name="toast_mesh_device_discovered">Обнаружено новое устройство роя!</string>
@@ -57,6 +57,7 @@
     <string name="logs_page_subtitle">Обзор всех перехваченных угроз и событий</string>
     <string name="logs_empty_message">Событий пока нет. Ваша система защищена.</string>
     <string name="logs_module_prefix">Модуль: %s</string>
+
     <!-- Privacy & Imprint Strings -->
     <string name="privacy_text">Политика конфиденциальности</string>
     <string name="privacy_link">Читать политику конфиденциальности</string>
@@ -72,10 +73,10 @@
     <string name="imprint_name_y">Отказ от ответственности</string>
     <string name="company_footer">Juaris Security – Все права защищены</string>
 
-    <!-- Air Gesture Strings -->
-    <string name="air_gesture_title">Управление воздушными жестами</string>
+    <!-- Air Gesture Additional Strings -->
     <string name="air_gesture_subtitle">Управляйте устройством движениями рук</string>
     <string name="air_gesture_desc">Используйте бесконтактные жесты для навигации</string>
     <string name="air_gesture_status">Датчик готов</string>
     <string name="air_gesture_action">Выполнить действие</string>
 </resources>
+
