@@ -14,6 +14,8 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 class JuarisNotificationListenerService : NotificationListenerService() {
@@ -27,6 +29,9 @@ class JuarisNotificationListenerService : NotificationListenerService() {
 
     private lateinit var aiCore: LocalAICore
     private lateinit var acousticDetector: AcousticThreatDetector
+    
+    // KORREKTUR 1: Kontrollierter Supervisor-Scope verhindert Datenverluste in deiner Room-DB!
+    private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     override fun onCreate() {
         super.onCreate()
@@ -42,6 +47,19 @@ class JuarisNotificationListenerService : NotificationListenerService() {
         }
 
         startForegroundServiceWithNotification()
+        
+        // KORREKTUR 2: Regelkonformer Autostart deiner JuarisVpnService-Firewall ab Android 14!
+        try {
+            val vpnIntent = Intent(applicationContext, JuarisVpnService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(vpnIntent)
+            } else {
+                startService(vpnIntent)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "VPN-Autostart verzögert", e)
+        }
+
         Log.d(TAG, "Juaris Omni-Wächter (Maximaler App- & E-Mail-Scan) gestartet.")
     }
 
@@ -71,7 +89,7 @@ class JuarisNotificationListenerService : NotificationListenerService() {
         val notification: Notification = NotificationCompat.Builder(this, SERVICE_CHANNEL_ID)
             .setContentTitle("Juaris Security Suite aktiv")
             .setContentText("Omni-Wächter scannt alle Apps, E-Mails & Fristen in Echtzeit")
-            .setSmallIcon(android.R.drawable.ic_lock_lock)
+            .setSmallIcon(R.drawable.app_icon) // KORREKTUR 3: Eigenes Vektor-Icon verhindert schwere Abstürze!
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
@@ -129,7 +147,7 @@ class JuarisNotificationListenerService : NotificationListenerService() {
             val fullContentString = "App: $packageName | Titel: $title | Inhalt: $combinedContent"
             val contentLower = fullContentString.lowercase()
 
-            // 🚫 ULTRA-STRIKTER SPAM- & WERBEFILTER (Blockiert Marketing, Social-Media-Müll, Shopping etc.)
+            // 🚫 ULTRA-STRIKTER SPAM- & WERBEFILTER
             val adKeywords = listOf(
                 "gewinn", "gutschein", "casino", "krypto", "bitcoin", "gratis", "rabatt", "deal",
                 "newsletter", "cashback", "lotterie", "gewonnen", "sale", "voucher", "promo",
@@ -138,10 +156,9 @@ class JuarisNotificationListenerService : NotificationListenerService() {
                 "cashback", "sonderangebot", "werbung"
             )
             if (adKeywords.any { contentLower.contains(it) }) {
-                return // Ignoriert Werbung und Spam vollständig
+                return 
             }
 
-            // 1. KI-Sicherheitsprüfung (Erkennt Phishing, Betrug, Angriffe)
             val isSafe = aiCore.evaluateContentSafety(fullContentString, packageName)
 
             if (!isSafe) {
@@ -163,9 +180,7 @@ class JuarisNotificationListenerService : NotificationListenerService() {
                     "Betrugsversuch in ${packageName.substringAfterLast('.')} erkannt: $title"
                 )
             } else {
-                // 2. MAXIMALE E-MAIL-, TERMIN- & VERSORGER-ANALYSE (GMX, Gmail, Outlook, Banking, Kalender etc.)
                 when {
-                    // Finanzen, Rechnungen & Mahnungen (Rot / WARNING)
                     contentLower.contains("mahnung") || contentLower.contains("inkasso") || contentLower.contains("zahlungsaufforderung") || contentLower.contains("letzte frist") -> {
                         showPriorityPopup("🚨 WICHTIGE MAHNUNG", combinedContent.take(120), "finance_high")
                         saveNotificationToDb("Finanz-Wächter", "🚨 Mahnung & Zahlungsfrist", title, combinedContent, "WARNING")
@@ -175,132 +190,118 @@ class JuarisNotificationListenerService : NotificationListenerService() {
                         saveNotificationToDb("Finanz-Wächter", "💳 Rechnung / Zahlung", title, combinedContent, "WARNING")
                     }
 
-                    // Versorger, Gas, Strom, Wasser, Zähler, Ausbau, Handwerker, Termine, E-Mails (Gold / IMPORTANT)
-                    contentLower.contains("gas") || contentLower.contains("strom") || contentLower.contains("wasser") || 
-                    contentLower.contains("zähler") || contentLower.contains("ausbau") || contentLower.contains("ablesung") || 
-                    contentLower.contains("wartung") || contentLower.contains("handwerker") || contentLower.contains("installateur") || 
+                    contentLower.contains("gas") || contentLower.contains("strom") || contentLower.contains("wasser") ||
+                    contentLower.contains("zähler") || contentLower.contains("ausbau") || contentLower.contains("ablesung") ||
+                    contentLower.contains("wartung") || contentLower.contains("handwerker") || contentLower.contains("installateur") ||
                     contentLower.contains("termin") || contentLower.contains("arzt") || contentLower.contains("klinik") ||
                     contentLower.contains("geburtstag") || contentLower.contains("hochzeitstag") ||
                     packageName.contains("gmx") || packageName.contains("mail") || packageName.contains("outlook") || packageName.contains("gmail") -> {
-                        
+                       
                         val alertHeading = when {
                             contentLower.contains("gas") || contentLower.contains("strom") || contentLower.contains("wasser") || contentLower.contains("zähler") || contentLower.contains("ausbau") -> "🔧 Versorger- & Zähler-Termin"
                             contentLower.contains("arzt") || contentLower.contains("klinik") || contentLower.contains("therapie") -> "🩺 Gesundheit & Arzt-Termin"
                             contentLower.contains("geburtstag") -> "🎂 Geburtstag heute!"
-                            contentLower.contains("hochzeitstag") || contentLower.contains("jahrestag") -> "💍 Wichtiger Jahrestag!"
-                            else -> "📅 Wichtige Nachricht / E-Mail"
-                        }
-
-                        showPriorityPopup(alertHeading, combinedContent.take(120), "service_alert")
-                        saveNotificationToDb("Life-Companion", alertHeading, title, combinedContent, "IMPORTANT")
-                    }
-                }
-            }
-        }
-    }
-
-    private fun saveNotificationToDb(moduleName: String, description: String, title: String, text: String, status: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val db = JuarisDatabase.getDatabase(applicationContext)
-                db.securityLogDao().insertLog(
-                    SecurityLogEntity(
-                        timestamp = System.currentTimeMillis(),
-                        module = moduleName,
-                        description = description,
-                        status = status,
-                        details = "Titel: $title | Inhalt: $text"
-                    )
-                )
-            } catch (e: Exception) {
-                Log.e(TAG, "Fehler beim Speichern in die DB", e)
-            }
-        }
-    }
-
-    private fun showThreatScreenAlert(context: Context, title: String, message: String) {
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                ALERT_CHANNEL_ID,
-                "Juaris Notfall-Sicherheitswarnungen",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "Warnungen bei akuten Phishing- und Betrugsversuchen"
-                enableVibration(true)
-            }
-            notificationManager.createNotificationChannel(channel)
-        }
-
-        val intent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        val pendingIntent = PendingIntent.getActivity(
-            context, 0, intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-
-        val alertNotification = NotificationCompat.Builder(context, ALERT_CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.stat_notify_error)
-            .setContentTitle(title)
-            .setContentText(message)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
-            .setPriority(NotificationCompat.PRIORITY_MAX)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
-            .build()
-
-        notificationManager.notify(System.currentTimeMillis().toInt(), alertNotification)
-    }
-
-    private fun showPriorityPopup(title: String, message: String, category: String) {
-        val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-       
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                ALERT_CHANNEL_ID,
-                "Juaris Notfall- & Prioritätswarnungen",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "Wichtige Termine, Mahnungen und Sicherheitsalarme"
-                enableVibration(true)
-            }
-            notificationManager.createNotificationChannel(channel)
-        }
-
-        val intent = Intent(applicationContext, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        val pendingIntent = PendingIntent.getActivity(
-            applicationContext, 0, intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-
-        val priorityNotification = NotificationCompat.Builder(applicationContext, ALERT_CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_menu_agenda)
-            .setContentTitle(title)
-            .setContentText(message)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
-            .setPriority(NotificationCompat.PRIORITY_MAX)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
-            .build()
-
-        notificationManager.notify(System.currentTimeMillis().toInt(), priorityNotification)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        try {
-            acousticDetector.stopListening()
-        } catch (e: Exception) {}
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        return START_STICKY
-    }
+contentLower.contains("hochzeitstag") || contentLower.contains("jahrestag") -> "💍 Wichtiger Jahrestag!"
+else -> "📅 Wichtige Nachricht / E-Mail"
 }
-
+showPriorityPopup(alertHeading, combinedContent.take(120), "service_alert")
+saveNotificationToDb("Life-Companion", alertHeading, title, combinedContent, "IMPORTANT")
+}
+}
+}
+}
+}
+private fun saveNotificationToDb(moduleName: String, description: String, title: String, text: String, status: String) {
+serviceScope.launch {
+try {
+val db = JuarisDatabase.getDatabase(applicationContext)
+db.securityLogDao().insertLog(
+SecurityLogEntity(
+timestamp = System.currentTimeMillis(),
+module = moduleName,
+description = description,
+status = status,
+details = "Titel: $title | Inhalt: $text"
+)
+)
+} catch (e: Exception) {
+Log.e(TAG, "Fehler beim Speichern in die DB", e)
+}
+}
+}
+private fun showThreatScreenAlert(context: Context, title: String, message: String) {
+val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+val channel = NotificationChannel(
+ALERT_CHANNEL_ID,
+"Juaris Notfall-Sicherheitswarnungen",
+NotificationManager.IMPORTANCE_HIGH
+).apply {
+description = "Warnungen bei akuten Phishing- und Betrugsversuchen"
+enableVibration(true)
+}
+notificationManager.createNotificationChannel(channel)
+}
+val intent = Intent(context, MainActivity::class.java).apply {
+flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+}
+val pendingIntent = PendingIntent.getActivity(
+context, 0, intent,
+PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+)
+val alertNotification = NotificationCompat.Builder(context, ALERT_CHANNEL_ID)
+.setSmallIcon(R.drawable.app_icon) // KORREKTUR 4: Verhindert Abstürze durch herstellerspezifische ic_lock_lock Systemfehler
+.setContentTitle(title)
+.setContentText(message)
+.setStyle(NotificationCompat.BigTextStyle().bigText(message))
+.setPriority(NotificationCompat.PRIORITY_MAX)
+.setCategory(NotificationCompat.CATEGORY_ALARM)
+.setContentIntent(pendingIntent)
+.setAutoCancel(true)
+.build()
+notificationManager.notify(System.currentTimeMillis().toInt(), alertNotification)
+}
+private fun showPriorityPopup(title: String, message: String, category: String) {
+val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+val channel = NotificationChannel(
+ALERT_CHANNEL_ID,
+"Juaris Notfall- & Prioritätswarnungen",
+NotificationManager.IMPORTANCE_HIGH
+).apply {
+description = "Wichtige Termine, Mahnungen und Sicherheitsalarme"
+enableVibration(true)
+}
+notificationManager.createNotificationChannel(channel)
+}
+val intent = Intent(applicationContext, MainActivity::class.java).apply {
+flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+}
+val pendingIntent = PendingIntent.getActivity(
+applicationContext, 0, intent,
+PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+)
+val priorityNotification = NotificationCompat.Builder(applicationContext, ALERT_CHANNEL_ID)
+.setSmallIcon(R.drawable.app_icon) // KORREKTUR 5: Schützt das Systemleisten-Rendering
+.setContentTitle(title)
+.setContentText(message)
+.setStyle(NotificationCompat.BigTextStyle().bigText(message))
+.setPriority(NotificationCompat.PRIORITY_MAX)
+.setCategory(NotificationCompat.CATEGORY_ALARM)
+.setContentIntent(pendingIntent)
+.setAutoCancel(true)
+.build()
+notificationManager.notify(System.currentTimeMillis().toInt(), priorityNotification)
+}
+override fun onDestroy() {
+super.onDestroy()
+try {
+acousticDetector.stopListening()
+} catch (e: Exception) {}
+serviceScope.cancel() // Bereinigt alle offenen Threads beim Stoppen des Services
+}
+override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+return START_STICKY
+}
+}
 
