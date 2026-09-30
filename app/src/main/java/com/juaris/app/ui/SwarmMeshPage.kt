@@ -7,8 +7,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,7 +20,7 @@ import androidx.compose.ui.unit.sp
 import com.juaris.app.GlobalMeshEngine
 import com.juaris.app.NearbyMeshManager
 import com.juaris.app.JuarisDatabase
-import com.juaris.app.R // Wichtig für den Zugriff auf deine strings.xml-Keys!
+import com.juaris.app.R
 
 @Composable
 fun SwarmMeshPage() {
@@ -31,7 +29,6 @@ fun SwarmMeshPage() {
     val postsFlow = remember { db.meshDao().getAllActivePosts() }
     val posts by postsFlow.collectAsState(initial = emptyList())
 
-    // Lokalisierte Standard-Werte für die Initialisierung laden
     val statusReadyText = stringResource(R.string.status_ready)
     val statusMeshActiveText = stringResource(R.string.status_mesh_active_search)
 
@@ -41,13 +38,13 @@ fun SwarmMeshPage() {
     var scanStatusText by remember { mutableStateOf(statusReadyText) }
     var discoveredCount by remember { mutableStateOf(0) }
 
-    // Lokalisierte Strings für Toasts und Statusmeldungen innerhalb anonymer Callbacks sichern
     val toastDeviceDiscovered = stringResource(R.string.toast_mesh_device_discovered)
     val statusConnectedTemplate = stringResource(R.string.status_mesh_connected_format)
     val statusConnectedDevicesTemplate = stringResource(R.string.status_mesh_connected_devices_format)
     val statusSentText = stringResource(R.string.status_sent)
     val toastP2pStartedText = stringResource(R.string.toast_p2p_started)
     val toastBluetoothMissingText = stringResource(R.string.toast_bluetooth_missing)
+    val neonGreen = Color(0xFF00E676)
 
     val meshManager = remember {
         NearbyMeshManager(
@@ -101,14 +98,16 @@ fun SwarmMeshPage() {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            // KORREKTUR 1: Alle statischen UI-Texte an dein 12 Weltsprachen-Ressourcensystem gekoppelt!
             Text(stringResource(R.string.p2p_swarm_title), style = MaterialTheme.typography.titleLarge, color = Color.White)
             Text(stringResource(R.string.p2p_swarm_subtitle), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
-            TacticalPulseCard {
-                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(stringResource(R.string.mesh_broadcast_title), style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(R.string.mesh_broadcast_title), style = MaterialTheme.typography.titleMedium, color = neonGreen)
                     OutlinedTextField(
                         value = inputMessage,
                         onValueChange = { inputMessage = it },
@@ -141,32 +140,38 @@ fun SwarmMeshPage() {
                                     )
                                 }
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
+                            colors = ButtonDefaults.buttonColors(containerColor = neonGreen)
                         ) {
                             Text(stringResource(R.string.btn_broadcast), color = Color.Black, fontWeight = FontWeight.Bold)
                         }
                     }
                     if (statusMessage.isNotBlank()) {
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(statusMessage, color = NeonGiftgruen, fontSize = 12.sp)
+                        Text(statusMessage, color = neonGreen, fontSize = 12.sp)
                     }
                 }
             }
         }
-        item { Text(stringResource(R.string.mesh_packets_count, posts.size), style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen) }
+        item { Text(stringResource(R.string.mesh_packets_count, posts.size), style = MaterialTheme.typography.titleMedium, color = neonGreen) }
         items(posts) { post ->
-            TacticalPulseCard {
-                Column(modifier = Modifier.fillMaxWidth().padding(4.dp)) {
-                    Text(text = post.senderNode, color = NeonGiftgruen, style = MaterialTheme.typography.bodySmall)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                    Text(text = post.senderNode, color = neonGreen, style = MaterialTheme.typography.bodySmall)
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(text = post.content, color = Color.White)
                 }
             }
         }
         item {
-            TacticalPulseCard {
-                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(stringResource(R.string.mesh_hardware_title), style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(R.string.mesh_hardware_title), style = MaterialTheme.typography.titleMedium, color = neonGreen)
                     Text(stringResource(R.string.mesh_status_format, scanStatusText), color = Color.White)
                     Button(
                         onClick = {
@@ -184,7 +189,7 @@ fun SwarmMeshPage() {
                             bluetoothPermissionLauncher.launch(permissions)
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
+                        colors = ButtonDefaults.buttonColors(containerColor = neonGreen)
                     ) {
                         Text(stringResource(R.string.btn_start_mesh_node), color = Color.Black, fontWeight = FontWeight.Bold)
                     }
@@ -193,4 +198,5 @@ fun SwarmMeshPage() {
         }
     }
 }
+
 
