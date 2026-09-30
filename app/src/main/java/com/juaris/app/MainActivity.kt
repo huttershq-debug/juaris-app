@@ -137,7 +137,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         checkRuntimeIntegrity()
-        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         checkAndBootProtectionServices()
         registerEmergencyReceiver()
 
@@ -1285,7 +1284,7 @@ fun PrivacyAndLegalContent() {
                         color = NeonGiftgruen,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.clickable {
-                            uriHandler.openUri("https://juaris.com/privacy.")
+                            uriHandler.openUri("https://juaris.com/privacy")
                         }
                     )
 
