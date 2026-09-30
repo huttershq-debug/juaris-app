@@ -13,7 +13,10 @@ Juaris arbeitet strikt nach dem Local-First-Prinzip.
 ## 3. In-App-Abonnements (Google Play Billing)
 Für die Abwicklung des monatlichen Abonnements (1,99 €/Monat) nutzen wir den offiziellen Google Play Billing Service. Google verarbeitet dabei die Zahlungsdaten gemäß den Google-Datenschutzrichtlinien. Wir selbst erhalten keine Kreditkarten- oder Bankdaten von dir.
 
-## 4. Kontakt
+## 4. Nearby-Schnittstelle
+Die Nearby-Schnittstelle wird ausschließlich lokal für den Offline-Peer-to-Peer-Datenabgleich via Bluetooth genutzt. Es werden hierbei keinerlei Daten an Google-Server übertragen.
+
+## 5. Kontakt
 Bei Fragen zum Datenschutz erreichst du uns unter: support@juaris.com
 
 ---
