@@ -31,4 +31,30 @@
     <string name="vpn_disclosure_message">Juaris آپ کے آلے پر براہ راست فشنگ اور میلویئر کا پتہ لگانے کے لیے ایک مقامی VpnService استعمال کرتا ہے۔\n\nتمام ڈیٹا 100% مقامی رہتا ہے۔ کسی بھی بیرونی سرور یا کلاؤڈ پر کچھ نہیں بھیجا جاتا۔</string>
     <string name="btn_understood">سمجھ گیا اور فعال کریں</string>
     <string name="btn_cancel">منسوخ کریں</string>
+     <!-- P2P Swarm & Mesh Strings -->
+    <string name="p2p_swarm_title">جوارِس سورم میش (P2P)</string>
+    <string name="p2p_swarm_subtitle">انٹرنیٹ کے بغیر محفوظ، غیرمرکزی مواصلات</string>
+    <string name="mesh_broadcast_title">سورم کو پیغام نشر کریں</string>
+    <string name="label_message_placeholder">پیغام درج کریں...</string>
+    <string name="checkbox_ephemeral">پڑھنے کے بعد پیغام حذف کریں (عارضی)</string>
+    <string name="btn_broadcast">سورم کو بھیجیں</string>
+    <string name="mesh_packets_count">فعال سورم پیکٹس (%d)</string>
+    <string name="mesh_hardware_title">P2P ہارڈ ویئر اور کنکشنز</string>
+    <string name="mesh_status_format">حیثیت: %s</string>
+    <string name="btn_start_mesh_node">P2P میش نوڈ شروع کریں</string>
+    
+    <string name="status_ready">سورم کنکشن کے لیے تیار</string>
+    <string name="status_mesh_active_search">سورم نوڈز تلاش کیے جا رہے ہیں...</string>
+    <string name="toast_mesh_device_discovered">نیا سورم ڈیوائس دریافت ہوا!</string>
+    <string name="status_mesh_connected_format">%s سے منسلک (ڈیوائیسز: %d)</string>
+    <string name="status_mesh_connected_devices_format">منسلک ڈیوائیسز: %d</string>
+    <string name="status_sent">پیغام کامیابی کے ساتھ سورم کو بھیج دیا گیا</string>
+    <string name="toast_p2p_started">P2P میش نوڈ کامیابی سے شروع ہو گیا!</string>
+    <string name="toast_bluetooth_missing">بلوٹوتھ کی اجازتیں درکار ہیں!</string>
+
+    <!-- Security Logs Strings -->
+    <string name="logs_page_title">سیکیورٹی لاگز</string>
+    <string name="logs_page_subtitle">تمام روکی گئی دھمکیوں اور واقعات کا خلاصہ</string>
+    <string name="logs_empty_message">ابھی تک کوئی واقعہ درج نہیں ہوا۔ آپ کا سسٹم محفوظ ہے۔</string>
+    <string name="logs_module_prefix">ماڈیول: %s</string>
 </resources>
