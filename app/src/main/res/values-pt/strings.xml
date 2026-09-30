@@ -46,7 +46,7 @@
     <string name="status_ready">Pronto para conexão de enxame</string>
     <string name="status_mesh_active_search">Procurando nós de enxame...</string>
     <string name="toast_mesh_device_discovered">Novo dispositivo de enxame descoberto!</string>
-    <string name="status_mesh_connected_format">Conectado a %s (Dispositivos: %d)</string>
+    <string name="status_mesh_connected_format" formatted="false">Conectado a %s (Dispositivos: %d)</string>
     <string name="status_mesh_connected_devices_format">Dispositivos conectados: %d</string>
     <string name="status_sent">Mensagem enviada com sucesso para o enxame</string>
     <string name="toast_p2p_started">Nó de malha P2P iniciado com sucesso!</string>
