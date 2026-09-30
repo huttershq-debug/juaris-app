@@ -46,7 +46,7 @@
     <string name="status_ready">Готово к подключению к рою</string>
     <string name="status_mesh_active_search">Поиск узлов роя...</string>
     <string name="toast_mesh_device_discovered">Обнаружено новое устройство роя!</string>
-    <string name="status_mesh_connected_format">Подключено к %s (Устройств: %d)</string>
+    <string name="status_mesh_connected_format" formatted="false">Подключено к %s (Устройств: %d)</string>
     <string name="status_mesh_connected_devices_format">Подключенные устройства: %d</string>
     <string name="status_sent">Сообщение успешно отправлено в рой</string>
     <string name="toast_p2p_started">Узел P2P-сети успешно запущен!</string>
