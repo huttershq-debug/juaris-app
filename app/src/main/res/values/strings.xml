@@ -57,5 +57,26 @@
     <string name="logs_page_subtitle">Overview of all intercepted threats and events</string>
     <string name="logs_empty_message">No events recorded yet. Your system is secure.</string>
     <string name="logs_module_prefix">Module: %s</string>
+      <!-- Privacy & Imprint Strings -->
+    <string name="privacy_text">Privacy Policy</string>
+    <string name="privacy_link">Read Privacy Policy</string>
+    <string name="imprint_title">Imprint</string>
+    <string name="imprint_subtitle">Legal information</string>
+    <string name="imprint_name">Company Name</string>
+    <string name="imprint_address">Address</string>
+    <string name="imprint_email">Contact Email</string>
+    <string name="imprint_responsible">Responsible Person</string>
+    <string name="imprint_name_v">Authorized Representative</string>
+    <string name="imprint_design">Design &amp; Implementation</string>
+    <string name="imprint_name_va">Additional Disclosures</string>
+    <string name="imprint_name_y">Disclaimer</string>
+    <string name="company_footer">Juaris Security - All rights reserved</string>
+
+    <!-- Air Gesture Strings -->
+    <string name="air_gesture_title">Air Gesture Control</string>
+    <string name="air_gesture_subtitle">Control your device with hand movements</string>
+    <string name="air_gesture_desc">Use contactless gestures to navigate</string>
+    <string name="air_gesture_status">Sensor Ready</string>
+    <string name="air_gesture_action">Trigger Action</string>
 </resources>
 
