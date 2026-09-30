@@ -46,7 +46,7 @@
     <string name="status_ready">سورم کنکشن کے لیے تیار</string>
     <string name="status_mesh_active_search">سورم نوڈز تلاش کیے جا رہے ہیں...</string>
     <string name="toast_mesh_device_discovered">نیا سورم ڈیوائس دریافت ہوا!</string>
-    <string name="status_mesh_connected_format">%s سے منسلک (ڈیوائیسز: %d)</string>
+    <string name="status_mesh_connected_format" formatted="false">%s سے منسلک (ڈیوائیسز: %d)</string>
     <string name="status_mesh_connected_devices_format">منسلک ڈیوائیسز: %d</string>
     <string name="status_sent">پیغام کامیابی کے ساتھ سورم کو بھیج دیا گیا</string>
     <string name="toast_p2p_started">P2P میش نوڈ کامیابی سے شروع ہو گیا!</string>
