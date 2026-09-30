@@ -36,30 +36,31 @@ object GlobalMeshEngine {
 
         Log.d(TAG, "Dilithium-Signatur erfolgreich erstellt: ${signatureBase64.take(12)}...")
 
-        val db = JuarisDatabase.getDatabase(context)
-        
+         val db = JuarisDatabase.getDatabase(context)
+       
         CoroutineScope(Dispatchers.IO).launch {
-            // Speicherung in deiner bestehenden Room-Datenbankstruktur
+            // Speicherung des ECHTEN Inhalts in deiner Room-Datenbankstruktur
             val post = MeshPostEntity(
                 postId = UUID.randomUUID().toString(),
                 senderNode = if (isEphemeral) "[Ephemerer PQC-Node]" else "[Verifizierter PQC-Node]",
-                content = "PQC-Signiert [Sig: ${signatureBase64.take(8)}...]",
+                content = content, // Speichert das, was der Nutzer ECHT geschrieben hat!
                 timestamp = System.currentTimeMillis(),
                 isEphemeral = isEphemeral,
-                mediaUri = "", // Non-Null String konform
-                mediaType = "", // Non-Null String konform
-                ttlHopCount = 3 // Schützt vor Endlosschleifen im Mesh
+                mediaUri = "PQC_SIG:$signatureBase64", // Nutze freie Felder für die Signatur-Sicherung
+                mediaType = "PQC_KEY:$publicKeyBase64",
+                ttlHopCount = 3
             )
-            
+           
             db.meshDao().insertPost(post)
 
-            // P2P-Broadcast: Überträgt den Inhalt zusammen mit der Dilithium-Signatur und dem Public Key, 
-            // damit empfangende Nodes die Echtheit via quantumEngine.verifySwarmSignature() prüfen können!
+            // P2P-Broadcast: Überträgt NUR das verpackte Post-Quantum-Sicherheitspaket!
             val meshPacket = "JUARIS_PQC_SECURE:$signatureBase64:$publicKeyBase64:$content"
             meshManager?.broadcastMessage(meshPacket)
 
-            onSuccess(System.currentTimeMillis())
+            // UI-Callback sicher auf dem Hauptthread ausführen
+            withContext(Dispatchers.Main) {
+                onSuccess(System.currentTimeMillis())
+            }
         }
     }
-}
 
