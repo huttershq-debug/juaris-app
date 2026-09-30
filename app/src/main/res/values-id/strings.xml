@@ -31,6 +31,7 @@
     <string name="vpn_disclosure_message">Juaris menggunakan VpnService lokal untuk mendeteksi phishing dan malware langsung di perangkat Anda.\n\nSemua data tetap 100% lokal. Tidak ada yang dikirim ke server eksternal atau cloud.</string>
     <string name="btn_understood">Mengerti &amp; Aktifkan</string>
     <string name="btn_cancel">Batal</string>
+    
     <!-- P2P Swarm & Mesh Strings -->
     <string name="p2p_swarm_title">Mesh Swarm Juaris (P2P)</string>
     <string name="p2p_swarm_subtitle">Komunikasi terdesentralisasi yang aman tanpa internet</string>
@@ -42,7 +43,6 @@
     <string name="mesh_hardware_title">Perangkat &amp; Koneksi P2P</string>
     <string name="mesh_status_format">Status: %s</string>
     <string name="btn_start_mesh_node">Mulai Node Mesh P2P</string>
-    
     <string name="status_ready">Siap untuk koneksi swarm</string>
     <string name="status_mesh_active_search">Mencari node swarm...</string>
     <string name="toast_mesh_device_discovered">Perangkat swarm baru ditemukan!</string>
@@ -57,6 +57,7 @@
     <string name="logs_page_subtitle">Ringkasan semua ancaman dan peristiwa yang dicegat</string>
     <string name="logs_empty_message">Belum ada peristiwa yang dicatat. Sistem Anda aman.</string>
     <string name="logs_module_prefix">Modul: %s</string>
+
     <!-- Privacy & Imprint Strings -->
     <string name="privacy_text">Kebijakan Privasi</string>
     <string name="privacy_link">Baca Kebijakan Privasi</string>
@@ -72,10 +73,11 @@
     <string name="imprint_name_y">Penyangkalan (Disclaimer)</string>
     <string name="company_footer">Juaris Security - Hak cipta dilindungi undang-undang</string>
 
-    <!-- Air Gesture Strings -->
-    <string name="air_gesture_title">Kontrol Gestur Udara</string>
+    <!-- Air Gesture Additional Strings -->
     <string name="air_gesture_subtitle">Kontrol perangkat Anda dengan gerakan tangan</string>
     <string name="air_gesture_desc">Gunakan gestur nirkontak untuk navigasi</string>
     <string name="air_gesture_status">Sensor Siap</string>
     <string name="air_gesture_action">Picu Aksi</string>
 </resources>
+
+
