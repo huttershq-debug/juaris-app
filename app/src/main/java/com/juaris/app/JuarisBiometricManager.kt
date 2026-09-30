@@ -1,5 +1,6 @@
 package com.juaris.app
 
+import android.os.Build
 import android.widget.Toast
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
@@ -15,9 +16,8 @@ class JuarisBiometricManager(private val activity: FragmentActivity) {
         onError: (String) -> Unit
     ) {
         val biometricManager = BiometricManager.from(activity)
-        
-        // ZUKUNFTSSICHER: Kombiniert Strong-Biometrics, Weak-Biometrics (z.B. neuartige Gesichtserkennung) 
-        // und Device-Credentials (PIN/Muster) für absolute Abwärts- und Aufwärtskompatibilität.
+       
+        // ZUKUNFTSSICHER: Kombiniert Strong-Biometrics, Weak-Biometrics und Device-Credentials (PIN/Muster)
         val allowedAuthenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG or
                 BiometricManager.Authenticators.BIOMETRIC_WEAK or
                 BiometricManager.Authenticators.DEVICE_CREDENTIAL
@@ -43,12 +43,20 @@ class JuarisBiometricManager(private val activity: FragmentActivity) {
                         }
                     })
 
-                val promptInfo = BiometricPrompt.PromptInfo.Builder()
+                // KORREKTUR: Versionssicherer Builder verhindert Abstürze bei kombinierten Authentifikatoren
+                val promptInfoBuilder = BiometricPrompt.PromptInfo.Builder()
                     .setTitle(title)
                     .setSubtitle(subtitle)
-                    .setAllowedAuthenticators(allowedAuthenticators)
-                    .build()
 
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    promptInfoBuilder.setAllowedAuthenticators(allowedAuthenticators)
+                } else {
+                    // Abwärtskompatibler Fallback für ältere Android-Versionen vor API 30
+                    @Suppress("DEPRECATION")
+                    promptInfoBuilder.setDeviceCredentialAllowed(true)
+                }
+
+                val promptInfo = promptInfoBuilder.build()
                 biometricPrompt.authenticate(promptInfo)
             }
             BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> {
@@ -63,5 +71,4 @@ class JuarisBiometricManager(private val activity: FragmentActivity) {
         }
     }
 }
-
 
