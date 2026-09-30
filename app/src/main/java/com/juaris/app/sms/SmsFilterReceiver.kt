@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Telephony
 import com.juaris.app.JuarisDatabase
+import com.juaris.app.JuarisNotificationDispatcher
 import com.juaris.app.SecurityLogEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -12,39 +13,58 @@ import kotlinx.coroutines.launch
 
 class SmsFilterReceiver : BroadcastReceiver() {
 
-    private val scope = CoroutineScope(Dispatchers.IO)
-
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Telephony.Sms.Intents.SMS_RECEIVED_ACTION) {
+            
+            // KORREKTUR 1: Nutze goAsync(), um dem OS zu signalisieren, dass Hintergrundarbeit läuft!
+            val pendingResult = goAsync()
             val messages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
             val db = JuarisDatabase.getDatabase(context)
 
-            for (sms in messages) {
-                val messageBody = sms.messageBody ?: continue
-                val sender = sms.originatingAddress ?: "Unbekannt"
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    for (sms in messages) {
+                        val messageBody = sms.messageBody ?: continue
+                        val sender = sms.originatingAddress ?: "Unbekannt"
 
-                // Lokale Phishing-Erkennung für SMS
-                val isSuspicious = messageBody.contains("http", ignoreCase = true) ||
-                        messageBody.contains("banking", ignoreCase = true) ||
-                        messageBody.contains("paket", ignoreCase = true) ||
-                        messageBody.contains("konto", ignoreCase = true) ||
-                        messageBody.contains("verifizieren", ignoreCase = true)
+                        // Lokale Phishing-Erkennung für SMS
+                        val isSuspicious = messageBody.contains("http", ignoreCase = true) ||
+                                messageBody.contains("banking", ignoreCase = true) ||
+                                messageBody.contains("paket", ignoreCase = true) ||
+                                messageBody.contains("konto", ignoreCase = true) ||
+                                messageBody.contains("verifizieren", ignoreCase = true)
 
-                val status = if (isSuspicious) "BLOCKED" else "ALLOWED"
-                val module = "SMS-Shield"
-                val description = if (isSuspicious) "Phishing-Verdacht in SMS erkannt" else "Eingehende SMS geprüft"
-                val details = "Absender: $sender | Text: $messageBody"
+                        val status = if (isSuspicious) "BLOCKED" else "ALLOWED"
+                        val module = "SMS-Shield"
+                        val description = if (isSuspicious) "Phishing-Verdacht in SMS erkannt" else "Eingehende SMS geprüft"
+                        val details = "Absender: $sender | Text: $messageBody"
 
-                scope.launch {
-                    db.securityLogDao().insertLog(
-                        SecurityLogEntity(
-                            timestamp = System.currentTimeMillis(),
-                            status = status,
-                            module = module,
-                            description = description,
-                            details = details
+                        // Sicheres Schreiben in die Room-DB, da goAsync den Prozess aktiv hält
+                        db.securityLogDao().insertLog(
+                            SecurityLogEntity(
+                                timestamp = System.currentTimeMillis(),
+                                status = status,
+                                module = module,
+                                description = description,
+                                details = details
+                            )
                         )
-                    )
+
+                        // KORREKTUR 2: Sofortige Warnung via Heads-Up Pop-up bei Bedrohung!
+                        if (isSuspicious) {
+                            JuarisNotificationDispatcher.sendPriorityAlert(
+                                context = context,
+                                title = "🚨 SMS-Phishing blockiert!",
+                                message = "Gefährlicher Link oder betrügerischer Inhalt von $sender lokal abgefangen.",
+                                isCritical = true
+                            )
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                } finally {
+                    // Signalisiert dem Betriebssystem, dass die Hintergrundarbeit abgeschlossen ist
+                    pendingResult.finish()
                 }
             }
         }
