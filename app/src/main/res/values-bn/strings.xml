@@ -31,6 +31,7 @@
     <string name="vpn_disclosure_message">Juaris আপনার ডিভাইসেই ফিশিং এবং মেলওয়্যার সনাক্ত করতে একটি স্থানীয় VpnService ব্যবহার করে।\n\nসমস্ত ডেটা ১০০% স্থানীয় থাকে। বাহ্যিক সার্ভার বা ক্লাউডে কিছুই পাঠানো হয় না।</string>
     <string name="btn_understood">বুঝেছি এবং সক্রিয় করুন</string>
     <string name="btn_cancel">বাতিল</string>
+    
     <!-- P2P Swarm & Mesh Strings -->
     <string name="p2p_swarm_title">জুয়ারিস সোয়ার্ম মেশ (P2P)</string>
     <string name="p2p_swarm_subtitle">ইন্টারনেট ছাড়াই নিরাপদ, বিকেন্দ্রীকৃত যোগাযোগ</string>
@@ -42,7 +43,6 @@
     <string name="mesh_hardware_title">P2P হার্ডওয়্যার এবং সংযোগ</string>
     <string name="mesh_status_format">স্ট্যাটাস: %s</string>
     <string name="btn_start_mesh_node">P2P মেশ নোড শুরু করুন</string>
-    
     <string name="status_ready">সোয়ার্ম সংযোগের জন্য প্রস্তুত</string>
     <string name="status_mesh_active_search">সোয়ার্ম নোড খোঁজা হচ্ছে...</string>
     <string name="toast_mesh_device_discovered">নতুন সোয়ার্ম ডিভাইস আবিষ্কৃত হয়েছে!</string>
@@ -57,6 +57,7 @@
     <string name="logs_page_subtitle">সমস্ত বাধাগ্রস্ত হুমকি এবং ইভেন্টের সংক্ষিপ্ত বিবরণ</string>
     <string name="logs_empty_message">এখনও কোনো ইভেন্ট রেকর্ড করা হয়নি। আপনার সিস্টেম নিরাপদ।</string>
     <string name="logs_module_prefix">মডিউল: %s</string>
+
     <!-- Privacy & Imprint Strings -->
     <string name="privacy_text">গোপনীয়তা নীতি</string>
     <string name="privacy_link">গোপনীয়তা নীতি পড়ুন</string>
@@ -72,10 +73,11 @@
     <string name="imprint_name_y">দায়মুক্তি (Disclaimer)</string>
     <string name="company_footer">জুয়ারিস সিকিউরিটি - সর্বস্বত্ব সংরক্ষিত</string>
 
-    <!-- Air Gesture Strings -->
-    <string name="air_gesture_title">এয়ার গেসচার কন্ট্রোল</string>
+    <!-- Air Gesture Additional Strings -->
     <string name="air_gesture_subtitle">হাতের ইশারায় আপনার ডিভাইস নিয়ন্ত্রণ করুন</string>
     <string name="air_gesture_desc">নেভিগেট করতে কন্ট্যাক্টলেস ইশারা ব্যবহার করুন</string>
     <string name="air_gesture_status">সেন্সর প্রস্তুত</string>
     <string name="air_gesture_action">অ্যাকশন ট্রিগার করুন</string>
 </resources>
+
+
