@@ -46,7 +46,7 @@
     <string name="status_ready">Siap untuk koneksi swarm</string>
     <string name="status_mesh_active_search">Mencari node swarm...</string>
     <string name="toast_mesh_device_discovered">Perangkat swarm baru ditemukan!</string>
-    <string name="status_mesh_connected_format">Terhubung ke %s (Perangkat: %d)</string>
+    <string name="status_mesh_connected_format" formatted="false">Terhubung ke %s (Perangkat: %d)</string>
     <string name="status_mesh_connected_devices_format">Perangkat terhubung: %d</string>
     <string name="status_sent">Pesan berhasil dikirim ke swarm</string>
     <string name="toast_p2p_started">Node Mesh P2P berhasil dimulai!</string>
