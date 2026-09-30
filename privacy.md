@@ -33,5 +33,5 @@ Verantwortlicher Entwickler:
 Benedikt Wolfgang Hütter
 Schulgasse 4/15, 2700 Wiener Neustadt, Österreich
 E-Mail: support@juaris.com
-Web: juaris.com
+Web: www.juaris.com
 
