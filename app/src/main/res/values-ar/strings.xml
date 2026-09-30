@@ -31,6 +31,7 @@
     <string name="vpn_disclosure_message">تستخدم Juaris خدمة شبكة VPN محلية لاكتشاف البرامج الضارة والتصيد الاحتيالي مباشرة على جهازك.\n\nتظل جميع البيانات محلية بنسبة 100%. لا يتم إرسال أي شيء إلى خوادم خارجية أو السحابة.</string>
     <string name="btn_understood">فهمت والتفعيل</string>
     <string name="btn_cancel">إلغاء</string>
+    
     <!-- P2P Swarm & Mesh Strings -->
     <string name="p2p_swarm_title">شبكة سُحُب جواريس (P2P)</string>
     <string name="p2p_swarm_subtitle">اتصالات آمنة لامركزية بدون إنترنت</string>
@@ -42,7 +43,6 @@
     <string name="mesh_hardware_title">أجهزة P2P والاتصالات</string>
     <string name="mesh_status_format">الحالة: %s</string>
     <string name="btn_start_mesh_node">بدء عقدة شبكة P2P</string>
-    
     <string name="status_ready">جاهز للاتصال بالشبكة</string>
     <string name="status_mesh_active_search">البحث عن عقد الشبكة...</string>
     <string name="toast_mesh_device_discovered">تم اكتشاف جهاز شبكة جديد!</string>
@@ -57,6 +57,7 @@
     <string name="logs_page_subtitle">نظرة عامة على جميع التهديدات والأحداث التي تم اعتراضها</string>
     <string name="logs_empty_message">لم يتم تسجيل أي أحداث حتى الآن. نظامك آمن.</string>
     <string name="logs_module_prefix">الوحدة: %s</string>
+
     <!-- Privacy & Imprint Strings -->
     <string name="privacy_text">سياسة الخصوصية</string>
     <string name="privacy_link">قراءة سياسة الخصوصية</string>
@@ -72,8 +73,7 @@
     <string name="imprint_name_y">إخلاء المسؤولية</string>
     <string name="company_footer">جواريس للأمان - جميع الحقوق محفوظة</string>
 
-    <!-- Air Gesture Strings -->
-    <string name="air_gesture_title">التحكم بالإيماءات الهوائية</string>
+    <!-- Air Gesture Additional Strings -->
     <string name="air_gesture_subtitle">تحكم في جهازك بحركات اليد</string>
     <string name="air_gesture_desc">استخدم إيماءات بدون تلامس للتنقل</string>
     <string name="air_gesture_status">المستشعر جاهز</string>
