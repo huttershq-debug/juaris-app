@@ -1,10 +1,14 @@
 package com.juaris.app
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Log
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -13,7 +17,8 @@ import javax.crypto.KeyGenerator
 
 class SecurityEngine(private val context: Context) {
 
-    private val prefs = context.getSharedPreferences("juaris_secure_vault", Context.MODE_PRIVATE)
+    // KORREKTUR 1: Nutzt die unverschlüsselten Public Prefs zur crashsicheren Abfrage in Hintergrund-Workern
+    private val prefs = context.getSharedPreferences("juaris_public_prefs", Context.MODE_PRIVATE)
 
     companion object {
         private const val TAG = "JuarisSecurityEngine"
@@ -21,12 +26,12 @@ class SecurityEngine(private val context: Context) {
 
         // Lokale Whitelists und bekannte Phishing-Indikatoren (Offline-Heuristik)
         private val PHISHING_KEYWORDS = listOf(
-            "konto gesperrt", "sofort verifizieren", "gewinn", "bitcoin wallet", 
+            "konto gesperrt", "sofort verifizieren", "gewinn", "bitcoin wallet",
             "kreditkarte abgelaufen", "dringend handeln", "bank-login", "security alert",
             "paket zugestellt", "zollgebühr", "post.at/paket", "paypal sicherheit",
             "rechnung im anhang", "passwort zurücksetzen", "unauthorisierter zugriff"
         )
-        
+       
         private val TRUSTED_DOMAINS = listOf(
             "google.com", "apple.com", "microsoft.com", "banking", "gov.at", "gv.at", "finanzonline.at"
         )
@@ -34,15 +39,9 @@ class SecurityEngine(private val context: Context) {
         // Root- und Manipulationserkennung (Hardware Zero-Trust)
         fun isDeviceCompromised(): Boolean {
             val paths = arrayOf(
-                "/system/app/Superuser.apk",
-                "/sbin/su",
-                "/system/bin/su",
-                "/system/xbin/su",
-                "/data/local/xbin/su",
-                "/data/local/bin/su",
-                "/system/sd/xbin/su",
-                "/system/bin/failsafe/su",
-                "/data/local/su"
+                "/system/app/Superuser.apk", "/sbin/su", "/system/bin/su", "/system/view/su",
+                "/system/xbin/su", "/data/local/xbin/su", "/data/local/bin/su",
+                "/system/sd/xbin/su", "/system/bin/failsafe/su", "/data/local/su"
             )
             for (path in paths) {
                 if (File(path).exists()) return true
@@ -104,10 +103,10 @@ class SecurityEngine(private val context: Context) {
      */
     suspend fun analyzeText(content: String): ThreatResult = withContext(Dispatchers.Default) {
         val lowerContent = content.lowercase()
-        
+       
         var matchCount = 0
         var matchedKeyword = ""
-        
+       
         for (keyword in PHISHING_KEYWORDS) {
             if (lowerContent.contains(keyword)) {
                 matchCount++
@@ -140,13 +139,10 @@ class SecurityEngine(private val context: Context) {
         return@withContext result
     }
 
-    /**
-     * Prüft URLs auf betrügerische Strukturen oder bekannte Phishing-Muster.
-     */
     private fun containsMaliciousUrlPattern(text: String): Boolean {
         val urlPattern = "(http://|https://|www\\.)([a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+)(/[\\w-]*)*".toRegex()
         val matchResults = urlPattern.findAll(text)
-        
+       
         for (match in matchResults) {
             val url = match.value.lowercase()
             val isTrusted = TRUSTED_DOMAINS.any { domain -> url.contains(domain) }
@@ -157,10 +153,7 @@ class SecurityEngine(private val context: Context) {
         return false
     }
 
-    /**
-     * Protokolliert einen Sicherheitsvorfall direkt in der lokalen Room-Datenbank.
-     */
-     suspend fun logThreatToDatabase(module: String, description: String, status: String, details: String = "Lokale Heuristik-Prüfung aktiv") {
+    suspend fun logThreatToDatabase(module: String, description: String, status: String, details: String = "Lokale Heuristik-Prüfung aktiv") {
         withContext(Dispatchers.IO) {
             try {
                 val db = JuarisDatabase.getDatabase(context)
@@ -178,8 +171,6 @@ class SecurityEngine(private val context: Context) {
         }
     }
 
-
-    // Anruf- und SMS-Filter
     fun getBlockedNumbers(): Set<String> {
         return prefs.getStringSet("blocked_numbers", emptySet()) ?: emptySet()
     }
@@ -199,11 +190,12 @@ class SecurityEngine(private val context: Context) {
         }
     }
 
+    // KORREKTUR 2: Synchronisiert die Rückgabe-Enums exakt mit den Erwartungen deiner Core-Filter (SmsFilterReceiver & EmailScanWorker)
     fun analyzeIncomingSms(smsText: String): SmsSecurityResult {
         val lower = smsText.lowercase()
         return when {
-            lower.contains("phishing") || lower.contains("malware") -> SmsSecurityResult.QUARANTINE_AND_ALERT
-            lower.contains("spam") -> SmsSecurityResult.SPAM
+            PHISHING_KEYWORDS.any { lower.contains(it) } || lower.contains("http") -> SmsSecurityResult.BLOCK
+            lower.contains("spam") || lower.contains("werbung") -> SmsSecurityResult.SPAM
             else -> SmsSecurityResult.SAFE
         }
     }
@@ -211,33 +203,14 @@ class SecurityEngine(private val context: Context) {
     fun analyzeIncomingEmail(emailContent: String): EmailSecurityResult {
         val lower = emailContent.lowercase()
         return when {
-            lower.contains("phishing") || lower.contains("malware") -> EmailSecurityResult.QUARANTINE_AND_ALERT
-            lower.contains("spam") -> EmailSecurityResult.SPAM
+            PHISHING_KEYWORDS.any { lower.contains(it) } || lower.contains("http") -> EmailSecurityResult.BLOCK
+            lower.contains("spam") || lower.contains("werbung") -> EmailSecurityResult.SPAM
             else -> EmailSecurityResult.SAFE
         }
     }
 }
 
-// Ergebnis-Enums
-enum class CallSecurityResult {
-    ALLOW,
-    BLOCK,
-    QUARANTINE_AND_ALERT
-}
-
-enum class SmsSecurityResult {
-    SAFE,
-    SPAM,
-    PHISHING,
-    QUARANTINE_AND_ALERT,
-    BLOCK
-}
-
-enum class EmailSecurityResult {
-    SAFE,
-    SPAM,
-    PHISHING,
-    QUARANTINE_AND_ALERT,
-    BLOCK
-}
+enum class CallSecurityResult { ALLOW, BLOCK, QUARANTINE_AND_ALERT }
+enum class SmsSecurityResult { SAFE, SPAM, PHISHING, QUARANTINE_AND_ALERT, BLOCK }
+enum class EmailSecurityResult { SAFE, SPAM, PHISHING, QUARANTINE_AND_ALERT, BLOCK }
 
