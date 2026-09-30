@@ -57,4 +57,25 @@
     <string name="logs_page_subtitle">Ringkasan semua ancaman dan peristiwa yang dicegat</string>
     <string name="logs_empty_message">Belum ada peristiwa yang dicatat. Sistem Anda aman.</string>
     <string name="logs_module_prefix">Modul: %s</string>
+    <!-- Privacy & Imprint Strings -->
+    <string name="privacy_text">Kebijakan Privasi</string>
+    <string name="privacy_link">Baca Kebijakan Privasi</string>
+    <string name="imprint_title">Imprint (Keterangan)</string>
+    <string name="imprint_subtitle">Informasi hukum</string>
+    <string name="imprint_name">Nama Perusahaan</string>
+    <string name="imprint_address">Alamat</string>
+    <string name="imprint_email">Email Kontak</string>
+    <string name="imprint_responsible">Orang yang bertanggung jawab</string>
+    <string name="imprint_name_v">Perwakilan Resmi</string>
+    <string name="imprint_design">Desain &amp; Implementasi</string>
+    <string name="imprint_name_va">Pengungkapan Tambahan</string>
+    <string name="imprint_name_y">Penyangkalan (Disclaimer)</string>
+    <string name="company_footer">Juaris Security - Hak cipta dilindungi undang-undang</string>
+
+    <!-- Air Gesture Strings -->
+    <string name="air_gesture_title">Kontrol Gestur Udara</string>
+    <string name="air_gesture_subtitle">Kontrol perangkat Anda dengan gerakan tangan</string>
+    <string name="air_gesture_desc">Gunakan gestur nirkontak untuk navigasi</string>
+    <string name="air_gesture_status">Sensor Siap</string>
+    <string name="air_gesture_action">Picu Aksi</string>
 </resources>
