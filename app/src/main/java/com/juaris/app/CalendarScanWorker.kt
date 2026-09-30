@@ -68,14 +68,16 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
                     "${CalendarContract.Instances.BEGIN} ASC"
                 )
 
-                cursor?.use {
+                 cursor?.use {
                     val titleIdx = it.getColumnIndex(CalendarContract.Instances.TITLE)
                     val descIdx = it.getColumnIndex(CalendarContract.Instances.DESCRIPTION)
 
                     while (it.moveToNext()) {
-                        val title = if (titleIdx != -1) it.getString(titleIdx) ?: "" else ""
-                        val description = if (descIdx != -1) it.getString(descIdx) ?: "" else ""
+                        // Absolut absturzsicheres Auslesen der Spalten – Fängt jeden Index-Fehler ab!
+                        val title = if (titleIdx >= 0) it.getString(titleIdx) ?: "" else ""
+                        val description = if (descIdx >= 0) it.getString(descIdx) ?: "" else ""
                         val combined = "$title $description".lowercase()
+
 
                         // 🚫 SPAM- & WERBEFILTER
                         val spamKeywords = listOf(
