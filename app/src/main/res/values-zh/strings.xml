@@ -46,7 +46,7 @@
     <string name="status_ready">准备连接群蜂</string>
     <string name="status_mesh_active_search">正在搜索群蜂节点...</string>
     <string name="toast_mesh_device_discovered">发现新的群蜂设备！</string>
-    <string name="status_mesh_connected_format">已连接至 %s（设备：%d）</string>
+    <string name="status_mesh_connected_format" formatted="false">已连接至 %s（设备：%d）</string>
     <string name="status_mesh_connected_devices_format">已连接设备：%d</string>
     <string name="status_sent">消息成功发送至群蜂</string>
     <string name="toast_p2p_started">P2P 网状节点启动成功！</string>
