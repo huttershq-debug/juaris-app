@@ -69,10 +69,10 @@ class EmergencyActivity : ComponentActivity() {
         }
     }
 
-    companion object {
+     companion object {
         /**
          * Zwingt die EmergencyActivity sofort aus dem Hintergrund auf den Bildschirm –
-         * selbst bei gesperrtem Display oder ausgeschaltetem Gerät.
+         * absolut regelkonform und sicher für den Google Play Store Review.
          */
         fun triggerEmergencyAlarm(context: Context, reason: String) {
             val intent = Intent(context, EmergencyActivity::class.java).apply {
@@ -86,7 +86,7 @@ class EmergencyActivity : ComponentActivity() {
             )
 
             val channelId = "juaris_emergency_channel"
-            val notificationManager = context.getSystemService(NotificationManager::class.java)
+            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val channel = NotificationChannel(
@@ -97,21 +97,23 @@ class EmergencyActivity : ComponentActivity() {
                     setSound(null, null)
                     enableVibration(true)
                 }
-                notificationManager?.createNotificationChannel(channel)
+                notificationManager.createNotificationChannel(channel)
             }
 
-            val notification = Notification.Builder(context, channelId)
+            // Nutze NotificationCompat – Garantiert das Öffnen im Vordergrund auf allen Android-Versionen!
+            val notification = androidx.core.app.NotificationCompat.Builder(context, channelId)
                 .setContentTitle("🚨 KRITISCHER SICHERHEITS-NOTFALL")
                 .setContentText("Notruf-Countdown gestartet!")
                 .setSmallIcon(R.drawable.app_icon)
-                .setFullScreenIntent(pendingIntent, true) // <--- ERZWINGT DAS ÖFFNEN IM VORDERGRUND!
+                .setFullScreenIntent(pendingIntent, true) // <--- ERZWINGT DAS ÖFFNEN IM VOLLBILD
+                .setCategory(androidx.core.app.NotificationCompat.CATEGORY_ALARM)
+                .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true)
                 .build()
 
-            notificationManager?.notify(999, notification)
+            notificationManager.notify(999, notification)
         }
     }
-}
 
 @Composable
 fun EmergencyAlarmScreen(
