@@ -5,15 +5,16 @@ import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.UUID
 
 object GlobalMeshEngine {
 
     private const val TAG = "JuarisSwarmMesh"
-    
+   
     // Instanziiert deine echte Post-Quantum-Engine
     private val quantumEngine = QuantumEngine()
-    
+   
     // Generiert beim Start des Engines ein sicheres Dilithium-Schlüsselpaar für diesen Node
     private val nodeKeyPair = quantumEngine.generatePostQuantumKeyPair()
 
@@ -29,38 +30,46 @@ object GlobalMeshEngine {
         Log.d(TAG, "Generiere post-quantum-resistente Dilithium-Signatur für den Schwarm...")
 
         val payloadBytes = content.toByteArray(Charsets.UTF_8)
-        
+       
         // Echte Dilithium-Signatur mit deiner QuantumEngine erzeugen
         val signatureBase64 = quantumEngine.signThreatData(nodeKeyPair.privateKeyObj, payloadBytes)
         val publicKeyBase64 = nodeKeyPair.publicKeyBase64
 
         Log.d(TAG, "Dilithium-Signatur erfolgreich erstellt: ${signatureBase64.take(12)}...")
 
-         val db = JuarisDatabase.getDatabase(context)
+        val db = JuarisDatabase.getDatabase(context)
        
         CoroutineScope(Dispatchers.IO).launch {
-            // Speicherung des ECHTEN Inhalts in deiner Room-Datenbankstruktur
-            val post = MeshPostEntity(
-                postId = UUID.randomUUID().toString(),
-                senderNode = if (isEphemeral) "[Ephemerer PQC-Node]" else "[Verifizierter PQC-Node]",
-                content = content, // Speichert das, was der Nutzer ECHT geschrieben hat!
-                timestamp = System.currentTimeMillis(),
-                isEphemeral = isEphemeral,
-                mediaUri = "PQC_SIG:$signatureBase64", // Nutze freie Felder für die Signatur-Sicherung
-                mediaType = "PQC_KEY:$publicKeyBase64",
-                ttlHopCount = 3
-            )
-           
-            db.meshDao().insertPost(post)
+            try {
+                // KORREKTUR 1: Perfekt synchronisiert mit den neuen Krypto-Feldern deines Datenmodells!
+                val post = MeshPostEntity(
+                    postId = UUID.randomUUID().toString(),
+                    senderNode = if (isEphemeral) "[Ephemerer PQC-Node]" else "[Verifizierter PQC-Node]",
+                    content = content, // Speichert das, was der Nutzer ECHT geschrieben hat!
+                    timestamp = System.currentTimeMillis(),
+                    isEphemeral = isEphemeral,
+                    mediaUri = null, 
+                    mediaType = "TEXT",
+                    ttlHopCount = 3,
+                    pqcSignature = signatureBase64, // Dedizierte Signatur-Sicherung
+                    pqcPublicKey = publicKeyBase64 // Dedizierte Schlüssel-Sicherung
+                )
+               
+                db.meshDao().insertPost(post)
 
-            // P2P-Broadcast: Überträgt NUR das verpackte Post-Quantum-Sicherheitspaket!
-            val meshPacket = "JUARIS_PQC_SECURE:$signatureBase64:$publicKeyBase64:$content"
-            meshManager?.broadcastMessage(meshPacket)
+                // P2P-Broadcast: Überträgt das verpackte Post-Quantum-Sicherheitspaket ins Bluetooth-Mesh
+                val meshPacket = "JUARIS_PQC_SECURE:$signatureBase64:$publicKeyBase64:$content"
+                meshManager?.broadcastMessage(meshPacket)
 
-            // UI-Callback sicher auf dem Hauptthread ausführen
-            withContext(Dispatchers.Main) {
-                onSuccess(System.currentTimeMillis())
+                // UI-Callback sicher zurück auf den Hauptthread melden
+                withContext(Dispatchers.Main) {
+                    onSuccess(System.currentTimeMillis())
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Fehler in der Swarm-Engine: ${e.message}")
             }
-        }
-    }
+        } // KORREKTUR 2: Schließt die Coroutine-Schleife sauber ab!
+    } // KORREKTUR 3: Schließt die broadcastToSwarm-Funktion regelkonform!
+} // KORREKTUR 4: Schließt das GlobalMeshEngine-Objekt fehlerfrei!
+
 
