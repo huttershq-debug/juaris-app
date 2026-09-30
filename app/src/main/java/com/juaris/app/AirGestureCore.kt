@@ -7,13 +7,16 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import java.nio.ByteBuffer
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.math.abs
 
 class AirGestureCore(private val context: Context) {
 
     private var cameraProvider: ProcessCameraProvider? = null
-    private val analysisExecutor = Executors.newSingleThreadExecutor()
+    
+    // KORREKTUR 1: Dynamischer Executor, der im Ruhezustand kontrolliert beendet wird, um Memory Leaks zu verhindern!
+    private var analysisExecutor: ExecutorService? = null
 
     enum class GestureAction {
         NONE, TRIGGERED
@@ -24,6 +27,12 @@ class AirGestureCore(private val context: Context) {
         onGestureDetected: (GestureAction) -> Unit,
         onDebugInfo: (String) -> Unit
     ) {
+        // Falls noch ein alter Executor läuft, diesen zur Sicherheit vorher schließen
+        stopGestureDetection()
+        
+        // Frischen Single-Thread für diese Session aufbauen
+        analysisExecutor = Executors.newSingleThreadExecutor()
+        
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
 
         cameraProviderFuture.addListener({
@@ -42,6 +51,7 @@ class AirGestureCore(private val context: Context) {
         onDebugInfo: (String) -> Unit
     ) {
         val cameraProvider = cameraProvider ?: return
+        val currentExecutor = analysisExecutor ?: return
         val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
 
         val imageAnalysis = ImageAnalysis.Builder()
@@ -50,9 +60,9 @@ class AirGestureCore(private val context: Context) {
 
         var lastLuminance = 0.0
         var coolDownFrames = 0
-        var consecutiveTriggers = 0 // Multi-Frame Validierung gegen Schatten/Fehlalarme
+        var consecutiveTriggers = 0 
 
-        imageAnalysis.setAnalyzer(analysisExecutor) { imageProxy ->
+        imageAnalysis.setAnalyzer(currentExecutor) { imageProxy ->
             try {
                 val buffer = imageProxy.planes[0].buffer
                 val data = byteBufferToByteArray(buffer)
@@ -65,10 +75,10 @@ class AirGestureCore(private val context: Context) {
                     val delta = currentLuminance - lastLuminance
                     onDebugInfo("Sensor aktiv | Delta: %.1f".format(delta))
 
-                    // Striktere Prüfung: Verlangt echte plötzliche Helligkeitsänderung
+                    // Echte, plötzliche Helligkeitsänderung im Nahbereich validieren
                     if (abs(delta) > 15.0) {
                         consecutiveTriggers++
-                        if (consecutiveTriggers >= 2) { // Muss über 2 Frames bestätigt werden
+                        if (consecutiveTriggers >= 2) { 
                             onGestureDetected(GestureAction.TRIGGERED)
                             coolDownFrames = 50 // ca. 1.5 Sekunden Cooldown
                             consecutiveTriggers = 0
@@ -80,6 +90,9 @@ class AirGestureCore(private val context: Context) {
                 lastLuminance = currentLuminance
             } catch (e: Exception) {
                 onDebugInfo("Analyzer-Fehler: ${e.message}")
+            } catch (e: OutOfMemoryError) {
+                // System-Schutz vor extremen Puffer-Überlastungen
+                System.gc()
             } finally {
                 imageProxy.close()
             }
@@ -102,6 +115,12 @@ class AirGestureCore(private val context: Context) {
         try {
             cameraProvider?.unbindAll()
         } catch (e: Exception) {}
+        
+        // KORREKTUR 2: Den Hintergrund-Thread physikalisch zerstören, sobald der Sensor deaktiviert wird!
+        try {
+            analysisExecutor?.shutdownNow()
+            analysisExecutor = null
+        } catch (e: Exception) {}
     }
 
     private fun byteBufferToByteArray(buffer: ByteBuffer): ByteArray {
@@ -122,4 +141,5 @@ class AirGestureCore(private val context: Context) {
         return if (count > 0) sum.toDouble() / count else 0.0
     }
 }
+
 
