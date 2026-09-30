@@ -31,7 +31,8 @@
     <string name="vpn_disclosure_message">Juaris utilise un VpnService local pour détecter le phishing et les logiciels malveillants directement sur votre appareil.\n\nDonnées 100% locales. Rien n\'est envoyé vers des serveurs externes ou le cloud.</string>
     <string name="btn_understood">Compris et Activer</string>
     <string name="btn_cancel">Annuler</string>
-     <!-- P2P Swarm & Mesh Strings (French - Corrected) -->
+    
+    <!-- P2P Swarm & Mesh Strings (French - Corrected) -->
     <string name="p2p_swarm_title">"Mesh d'essaim Juaris (P2P)"</string>
     <string name="p2p_swarm_subtitle">"Communication sécurisée et décentralisée sans Internet"</string>
     <string name="mesh_broadcast_title">"Diffuser un message à l'essaim"</string>
@@ -42,7 +43,6 @@
     <string name="mesh_hardware_title">"Matériel P2P et Connexions"</string>
     <string name="mesh_status_format">"Statut : %s"</string>
     <string name="btn_start_mesh_node">"Démarrer le nœud Mesh P2P"</string>
-    
     <string name="status_ready">"Prêt pour la connexion en essaim"</string>
     <string name="status_mesh_active_search">"Recherche de nœuds d'essaim..."</string>
     <string name="toast_mesh_device_discovered">"Nouvel appareil d'essaim découvert !"</string>
@@ -57,7 +57,8 @@
     <string name="logs_page_subtitle">"Aperçu de toutes les menaces et événements interceptés"</string>
     <string name="logs_empty_message">"Aucun événement enregistré pour l'instant. Votre système est sécurisé."</string>
     <string name="logs_module_prefix">"Module : %s"</string>
-     <!-- Privacy & Imprint Strings -->
+
+    <!-- Privacy & Imprint Strings -->
     <string name="privacy_text">"Politique de confidentialité"</string>
     <string name="privacy_link">"Lire la politique de confidentialité"</string>
     <string name="imprint_title">"Mentions légales"</string>
@@ -72,11 +73,11 @@
     <string name="imprint_name_y">"Clause de non-responsabilité"</string>
     <string name="company_footer">"Juaris Security - Tous droits réservés"</string>
 
-    <!-- Air Gesture Strings -->
-    <string name="air_gesture_title">"Contrôle par gestes aériens"</string>
+    <!-- Air Gesture Additional Strings -->
     <string name="air_gesture_subtitle">"Contrôlez votre appareil avec des mouvements de main"</string>
     <string name="air_gesture_desc">"Utilisez des gestes sans contact pour naviguer"</string>
     <string name="air_gesture_status">"Capteur prêt"</string>
     <string name="air_gesture_action">"Déclencher l'action"</string>
 </resources>
+
 
