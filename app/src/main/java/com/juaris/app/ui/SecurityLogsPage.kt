@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.juaris.app.R // Wichtig für den Zugriff auf deine strings.xml-Keys
+import com.juaris.app.R
 import com.juaris.app.SecurityLogDao
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -19,11 +19,8 @@ import java.util.Locale
 @Composable
 fun SecurityLogsPage(logDao: SecurityLogDao) {
     val logs by logDao.getAllLogs().collectAsState(initial = emptyList())
-
-    // KORREKTUR 1: Formatter wird nur EINMAL instanziiert und im Lebenszyklus gehalten.
-    // Garantiert ein absolut butterweiches, ruckelfreies Scrollen selbst bei tausenden Logs!
-    val dateFormatter = remember { 
-        SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault()) 
+    val dateFormatter = remember {
+        SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault())
     }
 
     Column(
@@ -33,7 +30,7 @@ fun SecurityLogsPage(logDao: SecurityLogDao) {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = stringResource(R.string.logs_page_title), // KORREKTUR 2: An deine 12 Weltsprachen gekoppelt!
+            text = stringResource(R.string.logs_page_title),
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.primary
         )
@@ -66,9 +63,9 @@ fun SecurityLogsPage(logDao: SecurityLogDao) {
                                     log.status.equals("WARNING", ignoreCase = true)
 
                     val borderColor = when {
-                        isImportant -> Color(0xFFFFD700) // Edles Gold für Termine, Zähler, Geburtstage & E-Mails
-                        isBlocked -> Color(0xFFFF3333) // Rot für Mahnungen & Phishing-Blockaden
-                        else -> NeonGiftgruen // Neon-Grün für Systemmeldungen
+                        isImportant -> Color(0xFFFFD700)
+                        isBlocked -> Color(0xFFFF3333)
+                        else -> Color(0xFF00E676)
                     }
 
                     Card(
@@ -87,7 +84,7 @@ fun SecurityLogsPage(logDao: SecurityLogDao) {
                                 Text(
                                     text = stringResource(R.string.logs_module_prefix, log.module),
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = NeonGiftgruen
+                                    color = Color(0xFF00E676)
                                 )
                                 Surface(
                                     shape = MaterialTheme.shapes.small,
@@ -116,7 +113,6 @@ fun SecurityLogsPage(logDao: SecurityLogDao) {
                                 )
                             }
 
-                            // Nutzt den performanten, ausgelagerten Formatter hocheffizient wieder
                             Text(
                                 text = dateFormatter.format(Date(log.timestamp)),
                                 style = MaterialTheme.typography.bodySmall,
