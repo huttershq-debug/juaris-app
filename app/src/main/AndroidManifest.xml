@@ -143,8 +143,8 @@
         <!-- 7. Lokale NPU- und Anomalie-Erkennungs-Engine -->
         <service
             android:name=".JuarisNpuAnomalyEngine"
-            android:exported="false"
-            android:foregroundServiceType="dataSync" />
+            android:exported="false" />
+           
 
         <!-- ================================================================= -->
         <!-- OBLIGATORISCHE SMS-ROLLEN-KOMPONENTEN (STANDARD-SMS-SCHUTZ ENGINE) -->
