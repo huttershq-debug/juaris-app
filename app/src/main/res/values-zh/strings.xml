@@ -31,5 +31,31 @@
     <string name="vpn_disclosure_message">Juaris 使用本地 VpnService 直接在您的设备上检测网络钓鱼和恶意软件。\n\n所有数据保持 100% 本地化。绝对不会向外部服务器或云端发送任何数据。</string>
     <string name="btn_understood">明白了并激活</string>
     <string name="btn_cancel">取消</string>
+    <!-- P2P Swarm & Mesh Strings -->
+    <string name="p2p_swarm_title">Juaris 网状群蜂 (P2P)</string>
+    <string name="p2p_swarm_subtitle">安全、无互联网的去中心化通信</string>
+    <string name="mesh_broadcast_title">向群蜂广播消息</string>
+    <string name="label_message_placeholder">输入消息...</string>
+    <string name="checkbox_ephemeral">读取后删除消息（阅后即焚）</string>
+    <string name="btn_broadcast">发送至群蜂</string>
+    <string name="mesh_packets_count">活跃群蜂数据包 (%d)</string>
+    <string name="mesh_hardware_title">P2P 硬件与连接</string>
+    <string name="mesh_status_format">状态：%s</string>
+    <string name="btn_start_mesh_node">启动 P2P 网状节点</string>
+    
+    <string name="status_ready">准备连接群蜂</string>
+    <string name="status_mesh_active_search">正在搜索群蜂节点...</string>
+    <string name="toast_mesh_device_discovered">发现新的群蜂设备！</string>
+    <string name="status_mesh_connected_format">已连接至 %s（设备：%d）</string>
+    <string name="status_mesh_connected_devices_format">已连接设备：%d</string>
+    <string name="status_sent">消息成功发送至群蜂</string>
+    <string name="toast_p2p_started">P2P 网状节点启动成功！</string>
+    <string name="toast_bluetooth_missing">需要蓝牙权限！</string>
+
+    <!-- Security Logs Strings -->
+    <string name="logs_page_title">安全日志</string>
+    <string name="logs_page_subtitle">拦截的所有威胁与事件概览</string>
+    <string name="logs_empty_message">暂无记录的事件。您的系统非常安全。</string>
+    <string name="logs_module_prefix">模块：%s</string>
 </resources>
 
