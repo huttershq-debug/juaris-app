@@ -36,9 +36,20 @@ class NearbyMeshManager(
 
     private val payloadCallback = object : PayloadCallback() {
         override fun onPayloadReceived(endpointId: String, payload: Payload) {
-            payload.asBytes()?.let { bytes ->
-                val message = String(bytes, StandardCharsets.UTF_8)
-                onMessageReceived(endpointId, message)
+            // KORREKTUR: Ausfallsicheres Auslesen des Byte-Payloads für Post-Quanten-Signaturen
+            val bytes = when (payload.type) {
+                Payload.Type.BYTES -> payload.asBytes()
+                Payload.Type.STREAM -> payload.asStream()?.asInputStream()?.use { it.readBytes() }
+                else -> null
+            }
+            
+            bytes?.let { rawBytes ->
+                try {
+                    val message = String(rawBytes, StandardCharsets.UTF_8)
+                    onMessageReceived(endpointId, message)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
 
@@ -90,4 +101,5 @@ class NearbyMeshManager(
         connectedEndpoints.clear()
     }
 }
+
 
