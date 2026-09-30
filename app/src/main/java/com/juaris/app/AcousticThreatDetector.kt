@@ -41,29 +41,30 @@ class AcousticThreatDetector(
             audioRecord?.startRecording()
             isMonitoring = true
 
-            monitoringJob = CoroutineScope(Dispatchers.IO).launch {
-                val buffer = ByteArray(bufferSize)
-                var highAmplitudeCount = 0 // Verhindert Fehlalarme durch einmaliges Klopfen/Teller fallen lassen
+             monitoringJob = CoroutineScope(Dispatchers.IO).launch {
+                // Nutze ein ShortArray für echtes 16-Bit PCM – Verhindert Array-Überläufe komplett!
+                val shortBufferSize = bufferSize / 2
+                val buffer = ShortArray(shortBufferSize)
+                var highAmplitudeCount = 0
 
                 while (isMonitoring && isActive) {
                     val read = audioRecord?.read(buffer, 0, buffer.size) ?: 0
                     if (read > 0) {
                         var sum = 0L
-                        for (i in 0 until read step 2) {
-                            val sample = (buffer[i].toInt() and 0xFF) or ((buffer[i+1].toInt()) shl 8)
-                            sum += abs(sample.toShort().toInt())
+                        for (i in 0 until read) {
+                            sum += abs(buffer[i].toInt())
                         }
-                        val averageAmplitude = sum / (read / 2)
+                        val averageAmplitude = sum / read
                        
-                        // Erkennung von extremen und anhaltenden akustischen Ausschlägen
+                        // Unbestechliche Erkennung von anhaltendem Lärm/Schreien
                         if (averageAmplitude > 27000) {
                             highAmplitudeCount++
-                            if (highAmplitudeCount >= 3) { // Muss in 3 aufeinanderfolgenden Messungen anhalten
+                            if (highAmplitudeCount >= 3) {
                                 withContext(Dispatchers.Main) {
                                     onEmergencyDetected()
                                 }
                                 highAmplitudeCount = 0
-                                delay(10000) // Cooldown nach Alarmauslösung
+                                delay(10000) // Cooldown-Phase
                             }
                         } else {
                             highAmplitudeCount = (highAmplitudeCount - 1).coerceAtLeast(0)
@@ -72,6 +73,7 @@ class AcousticThreatDetector(
                     delay(100)
                 }
             }
+
         } catch (e: Exception) {
             e.printStackTrace()
         }
