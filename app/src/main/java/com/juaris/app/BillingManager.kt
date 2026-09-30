@@ -2,6 +2,7 @@ package com.juaris.app
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import com.android.billingclient.api.*
 
 class BillingManager(
@@ -11,9 +12,11 @@ class BillingManager(
 ) : PurchasesUpdatedListener {
 
     companion object {
-        // ⚠️ WICHTIG FÜR DEN STORE-RELEASE:
-        // Vor dem Hochladen in den Google Play Store unbedingt auf FALSE stellen!
-        var IS_BETA_BYPASS_ACTIVE: Boolean = true
+        private const val TAG = "JuarisBillingKernel"
+        
+        // KORREKTUR 1: Nutze das automatische BuildConfig-Flag.
+        // Garantiert 100% kostenloses Testen im Debug-Modus, schaltet das Abo im Store aber unfehlbar scharf!
+        private val IS_BETA_BYPASS_ACTIVE: Boolean = BuildConfig.DEBUG
     }
 
     private var billingClient: BillingClient = BillingClient.newBuilder(context)
@@ -23,6 +26,7 @@ class BillingManager(
 
     fun startConnection(onReady: () -> Unit = {}) {
         if (IS_BETA_BYPASS_ACTIVE) {
+            Log.d(TAG, "🚧 Beta-Bypass aktiv: Schalte Premium-Dienste im Debug-Modus frei.")
             onSubscriptionActive()
             onReady()
             return
@@ -37,7 +41,7 @@ class BillingManager(
             }
 
             override fun onBillingServiceDisconnected() {
-                // Automatischer Reconnect bei Bedarf
+                // Automatischer Reconnect-Versuch bei nächster Gelegenheit
             }
         })
     }
@@ -49,7 +53,10 @@ class BillingManager(
                 .build()
         ) { result, purchases ->
             if (result.responseCode == BillingClient.BillingResponseCode.OK && purchases.isNotEmpty()) {
-                onSubscriptionActive()
+                for (purchase in purchases) {
+                    // Bestehende Käufe beim App-Start ebenfalls verifizieren & bestätigen
+                    handlePurchase(purchase)
+                }
             }
         }
     }
@@ -93,9 +100,33 @@ class BillingManager(
     override fun onPurchasesUpdated(billingResult: BillingResult, purchases: List<Purchase>?) {
         if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
             for (purchase in purchases) {
-                if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
-                    onSubscriptionActive()
+                handlePurchase(purchase)
+            }
+        }
+    }
+
+    /**
+     * KORREKTUR 2: Verarbeitet und bestätigt (Acknowledged) den Kauf bei Google.
+     * Verhindert das automatische Google-Storno nach 3 Tagen und sichert deine Umsätze!
+     */
+    private fun handlePurchase(purchase: Purchase) {
+        if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
+            if (!purchase.isAcknowledged) {
+                val acknowledgePurchaseParams = AcknowledgePurchaseParams.newBuilder()
+                    .setPurchaseToken(purchase.purchaseToken)
+                    .build()
+                
+                billingClient.acknowledgePurchase(acknowledgePurchaseParams) { billingResult ->
+                    if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                        Log.d(TAG, "✅ Kauf erfolgreich bei Google bestätigt!")
+                        onSubscriptionActive()
+                    } else {
+                        Log.e(TAG, "❌ Fehler bei der Kaufbestätigung: ${billingResult.debugMessage}")
+                    }
                 }
+            } else {
+                // Bereits bestätigter, aktiver Kauf
+                onSubscriptionActive()
             }
         }
     }
