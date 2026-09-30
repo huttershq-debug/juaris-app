@@ -132,7 +132,7 @@ fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
                                         reportBuilder.append("\n⚠️ Kalender-Zugriff eingeschränkt oder nicht erlaubt.\n")
                                     }
 
-                                    // 3. SCHRITT: Durchsuche den SMS-Posteingang (Findet echte Nachrichten wie die EVN-SMS)
+                                   // 3. SCHRITT: Durchsuche den gesamten SMS-Posteingang unlimitiert
                                     try {
                                         val smsUri = Uri.parse("content://sms/inbox")
                                         val cursor = context.contentResolver.query(
@@ -146,9 +146,7 @@ fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
                                             val bodyIdx = it.getColumnIndex("body")
                                             val matchingSms = mutableListOf<String>()
 
-                                            var count = 0
-                                            while (it.moveToNext() && count < 100) {
-                                                count++
+                                            while (it.moveToNext()) {
                                                 val sender = if (addressIdx != -1) it.getString(addressIdx) ?: "Unbekannt" else "Unbekannt"
                                                 val body = if (bodyIdx != -1) it.getString(bodyIdx) ?: "" else ""
                                                 val combined = "$sender $body".lowercase()
