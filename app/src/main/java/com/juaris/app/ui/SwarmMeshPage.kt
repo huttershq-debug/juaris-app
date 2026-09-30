@@ -1,5 +1,6 @@
 package com.juaris.app.ui
 
+import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -34,7 +35,6 @@ fun SwarmMeshPage() {
     var scanStatusText by remember { mutableStateOf("Bereit") }
     var discoveredCount by remember { mutableStateOf(0) }
 
-    // RICHTIG: NearbyMeshManager wird direkt hier instanziiert und ist nie null!
     val meshManager = remember {
         NearbyMeshManager(
             context = context,
@@ -48,7 +48,6 @@ fun SwarmMeshPage() {
                 scanStatusText = if (discoveredCount > 0) "Verbunden ($discoveredCount Geräte)" else "Mesh aktiv (Suche...)"
             },
             onMessageReceived = { _, message ->
-                // Eingehende Nachricht direkt in den lokalen Schwarm-Feed einspeisen
                 GlobalMeshEngine.broadcastToSwarm(
                     context = context,
                     content = message,
@@ -61,14 +60,13 @@ fun SwarmMeshPage() {
         )
     }
 
-    // Beim Verlassen der Seite den Mesh-Node sauber herunterfahren
     DisposableEffect(Unit) {
         onDispose {
             meshManager.stopMeshNode()
         }
     }
 
-    // SICHERHEIT: Bluetooth- & Standortberechtigungen vor dem Start anfordern
+    // Android-Versionsprüfung für Berechtigungs-Ergebnis
     val bluetoothPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -77,7 +75,7 @@ fun SwarmMeshPage() {
             scanStatusText = "Mesh-Knoten aktiv (Suche...)"
             Toast.makeText(context, "P2P-Schwarm erfolgreich gestartet!", Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(context, "Bluetooth- & Standort-Berechtigungen fehlen für den Schwarm.", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Bluetooth-Berechtigungen fehlen für den Schwarm.", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -154,15 +152,19 @@ fun SwarmMeshPage() {
                     Text("Status: $scanStatusText", color = Color.White)
                     Button(
                         onClick = {
-                            // Berechtigungsabfrage beim Klick starten
-                            bluetoothPermissionLauncher.launch(
+                            // Berechtigungen passend zur bereinigten Manifest-Datei abfragen
+                            val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                 arrayOf(
                                     android.Manifest.permission.BLUETOOTH_SCAN,
                                     android.Manifest.permission.BLUETOOTH_ADVERTISE,
-                                    android.Manifest.permission.BLUETOOTH_CONNECT,
+                                    android.Manifest.permission.BLUETOOTH_CONNECT
+                                )
+                            } else {
+                                arrayOf(
                                     android.Manifest.permission.ACCESS_FINE_LOCATION
                                 )
-                            )
+                            }
+                            bluetoothPermissionLauncher.launch(permissions)
                         },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
