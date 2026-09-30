@@ -80,9 +80,9 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            Toast.makeText(this, "Juaris ist jetzt als Standard-SMS-Wächter aktiv!", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.toast_sms_active), Toast.LENGTH_LONG).show()
         } else {
-            Toast.makeText(this, "SMS-Rolle wurde abgelehnt.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_sms_rejected), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -90,10 +90,10 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            Toast.makeText(this, "Benachrichtigungs-Berechtigung erteilt!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_notification_granted), Toast.LENGTH_SHORT).show()
             checkAndBootProtectionServices()
         } else {
-            Toast.makeText(this, "Achtung: Ohne Benachrichtigungs-Berechtigung kann kein Status-Icon angezeigt werden.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.toast_notification_warning), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -101,9 +101,9 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            Toast.makeText(this, "Kalender-Zugriff erlaubt! Fristen-Wächter aktiv.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_calendar_granted), Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(this, "Hinweis: Ohne Kalender-Zugriff kann Juaris Termine nicht automatisch scannen.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.toast_calendar_warning), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -111,10 +111,10 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            Toast.makeText(this, "VPN-Berechtigung erteilt! Starte Firewall...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_vpn_granted), Toast.LENGTH_SHORT).show()
             startVpnServiceInternal()
         } else {
-            Toast.makeText(this, "Achtung: VPN-Berechtigung wurde abgelehnt.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.toast_vpn_rejected), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -186,7 +186,7 @@ class MainActivity : AppCompatActivity() {
                                     launchBiometricVaultAuthentication(onSuccess)
                                 },
                                 onTriggerPanicEmergency = {
-                                    executeEmergencyProtocol("Manueller Panic-Button Trigger")
+                                    executeEmergencyProtocol(getString(R.string.emergency_reason_manual))
                                 }
                             )
                         }
@@ -240,7 +240,7 @@ class MainActivity : AppCompatActivity() {
                     val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
                     startActivity(intent)
                 } catch (e: Exception) {
-                    Toast.makeText(this, "Bitte den Benachrichtigungs-Zugriff manuell aktivieren.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, getString(R.string.toast_enable_notification_manual), Toast.LENGTH_LONG).show()
                 }
             }
         } else {
@@ -261,7 +261,7 @@ class MainActivity : AppCompatActivity() {
         emergencyReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (intent?.action == "com.juaris.app.ACTION_EMERGENCY_TRIGGER") {
-                    val reason = intent.getStringExtra("reason") ?: "Sensor-Notfall"
+                    val reason = intent.getStringExtra("reason") ?: getString(R.string.emergency_reason_sensor)
                     executeEmergencyProtocol(reason)
                 }
             }
@@ -292,21 +292,21 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkRuntimeIntegrity() {
         if (android.os.Debug.isDebuggerConnected()) {
-            Toast.makeText(this, "Sicherheitswarnung: Debugger erkannt!", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.toast_debugger_detected), Toast.LENGTH_LONG).show()
         }
     }
 
     private fun launchBiometricVaultAuthentication(onSuccess: () -> Unit) {
         val biometricManager = JuarisBiometricManager(this)
         biometricManager.authenticateUser(
-            title = "Juaris Future-Proof Vault",
-            subtitle = "Biometrische Verifizierung (Fingerabdruck, Gesicht, Sensor oder PIN)",
+            title = getString(R.string.biometric_vault_title),
+            subtitle = getString(R.string.biometric_vault_subtitle),
             onSuccess = {
                 onSuccess()
-                Toast.makeText(this, "Vault erfolgreich und sicher entsperrt", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_vault_success), Toast.LENGTH_SHORT).show()
             },
             onError = { errorMsg ->
-                Toast.makeText(this, "Sicherheitsprüfung abgebrochen: $errorMsg", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.toast_biometric_error, errorMsg), Toast.LENGTH_LONG).show()
             }
         )
     }
@@ -336,7 +336,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             startService(intent)
         }
-        Toast.makeText(this, "Juaris DNS-Shield Firewall gestartet!", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, getString(R.string.toast_vpn_started), Toast.LENGTH_SHORT).show()
     }
 
     private fun requestCallScreeningRoleIfNeeded() {
@@ -404,14 +404,14 @@ private fun showProminentDisclosureDialog(context: Context, onProceed: () -> Uni
     val activity = context.findActivity()
     if (activity != null) {
         AlertDialog.Builder(activity)
-            .setTitle("Sicherheits-Wächter aktivieren")
-            .setMessage("Juaris benötigt den Benachrichtigungszugriff, um eingehende Nachrichten von WhatsApp, E-Mail und Messengern lokal in Echtzeit auf Betrug und Phishing zu scannen.\n\nWichtig: Alle Daten bleiben zu 100% auf Ihrem Gerät. Es werden niemals Daten an Server oder Clouds übertragen.")
-            .setPositiveButton("Verstanden & Aktivieren") { _, _ -> onProceed() }
-            .setNegativeButton("Abbrechen", null)
+            .setTitle(context.getString(R.string.disclosure_dialog_title))
+            .setMessage(context.getString(R.string.disclosure_dialog_message))
+            .setPositiveButton(context.getString(R.string.btn_understood)) { _, _ -> onProceed() }
+            .setNegativeButton(context.getString(R.string.btn_cancel), null)
             .setCancelable(false)
             .show()
     } else {
-        Toast.makeText(context, "Fehler beim Öffnen des Dialogs", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, context.getString(R.string.toast_dialog_error), Toast.LENGTH_SHORT).show()
     }
 }
 
@@ -426,7 +426,7 @@ private fun Context.showVpnProminentDisclosureDialog(onConfirmed: () -> Unit) {
             .setCancelable(false)
             .show()
     } else {
-        Toast.makeText(this, "Fehler beim Öffnen des VPN-Dialogs", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, getString(R.string.toast_vpn_dialog_error), Toast.LENGTH_SHORT).show()
     }
 }
 
@@ -443,12 +443,12 @@ fun WelcomeScreen() {
         ) {
             Image(
                 painter = painterResource(id = R.drawable.hologram_avatar),
-                contentDescription = "Juaris KI Hologramm",
+                contentDescription = stringResource(R.string.desc_hologram),
                 modifier = Modifier.size(200.dp).padding(bottom = 24.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "WILLKOMMEN BEI JUARIS",
+                text = stringResource(R.string.welcome_title),
                 color = NeonGiftgruen,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
@@ -456,7 +456,7 @@ fun WelcomeScreen() {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Local-First Security Kernel. Zero Cloud.",
+                text = stringResource(R.string.welcome_subtitle),
                 color = Color.White,
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center
@@ -476,10 +476,10 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
         if (activity != null) {
             val biometricManager = JuarisBiometricManager(activity)
             biometricManager.authenticateUser(
-                title = "Juaris Biometrischer Login",
-                subtitle = "Verifiziere deinen Fingerabdruck zum Entsperren",
+                title = context.getString(R.string.biometric_login_title),
+                subtitle = context.getString(R.string.biometric_login_subtitle),
                 onSuccess = {
-                    Toast.makeText(context, "Erfolgreich eingeloggt!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.toast_login_success), Toast.LENGTH_SHORT).show()
                     onLoginSuccess()
                 },
                 onError = { _ -> }
@@ -497,14 +497,14 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
             modifier = Modifier.padding(32.dp)
         ) {
             Text(
-                text = "JUARIS ON-DEVICE KERNEL",
+                text = stringResource(R.string.kernel_title),
                 color = NeonGiftgruen,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Post-Quantum Security • 100% Offline",
+                text = stringResource(R.string.kernel_subtitle),
                 color = Color.Gray,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
@@ -517,14 +517,14 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                     if (activity != null) {
                         val biometricManager = JuarisBiometricManager(activity)
                         biometricManager.authenticateUser(
-                            title = "Juaris Biometrischer Login",
-                            subtitle = "Verifiziere deinen Fingerabdruck zum Entsperren",
+                            title = context.getString(R.string.biometric_login_title),
+                            subtitle = context.getString(R.string.biometric_login_subtitle),
                             onSuccess = {
-                                Toast.makeText(context, "Erfolgreich eingeloggt!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.toast_login_success), Toast.LENGTH_SHORT).show()
                                 onLoginSuccess()
                             },
                             onError = { error ->
-                                Toast.makeText(context, "Login abgebrochen: $error", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.toast_login_aborted, error), Toast.LENGTH_SHORT).show()
                             }
                         )
                     }
@@ -532,7 +532,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen, contentColor = Color.Black)
             ) {
-                Text(text = "🔓 Mit Fingerabdruck anmelden", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.Black)
+                Text(text = stringResource(R.string.btn_fingerprint_login), fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.Black)
             }
 
             if (BuildConfig.DEBUG) {
@@ -542,7 +542,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                     border = BorderStroke(1.dp, Color(0xFFFF9900))
                 ) {
-                    Text(text = "[DEBUG] Entwickler-Bypass", color = Color(0xFFFF9900), fontSize = 12.sp)
+                    Text(text = stringResource(R.string.btn_debug_bypass), color = Color(0xFFFF9900), fontSize = 12.sp)
                 }
             }
         }
@@ -566,7 +566,7 @@ fun JuarisMainDashboard(
     val liveLogs by logsFlow.collectAsState(initial = emptyList())
 
     var gestureEnabled by remember { mutableStateOf(false) }
-    var gestureStatusText by remember { mutableStateOf("Bereit") }
+    var gestureStatusText by remember { mutableStateOf(stringResource(R.string.status_ready)) }
 
     val tabs = listOf(
         stringResource(R.string.tab_status),
@@ -653,16 +653,16 @@ fun JuarisMainDashboard(
                                 SecurityLogEntity(
                                     timestamp = System.currentTimeMillis(),
                                     status = "BLOCKED",
-                                    module = "Echtzeit-Wächter",
-                                    description = "Phishing-Angriff lokal erkannt und blockiert!",
-                                    details = "Simulierter Testlauf erfolgreich ausgeführt."
+                                    module = context.getString(R.string.log_module_guardian),
+                                    description = context.getString(R.string.log_desc_phishing_blocked),
+                                    details = context.getString(R.string.log_details_simulation)
                                 )
                             )
                         }
-                        Toast.makeText(context, "Bedrohung auf dem Gerät neutralisiert & protokolliert!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.toast_threat_neutralized), Toast.LENGTH_SHORT).show()
                     },
                     onExportLogs = {
-                        Toast.makeText(context, "Logs sicher im verschlüsselten Vault gesichert.", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, context.getString(R.string.toast_logs_vault_secured), Toast.LENGTH_LONG).show()
                     },
                     onPanicWipe = {
                         onTriggerPanicEmergency()
@@ -693,7 +693,7 @@ fun JuarisMainDashboard(
                             }
                         } else {
                             vaultUnlocked = false
-                            Toast.makeText(context, "Vault gesperrt", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.toast_vault_locked), Toast.LENGTH_SHORT).show()
                         }
                     }
                 )
@@ -703,13 +703,13 @@ fun JuarisMainDashboard(
                         if (newEntry.isNotBlank() && !blockedContacts.contains(newEntry)) {
                             blockedContacts.add(newEntry)
                             prefs.edit().putStringSet("blocked_numbers", blockedContacts.toSet()).apply()
-                            Toast.makeText(context, "Nummer blockiert", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.toast_number_blocked), Toast.LENGTH_SHORT).show()
                         }
                     },
                     onRemoveBlocked = { item ->
                         blockedContacts.remove(item)
                         prefs.edit().putStringSet("blocked_numbers", blockedContacts.toSet()).apply()
-                        Toast.makeText(context, "Nummer freigegeben", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.toast_number_released), Toast.LENGTH_SHORT).show()
                     }
                 )
                 3 -> SecurityLogsPage(logDao = db.securityLogDao())
@@ -729,10 +729,10 @@ fun JuarisMainDashboard(
                     ) { isGranted ->
                         if (isGranted) {
                             gestureEnabled = true
-                            Toast.makeText(context, "Kamera-Sensor gestartet!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.toast_camera_started), Toast.LENGTH_SHORT).show()
                         } else {
                             gestureEnabled = false
-                            Toast.makeText(context, "Berechtigung verweigert", Toast.LENGTH_LONG).show()
+                            Toast.makeText(context, context.getString(R.string.toast_permission_denied), Toast.LENGTH_LONG).show()
                         }
                     }
 
@@ -753,7 +753,7 @@ fun JuarisMainDashboard(
                                 }
                             } else {
                                 gestureEnabled = false
-                                gestureStatusText = "Pausiert"
+                                gestureStatusText = context.getString(R.string.status_paused)
                             }
                         },
                         onTabSwitch = { forward ->
@@ -792,8 +792,8 @@ fun StatusPage(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            Text("System-Gesundheit (Local-First)", style = MaterialTheme.typography.titleLarge, color = Color.White)
-            Text("100% On-Device Kontrolle ohne Server-Anbindung.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text(stringResource(R.string.status_health_title), style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text(stringResource(R.string.status_health_subtitle), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
             Card(
@@ -808,8 +808,8 @@ fun StatusPage(
                 ) {
                     Icon(Icons.Default.CheckCircle, contentDescription = null, tint = NeonGiftgruen, modifier = Modifier.size(36.dp))
                     Column {
-                        Text("Status: AES-256 Verschlüsselt", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                        Text("Mikrofon-, Anruf-, SMS- & E-Mail-Filter aktiv", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                        Text(stringResource(R.string.status_aes_encrypted), style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                        Text(stringResource(R.string.status_filters_active), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                     }
                 }
             }
@@ -822,7 +822,7 @@ fun StatusPage(
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                     ) {
                         Column(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("BLOCKIERT", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                            Text(stringResource(R.string.card_blocked_caps), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                             Spacer(modifier = Modifier.height(4.dp))
                             Text("$blockedCount", style = MaterialTheme.typography.headlineLarge, color = Color(0xFFFF3333))
                         }
@@ -834,9 +834,9 @@ fun StatusPage(
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                     ) {
                         Column(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("DATENFLUSS", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                            Text(stringResource(R.string.card_data_flow), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                             Spacer(modifier = Modifier.height(4.dp))
-                            Text("NUR LOKAL", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                            Text(stringResource(R.string.card_local_only), style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                         }
                     }
                 }
@@ -844,7 +844,7 @@ fun StatusPage(
         }
         item {
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Aktionen", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+            Text(stringResource(R.string.section_actions), style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
         }
         item {
             Card(
@@ -859,14 +859,14 @@ fun StatusPage(
                     ) {
                         Icon(Icons.Default.Refresh, contentDescription = null, tint = Color.Black)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Phishing-Angriff (SMS/Mail) simulieren", color = Color.Black, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.btn_simulate_phishing), color = Color.Black, fontWeight = FontWeight.Bold)
                     }
                     OutlinedButton(
                         onClick = onExportLogs,
                         modifier = Modifier.fillMaxWidth(),
                         border = BorderStroke(1.dp, NeonGiftgruen)
                     ) {
-                        Text("Logs im verschlüsselten Vault sichern", color = NeonGiftgruen)
+                        Text(stringResource(R.string.btn_export_vault_logs), color = NeonGiftgruen)
                     }
                     Button(
                         onClick = onPanicWipe,
@@ -875,7 +875,7 @@ fun StatusPage(
                     ) {
                         Icon(Icons.Default.Warning, contentDescription = null, tint = Color.Black)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("PANIC WIPE & NOTRUF (112)", color = Color.Black, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.btn_panic_wipe), color = Color.Black, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -883,7 +883,7 @@ fun StatusPage(
         item {
             Spacer(modifier = Modifier.height(24.dp))
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text("Hutter's IT-Solutions", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                Text(stringResource(R.string.company_footer), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
             }
         }
     }
@@ -900,8 +900,8 @@ fun ProtectionModulesPage(
     val context = LocalContext.current
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
-            Text("Schutz-Module", style = MaterialTheme.typography.titleLarge, color = Color.White)
-            Text("Echtzeit-Wächter für Anrufe, SMS und E-Mails.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text(stringResource(R.string.protection_modules_title), style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text(stringResource(R.string.protection_modules_subtitle), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
             Card(
@@ -909,27 +909,27 @@ fun ProtectionModulesPage(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("Kommunikations-Filter", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text(stringResource(R.string.comm_filter_title), style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("Anruf-Schutz", style = MaterialTheme.typography.bodyLarge, color = Color.White)
-                            Text("Null-Ring Spam-Abweisung", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                            Text(stringResource(R.string.call_prot_title), style = MaterialTheme.typography.bodyLarge, color = Color.White)
+                            Text(stringResource(R.string.call_prot_desc), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                         }
                         Switch(checked = callProtection, onCheckedChange = onCallChange)
                     }
                     HorizontalDivider(color = Color(0xFF112211))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("SMS-Phishing-Filter", style = MaterialTheme.typography.bodyLarge, color = Color.White)
-                            Text("Standard-SMS-App Engine", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                            Text(stringResource(R.string.sms_prot_title), style = MaterialTheme.typography.bodyLarge, color = Color.White)
+                            Text(stringResource(R.string.sms_prot_desc), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                         }
                         Switch(checked = smsProtection, onCheckedChange = onSmsChange)
                     }
                     HorizontalDivider(color = Color(0xFF112211))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("E-Mail-Benachrichtigungs-Scan", style = MaterialTheme.typography.bodyLarge, color = Color.White)
-                            Text("Lokaler Notification Listener", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                            Text(stringResource(R.string.email_prot_title), style = MaterialTheme.typography.bodyLarge, color = Color.White)
+                            Text(stringResource(R.string.email_prot_desc), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                         }
                         Switch(
                             checked = emailProtection,
@@ -941,7 +941,7 @@ fun ProtectionModulesPage(
                                             val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
                                             context.startActivity(intent)
                                         } catch (e: Exception) {
-                                            Toast.makeText(context, "Bitte aktiviere den Notification Listener manuell.", Toast.LENGTH_LONG).show()
+                                            Toast.makeText(context, context.getString(R.string.toast_enable_listener_manual), Toast.LENGTH_LONG).show()
                                         }
                                     }
                                 } else {
@@ -963,11 +963,15 @@ fun ProtectionModulesPage(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Verschlüsselter Offline-Vault", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text(stringResource(R.string.offline_vault_title), style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text("AES-256 geschützter Speicher mit Biometrie-Hardware-Schutz.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    Text(stringResource(R.string.offline_vault_desc), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(if (vaultUnlocked) "Status: Entsperrt (Biometrisch)" else "Status: Gesperrt (Tippen zum Entsperren)", color = if (vaultUnlocked) NeonGiftgruen else Color(0xFFFF3333), fontWeight = FontWeight.Bold)
+                    Text(
+                        if (vaultUnlocked) stringResource(R.string.vault_status_unlocked) else stringResource(R.string.vault_status_locked),
+                        color = if (vaultUnlocked) NeonGiftgruen else Color(0xFFFF3333),
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
@@ -979,8 +983,8 @@ fun BlacklistPage(blockedList: MutableList<String>, onAddBlocked: (String) -> Un
     var inputNumber by remember { mutableStateOf("") }
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
-            Text("Sperrliste", style = MaterialTheme.typography.titleLarge, color = Color.White)
-            Text("Persistente Offline-Blockaden.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text(stringResource(R.string.blacklist_page_title), style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text(stringResource(R.string.blacklist_page_subtitle), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
             Card(
@@ -988,12 +992,12 @@ fun BlacklistPage(blockedList: MutableList<String>, onAddBlocked: (String) -> Un
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Nummer / Muster hinzufügen", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text(stringResource(R.string.blacklist_add_title), style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         OutlinedTextField(
                             value = inputNumber,
                             onValueChange = { inputNumber = it },
-                            label = { Text("Rufnummer", color = Color.Gray) },
+                            label = { Text(stringResource(R.string.label_phone_number), color = Color.Gray) },
                             modifier = Modifier.weight(1f)
                         )
                         Button(
@@ -1006,7 +1010,7 @@ fun BlacklistPage(blockedList: MutableList<String>, onAddBlocked: (String) -> Un
                 }
             }
         }
-        item { Text("Gesperrte Einträge (${blockedList.size})", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen) }
+        item { Text(stringResource(R.string.blacklist_items_count, blockedList.size), style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen) }
         items(blockedList) { item ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -1014,7 +1018,7 @@ fun BlacklistPage(blockedList: MutableList<String>, onAddBlocked: (String) -> Un
             ) {
                 Row(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text(item, style = MaterialTheme.typography.bodyLarge, color = Color.White)
-                    TextButton(onClick = { onRemoveBlocked(item) }) { Text("Freigeben", color = Color(0xFFFF3333)) }
+                    TextButton(onClick = { onRemoveBlocked(item) }) { Text(stringResource(R.string.btn_release), color = Color(0xFFFF3333)) }
                 }
             }
         }
@@ -1027,8 +1031,8 @@ fun ClipboardProtectionPage(autoClearEnabled: Boolean, onAutoClearChange: (Boole
     val clipboardManager = LocalClipboardManager.current
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
-            Text("Zwischenablage", style = MaterialTheme.typography.titleLarge, color = Color.White)
-            Text("Schützt sensible Daten vor Spyware.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text(stringResource(R.string.clipboard_page_title), style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text(stringResource(R.string.clipboard_page_subtitle), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
             Card(
@@ -1036,11 +1040,11 @@ fun ClipboardProtectionPage(autoClearEnabled: Boolean, onAutoClearChange: (Boole
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("Clipboard-Sicherheit", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text(stringResource(R.string.clipboard_security_title), style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("Automatisches Leeren", style = MaterialTheme.typography.bodyLarge, color = Color.White)
-                            Text("Säubert den Puffer bei Inaktivität", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                            Text(stringResource(R.string.clipboard_autoclear_title), style = MaterialTheme.typography.bodyLarge, color = Color.White)
+                            Text(stringResource(R.string.clipboard_autoclear_desc), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                         }
                         Switch(checked = autoClearEnabled, onCheckedChange = onAutoClearChange)
                     }
@@ -1048,12 +1052,12 @@ fun ClipboardProtectionPage(autoClearEnabled: Boolean, onAutoClearChange: (Boole
                     Button(
                         onClick = {
                             clipboardManager.setText(AnnotatedString(""))
-                            Toast.makeText(context, "Zwischenablage geleert!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.toast_clipboard_cleared), Toast.LENGTH_SHORT).show()
                         },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
                     ) {
-                        Text("Jetzt leeren", color = Color.Black, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.btn_clear_now), color = Color.Black, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -1066,8 +1070,8 @@ fun PermissionsAuditPage() {
     val context = LocalContext.current
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
-            Text("Berechtigungen & E-Mail-Listener", style = MaterialTheme.typography.titleLarge, color = Color.White)
-            Text("Verwalte die System-Schnittstellen für E-Mail- und SMS-Schutz.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text(stringResource(R.string.permissions_page_title), style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text(stringResource(R.string.permissions_page_subtitle), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
             Card(
@@ -1075,8 +1079,8 @@ fun PermissionsAuditPage() {
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("E-Mail Notification Listener", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                    Text("Ermöglicht das lokale Scannen eingehender E-Mail-Benachrichtigungen (Gmail, Outlook etc.) ohne Cloud.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    Text(stringResource(R.string.email_listener_card_title), style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text(stringResource(R.string.email_listener_card_desc), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
                         onClick = {
@@ -1085,25 +1089,25 @@ fun PermissionsAuditPage() {
                                     val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
                                     context.startActivity(intent)
                                 } catch (e: Exception) {
-                                    Toast.makeText(context, "Fehler beim Öffnen der Einstellungen", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.toast_settings_error), Toast.LENGTH_SHORT).show()
                                 }
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
                     ) {
-                        Text("Benachrichtigungs-Zugriff erlauben", color = Color.Black, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.btn_allow_notification_access), color = Color.Black, fontWeight = FontWeight.Bold)
                     }
                 }
             }
         }
         item {
             Button(
-                onClick = { Toast.makeText(context, "System-Audit: Alle Wächter bereit.", Toast.LENGTH_SHORT).show() },
+                onClick = { Toast.makeText(context, context.getString(R.string.toast_audit_ready), Toast.LENGTH_SHORT).show() },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
             ) {
-                Text("Vollständigen Audit-Scan starten", color = Color.Black, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.btn_start_audit_scan), color = Color.Black, fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -1119,7 +1123,7 @@ fun SwarmMeshPage() {
     var inputMessage by remember { mutableStateOf("") }
     var isEphemeral by remember { mutableStateOf(false) }
     var statusMessage by remember { mutableStateOf("") }
-    var scanStatusText by remember { mutableStateOf("Bereit") }
+    var scanStatusText by remember { mutableStateOf(context.getString(R.string.status_ready)) }
     var discoveredDevicesCount by remember { mutableStateOf(0) }
 
     val meshManager = remember {
@@ -1127,11 +1131,11 @@ fun SwarmMeshPage() {
             context = context,
             onDeviceDiscovered = { endpointId ->
                 discoveredDevicesCount += 1
-                scanStatusText = "Verbunden: $endpointId"
+                scanStatusText = context.getString(R.string.mesh_connected, endpointId)
             },
             onDeviceLost = { endpointId ->
                 discoveredDevicesCount = (discoveredDevicesCount - 1).coerceAtLeast(0)
-                scanStatusText = "Getrennt: $endpointId"
+                scanStatusText = context.getString(R.string.mesh_disconnected, endpointId)
             },
             onMessageReceived = { _, msg ->
                 GlobalMeshEngine.broadcastToSwarm(
@@ -1155,9 +1159,9 @@ fun SwarmMeshPage() {
     ) { permissions ->
         if (permissions.values.all { it }) {
             meshManager.startMeshNode()
-            Toast.makeText(context, "P2P-Schwarm gestartet", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.toast_p2p_started), Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(context, "Bluetooth-Berechtigungen fehlen", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, context.getString(R.string.toast_bluetooth_missing), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -1166,8 +1170,8 @@ fun SwarmMeshPage() {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            Text("P2P-Schwarm & Live-Feed", style = MaterialTheme.typography.titleLarge, color = Color.White)
-            Text("Dezentraler Offline-Austausch.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text(stringResource(R.string.mesh_page_title), style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text(stringResource(R.string.mesh_page_subtitle), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
             Card(
@@ -1175,11 +1179,11 @@ fun SwarmMeshPage() {
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Nachricht broadcasten", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text(stringResource(R.string.mesh_broadcast_title), style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     OutlinedTextField(
                         value = inputMessage,
                         onValueChange = { inputMessage = it },
-                        label = { Text("Nachricht...", color = Color.Gray) },
+                        label = { Text(stringResource(R.string.label_message_placeholder), color = Color.Gray) },
                         modifier = Modifier.fillMaxWidth()
                     )
                     Row(
@@ -1189,7 +1193,7 @@ fun SwarmMeshPage() {
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Checkbox(checked = isEphemeral, onCheckedChange = { isEphemeral = it })
-                            Text("Ephemer", color = Color.LightGray, fontSize = 12.sp)
+                            Text(stringResource(R.string.checkbox_ephemeral), color = Color.LightGray, fontSize = 12.sp)
                         }
                         Button(
                             onClick = {
@@ -1202,7 +1206,7 @@ fun SwarmMeshPage() {
                                         meshManager = meshManager,
                                         onBlocked = { reason -> statusMessage = reason },
                                         onSuccess = { _ ->
-                                            statusMessage = "Gesendet!"
+                                            statusMessage = context.getString(R.string.status_sent)
                                             inputMessage = ""
                                         }
                                     )
@@ -1210,13 +1214,13 @@ fun SwarmMeshPage() {
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
                         ) {
-                            Text("Broadcast", color = Color.Black, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.btn_broadcast), color = Color.Black, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
             }
         }
-        item { Text("Schwarm-Pakete (${posts.size})", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen) }
+        item { Text(stringResource(R.string.mesh_packets_count, posts.size), style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen) }
         items(posts) { post ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -1235,8 +1239,8 @@ fun SwarmMeshPage() {
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Bluetooth Mesh Hardware", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                    Text("Status: $scanStatusText", color = Color.White)
+                    Text(stringResource(R.string.mesh_hardware_title), style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text(stringResource(R.string.mesh_status_format, scanStatusText), color = Color.White)
                     Button(
                         onClick = {
                             bluetoothPermissionLauncher.launch(
@@ -1251,7 +1255,7 @@ fun SwarmMeshPage() {
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
                     ) {
-                        Text("P2P-Schwarm-Node starten", color = Color.Black, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.btn_start_mesh_node), color = Color.Black, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -1265,8 +1269,8 @@ fun PrivacyAndLegalContent() {
 
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
-            Text("Datenschutz & Impressum", style = MaterialTheme.typography.titleLarge, color = Color.White)
-            Text("100% Local-First Prinzip.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text(stringResource(R.string.legal_page_title), style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text(stringResource(R.string.legal_page_subtitle), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
             Card(
@@ -1274,13 +1278,13 @@ fun PrivacyAndLegalContent() {
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("Datenschutz", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                    Text("Keine Cloud, keine Server, keine Telemetrie. Alle Daten verbleiben ausschließlich verschlüsselt auf deinem Endgerät.", color = Color.White)
+                    Text(stringResource(R.string.privacy_title), style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text(stringResource(R.string.privacy_text), color = Color.White)
                    
                     Spacer(modifier = Modifier.height(4.dp))
                    
                     Text(
-                        text = "🔗 Offizielle Datenschutzrichtlinie (Online)",
+                        text = stringResource(R.string.privacy_link_text),
                         color = NeonGiftgruen,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.clickable {
@@ -1290,19 +1294,19 @@ fun PrivacyAndLegalContent() {
 
                     HorizontalDivider(color = Color(0xFF112211), modifier = Modifier.padding(vertical = 8.dp))
 
-                    Text("Impressum", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                    Text("Angaben gemäß § 5 TMG / ECG", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                    Text("Name / Entwickler: Benedikt Wolfgang Hütter", color = Color.White)
-                    Text("Anschrift: Schulgasse 4/15, 2700 Wiener Neustadt, Österreich", color = Color.White)
-                    Text("E-Mail: support@juaris.com", color = Color.White)
+                    Text(stringResource(R.string.imprint_title), style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text(stringResource(R.string.imprint_subtitle), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    Text(stringResource(R.string.imprint_name), color = Color.White)
+                    Text(stringResource(R.string.imprint_address), color = Color.White)
+                    Text(stringResource(R.string.imprint_email), color = Color.White)
                    
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text("Verantwortlich für den Inhalt:", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                    Text("Benedikt Wolfgang Hütter", color = Color.White)
+                    Text(stringResource(R.string.imprint_responsible), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    Text(stringResource(R.string.imprint_name_val), color = Color.White)
 
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text("Design:", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                    Text("Benedikt Wolfgang Hütter", color = Color.White)
+                    Text(stringResource(R.string.imprint_design), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    Text(stringResource(R.string.imprint_name_val), color = Color.White)
                 }
             }
         }
