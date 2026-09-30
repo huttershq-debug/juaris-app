@@ -31,6 +31,7 @@
     <string name="vpn_disclosure_message">Juaris 使用本地 VpnService 直接在您的设备上检测网络钓鱼和恶意软件。\n\n所有数据保持 100% 本地化。绝对不会向外部服务器或云端发送任何数据。</string>
     <string name="btn_understood">明白了并激活</string>
     <string name="btn_cancel">取消</string>
+    
     <!-- P2P Swarm & Mesh Strings -->
     <string name="p2p_swarm_title">Juaris 网状群蜂 (P2P)</string>
     <string name="p2p_swarm_subtitle">安全、无互联网的去中心化通信</string>
@@ -42,7 +43,6 @@
     <string name="mesh_hardware_title">P2P 硬件与连接</string>
     <string name="mesh_status_format">状态：%s</string>
     <string name="btn_start_mesh_node">启动 P2P 网状节点</string>
-    
     <string name="status_ready">准备连接群蜂</string>
     <string name="status_mesh_active_search">正在搜索群蜂节点...</string>
     <string name="toast_mesh_device_discovered">发现新的群蜂设备！</string>
@@ -57,7 +57,8 @@
     <string name="logs_page_subtitle">拦截的所有威胁与事件概览</string>
     <string name="logs_empty_message">暂无记录的事件。您的系统非常安全。</string>
     <string name="logs_module_prefix">模块：%s</string>
-     <!-- Privacy & Imprint Strings -->
+
+    <!-- Privacy & Imprint Strings -->
     <string name="privacy_text">隐私政策</string>
     <string name="privacy_link">阅读隐私政策</string>
     <string name="imprint_title">版权声明 / 法律说明</string>
@@ -72,8 +73,7 @@
     <string name="imprint_name_y">免责声明</string>
     <string name="company_footer">Juaris Security - 保留所有权利</string>
 
-    <!-- Air Gesture Strings -->
-    <string name="air_gesture_title">空中手势控制</string>
+    <!-- Air Gesture Additional Strings -->
     <string name="air_gesture_subtitle">通过手部动作控制您的设备</string>
     <string name="air_gesture_desc">使用非接触式手势进行导航</string>
     <string name="air_gesture_status">传感器就绪</string>
