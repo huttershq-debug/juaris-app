@@ -29,6 +29,7 @@ Für die Abwicklung des monatlichen Abonnements (€ 1,99/Monat) wird der offizi
 Da wir keine Daten von Ihnen besitzen oder speichern, können wir keine Auskunft, Löschung oder Sperrung von Daten vornehmen. Alle Daten löschen Sie ganz einfach physisch selbst, indem Sie die App deinstallieren oder im Dashboard den Panic-Wipe auslösen.
 
 Verantwortlicher Entwickler:
+
 Benedikt Wolfgang Hütter
 Schulgasse 4/15, 2700 Wiener Neustadt, Österreich
 E-Mail: support@juaris.com
