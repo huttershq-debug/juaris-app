@@ -57,4 +57,25 @@
     <string name="logs_page_subtitle">تمام روکی گئی دھمکیوں اور واقعات کا خلاصہ</string>
     <string name="logs_empty_message">ابھی تک کوئی واقعہ درج نہیں ہوا۔ آپ کا سسٹم محفوظ ہے۔</string>
     <string name="logs_module_prefix">ماڈیول: %s</string>
+     <!-- Privacy & Imprint Strings -->
+    <string name="privacy_text">رازداری کی پالیسی</string>
+    <string name="privacy_link">رازداری کی پالیسی پڑھیں</string>
+    <string name="imprint_title">امپرنٹ (قانونی تفصیلات)</string>
+    <string name="imprint_subtitle">قانونی معلومات</string>
+    <string name="imprint_name">کمپنی کا نام</string>
+    <string name="imprint_address">پتہ</string>
+    <string name="imprint_email">رابطہ ای میل</string>
+    <string name="imprint_responsible">ذمہ دار شخص</string>
+    <string name="imprint_name_v">مجاز نمائندہ</string>
+    <string name="imprint_design">ڈیزائن اور نفاذ</string>
+    <string name="imprint_name_va">اضافی انکشافات</string>
+    <string name="imprint_name_y">دستبرداری (Disclaimer)</string>
+    <string name="company_footer">جوارِس سیکیورٹی - تمام حقوق محفوظ ہیں</string>
+
+    <!-- Air Gesture Strings -->
+    <string name="air_gesture_title">ایئر جیسچر کنٹرول</string>
+    <string name="air_gesture_subtitle">اپنے ہاتھ کے اشاروں سے اپنے آلے کو کنٹرول کریں</string>
+    <string name="air_gesture_desc">نیویگیٹ کرنے کے لیے بغیر چھوئے اشارے استعمال کریں</string>
+    <string name="air_gesture_status">سینسر تیار ہے</string>
+    <string name="air_gesture_action">عمل شروع کریں</string>
 </resources>
