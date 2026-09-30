@@ -1,9 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Das Haupt-Theme für die Juaris Security Suite -->
+    <!-- Das Haupt-Theme für die Juaris Security Suite - Perfekt abgestimmt auf das Hacker-Green-Design -->
     <style name="Theme.Juaris" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Primäre und sekundäre Farben für das Design -->
-        <item name="colorPrimary">@android:color/holo_blue_dark</item>
-        <item name="colorSecondary">@android:color/holo_green_dark</item>
-        <item name="android:windowBackground">@android:color/white</item>
+        <!-- Akzentfarben (Zuweisung deiner NeonGiftgruen-Farbe als Hex-Wert #00E676) -->
+        <item name="colorPrimary">#00E676</item>
+        <item name="colorSecondary">#00E676</item>
+        
+        <!-- KORREKTUR: Verhindert den grellen weißen Startblitz auf OLED-Displays! -->
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:statusBarColor">@android:color/black</item>
+        <item name="android:navigationBarColor">@android:color/black</item>
     </style>
 </resources>
