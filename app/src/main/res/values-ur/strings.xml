@@ -79,7 +79,7 @@
     <string name="air_gesture_status">سینسر تیار ہے</string>
     <string name="air_gesture_action">عمل شروع کریں</string>
     
-    <!-- نئے UI استرنتز -->
+    <!-- اضافی UI اسٹرنگز -->
     <string name="mesh_page_title">میش نیٹ ورک</string>
     <string name="mesh_page_subtitle">غیرمرکزی مواصلات</string>
     <string name="legal_page_title">قانونی معلومات</string>
@@ -91,8 +91,6 @@
     <string name="air_gesture_page_subtitle">بغیر چھوئے کنٹرول</string>
     <string name="air_gesture_toggle_label">ایئر جেসچرز فعال کریں</string>
     <string name="air_gesture_store_notification">جیسچر کی ترتیبات محفوظ کریں</string>
-    
-    <!-- کلپ بورڈ، اجازتیں، آڈٹ اور میش اسٹرنگز -->
     <string name="clipboard_page_subtitle">کلپ بورڈ کا تحفظ اور سرگزشت</string>
     <string name="clipboard_security_status">کلپ بورڈ مانیٹرنگ فعال ہے</string>
     <string name="clipboard_autoclear_toggle">کلپ بورڈ خودکار طور پر صاف کریں</string>
@@ -109,5 +107,15 @@
     <string name="btn_start_audit_scan">آڈٹ اسکین شروع کریں</string>
     <string name="mesh_connected">میش جڑ گیا: %s</string>
     <string name="mesh_disconnected">میش منقطع ہو گیا: %s</string>
+    
+    <!-- Vault & Blacklist Additional Strings -->
+    <string name="vault_status_label">والٹ کی حیثیت</string>
+    <string name="blacklist_page_title">بلیک لسٹ</string>
+    <string name="blacklist_page_subtitle">مسدود نمبروں اور رابطوں کا انتظام کریں</string>
+    <string name="blacklist_add_title">بلیک لسٹ میں شامل کریں</string>
+    <string name="label_phone_number">فون نمبر</string>
+    <string name="blacklist_items_title">مسدود اندراجات</string>
+    <string name="btn_release">آزاد کریں</string>
+    <string name="clipboard_page_title">کلپ بورڈ</string>
 </resources>
 
