@@ -208,6 +208,5 @@
     <string name="protection_modules_title">保护模块</string>
     <string name="protection_modules_subtitle">实时活动安全过滤器</string>
     <string name="toast_enable_listener_manual">请在设置中启用通知监听器</string>
-    <string name="status_ready">就绪</string>
 </resources>
 
