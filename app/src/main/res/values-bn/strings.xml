@@ -78,6 +78,18 @@
     <string name="air_gesture_desc">নেভিগেট করতে কন্ট্যাক্টলেস ইশারা ব্যবহার করুন</string>
     <string name="air_gesture_status">সেন্সর প্রস্তুত</string>
     <string name="air_gesture_action">অ্যাকশন ট্রিগার করুন</string>
+     <!-- নতুন UI স্ট্রিং -->
+    <string name="mesh_page_title">মেশ নেটওয়ার্ক</string>
+    <string name="mesh_page_subtitle">বিকেন্দ্রীকৃত যোগাযোগ</string>
+    <string name="legal_page_title">আইনি তথ্য</string>
+    <string name="legal_page_subtitle">গুরুত্বপূর্ণ নোটিশ</string>
+    <string name="privacy_title">গোপনীয়তা নীতি</string>
+    <string name="privacy_link_text">সম্পূর্ণ নীতি পড়ুন</string>
+    <string name="imprint_name_val">কোম্পানির বিবরণ</string>
+    <string name="air_gesture_page_title">এয়ার গেসচার</string>
+    <string name="air_gesture_page_subtitle">কন্ট্যাক্টলেস নিয়ন্ত্রণ</string>
+    <string name="air_gesture_toggle_label">এয়ার গেসচার সক্ষম করুন</string>
+    <string name="air_gesture_store_notification">গেসচার সেটিংস সংরক্ষণ করুন</string>
 </resources>
 
 
