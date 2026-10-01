@@ -90,6 +90,23 @@
     <string name="air_gesture_page_subtitle">Control sin contacto</string>
     <string name="air_gesture_toggle_label">Activar gestos en el aire</string>
     <string name="air_gesture_store_notification">Guardar configuración de gestos</string>
+    <!-- Cadenas de portapapeles, permisos, auditoría y malla -->
+    <string name="clipboard_page_subtitle">Protección e historial del portapapeles</string>
+    <string name="clipboard_security_status">Monitoreo del portapapeles activo</string>
+    <string name="clipboard_autoclear_toggle">Borrar portapapeles automáticamente</string>
+    <string name="clipboard_autoclear_desc">Borrar datos sensibles automáticamente</string>
+    <string name="toast_clipboard_cleared">Portapapeles borrado con éxito</string>
+    <string name="btn_clear_now">Borrar ahora</string>
+    <string name="permissions_page_title">Permisos de aplicación</string>
+    <string name="permissions_page_subtitle">Administrar derechos de acceso de seguridad</string>
+    <string name="email_listener_card_title">Escudo anti-phishing de correo</string>
+    <string name="email_listener_card_desc">Analizando el contenido del correo entrante</string>
+    <string name="toast_settings_error">Error al guardar la configuración</string>
+    <string name="btn_allow_notification">Permitir notificación</string>
+    <string name="toast_audit_ready">Auditoría de seguridad lista</string>
+    <string name="btn_start_audit_scan">Iniciar escaneo de auditoría</string>
+    <string name="mesh_connected">Malla conectada</string>
+    <string name="mesh_disconnected">Malla desconectada</string>
 </resources>
 
 
