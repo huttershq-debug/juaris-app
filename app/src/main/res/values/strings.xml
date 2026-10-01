@@ -31,7 +31,7 @@
     <string name="vpn_disclosure_message">Juaris uses a local VpnService to detect phishing and malware directly on your device.\n\nAll data remains 100% local. Nothing is sent to external servers or clouds.</string>
     <string name="btn_understood">Understood &amp; Activate</string>
     <string name="btn_cancel">Cancel</string>
-    
+   
     <!-- P2P Swarm & Mesh Strings -->
     <string name="p2p_swarm_title">Juaris Swarm Mesh (P2P)</string>
     <string name="p2p_swarm_subtitle">Secure, decentralized communication without internet</string>
@@ -78,7 +78,8 @@
     <string name="air_gesture_desc">Use contactless gestures to navigate</string>
     <string name="air_gesture_status">Sensor Ready</string>
     <string name="air_gesture_action">Trigger Action</string>
-     <!-- Neue UI-Strings -->
+    
+    <!-- Neue UI-Strings -->
     <string name="mesh_page_title">Mesh Network</string>
     <string name="mesh_page_subtitle">Decentralized communication</string>
     <string name="legal_page_title">Legal Information</string>
@@ -90,7 +91,8 @@
     <string name="air_gesture_page_subtitle">Contactless control</string>
     <string name="air_gesture_toggle_label">Enable Air Gestures</string>
     <string name="air_gesture_store_notification">Store Gesture Settings</string>
-    <!-- Clipboard, Permissions, Audit & Mesh Strings -->
+    
+    <!-- Zwischenablage, Berechtigungen, Audit & Mesh Strings -->
     <string name="clipboard_page_subtitle">Clipboard protection and history</string>
     <string name="clipboard_security_status">Clipboard monitoring active</string>
     <string name="clipboard_autoclear_toggle">Auto-clear clipboard</string>
@@ -105,7 +107,8 @@
     <string name="btn_allow_notification">Allow Notification</string>
     <string name="toast_audit_ready">Security audit ready</string>
     <string name="btn_start_audit_scan">Start Audit Scan</string>
-    <string name="mesh_connected">Mesh Connected</string>
-    <string name="mesh_disconnected">Mesh Disconnected</string>
+    <string name="mesh_connected">Mesh Connected: %s</string>
+    <string name="mesh_disconnected">Mesh Disconnected: %s</string>
 </resources>
+
 
