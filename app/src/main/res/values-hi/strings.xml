@@ -31,7 +31,7 @@
     <string name="vpn_disclosure_message">Juaris सीधे आपके डिवाइस पर फ़िशिंग और मैलवेयर का पता लगाने के लिए एक स्थानीय VpnService का उपयोग करता है।\n\nसभी डेटा 100% स्थानीय रहता है। बाहरी सर्वर या क्लाउड पर कुछ भी नहीं भेजा जाता है।</string>
     <string name="btn_understood">समझ गया और सक्रिय करें</string>
     <string name="btn_cancel">रद्द करें</string>
-    
+   
     <!-- P2P Swarm & Mesh Strings -->
     <string name="p2p_swarm_title">जुआरिस स्वार्म मेश (P2P)</string>
     <string name="p2p_swarm_subtitle">इंटरनेट के बिना सुरक्षित, विकेंद्रीकृत संचार</string>
@@ -78,6 +78,7 @@
     <string name="air_gesture_desc">नेविगेट करने के लिए संपर्क रहित इशारों का उपयोग करें</string>
     <string name="air_gesture_status">सेंसर तैयार है</string>
     <string name="air_gesture_action">एक्शन ट्रिगर करें</string>
+    
     <!-- नए UI स्ट्रिंग्स -->
     <string name="mesh_page_title">मेश नेटवर्क</string>
     <string name="mesh_page_subtitle">विकेंद्रीकृत संचार</string>
@@ -90,6 +91,7 @@
     <string name="air_gesture_page_subtitle">संपर्क रहित नियंत्रण</string>
     <string name="air_gesture_toggle_label">एयर जेस्चर सक्षम करें</string>
     <string name="air_gesture_store_notification">जेस्चर सेटिंग्स सहेजें</string>
+    
     <!-- क्लिपबोर्ड, अनुमति, ऑडिट और मेश स्ट्रिंग्स -->
     <string name="clipboard_page_subtitle">क्लिपबोर्ड सुरक्षा और इतिहास</string>
     <string name="clipboard_security_status">क्लिपबोर्ड मॉनिटरिंग सक्रिय</string>
@@ -105,7 +107,8 @@
     <string name="btn_allow_notification">अधिसूचना की अनुमति दें</string>
     <string name="toast_audit_ready">सुरक्षा ऑडिट तैयार है</string>
     <string name="btn_start_audit_scan">ऑडिट स्कैन शुरू करें</string>
-    <string name="mesh_connected">मेश कनेक्टेड</string>
-    <string name="mesh_disconnected">मेश डिस्कनेक्टेड</string>
+    <string name="mesh_connected">मेश कनेक्टेड: %s</string>
+    <string name="mesh_disconnected">मेश डिस्कनेक्टेड: %s</string>
 </resources>
+
 
