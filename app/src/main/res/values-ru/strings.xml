@@ -188,4 +188,24 @@
     <string name="toast_permission_denied">Разрешение на камеру отклонено</string>
     <string name="status_paused">Приостановлено</string>
     <string name="btn_allow_notification_access">Разрешить доступ к уведомлениям</string>
+    <string name="alert_financial_title">Финансовое предупреждение</string>
+    <string name="alert_service_title">Предупреждение сервиса</string>
+    <string name="alert_anniversary_title">Напоминание о годовщине</string>
+    <string name="alert_birthday_title">Напоминание о дне рождения</string>
+    <string name="alert_medical_title">Предупреждение о приеме у врача</string>
+    <string name="alert_travel_title">Предупреждение о безопасности поездки</string>
+    <string name="alert_general_title">Общее предупреждение безопасности</string>
+    <string name="emergency_reason_default">Ручной аварийный запуск</string>
+    <string name="emergency_channel_name">Экстренный канал</string>
+    <string name="emergency_notification_title">Режим ЧП активен</string>
+    <string name="emergency_notification_text">Системные настройки и хранилище защищаются.</string>
+    <string name="emergency_screen_heading">ЭКСТРЕННЫЙ ПРОТОКОЛ</string>
+    <string name="emergency_screen_countdown_desc">Безопасная очистка выполняется по обратном отсчете...</string>
+    <string name="btn_emergency_call_now">Позвонить в службу спасения</string>
+    <string name="btn_emergency_cancel">Отменить чрезвычайную ситуацию</string>
+    <string name="disclosure_dialog_message">Juaris требует доступ к уведомлениям/специальным возможностям для локальной защиты вашего устройства.</string>
+    <string name="toast_vault_locked">Хранилище успешно заблокировано</string>
+    <string name="protection_modules_title">Модули защиты</string>
+    <string name="protection_modules_subtitle">Активные фильтры безопасности в реальном времени</string>
+    <string name="toast_enable_listener_manual">Пожалуйста, включите службу уведомлений в настройках</string>
 </resources>
