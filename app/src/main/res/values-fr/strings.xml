@@ -79,7 +79,7 @@
     <string name="air_gesture_status">"Capteur prêt"</string>
     <string name="air_gesture_action">"Déclencher l'action"</string>
     
-    <!-- Nouveaux strings UI -->
+    <!-- UI additionnels -->
     <string name="mesh_page_title">"Réseau mesh"</string>
     <string name="mesh_page_subtitle">"Communication décentralisée"</string>
     <string name="legal_page_title">"Informations légales"</string>
@@ -91,8 +91,6 @@
     <string name="air_gesture_page_subtitle">"Contrôle sans contact"</string>
     <string name="air_gesture_toggle_label">"Activer les gestes aériens"</string>
     <string name="air_gesture_store_notification">"Enregistrer les paramètres de gestes"</string>
-    
-    <!-- Chaînes presse-papiers, autorisations, audit et mesh -->
     <string name="clipboard_page_subtitle">"Protection et historique du presse-papiers"</string>
     <string name="clipboard_security_status">"Surveillance du presse-papiers active"</string>
     <string name="clipboard_autoclear_toggle">"Vider automatiquement le presse-papiers"</string>
@@ -109,5 +107,15 @@
     <string name="btn_start_audit_scan">"Démarrer l'analyse d'audit"</string>
     <string name="mesh_connected">"Mesh connecté : %s"</string>
     <string name="mesh_disconnected">"Mesh déconnecté : %s"</string>
+    
+    <!-- Vault & Blacklist Additional Strings -->
+    <string name="vault_status_label">"Statut du coffre"</string>
+    <string name="blacklist_page_title">"Liste noire"</string>
+    <string name="blacklist_page_subtitle">"Gérer les numéros et contacts bloqués"</string>
+    <string name="blacklist_add_title">"Ajouter à la liste noire"</string>
+    <string name="label_phone_number">"Numéro de téléphone"</string>
+    <string name="blacklist_items_title">"Entrées bloquées"</string>
+    <string name="btn_release">"Libérer"</string>
+    <string name="clipboard_page_title">"Presse-papiers"</string>
 </resources>
 
