@@ -78,6 +78,18 @@
     <string name="air_gesture_desc">"Utilisez des gestes sans contact pour naviguer"</string>
     <string name="air_gesture_status">"Capteur prêt"</string>
     <string name="air_gesture_action">"Déclencher l'action"</string>
+     <!-- Nouveaux strings UI -->
+    <string name="mesh_page_title">"Réseau mesh"</string>
+    <string name="mesh_page_subtitle">"Communication décentralisée"</string>
+    <string name="legal_page_title">"Informations légales"</string>
+    <string name="legal_page_subtitle">"Avis importants"</string>
+    <string name="privacy_title">"Politique de confidentialité"</string>
+    <string name="privacy_link_text">"Lire la politique complète"</string>
+    <string name="imprint_name_val">"Détails de l'entreprise"</string>
+    <string name="air_gesture_page_title">"Gestes aériens"</string>
+    <string name="air_gesture_page_subtitle">"Contrôle sans contact"</string>
+    <string name="air_gesture_toggle_label">"Activer les gestes aériens"</string>
+    <string name="air_gesture_store_notification">"Enregistrer les paramètres de gestes"</string>
 </resources>
 
 
