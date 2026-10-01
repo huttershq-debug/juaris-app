@@ -107,8 +107,6 @@
     <string name="btn_start_audit_scan">ऑडिट स्कैन शुरू करें</string>
     <string name="mesh_connected">मेश कनेक्टेड: %s</string>
     <string name="mesh_disconnected">मेश डिस्कनेक्टेड: %s</string>
-    
-    <!-- Vault & Blacklist Additional Strings -->
     <string name="vault_status_label">वॉल्ट स्थिति</string>
     <string name="blacklist_page_title">ब्लैकलिस्ट</string>
     <string name="blacklist_page_subtitle">अवरोधित नंबरों और संपर्कों का प्रबंधन करें</string>
@@ -117,5 +115,78 @@
     <string name="blacklist_items_title">अवरोधित प्रविष्टियाँ</string>
     <string name="btn_release">मुक्त करें</string>
     <string name="clipboard_page_title">क्लिपबोर्ड</string>
+    
+    <!-- नए Lint स्ट्रिंग्स -->
+    <string name="comm_filter_title">संचार फ़िल्टर</string>
+    <string name="call_prot_title">कॉल सुरक्षा</string>
+    <string name="call_prot_desc">संदिग्ध कॉलों से सुरक्षा</string>
+    <string name="sms_prot_title">एसएमएस सुरक्षा</string>
+    <string name="sms_prot_desc">फ़िशिंग टेक्स्ट संदेशों से सुरक्षा</string>
+    <string name="email_prot_title">ईमेल सुरक्षा</string>
+    <string name="email_prot_desc">हानिकारक ईमेल से सुरक्षा</string>
+    <string name="toast_enable_listener">लिसनर सफलतापूर्वक सक्षम किया गया</string>
+    <string name="offline_vault_title">ऑफ़लाइन वॉल्ट</string>
+    <string name="offline_vault_desc">संवेदनशील डेटा के लिए सुरक्षित स्थानीय संग्रहण</string>
+    <string name="vault_status_unlocked">वॉल्ट अनलॉक किया गया</string>
+    <string name="vault_status_locked">वॉल्ट लॉक किया गया</string>
+    <string name="blacklist_items_count">अवरोधित आइटम (%d)</string>
+    <string name="clipboard_security_title">क्लिपबोर्ड सुरक्षा</string>
+    <string name="clipboard_autoclear_title">क्लिपबोर्ड स्वतः साफ़ करें</string>
+    <string name="air_gesture_store_notice">जेस्चर सेटिंग्स स्थानीय रूप से सहेजी जाती हैं</string>
+    <string name="toast_sms_active">एसएमएस सुरक्षा सक्रिय</string>
+    <string name="toast_sms_rejected">एसएमएस भूमिका अस्वीकार कर दी गई</string>
+    <string name="toast_notification_granted">अधिसूचना अनुमति दी गई</string>
+    <string name="toast_notification_warning">सुरक्षा के लिए अधिसूचना अनुमति आवश्यक है</string>
+    <string name="toast_calendar_granted">कैलेंडर अनुमति दी गई</string>
+    <string name="toast_calendar_warning">स्वायत्त स्कैन के लिए कैलेंडर अनुमति आवश्यक है</string>
+    <string name="toast_vpn_granted">VPN अनुमति दी गई</string>
+    <string name="toast_vpn_rejected">VPN अनुमति अस्वीकार कर दी गई</string>
+    <string name="toast_enable_notification_manual">कृपया अधिसूचना लिसनर को मैन्युअल रूप से सक्षम करें</string>
+    <string name="emergency_reason_sensor">सेंसर द्वारा आपातकाल ट्रिगर किया गया</string>
+    <string name="emergency_reason_manual">मैनुअल पैनिक बटन ट्रिगर किया गया</string>
+    <string name="toast_debugger_detected">चेतावनी: डिबगर का पता चला!</string>
+    <string name="biometric_vault_title">वॉल्ट प्रमाणीकरण</string>
+    <string name="biometric_vault_subtitle">सुरक्षित वॉल्ट तक पहुँचने के लिए पहचान की पुष्टि करें</string>
+    <string name="toast_vault_success">वॉल्ट सफलतापूर्वक अनलॉक किया गया</string>
+    <string name="toast_biometric_error">बायोमेट्रिक त्रुटि: %s</string>
+    <string name="toast_vpn_started">Juaris VPN सेवा शुरू हो गई है</string>
+    <string name="disclosure_dialog_title">एक्सेसिबिलिटी और अधिसूचना सूचना</string>
+    <string name="disclosure_message">Juaris को आपके डिवाइस पर स्थानीय रूप से फ़िशिंग संदेशों को फ़िल्टर करने के लिए अधिसूचना एक्सेस की आवश्यकता है।</string>
+    <string name="toast_dialog_error">संवाद त्रुटि</string>
+    <string name="toast_vpn_dialog_error">VPN संवाद त्रुटि</string>
+    <string name="desc_hologram">होलोग्राम अवतार</string>
+    <string name="welcome_title">Juaris AI सुरक्षा</string>
+    <string name="welcome_subtitle">विकेंद्रीकृत मोबाइल सुरक्षा</string>
+    <string name="biometric_login_title">लॉगिन प्रमाणीकरण</string>
+    <string name="biometric_login_subtitle">Juaris कर्नेल में प्रवेश करने के लिए प्रमाणित करें</string>
+    <string name="toast_login_success">लॉगिन सफल</string>
+    <string name="kernel_title">Juaris कर्नेल</string>
+    <string name="kernel_subtitle">सुरक्षित एन्क्लेव सक्रिय</string>
+    <string name="btn_fingerprint_login">फिंगरप्रिंट लॉगिन</string>
+    <string name="btn_debug_bypass">डिबग बायपास</string>
+    <string name="toast_login_aborted">लॉगिन निरस्त: %s</string>
+    <string name="log_module_guardian">सुरक्षा संरक्षक</string>
+    <string name="log_desc_phishing_blocked">फ़िशिंग खतरा अवरुद्ध</string>
+    <string name="log_details_simulation">सिमुलेटेड हमला सफलतापूर्वक अवरुद्ध</string>
+    <string name="toast_threat_neutralized">खतरा बेअसर कर दिया गया!</string>
+    <string name="toast_logs_vault_secured">लॉग वॉल्ट में सुरक्षित रूप से एन्क्रिप्ट किए गए</string>
+    <string name="status_health_title">सिस्टम स्वास्थ्य स्थिति</string>
+    <string name="status_health_subtitle">रीयल-टाइम कर्नेल सुरक्षा अवलोकन</string>
+    <string name="status_aes_encrypted">AES-256 GCM एन्क्रिप्टेड</string>
+    <string name="status_filters_active">सभी सक्रिय फ़िल्टर चल रहे हैं</string>
+    <string name="card_blocked_caps">अवरोधित</string>
+    <string name="card_data_flow">डेटा प्रवाह</string>
+    <string name="card_local_only">100% स्थानीय</string>
+    <string name="section_actions">आपातकालीन और क्रियाएँ</string>
+    <string name="btn_simulate_phishing">फ़िशिंग हमले का अनुकरण करें</string>
+    <string name="btn_export_vault_logs">वॉल्ट लॉग निर्यात करें</string>
+    <string name="btn_panic_wipe">पैनिक वाइप (सारा डेटा मिटाएं)</string>
+    <string name="default_spam_label">ज्ञात स्पैम नंबर</string>
+    <string name="toast_number_blocked">नंबर ब्लैकलिस्ट में जोड़ा गया</string>
+    <string name="toast_number_released">नंबर ब्लैकलिस्ट से हटाया गया</string>
+    <string name="toast_camera_started">एयर जेस्चर कैमरा शुरू हो गया</string>
+    <string name="toast_permission_denied">कैमरा अनुमति अस्वीकार कर दी गई</string>
+    <string name="status_paused">रोक दिया गया</string>
+    <string name="btn_allow_notification_access">अधिसूचना एक्सेस की अनुमति दें</string>
 </resources>
 
