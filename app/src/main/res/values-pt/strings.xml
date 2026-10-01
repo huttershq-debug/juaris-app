@@ -90,5 +90,22 @@
     <string name="air_gesture_page_subtitle">Controle sem contato</string>
     <string name="air_gesture_toggle_label">Ativar gestos no ar</string>
     <string name="air_gesture_store_notification">Salvar configurações de gestos</string>
+    <!-- Strings de área de transferência, permissões, auditoria e mesh -->
+    <string name="clipboard_page_subtitle">Proteção e histórico da área de transferência</string>
+    <string name="clipboard_security_status">Monitoramento da área de transferência ativo</string>
+    <string name="clipboard_autoclear_toggle">Limpar automaticamente a área de transferência</string>
+    <string name="clipboard_autoclear_desc">Limpar dados sensíveis automaticamente</string>
+    <string name="toast_clipboard_cleared">Área de transferência limpa com sucesso</string>
+    <string name="btn_clear_now">Limpar agora</string>
+    <string name="permissions_page_title">Permissões do aplicativo</string>
+    <string name="permissions_page_subtitle">Gerenciar direitos de acesso de segurança</string>
+    <string name="email_listener_card_title">Escudo de phishing de e-mail</string>
+    <string name="email_listener_card_desc">Analisando o conteúdo do e-mail recebido</string>
+    <string name="toast_settings_error">Erro ao salvar as configurações</string>
+    <string name="btn_allow_notification">Permitir notificação</string>
+    <string name="toast_audit_ready">Auditoria de segurança pronta</string>
+    <string name="btn_start_audit_scan">Iniciar verificação de auditoria</string>
+    <string name="mesh_connected">Mesh conectado</string>
+    <string name="mesh_disconnected">Mesh desconectado</string>
 </resources>
 
