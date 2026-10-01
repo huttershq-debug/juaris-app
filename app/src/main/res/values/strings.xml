@@ -188,5 +188,25 @@
     <string name="toast_permission_denied">Camera permission denied</string>
     <string name="status_paused">Paused</string>
     <string name="btn_allow_notification_access">Allow Notification Access</string>
+    <string name="alert_financial_title">Financial Alert</string>
+    <string name="alert_service_title">Service Alert</string>
+    <string name="alert_anniversary_title">Anniversary Reminder</string>
+    <string name="alert_birthday_title">Birthday Reminder</string>
+    <string name="alert_medical_title">Medical Appointment Alert</string>
+    <string name="alert_travel_title">Travel Security Alert</string>
+    <string name="alert_general_title">General Security Alert</string>
+    <string name="emergency_reason_default">Manual emergency trigger</string>
+    <string name="emergency_channel_name">Emergency Channel</string>
+    <string name="emergency_notification_title">Emergency Mode Active</string>
+    <string name="emergency_notification_text">System preferences and vault are being secured.</string>
+    <string name="emergency_screen_heading">EMERGENCY PROTOCOL</string>
+    <string name="emergency_screen_countdown_desc">Secure wipe executing in countdown...</string>
+    <string name="btn_emergency_call_now">Call Emergency Now</string>
+    <string name="btn_emergency_cancel">Cancel Emergency</string>
+    <string name="disclosure_dialog_message">Juaris requires notification/accessibility access to protect your device locally.</string>
+    <string name="toast_vault_locked">Vault locked successfully</string>
+    <string name="protection_modules_title">Protection Modules</string>
+    <string name="protection_modules_subtitle">Active real-time security filters</string>
+    <string name="toast_enable_listener_manual">Please enable notification listener in settings</string>
 </resources>
 
