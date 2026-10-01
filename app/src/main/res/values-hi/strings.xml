@@ -78,5 +78,17 @@
     <string name="air_gesture_desc">नेविगेट करने के लिए संपर्क रहित इशारों का उपयोग करें</string>
     <string name="air_gesture_status">सेंसर तैयार है</string>
     <string name="air_gesture_action">एक्शन ट्रिगर करें</string>
+    <!-- नए UI स्ट्रिंग्स -->
+    <string name="mesh_page_title">मेश नेटवर्क</string>
+    <string name="mesh_page_subtitle">विकेंद्रीकृत संचार</string>
+    <string name="legal_page_title">कानूनी जानकारी</string>
+    <string name="legal_page_subtitle">महत्वपूर्ण सूचनाएं</string>
+    <string name="privacy_title">गोपनीयता नीति</string>
+    <string name="privacy_link_text">पूर्ण नीति पढ़ें</string>
+    <string name="imprint_name_val">कंपनी का विवरण</string>
+    <string name="air_gesture_page_title">एयर जेस्चर</string>
+    <string name="air_gesture_page_subtitle">संपर्क रहित नियंत्रण</string>
+    <string name="air_gesture_toggle_label">एयर जेस्चर सक्षम करें</string>
+    <string name="air_gesture_store_notification">जेस्चर सेटिंग्स सहेजें</string>
 </resources>
 
