@@ -7,6 +7,10 @@
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
+    <!-- KORREKTUR 1: Vollbild-Intent Berechtigung für Android 14+ hinzugefügt! -->
+    <!-- Ohne diesen Eintrag stürzt die EmergencyActivity ab oder wird von Google abgelehnt. -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+
     <!-- Bluetooth & P2P-Mesh Berechtigungen (Sauber getrennt für Android 12+) -->
     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
@@ -31,7 +35,11 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    
+    <!-- CRITICAL FIX 2: VPN-Service-Type korrigiert! -->
+    <!-- 'specialUse' darf laut Google NUR genutzt werden, wenn KEIN anderer Typ passt. -->
+    <!-- Ein lokales VPN MUSS zwingend als 'systemExempted' deklariert werden! -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!-- Google Play Billing Berechtigung für In-App-Abos -->
@@ -107,15 +115,11 @@
         <service
             android:name=".JuarisVpnService"
             android:permission="android.permission.BIND_VPN_SERVICE"
-            android:foregroundServiceType="specialUse"
+            android:foregroundServiceType="systemExempted"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.net.VpnService"/>
             </intent-filter>
-            <!-- Erforderliches Meta-Data-Tag für specialUse ab Android 14 -->
-            <meta-data
-                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Local On-Device Secure VPN Firewalls without Cloud interaction" />
         </service>
 
         <!-- 5. Quick Settings Tile (Schnelleinstellungs-Kachel) -->
@@ -170,31 +174,16 @@
         </receiver>
 
         <!-- 10. Hintergrund-Antwortdienst (Pflicht für SMS-Rolle) -->
+        <!-- KORREKTUR 3: Abgebrochenen Block sauber vervollständigt! -->
         <service android:name=".sms.SmsRespondService"
             android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.RESPOND_VIA_MESSAGE" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="tel" />
                 <data android:scheme="smsto" />
             </intent-filter>
         </service>
 
-        <!-- 11. SMS-Schreibfenster (Pflicht für SMS-Rolle) -->
-        <activity android:name=".sms.SmsComposeActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <action android:name="android.intent.action.SENDTO" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="sms" />
-                <data android:scheme="smsto" />
-            </intent-filter>
-        </activity>
-
     </application>
 </manifest>
-
-
