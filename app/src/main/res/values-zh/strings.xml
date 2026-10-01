@@ -78,5 +78,17 @@
     <string name="air_gesture_desc">使用非接触式手势进行导航</string>
     <string name="air_gesture_status">传感器就绪</string>
     <string name="air_gesture_action">触发动作</string>
+    <!-- 新的UI字符串 -->
+    <string name="mesh_page_title">网状网络</string>
+    <string name="mesh_page_subtitle">去中心化通信</string>
+    <string name="legal_page_title">法律信息</string>
+    <string name="legal_page_subtitle">重要通知</string>
+    <string name="privacy_title">隐私政策</string>
+    <string name="privacy_link_text">阅读完整政策</string>
+    <string name="imprint_name_val">公司详情</string>
+    <string name="air_gesture_page_title">空中手势</string>
+    <string name="air_gesture_page_subtitle">非接触式控制</string>
+    <string name="air_gesture_toggle_label">启用空中手势</string>
+    <string name="air_gesture_store_notification">保存手势设置</string>
 </resources>
 
