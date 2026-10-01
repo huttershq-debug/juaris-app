@@ -31,7 +31,7 @@
     <string name="vpn_disclosure_message">Juaris использует локальный VpnService для обнаружения фишинга и вредоносных программ прямо на вашем устройстве.\n\nВсе данные остаются локальными на 100%. Ничего не отправляется на внешние серверы или в облако.</string>
     <string name="btn_understood">Понятно и Активировать</string>
     <string name="btn_cancel">Отмена</string>
-    
+   
     <!-- P2P Swarm & Mesh Strings -->
     <string name="p2p_swarm_title">Роевая ячеистая сеть Juaris (P2P)</string>
     <string name="p2p_swarm_subtitle">Безопасная децентрализованная связь без интернета</string>
@@ -78,6 +78,7 @@
     <string name="air_gesture_desc">Используйте бесконтактные жесты для навигации</string>
     <string name="air_gesture_status">Датчик готов</string>
     <string name="air_gesture_action">Выполнить действие</string>
+    
     <!-- Новые строки интерфейса -->
     <string name="mesh_page_title">Ячеистая сеть</string>
     <string name="mesh_page_subtitle">Децентрализованная связь</string>
@@ -90,6 +91,7 @@
     <string name="air_gesture_page_subtitle">Бесконтактное управление</string>
     <string name="air_gesture_toggle_label">Включить воздушные жесты</string>
     <string name="air_gesture_store_notification">Сохранить настройки жестов</string>
+    
     <!-- Строки буфера обмена, разрешений, аудита и сети -->
     <string name="clipboard_page_subtitle">Защита буфера обмена и история</string>
     <string name="clipboard_security_status">Мониторинг буфера обмена активен</string>
@@ -105,7 +107,7 @@
     <string name="btn_allow_notification">Разрешить уведомление</string>
     <string name="toast_audit_ready">Аудит безопасности готов</string>
     <string name="btn_start_audit_scan">Запустить сканирование аудита</string>
-    <string name="mesh_connected">Сеть Mesh подключена</string>
-    <string name="mesh_disconnected">Сеть Mesh отключена</string>
+    <string name="mesh_connected">Сеть Mesh подключена: %s</string>
+    <string name="mesh_disconnected">Сеть Mesh отключена: %s</string>
 </resources>
 
