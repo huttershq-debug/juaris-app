@@ -91,6 +91,23 @@
     <string name="air_gesture_page_subtitle">Kontrol nirkontak</string>
     <string name="air_gesture_toggle_label">Aktifkan Gestur Udara</string>
     <string name="air_gesture_store_notification">Simpan Pengaturan Gestur</string>
+    <!-- String Papan Klip, Izin, Audit & Mesh -->
+    <string name="clipboard_page_subtitle">Perlindungan dan riwayat papan klip</string>
+    <string name="clipboard_security_status">Pemantauan papan klip aktif</string>
+    <string name="clipboard_autoclear_toggle">Hapus otomatis papan klip</string>
+    <string name="clipboard_autoclear_desc">Hapus data sensitif secara otomatis</string>
+    <string name="toast_clipboard_cleared">Papan klip berhasil dibersihkan</string>
+    <string name="btn_clear_now">Bersihkan Sekarang</string>
+    <string name="permissions_page_title">Izin Aplikasi</string>
+    <string name="permissions_page_subtitle">Kelola hak akses keamanan</string>
+    <string name="email_listener_card_title">Perisai Phishing Email</string>
+    <string name="email_listener_card_desc">Memindai konten email masuk</string>
+    <string name="toast_settings_error">Kesalahan menyimpan pengaturan</string>
+    <string name="btn_allow_notification">Izinkan Notifikasi</string>
+    <string name="toast_audit_ready">Audit keamanan siap</string>
+    <string name="btn_start_audit_scan">Mulai Pemindaian Audit</string>
+    <string name="mesh_connected">Mesh Terhubung</string>
+    <string name="mesh_disconnected">Mesh Terputus</string>
 </resources>
 
 
