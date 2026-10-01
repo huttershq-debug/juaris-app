@@ -188,4 +188,24 @@
     <string name="toast_permission_denied">ক্যামেরার অনুমতি প্রত্যাখ্যাত</string>
     <string name="status_paused">বিরতি দেওয়া হয়েছে</string>
     <string name="btn_allow_notification_access">বিজ্ঞপ্তি অ্যাক্সেসের অনুমতি দিন</string>
+    <string name="alert_financial_title">আর্থিক সতর্কতা</string>
+    <string name="alert_service_title">পরিষেবা সতর্কতা</string>
+    <string name="alert_anniversary_title">বার্ষিকী রিমাইন্ডার</string>
+    <string name="alert_birthday_title">জন্মদিন রিমাইন্ডার</string>
+    <string name="alert_medical_title">চিকিৎসা অ্যাপয়েন্টমেন্ট সতর্কতা</string>
+    <string name="alert_travel_title">ভ্রমণ নিরাপত্তা সতর্কতা</string>
+    <string name="alert_general_title">সাধারণ নিরাপত্তা সতর্কতা</string>
+    <string name="emergency_reason_default">ম্যানুয়াল জরুরি ট্রিগার</string>
+    <string name="emergency_channel_name">জরুরি চ্যানেল</string>
+    <string name="emergency_notification_title">জরুরি মোড সক্রিয়</string>
+    <string name="emergency_notification_text">সিস্টেম পছন্দ এবং ভল্ট সুরক্ষিত করা হচ্ছে।</string>
+    <string name="emergency_screen_heading">জরুরি প্রোটোকল</string>
+    <string name="emergency_screen_countdown_desc">কাউন্টডাউনে নিরাপদ ওয়াইপ কার্যকর করা হচ্ছে...</string>
+    <string name="btn_emergency_call_now">এখনই জরুরি কল করুন</string>
+    <string name="btn_emergency_cancel">জরুরি অবস্থা বাতিল করুন</string>
+    <string name="disclosure_dialog_message">স্থানীয়ভাবে আপনার ডিভাইস সুরক্ষিত করতে Juaris-এর নোটিফিকেশন/অ্যাক্সেসিবিলিটি অ্যাক্সেস প্রয়োজন।</string>
+    <string name="toast_vault_locked">ভল্ট সফলভাবে লক করা হয়েছে</string>
+    <string name="protection_modules_title">সুরক্ষা মডিউল</string>
+    <string name="protection_modules_subtitle">সক্রিয় রিয়েল-টাইম নিরাপত্তা ফিল্টার</string>
+    <string name="toast_enable_listener_manual">অনুগ্রহ করে সেটিংসে নোটিফিকেশন লিসনার সক্ষম করুন</string>
 </resources>
