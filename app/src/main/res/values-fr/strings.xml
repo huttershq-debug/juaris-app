@@ -90,6 +90,23 @@
     <string name="air_gesture_page_subtitle">"Contrôle sans contact"</string>
     <string name="air_gesture_toggle_label">"Activer les gestes aériens"</string>
     <string name="air_gesture_store_notification">"Enregistrer les paramètres de gestes"</string>
+    <!-- Chaînes presse-papiers, autorisations, audit et mesh -->
+    <string name="clipboard_page_subtitle">"Protection et historique du presse-papiers"</string>
+    <string name="clipboard_security_status">"Surveillance du presse-papiers active"</string>
+    <string name="clipboard_autoclear_toggle">"Vider automatiquement le presse-papiers"</string>
+    <string name="clipboard_autoclear_desc">"Effacer automatiquement les données sensibles"</string>
+    <string name="toast_clipboard_cleared">"Presse-papiers vidé avec succès"</string>
+    <string name="btn_clear_now">"Vider maintenant"</string>
+    <string name="permissions_page_title">"Autorisations de l'application"</string>
+    <string name="permissions_page_subtitle">"Gérer les droits d'accès de sécurité"</string>
+    <string name="email_listener_card_title">"Bouclier anti-phishing e-mail"</string>
+    <string name="email_listener_card_desc">"Analyse du contenu des e-mails entrants"</string>
+    <string name="toast_settings_error">"Erreur lors de l'enregistrement des paramètres"</string>
+    <string name="btn_allow_notification">"Autoriser la notification"</string>
+    <string name="toast_audit_ready">"Audit de sécurité prêt"</string>
+    <string name="btn_start_audit_scan">"Démarrer l'analyse d'audit"</string>
+    <string name="mesh_connected">"Mesh connecté"</string>
+    <string name="mesh_disconnected">"Mesh déconnecté"</string>
 </resources>
 
 
