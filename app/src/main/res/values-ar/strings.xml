@@ -31,7 +31,7 @@
     <string name="vpn_disclosure_message">تستخدم Juaris خدمة شبكة VPN محلية لاكتشاف البرامج الضارة والتصيد الاحتيالي مباشرة على جهازك.\n\nتظل جميع البيانات محلية بنسبة 100%. لا يتم إرسال أي شيء إلى خوادم خارجية أو السحابة.</string>
     <string name="btn_understood">فهمت والتفعيل</string>
     <string name="btn_cancel">إلغاء</string>
-    
+   
     <!-- P2P Swarm & Mesh Strings -->
     <string name="p2p_swarm_title">شبكة سُحُب جواريس (P2P)</string>
     <string name="p2p_swarm_subtitle">اتصالات آمنة لامركزية بدون إنترنت</string>
@@ -78,7 +78,9 @@
     <string name="air_gesture_desc">استخدم إيماءات بدون تلامس للتنقل</string>
     <string name="air_gesture_status">المستشعر جاهز</string>
     <string name="air_gesture_action">تفعيل الإجراء</string>
-      <string name="mesh_page_title">شبكة Mesh</string>
+    
+    <!-- نصوص واجهة جديدة -->
+    <string name="mesh_page_title">شبكة Mesh</string>
     <string name="mesh_page_subtitle">اتصالات لامركزية</string>
     <string name="legal_page_title">المعلومات القانونية</string>
     <string name="legal_page_subtitle">إشعارات هامة</string>
@@ -89,6 +91,8 @@
     <string name="air_gesture_page_subtitle">تحكم بدون تلامس</string>
     <string name="air_gesture_toggle_label">تفعيل الإيماءات الهوائية</string>
     <string name="air_gesture_store_notification">حفظ إعدادات الإيماءات</string>
+    
+    <!-- نصوص الحافظة، الصلاحيات، التدقيق والشبكة -->
     <string name="clipboard_page_subtitle">حماية وسجل الحافظة</string>
     <string name="clipboard_security_status">مراقبة الحافظة نشطة</string>
     <string name="clipboard_autoclear_toggle">مسح الحافظة تلقائياً</string>
@@ -103,7 +107,7 @@
     <string name="btn_allow_notification">السماح بالاشعارات</string>
     <string name="toast_audit_ready">تدقيق الأمان جاهز</string>
     <string name="btn_start_audit_scan">بدء فحص التدقيق</string>
-    <string name="mesh_connected">شبكة Mesh متصلة</string>
-    <string name="mesh_disconnected">شبكة Mesh مفصولة</string>
+    <string name="mesh_connected">شبكة Mesh متصلة: %s</string>
+    <string name="mesh_disconnected">شبكة Mesh مفصولة: %s</string>
 </resources>
 
