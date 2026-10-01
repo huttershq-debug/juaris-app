@@ -12,7 +12,7 @@
     <string name="tab_ai">IA</string>
     <string name="tab_gestures">Gestos</string>
     <string name="tab_info">Información</string>
-    <string name="tab_settings">Configuración</string>
+    <string name="tab_settings">Ajustes</string>
     <string name="air_gesture_title">Control por gestos en el aire</string>
     <string name="camera_scanner_label">Escáner de cámara</string>
     <string name="live_camera_status">Cámara en vivo activa</string>
@@ -31,7 +31,7 @@
     <string name="vpn_disclosure_message">Juaris utiliza un VpnService local para detectar phishing y malware directamente en tu dispositivo.\n\nTodos los datos permanecen 100% locales. No se envía nada a servidores externos o nubes.</string>
     <string name="btn_understood">Entendido y Activar</string>
     <string name="btn_cancel">Cancelar</string>
-    
+   
     <!-- P2P Swarm & Mesh Strings -->
     <string name="p2p_swarm_title">Malla de Enjambre Juaris (P2P)</string>
     <string name="p2p_swarm_subtitle">Comunicación segura y descentralizada sin Internet</string>
@@ -78,6 +78,7 @@
     <string name="air_gesture_desc">Usa gestos sin contacto para navegar</string>
     <string name="air_gesture_status">Sensor listo</string>
     <string name="air_gesture_action">Disparar acción</string>
+    
     <!-- Nuevos strings de UI -->
     <string name="mesh_page_title">Red de malla</string>
     <string name="mesh_page_subtitle">Comunicación descentralizada</string>
@@ -90,6 +91,7 @@
     <string name="air_gesture_page_subtitle">Control sin contacto</string>
     <string name="air_gesture_toggle_label">Activar gestos en el aire</string>
     <string name="air_gesture_store_notification">Guardar configuración de gestos</string>
+    
     <!-- Cadenas de portapapeles, permisos, auditoría y malla -->
     <string name="clipboard_page_subtitle">Protección e historial del portapapeles</string>
     <string name="clipboard_security_status">Monitoreo del portapapeles activo</string>
@@ -105,8 +107,7 @@
     <string name="btn_allow_notification">Permitir notificación</string>
     <string name="toast_audit_ready">Auditoría de seguridad lista</string>
     <string name="btn_start_audit_scan">Iniciar escaneo de auditoría</string>
-    <string name="mesh_connected">Malla conectada</string>
-    <string name="mesh_disconnected">Malla desconectada</string>
+    <string name="mesh_connected">Malla conectada: %s</string>
+    <string name="mesh_disconnected">Malla desconectada: %s</string>
 </resources>
-
 
