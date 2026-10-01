@@ -188,5 +188,25 @@
     <string name="toast_permission_denied">Kameraberechtigung verweigert</string>
     <string name="status_paused">Pausiert</string>
     <string name="btn_allow_notification_access">Benachrichtigungszugriff erlauben</string>
+    <string name="alert_financial_title">Finanz-Warnung</string>
+    <string name="alert_service_title">Dienst-Warnung</string>
+    <string name="alert_anniversary_title">Jahrestags-Erinnerung</string>
+    <string name="alert_birthday_title">Geburtstags-Erinnerung</string>
+    <string name="alert_medical_title">Arzttermin-Warnung</string>
+    <string name="alert_travel_title">Reise-Sicherheitswarnung</string>
+    <string name="alert_general_title">Allgemeine Sicherheitswarnung</string>
+    <string name="emergency_reason_default">Manueller Notfall-Auslöser</string>
+    <string name="emergency_channel_name">Notfall-Kanal</string>
+    <string name="emergency_notification_title">Notfallmodus aktiv</string>
+    <string name="emergency_notification_text">Systemeinstellungen und Tresor werden gesichert.</string>
+    <string name="emergency_screen_heading">NOTFALL-PROTOKOLL</string>
+    <string name="emergency_screen_countdown_desc">Sichere Löschung wird im Countdown ausgeführt...</string>
+    <string name="btn_emergency_call_now">Jetzt Notruf wählen</string>
+    <string name="btn_emergency_cancel">Notfall abbrechen</string>
+    <string name="disclosure_dialog_message">Juaris benötigt Benachrichtigungs-Zugriff, um dein Gerät lokal zu schützen.</string>
+    <string name="toast_vault_locked">Tresor erfolgreich gesperrt</string>
+    <string name="protection_modules_title">Schutzmodule</string>
+    <string name="protection_modules_subtitle">Aktive Echtzeit-Sicherheitsfilter</string>
+    <string name="toast_enable_listener_manual">Bitte aktiviere den Benachrichtigungs-Listener in den Einstellungen</string>
 </resources>
 
