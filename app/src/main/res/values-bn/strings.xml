@@ -28,10 +28,10 @@
     <string name="juaris_app_welcome_text" formatted="false">জুয়ারিস-এ স্বাগতম, ভবিষ্যতের জন্য আপনার নিরাপত্তা অ্যাপ। ১০০% স্বচ্ছ, ১০০% আপনার ফোনে। কোনো ক্লাউড নেই। আপনার সুরক্ষা, আপনার বাড়ি, আপনার নিয়ম।</string>
     <string name="juaris_app_welcome_audio_file">platzhalter_bn.m4a</string>
     <string name="vpn_disclosure_title">Juaris VPN নিরাপত্তা বিজ্ঞপ্তি</string>
-    <string name="vpn_disclosure_message">Juaris আপনার ডিভাইসেই ফিশিং এবং মেলওয়্যার সনাক্ত করতে একটি স্থানীয় VpnService ব্যবহার করে।\n\nসমস্ত ডেটা ১০০% স্থানীয় থাকে। বাহ্যিক সার্ভার বা ক্লাউডে কিছুই পাঠানো হয় না।</string>
+    <string name="vpn_disclosure_message">Juaris আপনার ডিভাইসেই ফিশিং এবং মেলওয়্যার সনাক্ত করতে একটি স্থানীয় VpnService ব্যবহার করে。\n\nসমস্ত ডেটা ১০০% স্থানীয় থাকে। বাহ্যিক সার্ভার বা ক্লাউডে কিছুই পাঠানো হয় না।</string>
     <string name="btn_understood">বুঝেছি এবং সক্রিয় করুন</string>
     <string name="btn_cancel">বাতিল</string>
-    
+   
     <!-- P2P Swarm & Mesh Strings -->
     <string name="p2p_swarm_title">জুয়ারিস সোয়ার্ম মেশ (P2P)</string>
     <string name="p2p_swarm_subtitle">ইন্টারনেট ছাড়াই নিরাপদ, বিকেন্দ্রীকৃত যোগাযোগ</string>
@@ -78,7 +78,8 @@
     <string name="air_gesture_desc">নেভিগেট করতে কন্ট্যাক্টলেস ইশারা ব্যবহার করুন</string>
     <string name="air_gesture_status">সেন্সর প্রস্তুত</string>
     <string name="air_gesture_action">অ্যাকশন ট্রিগার করুন</string>
-     <!-- নতুন UI স্ট্রিং -->
+    
+    <!-- নতুন UI স্ট্রিং -->
     <string name="mesh_page_title">মেশ নেটওয়ার্ক</string>
     <string name="mesh_page_subtitle">বিকেন্দ্রীকৃত যোগাযোগ</string>
     <string name="legal_page_title">আইনি তথ্য</string>
@@ -90,6 +91,7 @@
     <string name="air_gesture_page_subtitle">কন্ট্যাক্টলেস নিয়ন্ত্রণ</string>
     <string name="air_gesture_toggle_label">এয়ার গেসচার সক্ষম করুন</string>
     <string name="air_gesture_store_notification">গেসচার সেটিংস সংরক্ষণ করুন</string>
+    
     <!-- ক্লিপবোর্ড, অনুমতি, অডিট এবং মেশ স্ট্রিং -->
     <string name="clipboard_page_subtitle">ক্লিপবোর্ড সুরক্ষা এবং ইতিহাস</string>
     <string name="clipboard_security_status">ক্লিপবোর্ড মনিটরিং সক্রিয়</string>
@@ -101,12 +103,11 @@
     <string name="permissions_page_subtitle">নিরাপত্তা অ্যাক্সেস অধিকার পরিচালনা করুন</string>
     <string name="email_listener_card_title">ইমেল ফিশিং শিল্ড</string>
     <string name="email_listener_card_desc">ইনকামিং মেইল ​​কন্টেন্ট স্ক্যান করা হচ্ছে</string>
-    <string name="toast_settings_error">সেits সংরক্ষণ করতে ত্রুটি (বা সেটিংস সংর్రণে ত্রুটি)</string>
+    <string name="toast_settings_error">সেটিংস সংরক্ষণে ত্রুটি</string>
     <string name="btn_allow_notification">বিজ্ঞপ্তি অনুমতি দিন</string>
     <string name="toast_audit_ready">নিরাপত্তা অডিট প্রস্তুত</string>
     <string name="btn_start_audit_scan">অডিট স্ক্যান শুরু করুন</string>
-    <string name="mesh_connected">মেশ সংযুক্ত</string>
-    <string name="mesh_disconnected">মেশ সংযোগ বিচ্ছিন্ন</string>
+    <string name="mesh_connected">মেশ সংযুক্ত: %s</string>
+    <string name="mesh_disconnected">মেশ সংযোগ বিচ্ছিন্ন: %s</string>
 </resources>
-
 
