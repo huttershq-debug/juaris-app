@@ -79,7 +79,7 @@
     <string name="air_gesture_status">Sensor Ready</string>
     <string name="air_gesture_action">Trigger Action</string>
     
-    <!-- Neue UI-Strings -->
+    <!-- UI & Missing Build Reference Strings -->
     <string name="mesh_page_title">Mesh Network</string>
     <string name="mesh_page_subtitle">Decentralized communication</string>
     <string name="legal_page_title">Legal Information</string>
@@ -91,8 +91,6 @@
     <string name="air_gesture_page_subtitle">Contactless control</string>
     <string name="air_gesture_toggle_label">Enable Air Gestures</string>
     <string name="air_gesture_store_notification">Store Gesture Settings</string>
-    
-    <!-- Zwischenablage, Berechtigungen, Audit & Mesh Strings -->
     <string name="clipboard_page_subtitle">Clipboard protection and history</string>
     <string name="clipboard_security_status">Clipboard monitoring active</string>
     <string name="clipboard_autoclear_toggle">Auto-clear clipboard</string>
@@ -109,6 +107,15 @@
     <string name="btn_start_audit_scan">Start Audit Scan</string>
     <string name="mesh_connected">Mesh Connected: %s</string>
     <string name="mesh_disconnected">Mesh Disconnected: %s</string>
+    
+    <!-- Vault & Blacklist Additional Strings -->
+    <string name="vault_status_label">Vault Status</string>
+    <string name="blacklist_page_title">Blacklist</string>
+    <string name="blacklist_page_subtitle">Manage blocked numbers and contacts</string>
+    <string name="blacklist_add_title">Add to Blacklist</string>
+    <string name="label_phone_number">Phone Number</string>
+    <string name="blacklist_items_title">Blocked Entries</string>
+    <string name="btn_release">Release</string>
+    <string name="clipboard_page_title">Clipboard</string>
 </resources>
-
 
