@@ -78,7 +78,7 @@
     <string name="air_gesture_desc">Gunakan gestur nirkontak untuk navigasi</string>
     <string name="air_gesture_status">Sensor Siap</string>
     <string name="air_gesture_action">Picu Aksi</string>
-
+    
     <!-- String UI Baru -->
     <string name="mesh_page_title">Jaringan Mesh</string>
     <string name="mesh_page_subtitle">Komunikasi terdesentralisasi</string>
@@ -91,6 +91,7 @@
     <string name="air_gesture_page_subtitle">Kontrol nirkontak</string>
     <string name="air_gesture_toggle_label">Aktifkan Gestur Udara</string>
     <string name="air_gesture_store_notification">Simpan Pengaturan Gestur</string>
+    
     <!-- String Papan Klip, Izin, Audit & Mesh -->
     <string name="clipboard_page_subtitle">Perlindungan dan riwayat papan klip</string>
     <string name="clipboard_security_status">Pemantauan papan klip aktif</string>
@@ -106,8 +107,8 @@
     <string name="btn_allow_notification">Izinkan Notifikasi</string>
     <string name="toast_audit_ready">Audit keamanan siap</string>
     <string name="btn_start_audit_scan">Mulai Pemindaian Audit</string>
-    <string name="mesh_connected">Mesh Terhubung</string>
-    <string name="mesh_disconnected">Mesh Terputus</string>
+    <string name="mesh_connected">Mesh Terhubung: %s</string>
+    <string name="mesh_disconnected">Mesh Terputus: %s</string>
 </resources>
 
 
