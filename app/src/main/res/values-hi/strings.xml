@@ -208,5 +208,6 @@
     <string name="protection_modules_title">सुरक्षा मॉड्यूल</string>
     <string name="protection_modules_subtitle">सक्रिय वास्तविक समय सुरक्षा फ़िल्टर</string>
     <string name="toast_enable_listener_manual">कृपया सेटिंग्स में नोटिफिकेशन लिसनर सक्षम करें</string>
+    <string name="status_ready">तैयार</string>
 </resources>
 
