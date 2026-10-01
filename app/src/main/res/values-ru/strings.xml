@@ -79,7 +79,7 @@
     <string name="air_gesture_status">Датчик готов</string>
     <string name="air_gesture_action">Выполнить действие</string>
     
-    <!-- Новые строки интерфейса -->
+    <!-- Дополнительные UI строки -->
     <string name="mesh_page_title">Ячеистая сеть</string>
     <string name="mesh_page_subtitle">Децентрализованная связь</string>
     <string name="legal_page_title">Правовая информация</string>
@@ -91,8 +91,6 @@
     <string name="air_gesture_page_subtitle">Бесконтактное управление</string>
     <string name="air_gesture_toggle_label">Включить воздушные жесты</string>
     <string name="air_gesture_store_notification">Сохранить настройки жестов</string>
-    
-    <!-- Строки буфера обмена, разрешений, аудита и сети -->
     <string name="clipboard_page_subtitle">Защита буфера обмена и история</string>
     <string name="clipboard_security_status">Мониторинг буфера обмена активен</string>
     <string name="clipboard_autoclear_toggle">Автоочистка буфера обмена</string>
@@ -109,5 +107,15 @@
     <string name="btn_start_audit_scan">Запустить сканирование аудита</string>
     <string name="mesh_connected">Сеть Mesh подключена: %s</string>
     <string name="mesh_disconnected">Сеть Mesh отключена: %s</string>
+    
+    <!-- Vault & Blacklist Additional Strings -->
+    <string name="vault_status_label">Статус хранилища</string>
+    <string name="blacklist_page_title">Черный список</string>
+    <string name="blacklist_page_subtitle">Управление заблокированными номерами и контактами</string>
+    <string name="blacklist_add_title">Добавить в черный список</string>
+    <string name="label_phone_number">Номер телефона</string>
+    <string name="blacklist_items_title">Заблокированные записи</string>
+    <string name="btn_release">Освободить</string>
+    <string name="clipboard_page_title">Буфер обмена</string>
 </resources>
 
