@@ -188,6 +188,26 @@
     <string name="toast_permission_denied">"Autorisation de caméra refusée"</string>
     <string name="status_paused">"En pause"</string>
     <string name="btn_allow_notification_access">"Autoriser l'accès aux notifications"</string>
+     <string name="alert_financial_title">"Alerte financière"</string>
+    <string name="alert_service_title">"Alerte de service"</string>
+    <string name="alert_anniversary_title">"Rappel d'anniversaire"</string>
+    <string name="alert_birthday_title">"Rappel d'anniversaire de naissance"</string>
+    <string name="alert_medical_title">"Alerte de rendez-vous médical"</string>
+    <string name="alert_travel_title">"Alerte de sécurité de voyage"</string>
+    <string name="alert_general_title">"Alerte de sécurité générale"</string>
+    <string name="emergency_reason_default">"Déclencheur d'urgence manuel"</string>
+    <string name="emergency_channel_name">"Canal d'urgence"</string>
+    <string name="emergency_notification_title">"Mode d'urgence actif"</string>
+    <string name="emergency_notification_text">"Les préférences système et le coffre sont sécurisés."</string>
+    <string name="emergency_screen_heading">"PROTOCOLE D'URGENCE"</string>
+    <string name="emergency_screen_countdown_desc">"Effacement sécurisé en cours de compte à rebours..."</string>
+    <string name="btn_emergency_call_now">"Appeler les urgences maintenant"</string>
+    <string name="btn_emergency_cancel">"Annuler l'urgence"</string>
+    <string name="disclosure_dialog_message">"Juaris nécessite un accès aux notifications/accessibilité pour protéger votre appareil localement."</string>
+    <string name="toast_vault_locked">"Coffre verrouillé avec succès"</string>
+    <string name="protection_modules_title">"Modules de protection"</string>
+    <string name="protection_modules_subtitle">"Filtres de sécurité actifs en temps réel"</string>
+    <string name="toast_enable_listener_manual">"Veuillez activer l'écouteur de notifications dans les paramètres"</string>
 </resources>
 
 
