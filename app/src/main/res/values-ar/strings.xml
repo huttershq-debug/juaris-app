@@ -78,5 +78,16 @@
     <string name="air_gesture_desc">استخدم إيماءات بدون تلامس للتنقل</string>
     <string name="air_gesture_status">المستشعر جاهز</string>
     <string name="air_gesture_action">تفعيل الإجراء</string>
+      <string name="mesh_page_title">شبكة Mesh</string>
+    <string name="mesh_page_subtitle">اتصالات لامركزية</string>
+    <string name="legal_page_title">المعلومات القانونية</string>
+    <string name="legal_page_subtitle">إشعارات هامة</string>
+    <string name="privacy_title">سياسة الخصوصية</string>
+    <string name="privacy_link_text">قراءة السياسة كاملة</string>
+    <string name="imprint_name_val">تفاصيل الشركة</string>
+    <string name="air_gesture_page_title">الإيماءات الهوائية</string>
+    <string name="air_gesture_page_subtitle">تحكم بدون تلامس</string>
+    <string name="air_gesture_toggle_label">تفعيل الإيماءات الهوائية</string>
+    <string name="air_gesture_store_notification">حفظ إعدادات الإيماءات</string>
 </resources>
 
