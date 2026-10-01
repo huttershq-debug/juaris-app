@@ -188,5 +188,25 @@
     <string name="toast_permission_denied">相机权限被拒绝</string>
     <string name="status_paused">已暂停</string>
     <string name="btn_allow_notification_access">允许通知访问</string>
+     <string name="alert_financial_title">财务警报</string>
+    <string name="alert_service_title">服务警报</string>
+    <string name="alert_anniversary_title">周年纪念提醒</string>
+    <string name="alert_birthday_title">生日提醒</string>
+    <string name="alert_medical_title">医疗预约警报</string>
+    <string name="alert_travel_title">旅行安全警报</string>
+    <string name="alert_general_title">通用安全警报</string>
+    <string name="emergency_reason_default">手动紧急触发</string>
+    <string name="emergency_channel_name">紧急频道</string>
+    <string name="emergency_notification_title">紧急模式已激活</string>
+    <string name="emergency_notification_text">系统首选项和保险库正在被保护。</string>
+    <string name="emergency_screen_heading">紧急协议</string>
+    <string name="emergency_screen_countdown_desc">安全擦除正在倒计时执行...</string>
+    <string name="btn_emergency_call_now">立即呼叫紧急救援</string>
+    <string name="btn_emergency_cancel">取消紧急情况</string>
+    <string name="disclosure_dialog_message">Juaris 需要通知/无障碍访问权限以在本地保护您的设备。</string>
+    <string name="toast_vault_locked">保险库已成功锁定</string>
+    <string name="protection_modules_title">保护模块</string>
+    <string name="protection_modules_subtitle">实时活动安全过滤器</string>
+    <string name="toast_enable_listener_manual">请在设置中启用通知监听器</string>
 </resources>
 
