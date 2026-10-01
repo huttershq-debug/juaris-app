@@ -208,5 +208,6 @@
     <string name="protection_modules_title">Schutzmodule</string>
     <string name="protection_modules_subtitle">Aktive Echtzeit-Sicherheitsfilter</string>
     <string name="toast_enable_listener_manual">Bitte aktiviere den Benachrichtigungs-Listener in den Einstellungen</string>
+    <string name="status_ready">Bereit</string>
 </resources>
 
