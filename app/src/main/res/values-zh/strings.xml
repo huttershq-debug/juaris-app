@@ -90,5 +90,22 @@
     <string name="air_gesture_page_subtitle">非接触式控制</string>
     <string name="air_gesture_toggle_label">启用空中手势</string>
     <string name="air_gesture_store_notification">保存手势设置</string>
+    <!-- 剪贴板、权限、审计和网状网络字符串 -->
+    <string name="clipboard_page_subtitle">剪贴板保护与历史记录</string>
+    <string name="clipboard_security_status">剪贴板监视已激活</string>
+    <string name="clipboard_autoclear_toggle">自动清除剪贴板</string>
+    <string name="clipboard_autoclear_desc">自动清除敏感数据</string>
+    <string name="toast_clipboard_cleared">剪贴板已成功清除</string>
+    <string name="btn_clear_now">立即清除</string>
+    <string name="permissions_page_title">应用权限</string>
+    <string name="permissions_page_subtitle">管理安全访问权限</string>
+    <string name="email_listener_card_title">电子邮件防钓鱼盾</string>
+    <string name="email_listener_card_desc">正在扫描入站邮件内容</string>
+    <string name="toast_settings_error">保存设置时出错</string>
+    <string name="btn_allow_notification">允许通知</string>
+    <string name="toast_audit_ready">安全审计就绪</string>
+    <string name="btn_start_audit_scan">开始审计扫描</string>
+    <string name="mesh_connected">网状网络已连接</string>
+    <string name="mesh_disconnected">网状网络已断开</string>
 </resources>
 
