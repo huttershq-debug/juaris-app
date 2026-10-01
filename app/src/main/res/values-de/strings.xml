@@ -31,7 +31,7 @@
     <string name="vpn_disclosure_message">Juaris nutzt einen lokalen VpnService, um Phishing und Malware direkt auf deinem Gerät zu erkennen.\n\nAlle Daten bleiben zu 100% lokal. Es wird absolut nichts an externe Server oder Clouds gesendet.</string>
     <string name="btn_understood">Verstanden &amp; Aktivieren</string>
     <string name="btn_cancel">Abbrechen</string>
-    
+   
     <!-- P2P Swarm & Mesh Strings -->
     <string name="p2p_swarm_title">Juaris Schwarm-Mesh (P2P)</string>
     <string name="p2p_swarm_subtitle">Sichere, dezentrale Kommunikation ohne Internet</string>
@@ -78,7 +78,8 @@
     <string name="air_gesture_desc">Nutze kontaktlose Gesten zur Navigation</string>
     <string name="air_gesture_status">Sensor bereit</string>
     <string name="air_gesture_action">Aktion auslösen</string>
-     <!-- Neue UI-Strings -->
+    
+    <!-- Neue UI-Strings -->
     <string name="mesh_page_title">Mesh-Netzwerk</string>
     <string name="mesh_page_subtitle">Dezentrale Kommunikation</string>
     <string name="legal_page_title">Rechtliche Hinweise</string>
@@ -90,7 +91,8 @@
     <string name="air_gesture_page_subtitle">Kontaktlose Steuerung</string>
     <string name="air_gesture_toggle_label">Luftgesten aktivieren</string>
     <string name="air_gesture_store_notification">Gesteneinstellungen speichern</string>
-     <!-- Zwischenablage, Berechtigungen, Audit & Mesh Strings -->
+    
+    <!-- Zwischenablage, Berechtigungen, Audit & Mesh Strings -->
     <string name="clipboard_page_subtitle">Zwischenablagen-Schutz und Verlauf</string>
     <string name="clipboard_security_status">Zwischenablagen-Überwachung aktiv</string>
     <string name="clipboard_autoclear_toggle">Zwischenablage automatisch leeren</string>
@@ -105,7 +107,8 @@
     <string name="btn_allow_notification">Benachrichtigung erlauben</string>
     <string name="toast_audit_ready">Sicherheits-Audit bereit</string>
     <string name="btn_start_audit_scan">Audit-Scan starten</string>
-    <string name="mesh_connected">Mesh verbunden</string>
-    <string name="mesh_disconnected">Mesh getrennt</string>
+    <string name="mesh_connected">Mesh verbunden: %s</string>
+    <string name="mesh_disconnected">Mesh getrennt: %s</string>
 </resources>
+
 
