@@ -208,6 +208,5 @@
     <string name="protection_modules_title">Módulos de proteção</string>
     <string name="protection_modules_subtitle">Filtros de segurança ativos em tempo real</string>
     <string name="toast_enable_listener_manual">Ative o listener de notificações nas configurações</string>
-    <string name="status_ready">Pronto</string>
 </resources>
 
