@@ -90,5 +90,22 @@
     <string name="air_gesture_page_subtitle">Contactless control</string>
     <string name="air_gesture_toggle_label">Enable Air Gestures</string>
     <string name="air_gesture_store_notification">Store Gesture Settings</string>
+    <!-- Clipboard, Permissions, Audit & Mesh Strings -->
+    <string name="clipboard_page_subtitle">Clipboard protection and history</string>
+    <string name="clipboard_security_status">Clipboard monitoring active</string>
+    <string name="clipboard_autoclear_toggle">Auto-clear clipboard</string>
+    <string name="clipboard_autoclear_desc">Automatically clear sensitive data</string>
+    <string name="toast_clipboard_cleared">Clipboard cleared successfully</string>
+    <string name="btn_clear_now">Clear Now</string>
+    <string name="permissions_page_title">App Permissions</string>
+    <string name="permissions_page_subtitle">Manage security access rights</string>
+    <string name="email_listener_card_title">Email Phishing Shield</string>
+    <string name="email_listener_card_desc">Scanning incoming mail content</string>
+    <string name="toast_settings_error">Error saving settings</string>
+    <string name="btn_allow_notification">Allow Notification</string>
+    <string name="toast_audit_ready">Security audit ready</string>
+    <string name="btn_start_audit_scan">Start Audit Scan</string>
+    <string name="mesh_connected">Mesh Connected</string>
+    <string name="mesh_disconnected">Mesh Disconnected</string>
 </resources>
 
