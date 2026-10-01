@@ -78,5 +78,17 @@
     <string name="air_gesture_desc">Используйте бесконтактные жесты для навигации</string>
     <string name="air_gesture_status">Датчик готов</string>
     <string name="air_gesture_action">Выполнить действие</string>
+    <!-- Новые строки интерфейса -->
+    <string name="mesh_page_title">Ячеистая сеть</string>
+    <string name="mesh_page_subtitle">Децентрализованная связь</string>
+    <string name="legal_page_title">Правовая информация</string>
+    <string name="legal_page_subtitle">Важные уведомления</string>
+    <string name="privacy_title">Политика конфиденциальности</string>
+    <string name="privacy_link_text">Читать полную политику</string>
+    <string name="imprint_name_val">Сведения о компании</string>
+    <string name="air_gesture_page_title">Воздушные жесты</string>
+    <string name="air_gesture_page_subtitle">Бесконтактное управление</string>
+    <string name="air_gesture_toggle_label">Включить воздушные жесты</string>
+    <string name="air_gesture_store_notification">Сохранить настройки жестов</string>
 </resources>
 
