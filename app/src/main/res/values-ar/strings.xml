@@ -188,5 +188,25 @@
     <string name="toast_permission_denied">تم رفض إذن الكاميرا</string>
     <string name="status_paused">متوقف مؤقتاً</string>
     <string name="btn_allow_notification_access">السماح بالوصول إلى الإشعارات</string>
+    <string name="alert_financial_title">تنبيه مالي</string>
+    <string name="alert_service_title">تنبيه الخدمة</string>
+    <string name="alert_anniversary_title">تذكير الذكرى السنوية</string>
+    <string name="alert_birthday_title">تذكير عيد الميلاد</string>
+    <string name="alert_medical_title">تنبيه موعد طبي</string>
+    <string name="alert_travel_title">تنبيه أمان السفر</string>
+    <string name="alert_general_title">تنبيه أمني عام</string>
+    <string name="emergency_reason_default">مشغل طوارئ يدوية</string>
+    <string name="emergency_channel_name">قناة الطوارئ</string>
+    <string name="emergency_notification_title">وضع الطوارئ نشط</string>
+    <string name="emergency_notification_text">جاري تأمين تفضيلات النظام والخزنة.</string>
+    <string name="emergency_screen_heading">بروتوكول الطوارئ</string>
+    <string name="emergency_screen_countdown_desc">جاري تنفيذ المسح الآمن في العد التنازلي...</string>
+    <string name="btn_emergency_call_now">اتصل بالطوارئ الآن</string>
+    <string name="btn_emergency_cancel">إلغاء الطوارئ</string>
+    <string name="disclosure_dialog_message">يتطلب Juaris إذن الإشعارات/سهولة الوصول لحماية جهازك محلياً.</string>
+    <string name="toast_vault_locked">تم قفل الخزنة بنجاح</string>
+    <string name="protection_modules_title">وحدات الحماية</string>
+    <string name="protection_modules_subtitle">مرشحات الأمان النشطة في الوقت الفعلي</string>
+    <string name="toast_enable_listener_manual">يرجى تمكين مستمع الإشعارات في الإعدادات</string>
 </resources>
 
