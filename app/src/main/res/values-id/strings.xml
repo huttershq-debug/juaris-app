@@ -208,7 +208,6 @@
     <string name="protection_modules_title">Modul Perlindungan</string>
     <string name="protection_modules_subtitle">Filter keamanan waktu nyata aktif</string>
     <string name="toast_enable_listener_manual">Harap aktifkan pendengar notifikasi di pengaturan</string>
-    <string name="status_ready">Siap</string>
 </resources>
 
 
