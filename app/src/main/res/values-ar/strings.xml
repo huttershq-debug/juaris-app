@@ -107,8 +107,6 @@
     <string name="btn_start_audit_scan">بدء فحص التدقيق</string>
     <string name="mesh_connected">شبكة Mesh متصلة: %s</string>
     <string name="mesh_disconnected">شبكة Mesh مفصولة: %s</string>
-    
-    <!-- Vault & Blacklist Additional Strings -->
     <string name="vault_status_label">حالة الخزنة</string>
     <string name="blacklist_page_title">القائمة السوداء</string>
     <string name="blacklist_page_subtitle">إدارة الأرقام وجهات الاتصال المحظورة</string>
@@ -117,6 +115,78 @@
     <string name="blacklist_items_title">العناصر المحظورة</string>
     <string name="btn_release">إلغاء الحظر</string>
     <string name="clipboard_page_title">الحافظة</string>
+    
+    <!-- نصوص Lint الجديدة -->
+    <string name="comm_filter_title">مرشح الاتصالات</string>
+    <string name="call_prot_title">حماية المكالمات</string>
+    <string name="call_prot_desc">الحماية من المكالمات المشبوهة</string>
+    <string name="sms_prot_title">حماية الرسائل القصيرة</string>
+    <string name="sms_prot_desc">الحماية من رسائل التصيد الاحتيالي</string>
+    <string name="email_prot_title">حماية البريد الإلكتروني</string>
+    <string name="email_prot_desc">الحماية من رسائل البريد الإلكتروني الضارة</string>
+    <string name="toast_enable_listener">تم تفعيل المستمع بنجاح</string>
+    <string name="offline_vault_title">الخزنة دون اتصال</string>
+    <string name="offline_vault_desc">التخزين المحلي الآمن للبيانات الحساسة</string>
+    <string name="vault_status_unlocked">الخزنة مفتوحة</string>
+    <string name="vault_status_locked">الخزنة مقفلة</string>
+    <string name="blacklist_items_count">العناصر المحظورة (%d)</string>
+    <string name="clipboard_security_title">أمان الحافظة</string>
+    <string name="clipboard_autoclear_title">مسح الحافظة تلقائياً</string>
+    <string name="air_gesture_store_notice">يتم حفظ إعدادات الإيماءات محلياً</string>
+    <string name="toast_sms_active">تم تفعيل حماية الرسائل القصيرة</string>
+    <string name="toast_sms_rejected">تم رفض دور الرسائل القصيرة</string>
+    <string name="toast_notification_granted">تم منح إذن الإشعارات</string>
+    <string name="toast_notification_warning">إذن الإشعارات مطلوب للحماية</string>
+    <string name="toast_calendar_granted">تم منح إذن التقويم</string>
+    <string name="toast_calendar_warning">إذن التقويم مطلوب للفحص الذاتي</string>
+    <string name="toast_vpn_granted">تم منح إذن VPN</string>
+    <string name="toast_vpn_rejected">تم رفض إذن VPN</string>
+    <string name="toast_enable_notification_manual">يرجى تفعيل مستمع الإشعارات يدوياً</string>
+    <string name="emergency_reason_sensor">تم تفعيل الطوارئ بواسطة المستشعر</string>
+    <string name="emergency_reason_manual">تم تفعيل زر الذعر اليدوي</string>
+    <string name="toast_debugger_detected">تحذير: تم اكتشاف مصحح أخطاء!</string>
+    <string name="biometric_vault_title">مصادقة الخزنة</string>
+    <string name="biometric_vault_subtitle">قم بتأكيد الهوية للوصول إلى الخزنة الآمنة</string>
+    <string name="toast_vault_success">تم فتح الخزنة بنجاح</string>
+    <string name="toast_biometric_error">خطأ في المقاييس الحيوية: %s</string>
+    <string name="toast_vpn_started">تم بدء خدمة Juaris VPN</string>
+    <string name="disclosure_dialog_title">إشعار إمكانية الوصول والإشعارات</string>
+    <string name="disclosure_message">تحتاج Juaris إلى الوصول للإشعارات لتصفية رسائل التصيد الاحتيالي محلياً على جهازك.</string>
+    <string name="toast_dialog_error">خطأ في مربع الحوار</string>
+    <string name="toast_vpn_dialog_error">خطأ في مربع حوار VPN</string>
+    <string name="desc_hologram">صورة رمزية مجسمة</string>
+    <string name="welcome_title">أمان الذكاء الاصطناعي من Juaris</string>
+    <string name="welcome_subtitle">حماية متنقلة لامركزية</string>
+    <string name="biometric_login_title">مصادقة تسجيل الدخول</string>
+    <string name="biometric_login_subtitle">قم بالمصادقة للخول إلى نواة Juaris</string>
+    <string name="toast_login_success">تم تسجيل الدخول بنجاح</string>
+    <string name="kernel_title">نواة Juaris</string>
+    <string name="kernel_subtitle">المنطقة الآمنة نشطة</string>
+    <string name="btn_fingerprint_login">تسجيل الدخول بصمة الإصبع</string>
+    <string name="btn_debug_bypass">تجاوز التصحيح</string>
+    <string name="toast_login_aborted">تم إلغاء تسجيل الدخول: %s</string>
+    <string name="log_module_guardian">حارس الأمان</string>
+    <string name="log_desc_phishing_blocked">تم اعتراض تهديد التصيد الاحتيالي</string>
+    <string name="log_details_simulation">تم منع الهجوم المحاكاة بنجاح</string>
+    <string name="toast_threat_neutralized">تم تحييد التهديد!</string>
+    <string name="toast_logs_vault_secured">تم تشفير السجلات بأمان في الخزنة</string>
+    <string name="status_health_title">حالة سلامة النظام</string>
+    <string name="status_health_subtitle">نظرة عامة على حماية النواة في الوقت الفعلي</string>
+    <string name="status_aes_encrypted">مشفر باستخدام AES-256 GCM</string>
+    <string name="status_filters_active">جميع المرشحات النشطة تعمل</string>
+    <string name="card_blocked_caps">محظور</string>
+    <string name="card_data_flow">تدفق البيانات</string>
+    <string name="card_local_only">100% محلي</string>
+    <string name="section_actions">الطوارئ والإجراءات</string>
+    <string name="btn_simulate_phishing">محاكاة هجوم التصيد الاحتيالي</string>
+    <string name="btn_export_vault_logs">تصدير سجلات الخزنة</string>
+    <string name="btn_panic_wipe">مسح الطوارئ (PANIC WIPE)</string>
+    <string name="default_spam_label">رقم مزعج معروف</string>
+    <string name="toast_number_blocked">تم إضافة الرقم إلى القائمة السوداء</string>
+    <string name="toast_number_released">تم إزالة الرقم من القائمة السوداء</string>
+    <string name="toast_camera_started">تم تشغيل كاميرا الإيماءات الهوائية</string>
+    <string name="toast_permission_denied">تم رفض إذن الكاميرا</string>
+    <string name="status_paused">متوقف مؤقتاً</string>
+    <string name="btn_allow_notification_access">السماح بالوصول إلى الإشعارات</string>
 </resources>
-
 
