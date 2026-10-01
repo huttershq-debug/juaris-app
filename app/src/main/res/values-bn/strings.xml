@@ -46,7 +46,7 @@
     <string name="status_ready">সোয়ার্ম সংযোগের জন্য প্রস্তুত</string>
     <string name="status_mesh_active_search">সোয়ার্ম নোড খোঁজা হচ্ছে...</string>
     <string name="toast_mesh_device_discovered">নতুন সোয়ার্ম ডিভাইস আবিষ্কৃত হয়েছে!</string>
-    <string name="status_mesh_connected_format" formatted="false">%s এর সাথে সংযুক্ত (ডিভাইস: %d)</string>
+    <string name="status_mesh_connected_format" formatted="false">%স এর সাথে সংযুক্ত (ডিভাইস: %d)</string>
     <string name="status_mesh_connected_devices_format">সংযুক্ত ডিভাইস: %d</string>
     <string name="status_sent">সফলভাবে সোয়ার্মে বার্তা পাঠানো হয়েছে</string>
     <string name="toast_p2p_started">P2P মেশ নোড সফলভাবে শুরু হয়েছে!</string>
@@ -107,8 +107,6 @@
     <string name="btn_start_audit_scan">অডিট স্ক্যান শুরু করুন</string>
     <string name="mesh_connected">মেশ সংযুক্ত: %s</string>
     <string name="mesh_disconnected">মেশ সংযোগ বিচ্ছিন্ন: %s</string>
-    
-    <!-- Vault & Blacklist Additional Strings -->
     <string name="vault_status_label">ভল্ট স্ট্যাটাস</string>
     <string name="blacklist_page_title">ব্ল্যাকলিস্ট</string>
     <string name="blacklist_page_subtitle">ব্লক করা নম্বর এবং পরিচিতিগুলি পরিচালনা করুন</string>
@@ -117,5 +115,77 @@
     <string name="blacklist_items_title">ব্লক করা এন্ট্রি</string>
     <string name="btn_release">মুক্ত করুন</string>
     <string name="clipboard_page_title">ক্লিপবোর্ড</string>
+    
+    <!-- নতুন Lint স্ট্রিং -->
+    <string name="comm_filter_title">কমিউনিকেশন ফিল্টার</string>
+    <string name="call_prot_title">কল সুরক্ষা</string>
+    <string name="call_prot_desc">সন্দেহজনক কল থেকে সুরক্ষা</string>
+    <string name="sms_prot_title">এসএমএস সুরক্ষা</string>
+    <string name="sms_prot_desc">ফিশিং টেক্সট মেসেজ থেকে সুরক্ষা</string>
+    <string name="email_prot_title">ইমেল সুরক্ষা</string>
+    <string name="email_prot_desc">ক্ষতিকর ইমেল থেকে সুরক্ষা</string>
+    <string name="toast_enable_listener">লিসনার সফলভাবে সক্রিয় করা হয়েছে</string>
+    <string name="offline_vault_title">অফলাইন ভল্ট</string>
+    <string name="offline_vault_desc">সংবেদনশীল ডেটার জন্য নিরাপদ স্থানীয় স্টোরেজ</string>
+    <string name="vault_status_unlocked">ভল্ট আনলক করা হয়েছে</string>
+    <string name="vault_status_locked">ভল্ট লক করা হয়েছে</string>
+    <string name="blacklist_items_count">ব্লক করা আইটেম (%d)</string>
+    <string name="clipboard_security_title">ক্লিপবোর্ড নিরাপত্তা</string>
+    <string name="clipboard_autoclear_title">ক্লিপবোর্ড স্বয়ংক্রিয়ভাবে সাফ করুন</string>
+    <string name="air_gesture_store_notice">ভঙ্গির সেটিংস স্থানীয়ভাবে সংরক্ষিত হয়</string>
+    <string name="toast_sms_active">এসএমএস সুরক্ষা সক্রিয় করা হয়েছে</string>
+    <string name="toast_sms_rejected">এসএমএস ভূমিকা প্রত্যাখ্যাত</string>
+    <string name="toast_notification_granted">বিজ্ঞপ্তির অনুমতি দেওয়া হয়েছে</string>
+    <string name="toast_notification_warning">সুরক্ষার জন্য বিজ্ঞপ্তির অনুমতি প্রয়োজন</string>
+    <string name="toast_calendar_granted">ক্যালেন্ডারের অনুমতি দেওয়া হয়েছে</string>
+    <string name="toast_calendar_warning">স্বায়ত্তশাসিত স্ক্যানের জন্য ক্যালেন্ডারের অনুমতি প্রয়োজন</string>
+    <string name="toast_vpn_granted">ভিপিএন অনুমতি দেওয়া হয়েছে</string>
+    <string name="toast_vpn_rejected">ভিপিএন অনুমতি প্রত্যাখ্যাত</string>
+    <string name="toast_enable_notification_manual">দ দয়া করে ম্যানুয়ালি নোটিফিকেশন লিসনার সক্ষম করুন</string>
+    <string name="emergency_reason_sensor">সেন্সর দ্বারা জরুরি অবস্থা ট্রিগার করা হয়েছে</string>
+    <string name="emergency_reason_manual">ম্যানুয়াল প্যানিক বোতাম ট্রিগার করা হয়েছে</string>
+    <string name="toast_debugger_detected">সতর্কতা: ডিবাগার সনাক্ত হয়েছে!</string>
+    <string name="biometric_vault_title">ভল্ট প্রমাণীকরণ</string>
+    <string name="biometric_vault_subtitle">সুরক্ষিত ভল্ট অ্যাক্সেস করতে পরিচয় নিশ্চিত করুন</string>
+    <string name="toast_vault_success">ভল্ট সফলভাবে আনলক করা হয়েছে</string>
+    <string name="toast_biometric_error">বায়োমেট্রিক ত্রুটি: %s</string>
+    <string name="toast_vpn_started">জুয়ারিস ভিপিএন পরিষেবা শুরু হয়েছে</string>
+    <string name="disclosure_dialog_title">অ্যাক্সেসিবিলিটি এবং নোটিফিকেশন বিজ্ঞপ্তি</string>
+    <string name="disclosure_message">আপনার ডিভাইসে স্থানীয়ভাবে ফিশিং বার্তাগুলি ফিল্টার করতে জুয়ারিস-এর বিজ্ঞপ্তি অ্যাক্সেস প্রয়োজন।</string>
+    <string name="toast_dialog_error">ডায়ালগ ত্রুটি</string>
+    <string name="toast_vpn_dialog_error">ভিপিএন ডায়ালগ ত্রুটি</string>
+    <string name="desc_hologram">হologram অবতার</string>
+    <string name="welcome_title">জুয়ারিস এআই সিকিউরিটি</string>
+    <string name="welcome_subtitle">বিকেন্দ্রীকৃত মোবাইল সুরক্ষা</string>
+    <string name="biometric_login_title">লগইন প্রমাণীকরণ</string>
+    <string name="biometric_login_subtitle">জুয়ারিস কার্নেল প্রবেশ করতে প্রমাণীকরণ করুন</string>
+    <string name="toast_login_success">লগইন সফল</string>
+    <string name="kernel_title">জুয়ারিস কার্নেল</string>
+    <string name="kernel_subtitle">সুরক্ষিত এনক্লেভ সক্রিয়</string>
+    <string name="btn_fingerprint_login">ফিঙ্গারপ্রিন্ট লগইন</string>
+    <string name="btn_debug_bypass">ডিবাগ বাইপাস</string>
+    <string name="toast_login_aborted">লগইন বাতিল: %s</string>
+    <string name="log_module_guardian">নিরাপত্তা অভিভাবক</string>
+    <string name="log_desc_phishing_blocked">ফিশিং হুমকি বাধাগ্রস্ত হয়েছে</string>
+    <string name="log_details_simulation">সিমুলেটেড আক্রমণ সফলভাবে অবরুদ্ধ করা হয়েছে</string>
+    <string name="toast_threat_neutralized">হুমকি নিষ্ক্রিয় করা হয়েছে!</string>
+    <string name="toast_logs_vault_secured">লগগুলি ভল্টে নিরাপদে এনক্রিপ্ট করা হয়েছে</string>
+    <string name="status_health_title">সিস্টেম হেলথ স্ট্যাটাস</string>
+    <string name="status_health_subtitle">রিয়েল-টাইম কার্নেল সুরক্ষা ওভারভিউ</string>
+    <string name="status_aes_encrypted">AES-256 GCM এনক্রিপ্ট করা</string>
+    <string name="status_filters_active">সমস্ত সক্রিয় ফিল্টার চলছে</string>
+    <string name="card_blocked_caps">অবরুদ্ধ</string>
+    <string name="card_data_flow">ডেটা ফ্লো</string>
+    <string name="card_local_only">১০০% স্থানীয়</string>
+    <string name="section_actions">জরুরি অবস্থা এবং অ্যাকশন</string>
+    <string name="btn_simulate_phishing">ফিশিং আক্রমণ সিমুলেট করুন</string>
+    <string name="btn_export_vault_logs">ভল্ট লগ এক্সপোর্ট করুন</string>
+    <string name="btn_panic_wipe">প্যানিক ওয়াইপ (সব মুছে ফেলুন)</string>
+    <string name="default_spam_label">পরিচিত স্প্যাম নম্বর</string>
+    <string name="toast_number_blocked">ব্ল্যাকলিস্টে নম্বর যোগ করা হয়েছে</string>
+    <string name="toast_number_released">ব্ল্যাকলিস্ট থেকে নম্বর সরানো হয়েছে</string>
+    <string name="toast_camera_started">এয়ার জেসচার ক্যামেরা শুরু হয়েছে</string>
+    <string name="toast_permission_denied">ক্যামেরার অনুমতি প্রত্যাখ্যাত</string>
+    <string name="status_paused">বিরতি দেওয়া হয়েছে</string>
+    <string name="btn_allow_notification_access">বিজ্ঞপ্তি অ্যাক্সেসের অনুমতি দিন</string>
 </resources>
-
