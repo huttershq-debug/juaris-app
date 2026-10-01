@@ -188,5 +188,25 @@
     <string name="toast_permission_denied">कैमरा अनुमति अस्वीकार कर दी गई</string>
     <string name="status_paused">रोक दिया गया</string>
     <string name="btn_allow_notification_access">अधिसूचना एक्सेस की अनुमति दें</string>
+    <string name="alert_financial_title">वित्तीय चेतावनी</string>
+    <string name="alert_service_title">सेवा चेतावनी</string>
+    <string name="alert_anniversary_title">सालगिरह अनुस्मारक</string>
+    <string name="alert_birthday_title">जन्मदिन अनुस्मारक</string>
+    <string name="alert_medical_title">चिकित्सा नियुक्ति चेतावनी</string>
+    <string name="alert_travel_title">यात्रा सुरक्षा चेतावनी</string>
+    <string name="alert_general_title">सामान्य सुरक्षा चेतावनी</string>
+    <string name="emergency_reason_default">मैनुअल आपातकालीन ट्रिगर</string>
+    <string name="emergency_channel_name">आपातकालीन चैनल</string>
+    <string name="emergency_notification_title">आपातकालीन मोड सक्रिय है</string>
+    <string name="emergency_notification_text">सिस्टम प्राथमिकताएं और वॉल्ट सुरक्षित किए जा रहे हैं।</string>
+    <string name="emergency_screen_heading">आपातकालीन प्रोटोकॉल</string>
+    <string name="emergency_screen_countdown_desc">उल्टी गिनती में सुरक्षित वाइप निष्पादित हो रहा है...</string>
+    <string name="btn_emergency_call_now">अभी आपातकालीन कॉल करें</string>
+    <string name="btn_emergency_cancel">आपातकाल रद्द करें</string>
+    <string name="disclosure_dialog_message">स्थानीय रूप से आपके डिवाइस की सुरक्षा के लिए जुआरिस को सूचना/एक्सेसिबिलिटी एक्सेस की आवश्यकता है।</string>
+    <string name="toast_vault_locked">वॉल्ट सफलतापूर्वक लॉक हो गया</string>
+    <string name="protection_modules_title">सुरक्षा मॉड्यूल</string>
+    <string name="protection_modules_subtitle">सक्रिय वास्तविक समय सुरक्षा फ़िल्टर</string>
+    <string name="toast_enable_listener_manual">कृपया सेटिंग्स में नोटिफिकेशन लिसनर सक्षम करें</string>
 </resources>
 
