@@ -79,7 +79,7 @@
     <string name="air_gesture_status">Sensor pronto</string>
     <string name="air_gesture_action">Disparar ação</string>
     
-    <!-- Novas strings de IU -->
+    <!-- UI Strings adicionais -->
     <string name="mesh_page_title">Rede Mesh</string>
     <string name="mesh_page_subtitle">Comunicação descentralizada</string>
     <string name="legal_page_title">Informações legais</string>
@@ -91,8 +91,6 @@
     <string name="air_gesture_page_subtitle">Controle sem contato</string>
     <string name="air_gesture_toggle_label">Ativar gestos no ar</string>
     <string name="air_gesture_store_notification">Salvar configurações de gestos</string>
-    
-    <!-- Strings de área de transferência, permissões, auditoria e mesh -->
     <string name="clipboard_page_subtitle">Proteção e histórico da área de transferência</string>
     <string name="clipboard_security_status">Monitoramento da área de transferência ativo</string>
     <string name="clipboard_autoclear_toggle">Limpar automaticamente a área de transferência</string>
@@ -109,5 +107,16 @@
     <string name="btn_start_audit_scan">Iniciar verificação de auditoria</string>
     <string name="mesh_connected">Mesh conectado: %s</string>
     <string name="mesh_disconnected">Mesh desconectado: %s</string>
+    
+    <!-- Vault & Blacklist Additional Strings -->
+    <string name="vault_status_label">Status do Cofre</string>
+    <string name="blacklist_page_title">Lista Negra</string>
+    <string name="blacklist_page_subtitle">Gerenciar números e contatos bloqueados</string>
+    <string name="blacklist_add_title">Adicionar à lista negra</string>
+    <string name="label_phone_number">Número de telefone</string>
+    <string name="blacklist_items_title">Entradas bloqueadas</string>
+    <string name="btn_release">Liberar</string>
+    <string name="clipboard_page_title">Área de transferência</string>
 </resources>
+
 
