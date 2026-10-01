@@ -90,6 +90,23 @@
     <string name="air_gesture_page_subtitle">কন্ট্যাক্টলেস নিয়ন্ত্রণ</string>
     <string name="air_gesture_toggle_label">এয়ার গেসচার সক্ষম করুন</string>
     <string name="air_gesture_store_notification">গেসচার সেটিংস সংরক্ষণ করুন</string>
+    <!-- ক্লিপবোর্ড, অনুমতি, অডিট এবং মেশ স্ট্রিং -->
+    <string name="clipboard_page_subtitle">ক্লিপবোর্ড সুরক্ষা এবং ইতিহাস</string>
+    <string name="clipboard_security_status">ক্লিপবোর্ড মনিটরিং সক্রিয়</string>
+    <string name="clipboard_autoclear_toggle">ক্লিপবোর্ড স্বয়ংক্রিয়ভাবে সাফ করুন</string>
+    <string name="clipboard_autoclear_desc">সংবেদনশীল ডেটা স্বয়ংক্রিয়ভাবে মুছে ফেলুন</string>
+    <string name="toast_clipboard_cleared">ক্লিপবোর্ড সফলভাবে সাফ করা হয়েছে</string>
+    <string name="btn_clear_now">এখনই সাফ করুন</string>
+    <string name="permissions_page_title">অ্যাপের অনুমতিসমূহ</string>
+    <string name="permissions_page_subtitle">নিরাপত্তা অ্যাক্সেস অধিকার পরিচালনা করুন</string>
+    <string name="email_listener_card_title">ইমেল ফিশিং শিল্ড</string>
+    <string name="email_listener_card_desc">ইনকামিং মেইল ​​কন্টেন্ট স্ক্যান করা হচ্ছে</string>
+    <string name="toast_settings_error">সেits সংরক্ষণ করতে ত্রুটি (বা সেটিংস সংর్రণে ত্রুটি)</string>
+    <string name="btn_allow_notification">বিজ্ঞপ্তি অনুমতি দিন</string>
+    <string name="toast_audit_ready">নিরাপত্তা অডিট প্রস্তুত</string>
+    <string name="btn_start_audit_scan">অডিট স্ক্যান শুরু করুন</string>
+    <string name="mesh_connected">মেশ সংযুক্ত</string>
+    <string name="mesh_disconnected">মেশ সংযোগ বিচ্ছিন্ন</string>
 </resources>
 
 
