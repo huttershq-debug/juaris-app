@@ -188,5 +188,25 @@
     <string name="toast_permission_denied">Permissão da câmera negada</string>
     <string name="status_paused">Pausado</string>
     <string name="btn_allow_notification_access">Permitir acesso a notificações</string>
+    <string name="alert_financial_title">Alerta financeiro</string>
+    <string name="alert_service_title">Alerta de serviço</string>
+    <string name="alert_anniversary_title">Lembrete de aniversário</string>
+    <string name="alert_birthday_title">Lembrete de aniversário</string>
+    <string name="alert_medical_title">Alerta de consulta médica</string>
+    <string name="alert_travel_title">Alerta de segurança de viagem</string>
+    <string name="alert_general_title">Alerta de segurança geral</string>
+    <string name="emergency_reason_default">Acionador de emergência manual</string>
+    <string name="emergency_channel_name">Canal de emergência</string>
+    <string name="emergency_notification_title">Modo de emergência ativo</string>
+    <string name="emergency_notification_text">As preferências do sistema e o cofre estão sendo protegidos.</string>
+    <string name="emergency_screen_heading">PROTOCOLO DE EMERGÊNCIA</string>
+    <string name="emergency_screen_countdown_desc">Apagamento seguro executando em contagem regressiva...</string>
+    <string name="btn_emergency_call_now">Ligar para a emergência agora</string>
+    <string name="btn_emergency_cancel">Cancelar emergência</string>
+    <string name="disclosure_dialog_message">O Juaris requer acesso a notificações/acessibilidade para proteger seu dispositivo localmente.</string>
+    <string name="toast_vault_locked">Cofre bloqueado com sucesso</string>
+    <string name="protection_modules_title">Módulos de proteção</string>
+    <string name="protection_modules_subtitle">Filtros de segurança ativos em tempo real</string>
+    <string name="toast_enable_listener_manual">Ative o listener de notificações nas configurações</string>
 </resources>
 
