@@ -208,6 +208,5 @@
     <string name="protection_modules_title">وحدات الحماية</string>
     <string name="protection_modules_subtitle">مرشحات الأمان النشطة في الوقت الفعلي</string>
     <string name="toast_enable_listener_manual">يرجى تمكين مستمع الإشعارات في الإعدادات</string>
-    <string name="status_ready">جاهز</string>
 </resources>
 
