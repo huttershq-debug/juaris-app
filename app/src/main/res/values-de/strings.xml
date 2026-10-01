@@ -78,17 +78,17 @@
     <string name="air_gesture_desc">Nutze kontaktlose Gesten zur Navigation</string>
     <string name="air_gesture_status">Sensor bereit</string>
     <string name="air_gesture_action">Aktion auslösen</string>
-    <!-- Nuevos strings de UI -->
-    <string name="mesh_page_title">Red de malla</string>
-    <string name="mesh_page_subtitle">Comunicación descentralizada</string>
-    <string name="legal_page_title">Información legal</string>
-    <string name="legal_page_subtitle">Avisos importantes</string>
-    <string name="privacy_title">Política de privacidad</string>
-    <string name="privacy_link_text">Leer política completa</string>
-    <string name="imprint_name_val">Detalles de la empresa</string>
-    <string name="air_gesture_page_title">Gestos en el aire</string>
-    <string name="air_gesture_page_subtitle">Control sin contacto</string>
-    <string name="air_gesture_toggle_label">Activar gestos en el aire</string>
-    <string name="air_gesture_store_notification">Guardar configuración de gestos</string>
+     <!-- Neue UI-Strings -->
+    <string name="mesh_page_title">Mesh-Netzwerk</string>
+    <string name="mesh_page_subtitle">Dezentrale Kommunikation</string>
+    <string name="legal_page_title">Rechtliche Hinweise</string>
+    <string name="legal_page_subtitle">Wichtige Informationen</string>
+    <string name="privacy_title">Datenschutzerklärung</string>
+    <string name="privacy_link_text">Vollständige Richtlinie lesen</string>
+    <string name="imprint_name_val">Unternehmensdetails</string>
+    <string name="air_gesture_page_title">Luftgesten</string>
+    <string name="air_gesture_page_subtitle">Kontaktlose Steuerung</string>
+    <string name="air_gesture_toggle_label">Luftgesten aktivieren</string>
+    <string name="air_gesture_store_notification">Gesteneinstellungen speichern</string>
 </resources>
 
