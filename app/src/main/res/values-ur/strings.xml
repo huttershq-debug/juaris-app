@@ -78,5 +78,16 @@
     <string name="air_gesture_desc">نیویگیٹ کرنے کے لیے بغیر چھوئے اشارے استعمال کریں</string>
     <string name="air_gesture_status">سینسر تیار ہے</string>
     <string name="air_gesture_action">عمل شروع کریں</string>
+     <string name="mesh_page_title">میش نیٹ ورک</string>
+    <string name="mesh_page_subtitle">غیرمرکزی مواصلات</string>
+    <string name="legal_page_title">قانونی معلومات</string>
+    <string name="legal_page_subtitle">اہم نوٹس</string>
+    <string name="privacy_title">رازداری کی پالیسی</string>
+    <string name="privacy_link_text">مکمل پالیسی پڑھیں</string>
+    <string name="imprint_name_val">کمپنی کی تفصیلات</string>
+    <string name="air_gesture_page_title">ایئر جেসچرز</string>
+    <string name="air_gesture_page_subtitle">بغیر چھوئے کنٹرول</string>
+    <string name="air_gesture_toggle_label">ایئر جেসچرز فعال کریں</string>
+    <string name="air_gesture_store_notification">جیسچر کی ترتیبات محفوظ کریں</string>
 </resources>
 
