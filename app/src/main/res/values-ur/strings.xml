@@ -89,5 +89,21 @@
     <string name="air_gesture_page_subtitle">بغیر چھوئے کنٹرول</string>
     <string name="air_gesture_toggle_label">ایئر جেসچرز فعال کریں</string>
     <string name="air_gesture_store_notification">جیسچر کی ترتیبات محفوظ کریں</string>
+    <string name="clipboard_page_subtitle">کلپ بورڈ کا تحفظ اور سرگزشت</string>
+    <string name="clipboard_security_status">کلپ بورڈ مانیٹرنگ فعال ہے</string>
+    <string name="clipboard_autoclear_toggle">کلپ بورڈ خودکار طور پر صاف کریں</string>
+    <string name="clipboard_autoclear_desc">حساس ڈیٹا خود بخود صاف کریں</string>
+    <string name="toast_clipboard_cleared">کلپ بورڈ کامیابی سے صاف ہو گیا</string>
+    <string name="btn_clear_now">ابھی صاف کریں</string>
+    <string name="permissions_page_title">ایپ کی اجازتیں</string>
+    <string name="permissions_page_subtitle">سیکیورٹی تک رسائی کے حقوق کا انتظام کریں</string>
+    <string name="email_listener_card_title">ای میل فِشنگ شیلڈ</string>
+    <string name="email_listener_card_desc">آنے والے میل کے مواد کو اسکین کیا جا رہا ہے</string>
+    <string name="toast_settings_error">ترتیبات محفوظ کرنے میں خرابی</string>
+    <string name="btn_allow_notification">اطلاع کی اجازت دیں</string>
+    <string name="toast_audit_ready">سیکیورٹی آڈٹ تیار ہے</string>
+    <string name="btn_start_audit_scan">آڈٹ اسکین شروع کریں</string>
+    <string name="mesh_connected">میش جڑ گیا</string>
+    <string name="mesh_disconnected">میش منقطع ہو گیا</string>
 </resources>
 
