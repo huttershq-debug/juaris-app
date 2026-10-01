@@ -79,7 +79,7 @@
     <string name="air_gesture_status">Sensor bereit</string>
     <string name="air_gesture_action">Aktion auslösen</string>
     
-    <!-- Neue UI-Strings -->
+    <!-- UI & fehlende Strings -->
     <string name="mesh_page_title">Mesh-Netzwerk</string>
     <string name="mesh_page_subtitle">Dezentrale Kommunikation</string>
     <string name="legal_page_title">Rechtliche Hinweise</string>
@@ -91,8 +91,6 @@
     <string name="air_gesture_page_subtitle">Kontaktlose Steuerung</string>
     <string name="air_gesture_toggle_label">Luftgesten aktivieren</string>
     <string name="air_gesture_store_notification">Gesteneinstellungen speichern</string>
-    
-    <!-- Zwischenablage, Berechtigungen, Audit & Mesh Strings -->
     <string name="clipboard_page_subtitle">Zwischenablagen-Schutz und Verlauf</string>
     <string name="clipboard_security_status">Zwischenablagen-Überwachung aktiv</string>
     <string name="clipboard_autoclear_toggle">Zwischenablage automatisch leeren</string>
@@ -109,6 +107,15 @@
     <string name="btn_start_audit_scan">Audit-Scan starten</string>
     <string name="mesh_connected">Mesh verbunden: %s</string>
     <string name="mesh_disconnected">Mesh getrennt: %s</string>
+    
+    <!-- Vault & Blacklist Additional Strings -->
+    <string name="vault_status_label">Tresor-Status</string>
+    <string name="blacklist_page_title">Sperrliste</string>
+    <string name="blacklist_page_subtitle">Verwalte gesperrte Nummern und Kontakte</string>
+    <string name="blacklist_add_title">Nummer zur Sperrliste hinzufügen</string>
+    <string name="label_phone_number">Telefonnummer</string>
+    <string name="blacklist_items_title">Gesperrte Einträge</string>
+    <string name="btn_release">Freigeben</string>
+    <string name="clipboard_page_title">Zwischenablage</string>
 </resources>
-
 
