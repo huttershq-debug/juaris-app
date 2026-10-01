@@ -574,7 +574,7 @@ fun JuarisMainDashboard(
     val liveLogs by logsFlow.collectAsState(initial = emptyList())
 
     var gestureEnabled by remember { mutableStateOf(false) }
-    var gestureStatusText by remember { mutableStateOf(stringResource(R.string.status_ready)) }
+    var gestureStatusText by remember { mutableStateOf(context.getString(R.string.status_ready)) }
 
     val tabs = listOf(
         stringResource(R.string.tab_status),
