@@ -79,7 +79,7 @@
     <string name="air_gesture_status">सेंसर तैयार है</string>
     <string name="air_gesture_action">एक्शन ट्रिगर करें</string>
     
-    <!-- नए UI स्ट्रिंग्स -->
+    <!-- अतिरिक्त UI स्ट्रिंग्स -->
     <string name="mesh_page_title">मेश नेटवर्क</string>
     <string name="mesh_page_subtitle">विकेंद्रीकृत संचार</string>
     <string name="legal_page_title">कानूनी जानकारी</string>
@@ -91,8 +91,6 @@
     <string name="air_gesture_page_subtitle">संपर्क रहित नियंत्रण</string>
     <string name="air_gesture_toggle_label">एयर जेस्चर सक्षम करें</string>
     <string name="air_gesture_store_notification">जेस्चर सेटिंग्स सहेजें</string>
-    
-    <!-- क्लिपबोर्ड, अनुमति, ऑडिट और मेश स्ट्रिंग्स -->
     <string name="clipboard_page_subtitle">क्लिपबोर्ड सुरक्षा और इतिहास</string>
     <string name="clipboard_security_status">क्लिपबोर्ड मॉनिटरिंग सक्रिय</string>
     <string name="clipboard_autoclear_toggle">क्लिपबोर्ड स्वतः साफ़ करें</string>
@@ -109,6 +107,15 @@
     <string name="btn_start_audit_scan">ऑडिट स्कैन शुरू करें</string>
     <string name="mesh_connected">मेश कनेक्टेड: %s</string>
     <string name="mesh_disconnected">मेश डिस्कनेक्टेड: %s</string>
+    
+    <!-- Vault & Blacklist Additional Strings -->
+    <string name="vault_status_label">वॉल्ट स्थिति</string>
+    <string name="blacklist_page_title">ब्लैकलिस्ट</string>
+    <string name="blacklist_page_subtitle">अवरोधित नंबरों और संपर्कों का प्रबंधन करें</string>
+    <string name="blacklist_add_title">ब्लैकलिस्ट में जोड़ें</string>
+    <string name="label_phone_number">फ़ोन नंबर</string>
+    <string name="blacklist_items_title">अवरोधित प्रविष्टियाँ</string>
+    <string name="btn_release">मुक्त करें</string>
+    <string name="clipboard_page_title">क्लिपबोर्ड</string>
 </resources>
-
 
