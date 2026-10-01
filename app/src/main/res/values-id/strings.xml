@@ -31,7 +31,7 @@
     <string name="vpn_disclosure_message">Juaris menggunakan VpnService lokal untuk mendeteksi phishing dan malware langsung di perangkat Anda.\n\nSemua data tetap 100% lokal. Tidak ada yang dikirim ke server eksternal atau cloud.</string>
     <string name="btn_understood">Mengerti &amp; Aktifkan</string>
     <string name="btn_cancel">Batal</string>
-    
+   
     <!-- P2P Swarm & Mesh Strings -->
     <string name="p2p_swarm_title">Mesh Swarm Juaris (P2P)</string>
     <string name="p2p_swarm_subtitle">Komunikasi terdesentralisasi yang aman tanpa internet</string>
@@ -78,18 +78,7 @@
     <string name="air_gesture_desc">Gunakan gestur nirkontak untuk navigasi</string>
     <string name="air_gesture_status">Sensor Siap</string>
     <string name="air_gesture_action">Picu Aksi</string>
-    <!-- String UI Baru -->
-    <string name="mesh_page_title">Jaringan Mesh</string>
-    <string name="mesh_page_subtitle">Komunikasi terdesentralisasi</string>
-    <string name="legal_page_title">Informasi Hukum</string>
-    <string name="legal_page_subtitle">Pemberitahuan penting</string>
-    <string name="privacy_title">Kebijakan Privasi</string>
-    <string name="privacy_link_text">Baca kebijakan lengkap</string>
-    <string name="imprint_name_val">Detail Perusahaan</string>
-    <string name="air_gesture_page_title">Gestur Udara</string>
-    <string name="air_gesture_page_subtitle">Kontrol nirkontak</string>
-    <string name="air_gesture_toggle_label">Aktifkan Gestur Udara</string>
-    <string name="air_gesture_store_notification">Simpan Pengaturan Gestur</string>
+
     <!-- String UI Baru -->
     <string name="mesh_page_title">Jaringan Mesh</string>
     <string name="mesh_page_subtitle">Komunikasi terdesentralisasi</string>
