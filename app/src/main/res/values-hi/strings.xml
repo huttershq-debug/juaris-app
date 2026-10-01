@@ -90,5 +90,22 @@
     <string name="air_gesture_page_subtitle">संपर्क रहित नियंत्रण</string>
     <string name="air_gesture_toggle_label">एयर जेस्चर सक्षम करें</string>
     <string name="air_gesture_store_notification">जेस्चर सेटिंग्स सहेजें</string>
+    <!-- क्लिपबोर्ड, अनुमति, ऑडिट और मेश स्ट्रिंग्स -->
+    <string name="clipboard_page_subtitle">क्लिपबोर्ड सुरक्षा और इतिहास</string>
+    <string name="clipboard_security_status">क्लिपबोर्ड मॉनिटरिंग सक्रिय</string>
+    <string name="clipboard_autoclear_toggle">क्लिपबोर्ड स्वतः साफ़ करें</string>
+    <string name="clipboard_autoclear_desc">संवेदनशील डेटा स्वचालित रूप से साफ़ करें</string>
+    <string name="toast_clipboard_cleared">क्लिपबोर्ड सफलतापूर्वक साफ़ हो गया</string>
+    <string name="btn_clear_now">अभी साफ़ करें</string>
+    <string name="permissions_page_title">ऐप अनुमतियां</string>
+    <string name="permissions_page_subtitle">सुरक्षा पहुंच अधिकार प्रबंधित करें</string>
+    <string name="email_listener_card_title">ईमेल फ़िशिंग ढाल</string>
+    <string name="email_listener_card_desc">आने वाली मेल सामग्री को स्कैन किया जा रहा है</string>
+    <string name="toast_settings_error">सेटिंग्स सहेजने में त्रुटि</string>
+    <string name="btn_allow_notification">अधिसूचना की अनुमति दें</string>
+    <string name="toast_audit_ready">सुरक्षा ऑडिट तैयार है</string>
+    <string name="btn_start_audit_scan">ऑडिट स्कैन शुरू करें</string>
+    <string name="mesh_connected">मेश कनेक्टेड</string>
+    <string name="mesh_disconnected">मेश डिस्कनेक्टेड</string>
 </resources>
 
