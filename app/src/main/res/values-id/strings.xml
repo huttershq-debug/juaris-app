@@ -79,7 +79,7 @@
     <string name="air_gesture_status">Sensor Siap</string>
     <string name="air_gesture_action">Picu Aksi</string>
     
-    <!-- String UI Baru -->
+    <!-- String UI Tambahan -->
     <string name="mesh_page_title">Jaringan Mesh</string>
     <string name="mesh_page_subtitle">Komunikasi terdesentralisasi</string>
     <string name="legal_page_title">Informasi Hukum</string>
@@ -91,8 +91,6 @@
     <string name="air_gesture_page_subtitle">Kontrol nirkontak</string>
     <string name="air_gesture_toggle_label">Aktifkan Gestur Udara</string>
     <string name="air_gesture_store_notification">Simpan Pengaturan Gestur</string>
-    
-    <!-- String Papan Klip, Izin, Audit & Mesh -->
     <string name="clipboard_page_subtitle">Perlindungan dan riwayat papan klip</string>
     <string name="clipboard_security_status">Pemantauan papan klip aktif</string>
     <string name="clipboard_autoclear_toggle">Hapus otomatis papan klip</string>
@@ -109,6 +107,14 @@
     <string name="btn_start_audit_scan">Mulai Pemindaian Audit</string>
     <string name="mesh_connected">Mesh Terhubung: %s</string>
     <string name="mesh_disconnected">Mesh Terputus: %s</string>
+    
+    <!-- Vault & Blacklist Additional Strings -->
+    <string name="vault_status_label">Status Vault</string>
+    <string name="blacklist_page_title">Daftar Hitam</string>
+    <string name="blacklist_page_subtitle">Kelola nomor dan kontak yang diblokir</string>
+    <string name="blacklist_add_title">Tambahkan ke Daftar Hitam</string>
+    <string name="label_phone_number">Nomor Telepon</string>
+    <string name="blacklist_items_title">Entri yang Diblokir</string>
+    <string name="btn_release">Lepaskan</string>
+    <string name="clipboard_page_title">Papan Klip</string>
 </resources>
-
-
