@@ -79,7 +79,7 @@
     <string name="air_gesture_status">সেন্সর প্রস্তুত</string>
     <string name="air_gesture_action">অ্যাকশন ট্রিগার করুন</string>
     
-    <!-- নতুন UI স্ট্রিং -->
+    <!-- অতিরিক্ত UI স্ট্রিং -->
     <string name="mesh_page_title">মেশ নেটওয়ার্ক</string>
     <string name="mesh_page_subtitle">বিকেন্দ্রীকৃত যোগাযোগ</string>
     <string name="legal_page_title">আইনি তথ্য</string>
@@ -91,8 +91,6 @@
     <string name="air_gesture_page_subtitle">কন্ট্যাক্টলেস নিয়ন্ত্রণ</string>
     <string name="air_gesture_toggle_label">এয়ার গেসচার সক্ষম করুন</string>
     <string name="air_gesture_store_notification">গেসচার সেটিংস সংরক্ষণ করুন</string>
-    
-    <!-- ক্লিপবোর্ড, অনুমতি, অডিট এবং মেশ স্ট্রিং -->
     <string name="clipboard_page_subtitle">ক্লিপবোর্ড সুরক্ষা এবং ইতিহাস</string>
     <string name="clipboard_security_status">ক্লিপবোর্ড মনিটরিং সক্রিয়</string>
     <string name="clipboard_autoclear_toggle">ক্লিপবোর্ড স্বয়ংক্রিয়ভাবে সাফ করুন</string>
@@ -109,5 +107,15 @@
     <string name="btn_start_audit_scan">অডিট স্ক্যান শুরু করুন</string>
     <string name="mesh_connected">মেশ সংযুক্ত: %s</string>
     <string name="mesh_disconnected">মেশ সংযোগ বিচ্ছিন্ন: %s</string>
+    
+    <!-- Vault & Blacklist Additional Strings -->
+    <string name="vault_status_label">ভল্ট স্ট্যাটাস</string>
+    <string name="blacklist_page_title">ব্ল্যাকলিস্ট</string>
+    <string name="blacklist_page_subtitle">ব্লক করা নম্বর এবং পরিচিতিগুলি পরিচালনা করুন</string>
+    <string name="blacklist_add_title">ব্ল্যাকলিস্টে যোগ করুন</string>
+    <string name="label_phone_number">ফোন নম্বর</string>
+    <string name="blacklist_items_title">ব্লক করা এন্ট্রি</string>
+    <string name="btn_release">মুক্ত করুন</string>
+    <string name="clipboard_page_title">ক্লিপবোর্ড</string>
 </resources>
 
