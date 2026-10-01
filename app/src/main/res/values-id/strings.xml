@@ -188,6 +188,26 @@
     <string name="toast_permission_denied">Izin kamera ditolak</string>
     <string name="status_paused">Dijeda</string>
     <string name="btn_allow_notification_access">Izinkan Akses Notifikasi</string>
+    <string name="alert_financial_title">Peringatan Keuangan</string>
+    <string name="alert_service_title">Peringatan Layanan</string>
+    <string name="alert_anniversary_title">Pengingat Hari Jadi</string>
+    <string name="alert_birthday_title">Pengingat Ulang Tahun</string>
+    <string name="alert_medical_title">Peringatan Janji Medis</string>
+    <string name="alert_travel_title">Peringatan Keamanan Perjalanan</string>
+    <string name="alert_general_title">Peringatan Keamanan Umum</string>
+    <string name="emergency_reason_default">Pemicu darurat manual</string>
+    <string name="emergency_channel_name">Saluran Darurat</string>
+    <string name="emergency_notification_title">Mode Darurat Aktif</string>
+    <string name="emergency_notification_text">Preferensi sistem dan vault sedang diamankan.</string>
+    <string name="emergency_screen_heading">PROTOKOL DARURAT</string>
+    <string name="emergency_screen_countdown_desc">Penghapusan aman sedang berjalan dalam hitungan mundur...</string>
+    <string name="btn_emergency_call_now">Panggil Darurat Sekarang</string>
+    <string name="btn_emergency_cancel">Batalkan Darurat</string>
+    <string name="disclosure_dialog_message">Juaris memerlukan akses notifikasi/aksesibilitas untuk melindungi perangkat Anda secara lokal.</string>
+    <string name="toast_vault_locked">Vault berhasil dikunci</string>
+    <string name="protection_modules_title">Modul Perlindungan</string>
+    <string name="protection_modules_subtitle">Filter keamanan waktu nyata aktif</string>
+    <string name="toast_enable_listener_manual">Harap aktifkan pendengar notifikasi di pengaturan</string>
 </resources>
 
 
