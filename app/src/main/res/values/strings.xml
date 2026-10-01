@@ -79,7 +79,7 @@
     <string name="air_gesture_status">Sensor Ready</string>
     <string name="air_gesture_action">Trigger Action</string>
     
-    <!-- UI & Missing Build Reference Strings -->
+    <!-- UI & Additional Strings -->
     <string name="mesh_page_title">Mesh Network</string>
     <string name="mesh_page_subtitle">Decentralized communication</string>
     <string name="legal_page_title">Legal Information</string>
@@ -107,8 +107,6 @@
     <string name="btn_start_audit_scan">Start Audit Scan</string>
     <string name="mesh_connected">Mesh Connected: %s</string>
     <string name="mesh_disconnected">Mesh Disconnected: %s</string>
-    
-    <!-- Vault & Blacklist Additional Strings -->
     <string name="vault_status_label">Vault Status</string>
     <string name="blacklist_page_title">Blacklist</string>
     <string name="blacklist_page_subtitle">Manage blocked numbers and contacts</string>
@@ -117,5 +115,78 @@
     <string name="blacklist_items_title">Blocked Entries</string>
     <string name="btn_release">Release</string>
     <string name="clipboard_page_title">Clipboard</string>
+    
+    <!-- Newly Caught Missing Strings from MainActivity & AirGesturePage -->
+    <string name="comm_filter_title">Communication Filter</string>
+    <string name="call_prot_title">Call Protection</string>
+    <string name="call_prot_desc">Protect against suspicious calls</string>
+    <string name="sms_prot_title">SMS Protection</string>
+    <string name="sms_prot_desc">Protect against phishing text messages</string>
+    <string name="email_prot_title">Email Protection</string>
+    <string name="email_prot_desc">Protect against malicious emails</string>
+    <string name="toast_enable_listener">Listener successfully enabled</string>
+    <string name="offline_vault_title">Offline Vault</string>
+    <string name="offline_vault_desc">Secure local storage for sensitive data</string>
+    <string name="vault_status_unlocked">Vault Unlocked</string>
+    <string name="vault_status_locked">Vault Locked</string>
+    <string name="blacklist_items_count">Blocked Items (%d)</string>
+    <string name="clipboard_security_title">Clipboard Security</string>
+    <string name="clipboard_autoclear_title">Auto-clear Clipboard</string>
+    <string name="air_gesture_store_notice">Gesture settings are stored locally</string>
+    <string name="toast_sms_active">SMS Protection activated</string>
+    <string name="toast_sms_rejected">SMS Role rejected</string>
+    <string name="toast_notification_granted">Notification permission granted</string>
+    <string name="toast_notification_warning">Notification permission required for protection</string>
+    <string name="toast_calendar_granted">Calendar permission granted</string>
+    <string name="toast_calendar_warning">Calendar permission needed for autonomous scan</string>
+    <string name="toast_vpn_granted">VPN permission granted</string>
+    <string name="toast_vpn_rejected">VPN permission rejected</string>
+    <string name="toast_enable_notification_manual">Please enable notification listener manually</string>
+    <string name="emergency_reason_sensor">Emergency triggered by sensor</string>
+    <string name="emergency_reason_manual">Manual panic button triggered</string>
+    <string name="toast_debugger_detected">Warning: Debugger detected!</string>
+    <string name="biometric_vault_title">Vault Authentication</string>
+    <string name="biometric_vault_subtitle">Confirm identity to access secure vault</string>
+    <string name="toast_vault_success">Vault unlocked successfully</string>
+    <string name="toast_biometric_error">Biometric error: %s</string>
+    <string name="toast_vpn_started">Juaris VPN Service started</string>
+    <string name="disclosure_dialog_title">Accessibility &amp; Notification Notice</string>
+    <string name="disclosure_message">Juaris needs notification access to filter out phishing messages locally on your device.</string>
+    <string name="toast_dialog_error">Dialog error</string>
+    <string name="toast_vpn_dialog_error">VPN Dialog error</string>
+    <string name="desc_hologram">Hologram Avatar</string>
+    <string name="welcome_title">Juaris AI Security</string>
+    <string name="welcome_subtitle">Decentralized Mobile Protection</string>
+    <string name="biometric_login_title">Login Authentication</string>
+    <string name="biometric_login_subtitle">Authenticate to enter Juaris Kernel</string>
+    <string name="toast_login_success">Login successful</string>
+    <string name="kernel_title">Juaris Kernel</string>
+    <string name="kernel_subtitle">Secure Enclave Active</string>
+    <string name="btn_fingerprint_login">Fingerprint Login</string>
+    <string name="btn_debug_bypass">Debug Bypass</string>
+    <string name="toast_login_aborted">Login aborted: %s</string>
+    <string name="log_module_guardian">Security Guardian</string>
+    <string name="log_desc_phishing_blocked">Phishing threat intercepted</string>
+    <string name="log_details_simulation">Simulated attack blocked successfully</string>
+    <string name="toast_threat_neutralized">Threat neutralized!</string>
+    <string name="toast_logs_vault_secured">Logs securely encrypted in Vault</string>
+    <string name="status_health_title">System Health Status</string>
+    <string name="status_health_subtitle">Real-time kernel protection overview</string>
+    <string name="status_aes_encrypted">AES-256 GCM Encrypted</string>
+    <string name="status_filters_active">All active filters running</string>
+    <string name="card_blocked_caps">BLOCKED</string>
+    <string name="card_data_flow">DATA FLOW</string>
+    <string name="card_local_only">100% Local</string>
+    <string name="section_actions">Emergency &amp; Actions</string>
+    <string name="btn_simulate_phishing">Simulate Phishing Attack</string>
+    <string name="btn_export_vault_logs">Export Vault Logs</string>
+    <string name="btn_panic_wipe">PANIC WIPE</string>
+    <string name="default_spam_label">Known Spam Number</string>
+    <string name="toast_number_blocked">Number added to blacklist</string>
+    <string name="toast_number_released">Number removed from blacklist</string>
+    <string name="toast_camera_started">Air Gesture Camera started</string>
+    <string name="toast_permission_denied">Camera permission denied</string>
+    <string name="status_paused">Paused</string>
+    <string name="btn_allow_notification_access">Allow Notification Access</string>
 </resources>
 
