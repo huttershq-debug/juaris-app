@@ -21,14 +21,16 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
 
     companion object {
         private const val CHANNEL_ID = "juaris_life_companion_alerts"
+        private const val NOTIFICATION_BASE_ID = 5000 // Basis-ID für dynamische Benachrichtigungen
     }
 
     override suspend fun doWork(): Result {
         return withContext(Dispatchers.IO) {
             try {
                 val context = applicationContext
-                val db = JuarisDatabase.getDatabase(context)
-
+                
+                // PERFORMANCE-KORREKTUR 1: Datenbank-Initialisierung verschoben. 
+                // Wenn keine Rechte da sind, sparen wir uns den schweren DB-Aufruf komplett!
                 if (ContextCompat.checkSelfPermission(
                         context,
                         android.Manifest.permission.READ_CALENDAR
@@ -36,6 +38,8 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
                 ) {
                     return@withContext Result.success()
                 }
+
+                val db = JuarisDatabase.getDatabase(context)
 
                 val calendar = Calendar.getInstance().apply {
                     set(Calendar.HOUR_OF_DAY, 0)
@@ -57,7 +61,8 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
                 val projection = arrayOf(
                     CalendarContract.Instances.TITLE,
                     CalendarContract.Instances.BEGIN,
-                    CalendarContract.Instances.DESCRIPTION
+                    CalendarContract.Instances.DESCRIPTION,
+                    CalendarContract.Instances.EVENT_ID // KORREKTUR 2: Event_ID geladen für eindeutige Notifications
                 )
 
                 val cursor: Cursor? = context.contentResolver.query(
@@ -71,10 +76,12 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
                 cursor?.use {
                     val titleIdx = it.getColumnIndex(CalendarContract.Instances.TITLE)
                     val descIdx = it.getColumnIndex(CalendarContract.Instances.DESCRIPTION)
+                    val idIdx = it.getColumnIndex(CalendarContract.Instances.EVENT_ID)
 
                     while (it.moveToNext()) {
                         val title = if (titleIdx >= 0) it.getString(titleIdx) ?: "" else ""
                         val description = if (descIdx >= 0) it.getString(descIdx) ?: "" else ""
+                        val eventId = if (idIdx >= 0) it.getInt(idIdx) else (0..100000).random()
                         val combined = "$title $description".lowercase()
 
                         // 🚫 SPAM- & WERBEFILTER (100% On-Device)
@@ -100,7 +107,6 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
                         val isImportant = isAnniversary || isBirthday || isMedical || isFinancial || isTravel || isServiceOrHome
 
                         if (isImportant) {
-                            // KORREKTUR 1: Lädt alle Titel und Zuweisungen dynamisch aus deinen 12 Sprachdateien (strings.xml)!
                             val (alertTitle, dbStatus) = when {
                                 isFinancial -> Pair(context.getString(R.string.alert_financial_title), "WARNING")
                                 isServiceOrHome -> Pair(context.getString(R.string.alert_service_title), "IMPORTANT")
@@ -121,7 +127,8 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
                                 )
                             )
 
-                            showLifePopup(context, alertTitle, title.ifEmpty { context.getString(R.string.logs_empty_message) })
+                            // ID wird übergeben, damit mehrere Termine am Tag eigene Popups erzeugen!
+                            showLifePopup(context, NOTIFICATION_BASE_ID + eventId, alertTitle, title.ifEmpty { context.getString(R.string.logs_empty_message) })
                         }
                     }
                 }
@@ -134,7 +141,7 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
         }
     }
 
-    private fun showLifePopup(context: Context, title: String, message: String) {
+    private fun showLifePopup(context: Context, notificationId: Int, title: String, message: String) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -152,23 +159,25 @@ class CalendarScanWorker(appContext: Context, workerParams: WorkerParameters) : 
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
+        
+        // KORREKTUR 3: Abgebrochenen Code vollendet & FLAG_IMMUTABLE für moderne Android-Sicherheit gesetzt!
         val pendingIntent = PendingIntent.getActivity(
-            context, 0, intent,
+            context, 
+            notificationId, // Einzigartiger RequestCode verhindert Überschreiben von Intents
+            intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.app_icon) // KORREKTUR 2: Nutzt das transparente Vektor-Icon zur absoluten System-Stabilität!
             .setContentTitle(title)
             .setContentText(message)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
-            .setPriority(NotificationCompat.PRIORITY_MAX)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setSmallIcon(R.drawable.app_icon) // Stelle sicher, dass die Ressource existiert
             .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
+            .setAutoCancel(true) // Löscht die Benachrichtigung beim Tippen darauf automatisch
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .build()
 
-        notificationManager.notify((System.currentTimeMillis() % 10000).toInt(), notification)
+        notificationManager.notify(notificationId, notification)
     }
 }
-
