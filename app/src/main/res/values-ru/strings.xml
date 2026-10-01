@@ -107,8 +107,6 @@
     <string name="btn_start_audit_scan">Запустить сканирование аудита</string>
     <string name="mesh_connected">Сеть Mesh подключена: %s</string>
     <string name="mesh_disconnected">Сеть Mesh отключена: %s</string>
-    
-    <!-- Vault & Blacklist Additional Strings -->
     <string name="vault_status_label">Статус хранилища</string>
     <string name="blacklist_page_title">Черный список</string>
     <string name="blacklist_page_subtitle">Управление заблокированными номерами и контактами</string>
@@ -117,5 +115,77 @@
     <string name="blacklist_items_title">Заблокированные записи</string>
     <string name="btn_release">Освободить</string>
     <string name="clipboard_page_title">Буфер обмена</string>
+    
+    <!-- Новые строки Lint -->
+    <string name="comm_filter_title">Фильтр связи</string>
+    <string name="call_prot_title">Защита вызовов</string>
+    <string name="call_prot_desc">Защита от подозрительных вызовов</string>
+    <string name="sms_prot_title">Защита SMS</string>
+    <string name="sms_prot_desc">Защита от фишинговых текстовых сообщений</string>
+    <string name="email_prot_title">Защита почты</string>
+    <string name="email_prot_desc">Защита от вредоносных писем</string>
+    <string name="toast_enable_listener">Прослушиватель успешно включен</string>
+    <string name="offline_vault_title">Автономное хранилище</string>
+    <string name="offline_vault_desc">Безопасное локальное хранилище для конфиденциальных данных</string>
+    <string name="vault_status_unlocked">Хранилище разблокировано</string>
+    <string name="vault_status_locked">Хранилище заблокировано</string>
+    <string name="blacklist_items_count">Заблокированные элементы (%d)</string>
+    <string name="clipboard_security_title">Безопасность буфера обмена</string>
+    <string name="clipboard_autoclear_title">Автоочистка буфера обмена</string>
+    <string name="air_gesture_store_notice">Настройки жестов сохраняются локально</string>
+    <string name="toast_sms_active">Защита SMS активирована</string>
+    <string name="toast_sms_rejected">Роль SMS отклонена</string>
+    <string name="toast_notification_granted">Разрешение на уведомления предоставлено</string>
+    <string name="toast_notification_warning">Для защиты требуется разрешение на уведомления</string>
+    <string name="toast_calendar_granted">Разрешение на календарь предоставлено</string>
+    <string name="toast_calendar_warning">Для автономного сканирования требуется разрешение на календарь</string>
+    <string name="toast_vpn_granted">Разрешение VPN предоставлено</string>
+    <string name="toast_vpn_rejected">Разрешение VPN отклонено</string>
+    <string name="toast_enable_notification_manual">Включите службу прослушивания уведомлений вручную</string>
+    <string name="emergency_reason_sensor">Чрезвычайная ситуация вызвана датчиком</string>
+    <string name="emergency_reason_manual">Активирована ручная кнопка паники</string>
+    <string name="toast_debugger_detected">Предупреждение: обнаружен отладчик!</string>
+    <string name="biometric_vault_title">Аутентификация хранилища</string>
+    <string name="biometric_vault_subtitle">Подтвердите личность для доступа к защищенному хранилищу</string>
+    <string name="toast_vault_success">Хранилище успешно разблокировано</string>
+    <string name="toast_biometric_error">Ошибка биометрии: %s</string>
+    <string name="toast_vpn_started">Служба Juaris VPN запущена</string>
+    <string name="disclosure_dialog_title">Уведомление об универсальном доступе и уведомлениях</string>
+    <string name="disclosure_message">Juaris необходим доступ к уведомлениям для локальной фильтрации фишинговых сообщений на вашем устройстве.</string>
+    <string name="toast_dialog_error">Ошибка диалогового окна</string>
+    <string name="toast_vpn_dialog_error">Ошибка диалогового окна VPN</string>
+    <string name="desc_hologram">Голографический аватар</string>
+    <string name="welcome_title">Безопасность Juaris AI</string>
+    <string name="welcome_subtitle">Децентрализованная мобильная защита</string>
+    <string name="biometric_login_title">Аутентификация входа</string>
+    <string name="biometric_login_subtitle">Пройдите аутентификацию для входа в ядро Juaris</string>
+    <string name="toast_login_success">Вход выполнен успешно</string>
+    <string name="kernel_title">Ядро Juaris</string>
+    <string name="kernel_subtitle">Безопасный анклав активен</string>
+    <string name="btn_fingerprint_login">Вход по отпечатку пальца</string>
+    <string name="btn_debug_bypass">Обход отладки</string>
+    <string name="toast_login_aborted">Вход прерван: %s</string>
+    <string name="log_module_guardian">Страж безопасности</string>
+    <string name="log_desc_phishing_blocked">Фишинговая угроза перехвачена</string>
+    <string name="log_details_simulation">Симулированная атака успешно заблокирована</string>
+    <string name="toast_threat_neutralized">Угроза нейтрализована!</string>
+    <string name="toast_logs_vault_secured">Журналы надежно зашифрованы в хранилище</string>
+    <string name="status_health_title">Состояние системы</string>
+    <string name="status_health_subtitle">Обзор защиты ядра в реальном времени</string>
+    <string name="status_aes_encrypted">Зашифровано AES-256 GCM</string>
+    <string name="status_filters_active">Все активные фильтры запущены</string>
+    <string name="card_blocked_caps">ЗАБЛОКИРОВАНО</string>
+    <string name="card_data_flow">ПОТОК ДАННЫХ</string>
+    <string name="card_local_only">100% Локально</string>
+    <string name="section_actions">Чрезвычайные ситуации и действия</string>
+    <string name="btn_simulate_phishing">Симулировать фишинговую атаку</string>
+    <string name="btn_export_vault_logs">Экспортировать журналы хранилища</string>
+    <string name="btn_panic_wipe">ЭКСТРЕННАЯ ОЧИСТКА</string>
+    <string name="default_spam_label">Известный спам-номер</string>
+    <string name="toast_number_blocked">Номер добавлен в черный список</string>
+    <string name="toast_number_released">Номер удален из черного списка</string>
+    <string name="toast_camera_started">Камера жестов в воздухе запущен</string>
+    <string name="toast_permission_denied">Разрешение на камеру отклонено</string>
+    <string name="status_paused">Приостановлено</string>
+    <string name="btn_allow_notification_access">Разрешить доступ к уведомлениям</string>
 </resources>
-
