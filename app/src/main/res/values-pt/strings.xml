@@ -107,8 +107,6 @@
     <string name="btn_start_audit_scan">Iniciar verificação de auditoria</string>
     <string name="mesh_connected">Mesh conectado: %s</string>
     <string name="mesh_disconnected">Mesh desconectado: %s</string>
-    
-    <!-- Vault & Blacklist Additional Strings -->
     <string name="vault_status_label">Status do Cofre</string>
     <string name="blacklist_page_title">Lista Negra</string>
     <string name="blacklist_page_subtitle">Gerenciar números e contatos bloqueados</string>
@@ -117,6 +115,78 @@
     <string name="blacklist_items_title">Entradas bloqueadas</string>
     <string name="btn_release">Liberar</string>
     <string name="clipboard_page_title">Área de transferência</string>
+    
+    <!-- Novas strings do Lint -->
+    <string name="comm_filter_title">Filtro de comunicação</string>
+    <string name="call_prot_title">Proteção de chamadas</string>
+    <string name="call_prot_desc">Proteger contra chamadas suspeitas</string>
+    <string name="sms_prot_title">Proteção de SMS</string>
+    <string name="sms_prot_desc">Proteger contra mensagens de texto de phishing</string>
+    <string name="email_prot_title">Proteção de e-mail</string>
+    <string name="email_prot_desc">Proteger contra e-mails maliciosos</string>
+    <string name="toast_enable_listener">Ouvinte ativado com sucesso</string>
+    <string name="offline_vault_title">Cofre offline</string>
+    <string name="offline_vault_desc">Armazenamento local seguro para dados sensíveis</string>
+    <string name="vault_status_unlocked">Cofre desbloqueado</string>
+    <string name="vault_status_locked">Cofre bloqueado</string>
+    <string name="blacklist_items_count">Itens bloqueados (%d)</string>
+    <string name="clipboard_security_title">Segurança da área de transferência</string>
+    <string name="clipboard_autoclear_title">Limpar automaticamente a área de transferência</string>
+    <string name="air_gesture_store_notice">As configurações de gestos são salvas localmente</string>
+    <string name="toast_sms_active">Proteção de SMS ativada</string>
+    <string name="toast_sms_rejected">Função de SMS rejeitada</string>
+    <string name="toast_notification_granted">Permissão de notificação concedida</string>
+    <string name="toast_notification_warning">Permissão de notificação necessária para proteção</string>
+    <string name="toast_calendar_granted">Permissão de calendário concedida</string>
+    <string name="toast_calendar_warning">Permissão de calendário necessária para verificação autônoma</string>
+    <string name="toast_vpn_granted">Permissão de VPN concedida</string>
+    <string name="toast_vpn_rejected">Permissão de VPN rejeitada</string>
+    <string name="toast_enable_notification_manual">Ative o ouvinte de notificações manualmente</string>
+    <string name="emergency_reason_sensor">Emergência acionada por sensor</string>
+    <string name="emergency_reason_manual">Botão de pânico manual acionado</string>
+    <string name="toast_debugger_detected">Aviso: Depurador detectado!</string>
+    <string name="biometric_vault_title">Autenticação do Cofre</string>
+    <string name="biometric_vault_subtitle">Confirme a identidade para acessar o cofre seguro</string>
+    <string name="toast_vault_success">Cofre desbloqueado com sucesso</string>
+    <string name="toast_biometric_error">Erro biométrico: %s</string>
+    <string name="toast_vpn_started">Serviço VPN Juaris iniciado</string>
+    <string name="disclosure_dialog_title">Aviso de acessibilidade e notificações</string>
+    <string name="disclosure_message">O Juaris precisa de acesso às notificações para filtrar mensagens de phishing localmente no seu dispositivo.</string>
+    <string name="toast_dialog_error">Erro de diálogo</string>
+    <string name="toast_vpn_dialog_error">Erro de diálogo VPN</string>
+    <string name="desc_hologram">Avatar de holograma</string>
+    <string name="welcome_title">Segurança de IA Juaris</string>
+    <string name="welcome_subtitle">Proteção móvel descentralizada</string>
+    <string name="biometric_login_title">Autenticação de login</string>
+    <string name="biometric_login_subtitle">Autentique-se para entrar no Kernel Juaris</string>
+    <string name="toast_login_success">Login bem-sucedido</string>
+    <string name="kernel_title">Kernel Juaris</string>
+    <string name="kernel_subtitle">Enclave seguro ativo</string>
+    <string name="btn_fingerprint_login">Login por impressão digital</string>
+    <string name="btn_debug_bypass">Bypass de depuração</string>
+    <string name="toast_login_aborted">Login abortado: %s</string>
+    <string name="log_module_guardian">Guardião de segurança</string>
+    <string name="log_desc_phishing_blocked">Ameaça de phishing interceptada</string>
+    <string name="log_details_simulation">Ataque simulado bloqueado com sucesso</string>
+    <string name="toast_threat_neutralized">Ameaça neutralizada!</string>
+    <string name="toast_logs_vault_secured">Registros criptografados com segurança no Cofre</string>
+    <string name="status_health_title">Estado de saúde do sistema</string>
+    <string name="status_health_subtitle">Visão geral da proteção do kernel em tempo real</string>
+    <string name="status_aes_encrypted">Criptografado com AES-256 GCM</string>
+    <string name="status_filters_active">Todos os filtros ativos em execução</string>
+    <string name="card_blocked_caps">BLOQUEADO</string>
+    <string name="card_data_flow">FLUXO DE DADOS</string>
+    <string name="card_local_only">100% Local</string>
+    <string name="section_actions">Emergência e Ações</string>
+    <string name="btn_simulate_phishing">Simular ataque de phishing</string>
+    <string name="btn_export_vault_logs">Exportar registros do Cofre</string>
+    <string name="btn_panic_wipe">APAGAR TUDO (PÂNICO)</string>
+    <string name="default_spam_label">Número de spam conhecido</string>
+    <string name="toast_number_blocked">Número adicionado à lista negra</string>
+    <string name="toast_number_released">Número removido da lista negra</string>
+    <string name="toast_camera_started">Câmera de gestos no ar iniciada</string>
+    <string name="toast_permission_denied">Permissão da câmera negada</string>
+    <string name="status_paused">Pausado</string>
+    <string name="btn_allow_notification_access">Permitir acesso a notificações</string>
 </resources>
-
 
