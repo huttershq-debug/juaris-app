@@ -107,8 +107,6 @@
     <string name="btn_start_audit_scan">"Démarrer l'analyse d'audit"</string>
     <string name="mesh_connected">"Mesh connecté : %s"</string>
     <string name="mesh_disconnected">"Mesh déconnecté : %s"</string>
-    
-    <!-- Vault & Blacklist Additional Strings -->
     <string name="vault_status_label">"Statut du coffre"</string>
     <string name="blacklist_page_title">"Liste noire"</string>
     <string name="blacklist_page_subtitle">"Gérer les numéros et contacts bloqués"</string>
@@ -117,5 +115,79 @@
     <string name="blacklist_items_title">"Entrées bloquées"</string>
     <string name="btn_release">"Libérer"</string>
     <string name="clipboard_page_title">"Presse-papiers"</string>
+    
+    <!-- Nouveaux strings de Lint -->
+    <string name="comm_filter_title">"Filtre de communication"</string>
+    <string name="call_prot_title">"Protection des appels"</string>
+    <string name="call_prot_desc">"Protéger contre les appels suspects"</string>
+    <string name="sms_prot_title">"Protection SMS"</string>
+    <string name="sms_prot_desc">"Protéger contre les SMS de phishing"</string>
+    <string name="email_prot_title">"Protection des e-mails"</string>
+    <string name="email_prot_desc">"Protéger contre les e-mails malveillants"</string>
+    <string name="toast_enable_listener">"Écouteur activé avec succès"</string>
+    <string name="offline_vault_title">"Coffre hors ligne"</string>
+    <string name="offline_vault_desc">"Stockage local sécurisé pour données sensibles"</string>
+    <string name="vault_status_unlocked">"Coffre déverrouillé"</string>
+    <string name="vault_status_locked">"Coffre verrouillé"</string>
+    <string name="blacklist_items_count">"Éléments bloqués (%d)"</string>
+    <string name="clipboard_security_title">"Sécurité du presse-papiers"</string>
+    <string name="clipboard_autoclear_title">"Vider automatiquement le presse-papiers"</string>
+    <string name="air_gesture_store_notice">"Les paramètres de gestes sont enregistrés localement"</string>
+    <string name="toast_sms_active">"Protection SMS activée"</string>
+    <string name="toast_sms_rejected">"Rôle SMS rejeté"</string>
+    <string name="toast_notification_granted">"Autorisation de notification accordée"</string>
+    <string name="toast_notification_warning">"Autorisation de notification requise pour la protection"</string>
+    <string name="toast_calendar_granted">"Autorisation de calendrier accordée"</string>
+    <string name="toast_calendar_warning">"Autorisation de calendrier requise pour l'analyse autonome"</string>
+    <string name="toast_vpn_granted">"Autorisation VPN accordée"</string>
+    <string name="toast_vpn_rejected">"Autorisation VPN rejetée"</string>
+    <string name="toast_enable_notification_manual">"Veuillez activer l'écouteur de notifications manuellement"</string>
+    <string name="emergency_reason_sensor">"Urgence déclenchée par capteur"</string>
+    <string name="emergency_reason_manual">"Bouton de panique manuel déclenché"</string>
+    <string name="toast_debugger_detected">"Avertissement : Débogueur détecté !"</string>
+    <string name="biometric_vault_title">"Authentification du coffre"</string>
+    <string name="biometric_vault_subtitle">"Confirmez votre identité pour accéder au coffre sécurisé"</string>
+    <string name="toast_vault_success">"Coffre déverrouillé avec succès"</string>
+    <string name="toast_biometric_error">"Erreur biométrique : %s"</string>
+    <string name="toast_vpn_started">"Service VPN Juaris démarré"</string>
+    <string name="disclosure_dialog_title">"Avis d'accessibilité et de notification"</string>
+    <string name="disclosure_message">"Juaris a besoin d'accéder aux notifications pour filtrer les messages de phishing localement sur votre appareil."</string>
+    <string name="toast_dialog_error">"Erreur de boîte de dialogue"</string>
+    <string name="toast_vpn_dialog_error">"Erreur de boîte de dialogue VPN"</string>
+    <string name="desc_hologram">"Avatar hologramme"</string>
+    <string name="welcome_title">"Sécurité IA Juaris"</string>
+    <string name="welcome_subtitle">"Protection mobile décentralisée"</string>
+    <string name="biometric_login_title">"Authentification de connexion"</string>
+    <string name="biometric_login_subtitle">"Authentifiez-vous pour entrer dans le noyau Juaris"</string>
+    <string name="toast_login_success">"Connexion réussie"</string>
+    <string name="kernel_title">"Noyau Juaris"</string>
+    <string name="kernel_subtitle">"Enclave sécurisée active"</string>
+    <string name="btn_fingerprint_login">"Connexion par empreinte digitale"</string>
+    <string name="btn_debug_bypass">"Contournement de débogage"</string>
+    <string name="toast_login_aborted">"Connexion abandonnée : %s"</string>
+    <string name="log_module_guardian">"Gardien de sécurité"</string>
+    <string name="log_desc_phishing_blocked">"Menace de phishing interceptée"</string>
+    <string name="log_details_simulation">"Attaque simulée bloquée avec succès"</string>
+    <string name="toast_threat_neutralized">"Menace neutralisée !"</string>
+    <string name="toast_logs_vault_secured">"Journaux chiffrés en toute sécurité dans le coffre"</string>
+    <string name="status_health_title">"État de santé du système"</string>
+    <string name="status_health_subtitle">"Aperçu de la protection du noyau en temps réel"</string>
+    <string name="status_aes_encrypted">"Chiffrement AES-256 GCM"</string>
+    <string name="status_filters_active">"Tous les filtres actifs fonctionnent"</string>
+    <string name="card_blocked_caps">"BLOQUÉ"</string>
+    <string name="card_data_flow">"FLUX DE DONNÉES"</string>
+    <string name="card_local_only">"100% Local"</string>
+    <string name="section_actions">"Urgence &amp; Actions"</string>
+    <string name="btn_simulate_phishing">"Simuler une attaque de phishing"</string>
+    <string name="btn_export_vault_logs">"Exporter les journaux du coffre"</string>
+    <string name="btn_panic_wipe">"EFFACEMENT D'URGENCE"</string>
+    <string name="default_spam_label">"Numéro de spam connu"</string>
+    <string name="toast_number_blocked">"Numéro ajouté à la liste noire"</string>
+    <string name="toast_number_released">"Numéro retiré de la liste noire"</string>
+    <string name="toast_camera_started">"Caméra de gestes aériens démarrée"</string>
+    <string name="toast_permission_denied">"Autorisation de caméra refusée"</string>
+    <string name="status_paused">"En pause"</string>
+    <string name="btn_allow_notification_access">"Autoriser l'accès aux notifications"</string>
 </resources>
+
 
