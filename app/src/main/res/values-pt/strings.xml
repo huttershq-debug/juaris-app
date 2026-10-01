@@ -78,5 +78,17 @@
     <string name="air_gesture_desc">Use gestos sem contato para navegar</string>
     <string name="air_gesture_status">Sensor pronto</string>
     <string name="air_gesture_action">Disparar ação</string>
+    <!-- Novas strings de IU -->
+    <string name="mesh_page_title">Rede Mesh</string>
+    <string name="mesh_page_subtitle">Comunicação descentralizada</string>
+    <string name="legal_page_title">Informações legais</string>
+    <string name="legal_page_subtitle">Avisos importantes</string>
+    <string name="privacy_title">Política de privacidade</string>
+    <string name="privacy_link_text">Ler política completa</string>
+    <string name="imprint_name_val">Detalhes da empresa</string>
+    <string name="air_gesture_page_title">Gestos no ar</string>
+    <string name="air_gesture_page_subtitle">Controle sem contato</string>
+    <string name="air_gesture_toggle_label">Ativar gestos no ar</string>
+    <string name="air_gesture_store_notification">Salvar configurações de gestos</string>
 </resources>
 
