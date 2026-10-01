@@ -188,5 +188,25 @@
     <string name="toast_permission_denied">کیمرے کی اجازت مسترد کر دی گئی</string>
     <string name="status_paused">روک دیا گیا</string>
     <string name="btn_allow_notification_access">نوٹیفिकेशन تک رسائی کی اجازت دیں</string>
+    <string name="alert_financial_title">مالیاتی انتباہ</string>
+    <string name="alert_service_title">سروس انتباہ</string>
+    <string name="alert_anniversary_title">سالگرہ کا یاد دہانی</string>
+    <string name="alert_birthday_title">سالگرہ کی یاد دہانی</string>
+    <string name="alert_medical_title">طبی تقرری کا انتباہ</string>
+    <string name="alert_travel_title">سفر کی حفاظت کا انتباہ</string>
+    <string name="alert_general_title">عمومی سیکیورٹی الرٹ</string>
+    <string name="emergency_reason_default">دستی ہنگامی ٹرگر</string>
+    <string name="emergency_channel_name">ہنگامی چینل</string>
+    <string name="emergency_notification_title">ہنگامی موڈ فعال ہے</string>
+    <string name="emergency_notification_text">سسٹم کی ترجیحات اور والٹ کو محفوظ بنایا جا رہا ہے۔</string>
+    <string name="emergency_screen_heading">ہنگامی پروٹوکول</string>
+    <string name="emergency_screen_countdown_desc">الٹی گنتی میں محفوظ صفائی انجام دی جا رہی ہے...</string>
+    <string name="btn_emergency_call_now">ابھی ایمرجنسی کال کریں</string>
+    <string name="btn_emergency_cancel">ایمرجنسی منسوخ کریں</string>
+    <string name="disclosure_dialog_message">آپ کے آلے کو مقامی طور پر محفوظ کرنے کے لیے Juaris کو نوٹیفیکیشن/ایکسیسبیلٹی رسائی کی ضرورت ہے۔</string>
+    <string name="toast_vault_locked">والٹ کامیابی سے لاک ہو گیا</string>
+    <string name="protection_modules_title">پروٹیکشن ماڈیولز</string>
+    <string name="protection_modules_subtitle">فعال ریئل ٹائم سیکیورٹی فلٹرز</string>
+    <string name="toast_enable_listener_manual">براہ کرم سیٹنگز میں نوٹیفیکیشن لسنر کو فعال کریں</string>
 </resources>
 
