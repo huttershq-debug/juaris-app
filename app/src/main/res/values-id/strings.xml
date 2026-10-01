@@ -90,6 +90,18 @@
     <string name="air_gesture_page_subtitle">Kontrol nirkontak</string>
     <string name="air_gesture_toggle_label">Aktifkan Gestur Udara</string>
     <string name="air_gesture_store_notification">Simpan Pengaturan Gestur</string>
+    <!-- String UI Baru -->
+    <string name="mesh_page_title">Jaringan Mesh</string>
+    <string name="mesh_page_subtitle">Komunikasi terdesentralisasi</string>
+    <string name="legal_page_title">Informasi Hukum</string>
+    <string name="legal_page_subtitle">Pemberitahuan penting</string>
+    <string name="privacy_title">Kebijakan Privasi</string>
+    <string name="privacy_link_text">Baca kebijakan lengkap</string>
+    <string name="imprint_name_val">Detail Perusahaan</string>
+    <string name="air_gesture_page_title">Gestur Udara</string>
+    <string name="air_gesture_page_subtitle">Kontrol nirkontak</string>
+    <string name="air_gesture_toggle_label">Aktifkan Gestur Udara</string>
+    <string name="air_gesture_store_notification">Simpan Pengaturan Gestur</string>
 </resources>
 
 
