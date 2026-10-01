@@ -29,7 +29,7 @@
     <string name="juaris_app_welcome_audio_file">platzhalter_ur.m4a</string>
     <string name="vpn_disclosure_title">Juaris VPN سیکیورٹی نوٹس</string>
     <string name="vpn_disclosure_message">Juaris آپ کے آلے پر براہ راست فشنگ اور میلویئر کا پتہ لگانے کے لیے ایک مقامی VpnService استعمال کرتا ہے۔\n\nتمام ڈیٹا 100% مقامی رہتا ہے۔ کسی بھی بیرونی سرور یا کلاؤڈ پر کچھ نہیں بھیجا جاتا۔</string>
-    <string name="btn_understood">समझ गया और सक्रिय करें / سمجھ گیا اور فعال کریں</string>
+    <string name="btn_understood">سمجھ گیا اور فعال کریں</string>
     <string name="btn_cancel">منسوخ کریں</string>
    
     <!-- P2P Swarm & Mesh Strings -->
@@ -107,8 +107,6 @@
     <string name="btn_start_audit_scan">آڈٹ اسکین شروع کریں</string>
     <string name="mesh_connected">میش جڑ گیا: %s</string>
     <string name="mesh_disconnected">میش منقطع ہو گیا: %s</string>
-    
-    <!-- Vault & Blacklist Additional Strings -->
     <string name="vault_status_label">والٹ کی حیثیت</string>
     <string name="blacklist_page_title">بلیک لسٹ</string>
     <string name="blacklist_page_subtitle">مسدود نمبروں اور رابطوں کا انتظام کریں</string>
@@ -117,5 +115,78 @@
     <string name="blacklist_items_title">مسدود اندراجات</string>
     <string name="btn_release">آزاد کریں</string>
     <string name="clipboard_page_title">کلپ بورڈ</string>
+    
+    <!-- نئے Lint اسٹرنگز -->
+    <string name="comm_filter_title">مواصلاتی فلٹر</string>
+    <string name="call_prot_title">کال پروٹیکشن</string>
+    <string name="call_prot_desc">مشکوک کالوں سے حفاظت کریں</string>
+    <string name="sms_prot_title">ایس ایم ایس پروٹیکشن</string>
+    <string name="sms_prot_desc">فشنگ ٹیکسٹ میسجز سے حفاظت کریں</string>
+    <string name="email_prot_title">ای میل پروٹیکشن</string>
+    <string name="email_prot_desc">نقصان دہ ای میلز سے حفاظت کریں</string>
+    <string name="toast_enable_listener">لسنر کامیابی سے فعال ہو گیا</string>
+    <string name="offline_vault_title">آف لائن والٹ</string>
+    <string name="offline_vault_desc">حساس ڈیٹا کے لیے محفوظ مقامی اسٹোরেج</string>
+    <string name="vault_status_unlocked">والٹ ان لاک ہو گیا</string>
+    <string name="vault_status_locked">والٹ لاک ہو گیا</string>
+    <string name="blacklist_items_count">مسدود اشیاء (%d)</string>
+    <string name="clipboard_security_title">کلپ بورڈ سیکیورٹی</string>
+    <string name="clipboard_autoclear_title">کلپ بورڈ خودکار صاف کریں</string>
+    <string name="air_gesture_store_notice">جیسچر کی ترتیبات مقامی طور پر محفوظ کی جاتی ہیں</string>
+    <string name="toast_sms_active">SMS پروٹیکشن فعال ہو گئی</string>
+    <string name="toast_sms_rejected">SMS رول مسترد کر دیا گیا</string>
+    <string name="toast_notification_granted">نوٹیفिकेशन کی اجازت مل گئی</string>
+    <string name="toast_notification_warning">تحفظ کے لیے نوٹیفिकेशन کی اجازت درکار ہے</string>
+    <string name="toast_calendar_granted">کیلنڈر کی اجازت مل گئی</string>
+    <string name="toast_calendar_warning">خودکار اسکین کے لیے کیلنڈر کی اجازت درکار ہے</string>
+    <string name="toast_vpn_granted">VPN کی اجازت مل گئی</string>
+    <string name="toast_vpn_rejected">VPN کی اجازت مسترد کر दी गई</string>
+    <string name="toast_enable_notification_manual">براہ کرم نوٹیفिकेशन لسنر کو دستی طور پر فعال کریں</string>
+    <string name="emergency_reason_sensor">سینسر کی طرف سے ہنگامی صورت حال شروع کی گئی</string>
+    <string name="emergency_reason_manual">دستی پैनिक بٹن شروع کیا گیا</string>
+    <string name="toast_debugger_detected">وارننگ: ڈیبگر کا پتہ چلا!</string>
+    <string name="biometric_vault_title">والٹ تصدیق</string>
+    <string name="biometric_vault_subtitle">محفوظ والٹ تک رسائی کے لیے شناخت کی تصدیق کریں</string>
+    <string name="toast_vault_success">والٹ کامیابی سے ان لاک ہو گیا</string>
+    <string name="toast_biometric_error">بایومیٹرک خرابی: %s</string>
+    <string name="toast_vpn_started">Juaris VPN سروس شروع ہو گئی</string>
+    <string name="disclosure_dialog_title">رسائی اور نوٹیفिकेशन نوٹس</string>
+    <string name="disclosure_message">Juaris کو آپ کے آلے پر مقامی طور پر فشنگ کے پیغامات کو فلتر کرنے کے لیے نوٹیفिकेशन تک رسائی کی ضرورت ہے۔</string>
+    <string name="toast_dialog_error">ڈائیلاگ کی خرابی</string>
+    <string name="toast_vpn_dialog_error">VPN ڈائیلاگ کی خرابی</string>
+    <string name="desc_hologram">ہولوگرام آواتار</string>
+    <string name="welcome_title">Juaris AI سیکیورٹی</string>
+    <string name="welcome_subtitle">غیرمرکزی موبائل پروٹیکشن</string>
+    <string name="biometric_login_title">لاگ ان تصدیق</string>
+    <string name="biometric_login_subtitle">Juaris کرنل میں داخل ہونے کے لیے تصدیق کریں</string>
+    <string name="toast_login_success">لاگ ان کامیاب</string>
+    <string name="kernel_title">Juaris کرنل</string>
+    <string name="kernel_subtitle">محفوظ انکلیو فعال</string>
+    <string name="btn_fingerprint_login">فنگر پرنٹ لاگ ان</string>
+    <string name="btn_debug_bypass">ڈیবাগ بائی پاس</string>
+    <string name="toast_login_aborted">لاگ ان منسوخ: %s</string>
+    <string name="log_module_guardian">سیکیورٹی گارڈین</string>
+    <string name="log_desc_phishing_blocked">فشنگ کا خطرہ روک دیا گیا</string>
+    <string name="log_details_simulation">نقلی حملہ کامیابی سے مسدود کر دیا گیا</string>
+    <string name="toast_threat_neutralized">خطرہ بے اثر کر دیا گیا!</string>
+    <string name="toast_logs_vault_secured">لاگز والٹ میں محفوظ طریقے سے انکرپٹ ہو گئے</string>
+    <string name="status_health_title">سسٹم کی صحت کی حیثیت</string>
+    <string name="status_health_subtitle">ریئل ٹائم کرنل پروٹیکشن کا خلاصہ</string>
+    <string name="status_aes_encrypted">AES-256 GCM انکرپتد</string>
+    <string name="status_filters_active">تمام فعال فلٹرز چل رہے ہیں</string>
+    <string name="card_blocked_caps">مسدود</string>
+    <string name="card_data_flow">ڈیٹا کا بہاؤ</string>
+    <string name="card_local_only">100% مقامی</string>
+    <string name="section_actions">ہنگامی اور اقدامات</string>
+    <string name="btn_simulate_phishing">فشنگ حملے کی نقل کریں</string>
+    <string name="btn_export_vault_logs">والٹ لاگز برآمد کریں</string>
+    <string name="btn_panic_wipe">پैनिक وائپ (سب کچھ مٹائیں)</string>
+    <string name="default_spam_label">معروف اسپام نمبر</string>
+    <string name="toast_number_blocked">نمبر بلैकलिस्ट میں شامل کر دیا گیا</string>
+    <string name="toast_number_released">نمبر بلیک لسٹ سے ہٹا دیا گیا</string>
+    <string name="toast_camera_started">ایئر جسچر کیمرا شروع ہو گیا</string>
+    <string name="toast_permission_denied">کیمرے کی اجازت مسترد کر دی گئی</string>
+    <string name="status_paused">روک دیا گیا</string>
+    <string name="btn_allow_notification_access">نوٹیفिकेशन تک رسائی کی اجازت دیں</string>
 </resources>
 
