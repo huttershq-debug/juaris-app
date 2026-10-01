@@ -78,5 +78,17 @@
     <string name="air_gesture_desc">Use contactless gestures to navigate</string>
     <string name="air_gesture_status">Sensor Ready</string>
     <string name="air_gesture_action">Trigger Action</string>
+     <!-- Neue UI-Strings -->
+    <string name="mesh_page_title">Mesh Network</string>
+    <string name="mesh_page_subtitle">Decentralized communication</string>
+    <string name="legal_page_title">Legal Information</string>
+    <string name="legal_page_subtitle">Important notices</string>
+    <string name="privacy_title">Privacy Policy</string>
+    <string name="privacy_link_text">Read full policy</string>
+    <string name="imprint_name_val">Company Details</string>
+    <string name="air_gesture_page_title">Air Gestures</string>
+    <string name="air_gesture_page_subtitle">Contactless control</string>
+    <string name="air_gesture_toggle_label">Enable Air Gestures</string>
+    <string name="air_gesture_store_notification">Store Gesture Settings</string>
 </resources>
 
