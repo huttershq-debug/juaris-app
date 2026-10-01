@@ -79,7 +79,7 @@
     <string name="air_gesture_status">Sensor bereit</string>
     <string name="air_gesture_action">Aktion auslösen</string>
     
-    <!-- UI & fehlende Strings -->
+    <!-- UI & zusätzliche Strings -->
     <string name="mesh_page_title">Mesh-Netzwerk</string>
     <string name="mesh_page_subtitle">Dezentrale Kommunikation</string>
     <string name="legal_page_title">Rechtliche Hinweise</string>
@@ -107,8 +107,6 @@
     <string name="btn_start_audit_scan">Audit-Scan starten</string>
     <string name="mesh_connected">Mesh verbunden: %s</string>
     <string name="mesh_disconnected">Mesh getrennt: %s</string>
-    
-    <!-- Vault & Blacklist Additional Strings -->
     <string name="vault_status_label">Tresor-Status</string>
     <string name="blacklist_page_title">Sperrliste</string>
     <string name="blacklist_page_subtitle">Verwalte gesperrte Nummern und Kontakte</string>
@@ -117,5 +115,78 @@
     <string name="blacklist_items_title">Gesperrte Einträge</string>
     <string name="btn_release">Freigeben</string>
     <string name="clipboard_page_title">Zwischenablage</string>
+    
+    <!-- Neu hinzugefügte Lint-Strings -->
+    <string name="comm_filter_title">Kommunikations-Filter</string>
+    <string name="call_prot_title">Anrufschutz</string>
+    <string name="call_prot_desc">Schutz vor verdächtigen Anrufen</string>
+    <string name="sms_prot_title">SMS-Schutz</string>
+    <string name="sms_prot_desc">Schutz vor Phishing-Textnachrichten</string>
+    <string name="email_prot_title">E-Mail-Schutz</string>
+    <string name="email_prot_desc">Schutz vor schädlichen E-Mails</string>
+    <string name="toast_enable_listener">Listener erfolgreich aktiviert</string>
+    <string name="offline_vault_title">Offline-Tresor</string>
+    <string name="offline_vault_desc">Sicherer lokaler Speicher für sensible Daten</string>
+    <string name="vault_status_unlocked">Tresor entriegelt</string>
+    <string name="vault_status_locked">Tresor gesperrt</string>
+    <string name="blacklist_items_count">Gesperrte Einträge (%d)</string>
+    <string name="clipboard_security_title">Zwischenablagen-Sicherheit</string>
+    <string name="clipboard_autoclear_title">Zwischenablage automatisch leeren</string>
+    <string name="air_gesture_store_notice">Gesteneinstellungen werden lokal gespeichert</string>
+    <string name="toast_sms_active">SMS-Schutz aktiviert</string>
+    <string name="toast_sms_rejected">SMS-Rolle abgelehnt</string>
+    <string name="toast_notification_granted">Benachrichtigungsberechtigung erteilt</string>
+    <string name="toast_notification_warning">Benachrichtigungsberechtigung für Schutz erforderlich</string>
+    <string name="toast_calendar_granted">Kalenderberechtigung erteilt</string>
+    <string name="toast_calendar_warning">Kalenderberechtigung für autonomen Scan benötigt</string>
+    <string name="toast_vpn_granted">VPN-Berechtigung erteilt</string>
+    <string name="toast_vpn_rejected">VPN-Berechtigung abgelehnt</string>
+    <string name="toast_enable_notification_manual">Bitte Benachrichtigungs-Listener manuell aktivieren</string>
+    <string name="emergency_reason_sensor">Notfall durch Sensor ausgelöst</string>
+    <string name="emergency_reason_manual">Manueller Panik-Button ausgelöst</string>
+    <string name="toast_debugger_detected">Warnung: Debugger erkannt!</string>
+    <string name="biometric_vault_title">Tresor-Authentifizierung</string>
+    <string name="biometric_vault_subtitle">Identität bestätigen, um auf den Tresor zuzugreifen</string>
+    <string name="toast_vault_success">Tresor erfolgreich entriegelt</string>
+    <string name="toast_biometric_error">Biometrie-Fehler: %s</string>
+    <string name="toast_vpn_started">Juaris VPN-Dienst gestartet</string>
+    <string name="disclosure_dialog_title">Bedienungshilfen &amp; Benachrichtigungshinweis</string>
+    <string name="disclosure_message">Juaris benötigt Benachrichtigungszugriff, um Phishing-Nachrichten direkt lokal auf deinem Gerät zu filtern.</string>
+    <string name="toast_dialog_error">Dialogfehler</string>
+    <string name="toast_vpn_dialog_error">VPN-Dialogfehler</string>
+    <string name="desc_hologram">Hologramm-Avatar</string>
+    <string name="welcome_title">Juaris KI-Sicherheit</string>
+    <string name="welcome_subtitle">Dezentraler Mobilschutz</string>
+    <string name="biometric_login_title">Anmelde-Authentifizierung</string>
+    <string name="biometric_login_subtitle">Authentifizieren, um den Juaris-Kernel zu betreten</string>
+    <string name="toast_login_success">Anmeldung erfolgreich</string>
+    <string name="kernel_title">Juaris-Kernel</string>
+    <string name="kernel_subtitle">Sichere Enklave aktiv</string>
+    <string name="btn_fingerprint_login">Fingerabdruck-Anmeldung</string>
+    <string name="btn_debug_bypass">Debug-Bypass</string>
+    <string name="toast_login_aborted">Anmeldung abgebrochen: %s</string>
+    <string name="log_module_guardian">Sicherheits-Wächter</string>
+    <string name="log_desc_phishing_blocked">Phishing-Bedrohung abgefangen</string>
+    <string name="log_details_simulation">Simulierter Angriff erfolgreich blockiert</string>
+    <string name="toast_threat_neutralized">Bedrohung neutralisiert!</string>
+    <string name="toast_logs_vault_secured">Protokolle sicher im Tresor verschlüsselt</string>
+    <string name="status_health_title">Systemstatus-Gesundheit</string>
+    <string name="status_health_subtitle">Echtzeit-Kernel-Schutzübersicht</string>
+    <string name="status_aes_encrypted">AES-256 GCM verschlüsselt</string>
+    <string name="status_filters_active">Alle aktiven Filter laufen</string>
+    <string name="card_blocked_caps">BLOCKIERT</string>
+    <string name="card_data_flow">DATENFLUSS</string>
+    <string name="card_local_only">100% Lokal</string>
+    <string name="section_actions">Notfall &amp; Aktionen</string>
+    <string name="btn_simulate_phishing">Phishing-Angriff simulieren</string>
+    <string name="btn_export_vault_logs">Tresor-Protokolle exportieren</string>
+    <string name="btn_panic_wipe">PANIK-LÖSCHUNG</string>
+    <string name="default_spam_label">Bekannte Spam-Nummer</string>
+    <string name="toast_number_blocked">Nummer zur Sperrliste hinzugefügt</string>
+    <string name="toast_number_released">Nummer aus Sperrliste entfernt</string>
+    <string name="toast_camera_started">Air-Gestik-Kamera gestartet</string>
+    <string name="toast_permission_denied">Kameraberechtigung verweigert</string>
+    <string name="status_paused">Pausiert</string>
+    <string name="btn_allow_notification_access">Benachrichtigungszugriff erlauben</string>
 </resources>
 
