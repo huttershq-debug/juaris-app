@@ -107,8 +107,6 @@
     <string name="btn_start_audit_scan">开始审计扫描</string>
     <string name="mesh_connected">网状网络已连接：%s</string>
     <string name="mesh_disconnected">网状网络已断开：%s</string>
-    
-    <!-- Vault & Blacklist Additional Strings -->
     <string name="vault_status_label">保险库状态</string>
     <string name="blacklist_page_title">黑名单</string>
     <string name="blacklist_page_subtitle">管理被拦截的号码和联系人</string>
@@ -117,6 +115,78 @@
     <string name="blacklist_items_title">已拦截条目</string>
     <string name="btn_release">解除</string>
     <string name="clipboard_page_title">剪贴板</string>
+    
+    <!-- 新增 Lint 字符串 -->
+    <string name="comm_filter_title">通信过滤</string>
+    <string name="call_prot_title">来电保护</string>
+    <string name="call_prot_desc">防止可疑来电</string>
+    <string name="sms_prot_title">短信保护</string>
+    <string name="sms_prot_desc">防止钓鱼短信</string>
+    <string name="email_prot_title">邮件保护</string>
+    <string name="email_prot_desc">防止恶意电子邮件</string>
+    <string name="toast_enable_listener">已成功启用监听器</string>
+    <string name="offline_vault_title">离线保险库</string>
+    <string name="offline_vault_desc">用于敏感数据的安全本地存储</string>
+    <string name="vault_status_unlocked">保险库已解锁</string>
+    <string name="vault_status_locked">保险库已锁定</string>
+    <string name="blacklist_items_count">已拦截项目 (%d)</string>
+    <string name="clipboard_security_title">剪贴板安全</string>
+    <string name="clipboard_autoclear_title">自动清除剪贴板</string>
+    <string name="air_gesture_store_notice">手势设置已本地保存</string>
+    <string name="toast_sms_active">短信保护已激活</string>
+    <string name="toast_sms_rejected">短信角色被拒绝</string>
+    <string name="toast_notification_granted">已授予通知权限</string>
+    <string name="toast_notification_warning">保护功能需要通知权限</string>
+    <string name="toast_calendar_granted">已授予日历权限</string>
+    <string name="toast_calendar_warning">自主扫描需要日历权限</string>
+    <string name="toast_vpn_granted">已授予 VPN 权限</string>
+    <string name="toast_vpn_rejected">VPN 权限被拒绝</string>
+    <string name="toast_enable_notification_manual">请手动启用通知监听器</string>
+    <string name="emergency_reason_sensor">由传感器触发的紧急情况</string>
+    <string name="emergency_reason_manual">手动触发紧急按钮</string>
+    <string name="toast_debugger_detected">警告：检测到调试器！</string>
+    <string name="biometric_vault_title">保险库身份验证</string>
+    <string name="biometric_vault_subtitle">确认身份以访问安全保险库</string>
+    <string name="toast_vault_success">保险库解锁成功</string>
+    <string name="toast_biometric_error">生物识别错误：%s</string>
+    <string name="toast_vpn_started">Juaris VPN 服务已启动</string>
+    <string name="disclosure_dialog_title">无障碍与通知提示</string>
+    <string name="disclosure_message">Juaris 需要通知访问权限，以便直接在您的设备上本地过滤网络钓鱼消息。</string>
+    <string name="toast_dialog_error">对话框错误</string>
+    <string name="toast_vpn_dialog_error">VPN 对话框错误</string>
+    <string name="desc_hologram">全息头像</string>
+    <string name="welcome_title">Juaris AI 安全</string>
+    <string name="welcome_subtitle">去中心化移动保护</string>
+    <string name="biometric_login_title">登录身份验证</string>
+    <string name="biometric_login_subtitle">验证以进入 Juaris 内核</string>
+    <string name="toast_login_success">登录成功</string>
+    <string name="kernel_title">Juaris 内核</string>
+    <string name="kernel_subtitle">安全 enclave 已激活</string>
+    <string name="btn_fingerprint_login">指纹登录</string>
+    <string name="btn_debug_bypass">调试绕过</string>
+    <string name="toast_login_aborted">登录中止：%s</string>
+    <string name="log_module_guardian">安全卫士</string>
+    <string name="log_desc_phishing_blocked">已拦截网络钓鱼威胁</string>
+    <string name="log_details_simulation">成功阻止模拟攻击</string>
+    <string name="toast_threat_neutralized">威胁已 p平息/neutralized！</string>
+    <string name="toast_logs_vault_secured">日志已安全加密至保险库</string>
+    <string name="status_health_title">系统健康状态</string>
+    <string name="status_health_subtitle">实时内核保护概览</string>
+    <string name="status_aes_encrypted">AES-256 GCM 加密</string>
+    <string name="status_filters_active">所有活动过滤器正在运行</string>
+    <string name="card_blocked_caps">已拦截</string>
+    <string name="card_data_flow">数据流</string>
+    <string name="card_local_only">100% 本地</string>
+    <string name="section_actions">紧急与操作</string>
+    <string name="btn_simulate_phishing">模拟钓鱼攻击</string>
+    <string name="btn_export_vault_logs">导出保险库日志</string>
+    <string name="btn_panic_wipe">一键清空（Panic Wipe）</string>
+    <string name="default_spam_label">已知垃圾号码</string>
+    <string name="toast_number_blocked">号码已加入黑名单</string>
+    <string name="toast_number_released">号码已从黑名单移除</string>
+    <string name="toast_camera_started">空中手势相机已启动</string>
+    <string name="toast_permission_denied">相机权限被拒绝</string>
+    <string name="status_paused">已暂停</string>
+    <string name="btn_allow_notification_access">允许通知访问</string>
 </resources>
-
 
