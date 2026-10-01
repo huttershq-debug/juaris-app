@@ -107,8 +107,6 @@
     <string name="btn_start_audit_scan">Mulai Pemindaian Audit</string>
     <string name="mesh_connected">Mesh Terhubung: %s</string>
     <string name="mesh_disconnected">Mesh Terputus: %s</string>
-    
-    <!-- Vault & Blacklist Additional Strings -->
     <string name="vault_status_label">Status Vault</string>
     <string name="blacklist_page_title">Daftar Hitam</string>
     <string name="blacklist_page_subtitle">Kelola nomor dan kontak yang diblokir</string>
@@ -117,4 +115,79 @@
     <string name="blacklist_items_title">Entri yang Diblokir</string>
     <string name="btn_release">Lepaskan</string>
     <string name="clipboard_page_title">Papan Klip</string>
+    
+    <!-- String Lint Baru -->
+    <string name="comm_filter_title">Filter Komunikasi</string>
+    <string name="call_prot_title">Perlindungan Panggilan</string>
+    <string name="call_prot_desc">Lindungi dari panggilan mencurigakan</string>
+    <string name="sms_prot_title">Perlindungan SMS</string>
+    <string name="sms_prot_desc">Lindungi dari pesan teks phishing</string>
+    <string name="email_prot_title">Perlindungan Email</string>
+    <string name="email_prot_desc">Lindungi dari email berbahaya</string>
+    <string name="toast_enable_listener">Listener berhasil diaktifkan</string>
+    <string name="offline_vault_title">Vault Offline</string>
+    <string name="offline_vault_desc">Penyimpanan lokal yang aman untuk data sensitif</string>
+    <string name="vault_status_unlocked">Vault Terbuka</string>
+    <string name="vault_status_locked">Vault Terkunci</string>
+    <string name="blacklist_items_count">Item Diblokir (%d)</string>
+    <string name="clipboard_security_title">Keamanan Papan Klip</string>
+    <string name="clipboard_autoclear_title">Hapus Otomatis Papan Klip</string>
+    <string name="air_gesture_store_notice">Pengaturan gestur disimpan secara lokal</string>
+    <string name="toast_sms_active">Perlindungan SMS diaktifkan</string>
+    <string name="toast_sms_rejected">Peran SMS ditolak</string>
+    <string name="toast_notification_granted">Izin notifikasi diberikan</string>
+    <string name="toast_notification_warning">Izin notifikasi diperlukan untuk perlindungan</string>
+    <string name="toast_calendar_granted">Izin kalender diberikan</string>
+    <string name="toast_calendar_warning">Izin kalender diperlukan untuk pemindaian otonom</string>
+    <string name="toast_vpn_granted">Izin VPN diberikan</string>
+    <string name="toast_vpn_rejected">Izin VPN ditolak</string>
+    <string name="toast_enable_notification_manual">Harap aktifkan listener notifikasi secara manual</string>
+    <string name="emergency_reason_sensor">Darurat dipicu oleh sensor</string>
+    <string name="emergency_reason_manual">Tombol panik manual dipicu</string>
+    <string name="toast_debugger_detected">Peringatan: Debugger terdeteksi!</string>
+    <string name="biometric_vault_title">Autentikasi Vault</string>
+    <string name="biometric_vault_subtitle">Konfirmasi identitas untuk mengakses vault aman</string>
+    <string name="toast_vault_success">Vault berhasil dibuka</string>
+    <string name="toast_biometric_error">Kesalahan biometrik: %s</string>
+    <string name="toast_vpn_started">Layanan Juaris VPN dimulai</string>
+    <string name="disclosure_dialog_title">Pemberitahuan Aksesibilitas &amp; Notifikasi</string>
+    <string name="disclosure_message">Juaris memerlukan akses notifikasi untuk memfilter pesan phishing secara lokal di perangkat Anda.</string>
+    <string name="toast_dialog_error">Kesalahan dialog</string>
+    <string name="toast_vpn_dialog_error">Kesalahan dialog VPN</string>
+    <string name="desc_hologram">Avatar Hologram</string>
+    <string name="welcome_title">Keamanan AI Juaris</string>
+    <string name="welcome_subtitle">Perlindungan Seluler Terdesentralisasi</string>
+    <string name="biometric_login_title">Autentikasi Masuk</string>
+    <string name="biometric_login_subtitle">Autentikasi untuk masuk ke Kernel Juaris</string>
+    <string name="toast_login_success">Masuk berhasil</string>
+    <string name="kernel_title">Kernel Juaris</string>
+    <string name="kernel_subtitle">Enklave Aman Aktif</string>
+    <string name="btn_fingerprint_login">Masuk Sidik Jari</string>
+    <string name="btn_debug_bypass">Pintasan Debug</string>
+    <string name="toast_login_aborted">Masuk dibatalkan: %s</string>
+    <string name="log_module_guardian">Pengawas Keamanan</string>
+    <string name="log_desc_phishing_blocked">Ancaman phishing dicegat</string>
+    <string name="log_details_simulation">Serangan simulasi berhasil diblokir</string>
+    <string name="toast_threat_neutralized">Ancaman dinetralkan!</string>
+    <string name="toast_logs_vault_secured">Log dienkripsi dengan aman di Vault</string>
+    <string name="status_health_title">Status Kesehatan Sistem</string>
+    <string name="status_health_subtitle">Ikhtisar perlindungan kernel waktu nyata</string>
+    <string name="status_aes_encrypted">Terenkripsi AES-256 GCM</string>
+    <string name="status_filters_active">Semua filter aktif berjalan</string>
+    <string name="card_blocked_caps">DIBLOKIR</string>
+    <string name="card_data_flow">ALIRAN DATA</string>
+    <string name="card_local_only">100% Lokal</string>
+    <string name="section_actions">Darurat &amp; Aksi</string>
+    <string name="btn_simulate_phishing">Simulasikan Serangan Phishing</string>
+    <string name="btn_export_vault_logs">Ekspor Log Vault</string>
+    <string name="btn_panic_wipe">HAPUS DARURAT (PANIC WIPE)</string>
+    <string name="default_spam_label">Nomor Spam Dikenal</string>
+    <string name="toast_number_blocked">Nomor ditambahkan ke daftar hitam</string>
+    <string name="toast_number_released">Nomor dihapus dari daftar hitam</string>
+    <string name="toast_camera_started">Kamera Gestur Udara dimulai</string>
+    <string name="toast_permission_denied">Izin kamera ditolak</string>
+    <string name="status_paused">Dijeda</string>
+    <string name="btn_allow_notification_access">Izinkan Akses Notifikasi</string>
 </resources>
+
+
