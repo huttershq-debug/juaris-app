@@ -89,5 +89,21 @@
     <string name="air_gesture_page_subtitle">تحكم بدون تلامس</string>
     <string name="air_gesture_toggle_label">تفعيل الإيماءات الهوائية</string>
     <string name="air_gesture_store_notification">حفظ إعدادات الإيماءات</string>
+    <string name="clipboard_page_subtitle">حماية وسجل الحافظة</string>
+    <string name="clipboard_security_status">مراقبة الحافظة نشطة</string>
+    <string name="clipboard_autoclear_toggle">مسح الحافظة تلقائياً</string>
+    <string name="clipboard_autoclear_desc">مسح البيانات الحساسة تلقائياً</string>
+    <string name="toast_clipboard_cleared">تم مسح الحافظة بنجاح</string>
+    <string name="btn_clear_now">مسح الآن</string>
+    <string name="permissions_page_title">صلاحيات التطبيق</string>
+    <string name="permissions_page_subtitle">إدارة حقوق الوصول الأمني</string>
+    <string name="email_listener_card_title">درع التصيد الإحتيالي للبريد الإلكتروني</string>
+    <string name="email_listener_card_desc">فحص محتوى البريد الوارد</string>
+    <string name="toast_settings_error">خطأ في حفظ الإعدادات</string>
+    <string name="btn_allow_notification">السماح بالاشعارات</string>
+    <string name="toast_audit_ready">تدقيق الأمان جاهز</string>
+    <string name="btn_start_audit_scan">بدء فحص التدقيق</string>
+    <string name="mesh_connected">شبكة Mesh متصلة</string>
+    <string name="mesh_disconnected">شبكة Mesh مفصولة</string>
 </resources>
 
