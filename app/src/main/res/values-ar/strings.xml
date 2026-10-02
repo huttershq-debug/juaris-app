@@ -32,7 +32,7 @@
     <string name="btn_understood">فهمت والتفعيل</string>
     <string name="btn_cancel">إلغاء</string>
    
-    <!-- P2P Swarm & Mesh Strings -->
+    <!-- P2P Swarm &amp; Mesh Strings -->
     <string name="p2p_swarm_title">شبكة سُحُب جواريس (P2P)</string>
     <string name="p2p_swarm_subtitle">اتصالات آمنة لامركزية بدون إنترنت</string>
     <string name="mesh_broadcast_title">بث رسالة إلى الشبكة</string>
@@ -58,7 +58,7 @@
     <string name="logs_empty_message">لم يتم تسجيل أي أحداث حتى الآن. نظامك آمن.</string>
     <string name="logs_module_prefix">الوحدة: %s</string>
 
-    <!-- Privacy & Imprint Strings -->
+    <!-- Privacy &amp; Imprint Strings -->
     <string name="privacy_text">سياسة الخصوصية</string>
     <string name="privacy_link">قراءة سياسة الخصوصية</string>
     <string name="imprint_title">معلومات النشر (Imprint)</string>
