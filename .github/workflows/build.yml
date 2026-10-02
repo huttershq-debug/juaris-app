@@ -25,10 +25,10 @@ jobs:
       - name: Generate and Make Gradle Wrapper Executable
         run: |
           if [ ! -f "./gradlew" ]; then
-            echo "Gradle wrapper not found, generating it automatically..."
-            wget -q https://gradle.org
-            unzip -q gradle-8.5-bin.zip
-            ./gradle-8.5/bin/gradle wrapper --gradle-version 8.5
+            echo "Gradle wrapper not found, generating it via gradle-command..."
+            # WELTSPITZEN-STANDARD: Wir nutzen den vorinstallierten Gradle-Befehl 
+            # der GitHub Ubuntu-Maschine. Das ist zu 100% ausfallsicher und benötigt kein 'wget' oder 'unzip'!
+            gradle wrapper --gradle-version 8.5
           fi
           chmod +x ./gradlew
 
