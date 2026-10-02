@@ -208,5 +208,19 @@
     <string name="protection_modules_title">Schutzmodule</string>
     <string name="protection_modules_subtitle">Aktive Echtzeit-Sicherheitsfilter</string>
     <string name="toast_enable_listener_manual">Bitte aktiviere den Benachrichtigungs-Listener in den Einstellungen</string>
+        <!-- Juaris Core Extensions -->
+    <string name="comm_filter_title">Kommunikations-Filter</string>
+    <string name="call_prot_title">Anrufschutz</string>
+    <string name="call_prot_desc">Schutz vor verdächtigen Anrufen</string>
+    <string name="sms_prot_title">SMS-Schutz</string>
+    <string name="sms_prot_desc">Schutz vor Phishing-Textnachrichten</string>
+    <string name="email_prot_title">E-Mail-Schutz</string>
+    <string name="email_prot_desc">Schutz vor schädlichen E-Mails</string>
+    <string name="offline_vault_title">Offline-Tresor</string>
+    <string name="offline_vault_desc">Sicherer lokal­er Speicher für sensible Daten</string>
+    <string name="vault_status_unlocked">Tresor entriegelt</string>
+    <string name="vault_status_locked">Tresor gesperrt</string>
+    <string name="status_health_title">Systemstatus-Gesundheit</string>
+    <string name="status_health_subtitle">Echtzeit-Kernel-Schutzübersicht</string>
 </resources>
 
