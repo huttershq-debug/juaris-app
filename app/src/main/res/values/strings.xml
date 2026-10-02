@@ -208,5 +208,19 @@
     <string name="protection_modules_title">Protection Modules</string>
     <string name="protection_modules_subtitle">Active real-time security filters</string>
     <string name="toast_enable_listener_manual">Please enable notification listener in settings</string>
+        <!-- Juaris Core Extensions -->
+    <string name="comm_filter_title">Communication Filter</string>
+    <string name="call_prot_title">Call Protection</string>
+    <string name="call_prot_desc">Protection against suspicious calls</string>
+    <string name="sms_prot_title">SMS Protection</string>
+    <string name="sms_prot_desc">Protection against phishing text messages</string>
+    <string name="email_prot_title">Email Protection</string>
+    <string name="email_prot_desc">Protection against malicious emails</string>
+    <string name="offline_vault_title">Offline Vault</string>
+    <string name="offline_vault_desc">Secure local storage for sensitive data</string>
+    <string name="vault_status_unlocked">Vault Unlocked</string>
+    <string name="vault_status_locked">Vault Locked</string>
+    <string name="status_health_title">System Health Status</string>
+    <string name="status_health_subtitle">Real-time kernel protection overview</string>
 </resources>
 
