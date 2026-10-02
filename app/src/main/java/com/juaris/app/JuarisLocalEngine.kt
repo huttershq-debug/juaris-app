@@ -15,6 +15,10 @@ object JuarisLocalEngine {
     private const val ALGORITHM = "AES/GCM/NoPadding"
     private const val TAG_LENGTH_BIT = 128
 
+    // KORREKTUR 1: Zentrales, hoch-performantes Krypto-Zufalls-Singleton.
+    // Verhindert Entropie-Erschöpfung des Android-Kernels unter Volllast komplett.
+    private val secureRandom = SecureRandom()
+
     /**
      * Verschlüsselt sensible lokale Daten oder Dateien direkt auf dem Smartphone.
      * Es verlässt niemals das Gerät.
@@ -22,7 +26,10 @@ object JuarisLocalEngine {
     fun encryptData(inputData: ByteArray, secretKey: SecretKey): ByteArray {
         val cipher = Cipher.getInstance(ALGORITHM)
         val iv = ByteArray(12)
-        SecureRandom().nextBytes(iv)
+        
+        // Nutzt das sichere Singleton statt permanenter Neu-Instanziierung
+        secureRandom.nextBytes(iv)
+        
         val spec = GCMParameterSpec(TAG_LENGTH_BIT, iv)
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, spec)
         val cipherText = cipher.doFinal(inputData)
@@ -35,6 +42,10 @@ object JuarisLocalEngine {
      * Entschlüsselt lokale Daten sicher on-the-fly.
      */
     fun decryptData(encryptedData: ByteArray, secretKey: SecretKey): ByteArray {
+        if (encryptedData.size < 12) {
+            throw IllegalArgumentException("Ungültige Krypto-Daten: Payload zu kurz für AES-GCM IV.")
+        }
+        
         val iv = encryptedData.copyOfRange(0, 12)
         val cipherText = encryptedData.copyOfRange(12, encryptedData.size)
         val cipher = Cipher.getInstance(ALGORITHM)
@@ -49,9 +60,16 @@ object JuarisLocalEngine {
      */
     fun initializeLocalStorage(context: Context): Boolean {
         try {
-            val secureDir = File(context.filesDir, "juaris_secure_vault")
+            // KORREKTUR 2: Ordnername geändert zu "vault_media_storage"!
+            // Das verhindert kritische Namenskonflikte mit der in der MainActivity
+            // deklarierten Datei "juaris_secure_vault" für EncryptedSharedPreferences.
+            val secureDir = File(context.filesDir, "vault_media_storage")
             if (!secureDir.exists()) {
-                secureDir.mkdirs()
+                val created = secureDir.mkdirs()
+                if (!created && !secureDir.exists()) {
+                    Log.e(TAG, "❌ Ordnerstruktur konnte nicht physisch erzeugt werden.")
+                    return false
+                }
             }
             Log.d(TAG, "📁 Lokaler High-Security-Speicher initialisiert: ${secureDir.absolutePath}")
             return true
@@ -61,4 +79,3 @@ object JuarisLocalEngine {
         }
     }
 }
-
