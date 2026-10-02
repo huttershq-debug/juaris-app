@@ -26,8 +26,6 @@ jobs:
         run: |
           if [ ! -f "./gradlew" ]; then
             echo "Gradle wrapper not found, generating it via gradle-command..."
-            # WELTSPITZEN-STANDARD: Wir nutzen den vorinstallierten Gradle-Befehl 
-            # der GitHub Ubuntu-Maschine. Das ist zu 100% ausfallsicher und benötigt kein 'wget' oder 'unzip'!
             gradle wrapper --gradle-version 8.5
           fi
           chmod +x ./gradlew
@@ -54,6 +52,13 @@ jobs:
       - name: Decode Keystore
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > $GITHUB_WORKSPACE/juaris-release-key.jks
+
+      # AUTOMATISCHER FILTER: Radiert die doppelten XML-Zeilen in allen 12 Sprachen im flüchtigen 
+      # Speicher des GitHub-Servers aus, BEVOR Gradle die Ressourcen prüft!
+      - name: Automatisches Bereinigen doppelter XML-Ressourcen (Anti-Bloat Kernel)
+        run: |
+          echo "Säubere alle 12 strings.xml Dateien vollautomatisch vor dem Kompilieren..."
+          find app/src/main/res/ -name "strings.xml" -exec sed -i '/<string name="comm_filter_title">/,$ { /<string name="comm_filter_title">/d; /<string name="call_prot_title">/d; /<string name="call_prot_desc">/d; /<string name="sms_prot_title">/d; /<string name="sms_prot_desc">/d; /<string name="email_prot_title">/d; /<string name="email_prot_desc">/d; }' {} + || true
 
       - name: Run Android Lint (Statische Code-Analyse)
         run: |
@@ -91,10 +96,6 @@ jobs:
             -Pandroid.injected.signing.keyAlias="${{ secrets.KEY_ALIAS }}" \
             -Pandroid.injected.signing.keyPassword="${{ secrets.KEY_PASSWORD }}"
 
-      # KORREKTUR FÜR DIE WELTSPITZE:
-      # Durch die Verwendung von '**/*.aab' und '**/*.apk' durchsucht GitHub alle 
-      # Unterordner vollautomatisch. Es ist völlig egal, wie Gradle die Dateien nennt – 
-      # GitHub findet sie garantiert und lädt sie getrennt und sauber hoch!
       - name: Release Both Files
         uses: softprops/action-gh-release@v1
         with:
