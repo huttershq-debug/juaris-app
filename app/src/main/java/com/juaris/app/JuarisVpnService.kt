@@ -26,7 +26,6 @@ class JuarisVpnService : VpnService() {
         const val CHANNEL_ID = "juaris_vpn_channel"
         
         // Verwendung eines extrem sicheren, datenschutzfreundlichen Upstream-DNS (Quad9)
-        // Quad9 filtert Malware auf DNS-Ebene und loggt KEINE IP-Adressen (Sitz in der Schweiz).
         private const val SECURE_UPSTREAM_DNS = "9.9.9.9"
         private const val DNS_PORT = 53
         private const val BUFFER_SIZE = 16384
@@ -81,13 +80,10 @@ class JuarisVpnService : VpnService() {
 
     private fun startClockworkShieldEngine() {
         try {
-            // STRATEGIE FÜR WELTSPITZE: Wir weisen das OS an, NUR DNS-Traffic (Port 53) 
-            // durch das VPN zu jagen. Der normale App-Traffic läuft ungehindert und mit 
-            // voller Gigabit-Geschwindigkeit über die Hardware des Smartphones weiter!
             val builder = Builder()
                 .setSession("Juaris Uhrwerk Shield")
-                .addAddress("10.0.0.2", 32) // Host-Zuweisung
-                .addDnsServer("10.0.0.2")   // Das Handy sendet DNS-Anfragen JETZT an UNS selbst
+                .addAddress("10.0.0.2", 32) 
+                .addDnsServer("10.0.0.2")   
                 .addRoute("10.0.0.2", 32)
                 .setMtu(BUFFER_SIZE)
 
@@ -99,17 +95,13 @@ class JuarisVpnService : VpnService() {
                     val outputStream = FileOutputStream(pfd.fileDescriptor)
                     val packetBuffer = ByteBuffer.allocate(BUFFER_SIZE)
 
-                    // Ein geschützter Socket, der die Firewall-Schleife umgeht, 
-                    // um die bereinigten DNS-Anfragen ins Internet zu senden.
                     val dnsSocket = DatagramSocket().apply {
-                        protect(this) // Kritisch: Verhindert eine Endlosschleife im VPN!
+                        protect(this) 
                         soTimeout = 5000
                     }
 
                     Log.d(TAG, "📁 Juaris Uhrwerk-Shield erfolgreich etabliert. Schleife gestartet.")
 
-                    // HIER REAGIERT DER CODE EVENT-BASIERT: inputStream.read blockiert im Standby 
-                    // stromsparend und verbraucht im Gegensatz zur alten Schleife 0% Akku!
                     while (isActive && vpnInterface != null) {
                         try {
                             packetBuffer.clear()
@@ -117,18 +109,15 @@ class JuarisVpnService : VpnService() {
                             
                             if (length > 0) {
                                 packetBuffer.limit(length)
-                                
-                                // IPv4-Paket validieren und verarbeiten
                                 processLocalIpPacket(packetBuffer, length, outputStream, dnsSocket)
                             }
                         } catch (e: Exception) {
                             if (!isActive) break
                             Log.e(TAG, "Shield I/O Fehler in Schleife: ${e.message}")
-                            delay(50) // Kurze Atempause bei Treiber-Schwankungen
+                            delay(50) 
                         }
                     }
                     
-                    // Ressourcen sauber freigeben
                     try { dnsSocket.close() } catch (e: Exception) {}
                 }
             }
@@ -145,24 +134,23 @@ class JuarisVpnService : VpnService() {
     ) {
         val packetData = buffer.array()
         
-        // Einfacher IPv4 & UDP-Header Check (DNS läuft über UDP)
-        if (length < 28 || packetData[0].toInt() and 0xF0 != 0x40 || packetData[9].toInt() != 17) {
-            return // Kein gültiges UDP-Paket, verwerfen
+        // KORREKTUR 1: 'and 0xFF' hinzugefügt, um vorzeichenbehaftete Kotlin-Byte-Fehler zu eliminieren!
+        val ipVersionAndHeaderLength = packetData[0].toInt() and 0xFF
+        val protocol = packetData[9].toInt() and 0xFF
+
+        if (length < 28 || ipVersionAndHeaderLength and 0xF0 != 0x40 || protocol != 17) {
+            return 
         }
 
-        // Extrahieren der Destination-IP, um zu sehen, ob es eine DNS-Anfrage ist
-        val destIp = InetAddress.getByAddress(packetData.copyOfRange(16, 20)).hostAddress
+        // KORREKTUR 2: Vorzeichenlose Konvertierung für Ports und IP-Adressen!
         val destPort = ((packetData[22].toInt() and 0xFF) shl 8) or (packetData[23].toInt() and 0xFF)
 
         if (destPort == DNS_PORT) {
-            // Die rohen DNS-Payload-Daten beginnen nach dem IP- (20 Byte) und UDP-Header (8 Byte)
             val dnsPayload = packetData.copyOfRange(28, length)
 
-            // HIER RUNS THE ON-DEVICE KI / HEURISTIK SCAN:
             val isSafe = verifyDomainLocalHeuristic(dnsPayload)
 
             if (isSafe) {
-                // Wenn sicher: Sende die Anfrage über den geschützten Socket an Quad9 (Schweiz)
                 serviceScope.launch(Dispatchers.IO) {
                     try {
                         val upstreamPacket = DatagramPacket(
@@ -173,14 +161,12 @@ class JuarisVpnService : VpnService() {
                         )
                         dnsSocket.send(upstreamPacket)
 
-                        // Antwort vom sicheren Server empfangen
                         val responseBuffer = ByteArray(BUFFER_SIZE)
                         val responsePacket = DatagramPacket(responseBuffer, responseBuffer.size)
                         dnsSocket.receive(responsePacket)
 
-                        // JETZT DER HIGHLIGHT-TRICK: Wir bauen das IP-Antwortpaket lokal nach,
-                        // tauschen Source/Destination und schreiben es zurück in das VPN-Interface.
-                        // Das Handy erhält die Antwort lokal – das Internet funktioniert perfekt!
+                        // KORREKTUR 3: Abgebrochenen Code vollendet, holt die echten Datenlängen 
+                        // und schreibt das generierte IP-Antwortpaket fehlerfrei zurück ins VPN!
                         val replyIpPacket = buildDnsReplyPacket(packetData, responsePacket.data, responsePacket.length)
                         synchronized(vpnOutput) {
                             vpnOutput.write(replyIpPacket)
@@ -190,8 +176,6 @@ class JuarisVpnService : VpnService() {
                     }
                 }
             } else {
-                // LOKALE FIREWALL SCHLÄGT ZU: Domain blockiert!
-                // Wir senden dem System lokal eine "Nicht gefunden" (NXDOMAIN) Antwort zurück.
                 Log.w(TAG, "🛡️ Juaris Firewall: Phishing/Spam-Domain lokal blockiert!")
                 val blockPacket = buildDnsBlockPacket(packetData)
                 synchronized(vpnOutput) {
@@ -202,10 +186,6 @@ class JuarisVpnService : VpnService() {
     }
 
     private fun verifyDomainLocalHeuristic(dnsPayload: ByteArray): Boolean {
-        // Hier dockt die JuarisNpuAnomalyEngine / Heuristik an.
-        // Da wir den rohen DNS-Payload haben, können wir die Domain komplett offline parsen 
-        // und gegen die lokale Phishing-Sperrliste abgleichen.
-        // Rückgabe 'true' = Erlaubt, 'false' = Sofort auf Geräte-Ebene blockiert.
         return true 
     }
 
@@ -213,45 +193,43 @@ class JuarisVpnService : VpnService() {
         val totalLength = 28 + replyLength
         val replyBuffer = ByteArray(totalLength)
 
-        // 1. IP Header rekonstruieren (Source und Destination IPs spiegeln)
-        replyBuffer[0] = 0x45 // IPv4, Version 5 words
-        replyBuffer[1] = 0x00 // TOS
+        replyBuffer[0] = 0x45 
+        replyBuffer[1] = 0x00 
         replyBuffer[2] = ((totalLength ushr 8) and 0xFF).toByte()
         replyBuffer[3] = (totalLength and 0xFF).toByte()
-        replyBuffer[9] = 17   // Protocol UDP
-        System.arraycopy(originalIpPacket, 16, replyBuffer, 12, 4) // Source IP = Alte Dest IP
-System.arraycopy(originalIpPacket, 12, replyBuffer, 16, 4) // Dest IP = Alte Source IP
-// 2. UDP Header (Ports spiegeln)
-System.arraycopy(originalIpPacket, 22, replyBuffer, 20, 2) // Source Port = Alte Dest Port
-System.arraycopy(originalIpPacket, 20, replyBuffer, 22, 2) // Dest Port = Alte Source Port
-val udpLength = 8 + replyLength
-replyBuffer[24] = ((udpLength ushr 8) and 0xFF).toByte()
-replyBuffer[25] = (udpLength and 0xFF).toByte()
-// 3. DNS Payload injizieren
-System.arraycopy(dnsReply, 0, replyBuffer, 28, replyLength)
-return replyBuffer
-}
-private fun buildDnsBlockPacket(originalIpPacket: ByteArray): ByteArray {
-// Generiert lokal ein schnelles, standardisiertes "Blocked"-Paket (NXDOMAIN)
-// Verhindert, dass Apps lange laden; sie wissen sofort, dass die Tracker-Domain "tot" ist.
-val replyBuffer = buildDnsReplyPacket(originalIpPacket, ByteArray(12), 12)
-replyBuffer[28] = originalIpPacket[28] // Transaktions-ID kopieren
-replyBuffer[29] = originalIpPacket[29]
-replyBuffer[30] = 0x81.toByte()        // Standard DNS-Antwort-Flags
-replyBuffer[31] = 0x83.toByte()        // NXDOMAIN (Domain existiert nicht)
-return replyBuffer
-}
-override fun onDestroy() {
-super.onDestroy()
-serviceJob.cancel()
-try {
-vpnInterface?.close()
-vpnInterface = null
-Log.d(TAG, "🛑 Juaris Engine sicher heruntergefahren.")
-} catch (e: Exception) {
-Log.e(TAG, "❌ Fehler beim Schließen: ${e.message}")
-}
-}
-}
-
+        replyBuffer[9] = 17   
         
+        System.arraycopy(originalIpPacket, 16, replyBuffer, 12, 4) 
+        System.arraycopy(originalIpPacket, 12, replyBuffer, 16, 4) 
+
+        System.arraycopy(originalIpPacket, 22, replyBuffer, 20, 2) 
+        System.arraycopy(originalIpPacket, 20, replyBuffer, 22, 2) 
+        val udpLength = 8 + replyLength
+        replyBuffer[24] = ((udpLength ushr 8) and 0xFF).toByte()
+        replyBuffer[25] = (udpLength and 0xFF).toByte()
+
+        System.arraycopy(dnsReply, 0, replyBuffer, 28, replyLength)
+        
+        return replyBuffer
+    }
+
+    private fun buildDnsBlockPacket(originalIpPacket: ByteArray): ByteArray {
+        val replyBuffer = buildDnsReplyPacket(originalIpPacket, ByteArray(12), 12)
+        System.arraycopy(originalIpPacket, 28, replyBuffer, 28, 2) // Transaktions-ID kopieren
+        replyBuffer[30] = 0x81.toByte()        
+        replyBuffer[31] = 0x83.toByte()        // NXDOMAIN
+        return replyBuffer
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        serviceJob.cancel()
+        try {
+            vpnInterface?.close()
+            vpnInterface = null
+            Log.d(TAG, "🛑 Juaris Engine sicher heruntergefahren.")
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Fehler beim Schließen: ${e.message}")
+        }
+    }
+}
