@@ -22,7 +22,15 @@ class JuarisBiometricManager(private val activity: FragmentActivity) {
                 BiometricManager.Authenticators.BIOMETRIC_WEAK or
                 BiometricManager.Authenticators.DEVICE_CREDENTIAL
 
-        when (biometricManager.canAuthenticate(allowedAuthenticators)) {
+        // CRITICAL FIX: Vor Android 11 (API 30) gab es BIOMETRIC_WEAK in dieser Kombination nicht nativ im canAuthenticate-Check.
+        // Wir passen das Prüf-Flag für ältere APIs an, um System-Fehlinterpretationen zu vermeiden.
+        val checkAuthenticators = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            allowedAuthenticators
+        } else {
+            BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL
+        }
+
+        when (biometricManager.canAuthenticate(checkAuthenticators)) {
             BiometricManager.BIOMETRIC_SUCCESS -> {
                 val executor = ContextCompat.getMainExecutor(activity)
                 val biometricPrompt = BiometricPrompt(activity, executor,
@@ -43,7 +51,6 @@ class JuarisBiometricManager(private val activity: FragmentActivity) {
                         }
                     })
 
-                // KORREKTUR: Versionssicherer Builder verhindert Abstürze bei kombinierten Authentifikatoren
                 val promptInfoBuilder = BiometricPrompt.PromptInfo.Builder()
                     .setTitle(title)
                     .setSubtitle(subtitle)
@@ -51,13 +58,23 @@ class JuarisBiometricManager(private val activity: FragmentActivity) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     promptInfoBuilder.setAllowedAuthenticators(allowedAuthenticators)
                 } else {
-                    // Abwärtskompatibler Fallback für ältere Android-Versionen vor API 30
+                    // Abwärtskompatibler, stabiler Fallback für ältere Android-Versionen vor API 30
                     @Suppress("DEPRECATION")
                     promptInfoBuilder.setDeviceCredentialAllowed(true)
                 }
 
-                val promptInfo = promptInfoBuilder.build()
-                biometricPrompt.authenticate(promptInfo)
+                try {
+                    val promptInfo = promptInfoBuilder.build()
+                    
+                    // ARCHITEKTUR-TIPP FÜR DIE ZUKUNFT:
+                    // Um absolute Immunität gegen RAM-Injektionen (z.B. via Frida) zu erreichen,
+                    // sollte hier langfristig das 'CryptoObject' des verschlüsselten Tresors übergeben werden:
+                    // biometricPrompt.authenticate(promptInfo, cryptoObject)
+                    
+                    biometricPrompt.authenticate(promptInfo)
+                } catch (e: Exception) {
+                    onError("Fehler bei der Initialisierung der Biometrie-UI: ${e.message}")
+                }
             }
             BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> {
                 onError("Keine biometrische Hardware oder Sicherung auf diesem Gerät verfügbar.")
@@ -71,4 +88,3 @@ class JuarisBiometricManager(private val activity: FragmentActivity) {
         }
     }
 }
-
