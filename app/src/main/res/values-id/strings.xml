@@ -208,6 +208,20 @@
     <string name="protection_modules_title">Modul Perlindungan</string>
     <string name="protection_modules_subtitle">Filter keamanan waktu nyata aktif</string>
     <string name="toast_enable_listener_manual">Harap aktifkan pendengar notifikasi di pengaturan</string>
+        <!-- Juaris Core Extensions -->
+    <string name="comm_filter_title">Filter Komunikasi</string>
+    <string name="call_prot_title">Perlindungan Panggilan</string>
+    <string name="call_prot_desc">Perlindungan terhadap panggilan mencurigakan</string>
+    <string name="sms_prot_title">Perlindungan SMS</string>
+    <string name="sms_prot_desc">Perlindungan terhadap pesan teks phishing</string>
+    <string name="email_prot_title">Perlindungan Email</string>
+    <string name="email_prot_desc">Perlindungan terhadap email berbahaya</string>
+    <string name="offline_vault_title">Brankas Offline</string>
+    <string name="offline_vault_desc">Penyimpanan lokal yang aman untuk data sensitif</string>
+    <string name="vault_status_unlocked">Brankas Terbuka</string>
+    <string name="vault_status_locked">Brankas Terkunci</string>
+    <string name="status_health_title">Status Kesehatan Sistem</string>
+    <string name="status_health_subtitle">Ikhtisar perlindungan kernel waktu nyata</string>
 </resources>
 
 
