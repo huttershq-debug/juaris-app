@@ -208,4 +208,18 @@
     <string name="protection_modules_title">সুরক্ষা মডিউল</string>
     <string name="protection_modules_subtitle">সক্রিয় রিয়েল-টাইম নিরাপত্তা ফিল্টার</string>
     <string name="toast_enable_listener_manual">অনুগ্রহ করে সেটিংসে নোটিফিকেশন লিসনার সক্ষম করুন</string>
+        <!-- Juaris Core Extensions -->
+    <string name="comm_filter_title">যোগাযোগ ফিল্টার</string>
+    <string name="call_prot_title">কল সুরক্ষা</string>
+    <string name="call_prot_desc">সন্দেহজনক কল থেকে সুরক্ষা</string>
+    <string name="sms_prot_title">এসএমএস সুরক্ষা</string>
+    <string name="sms_prot_desc">ফিশিং টেক্সট মেসেজ থেকে সুরক্ষা</string>
+    <string name="email_prot_title">ইমেল সুরক্ষা</string>
+    <string name="email_prot_desc">ক্ষতিকারক ইমেল থেকে সুরক্ষা</string>
+    <string name="offline_vault_title">অফলাইন ভল্ট</string>
+    <string name="offline_vault_desc">সংবেদনশীল ডেটার জন্য নিরাপদ স্থানীয় স্টোরেজ</string>
+    <string name="vault_status_unlocked">ভল্ট আনলক করা হয়েছে</string>
+    <string name="vault_status_locked">ভল্ট लॉक করা হয়েছে</string>
+    <string name="status_health_title">সিস্টেম স্বাস্থ্য অবস্থা</string>
+    <string name="status_health_subtitle">রিয়েল-টাইม কার্নেল সুরক্ষা ওভারভিউ</string>
 </resources>
