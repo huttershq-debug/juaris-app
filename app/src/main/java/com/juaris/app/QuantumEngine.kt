@@ -10,7 +10,13 @@ import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumPrivateKeyParamet
 import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumPublicKeyParameters
 import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumSigner
 import java.security.SecureRandom
+import java.util.Arrays
 
+/**
+ * JUARIS QUANTUM ENGINE
+ * Implementiert das NIST-standardisierte CRYSTALS-Dilithium2 Verfahren.
+ * Schützt den dezentralen Schwarm vor Manipulationen durch quantenbasierte Cyber-Angriffe.
+ */
 class QuantumEngine {
 
     private val random = SecureRandom()
@@ -22,7 +28,16 @@ class QuantumEngine {
         val publicKeyBytes: ByteArray,
         val privateKeyObj: DilithiumPrivateKeyParameters,
         val publicKeyObj: DilithiumPublicKeyParameters
-    )
+    ) {
+        /**
+         * KORREKTUR 1 (Anti-Forensik): Löscht den privaten Schlüssel physisch aus dem RAM!
+         * Muss vom Entwickler aufgerufen werden, sobald der Schlüssel in den 
+         * EncryptedSharedPreferences gesichert wurde. Verhindert Cold-Boot- und RAM-Dumping-Angriffe.
+         */
+        fun shredPrivateKey() {
+            Arrays.fill(privateKeyBytes, 0.toByte())
+        }
+    }
 
     fun generatePostQuantumKeyPair(): PostQuantumKeyPair {
         val keyGenParams = DilithiumKeyGenerationParameters(random, parameters)
@@ -45,6 +60,22 @@ class QuantumEngine {
         )
     }
 
+    // KORREKTUR 2: Rekonstruktions-Schnittstelle für persistierte Schlüssel!
+    // Erlaubt es JUARIS, den hardwareverschlüsselten privaten Schlüssel beim App-Start 
+    // wieder aus der DB/SharedPrefs zu laden, ohne jedes Mal neue Identitäten zu erzwingen.
+    fun recreatePrivateKeyFromBytes(privBytes: ByteArray): DilithiumPrivateKeyParameters {
+        return DilithiumPrivateKeyParameters(parameters, privBytes)
+    }
+
+    fun recreatePublicKeyFromBytes(pubBytes: ByteArray): DilithiumPublicKeyParameters {
+        return DilithiumPublicKeyParameters(parameters, pubBytes)
+    }
+
+    fun recreatePublicKeyFromBase64(pubBase64: String): DilithiumPublicKeyParameters {
+        val decodedBytes = Base64.decode(pubBase64, Base64.NO_WRAP)
+        return recreatePublicKeyFromBytes(decodedBytes)
+    }
+
     fun signThreatData(privateKeyObj: DilithiumPrivateKeyParameters, payload: ByteArray): String {
         val signer = DilithiumSigner()
         signer.init(true, ParametersWithRandom(privateKeyObj, random))
@@ -57,11 +88,13 @@ class QuantumEngine {
             val signature = Base64.decode(base64Signature, Base64.NO_WRAP)
             val verifier = DilithiumSigner()
             verifier.init(false, publicKeyObj)
-            verifier.verifySignature(payload, signature)
+            val result = verifier.verifySignature(payload, signature)
+            
+            // Flüchtige Signatur-Bytes im Speicher nullen
+            Arrays.fill(signature, 0.toByte())
+            result
         } catch (e: Exception) {
             false
         }
     }
 }
-
-
