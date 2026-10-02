@@ -1,129 +1,74 @@
-package com.juaris.app.ui
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://android.com"
+    android:id="@+id/main_activity_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#121212">
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.juaris.app.R
-import com.juaris.app.SecurityLogEntity
+    <!-- Titel / App Name -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="JUARIS SECURITY"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#00E676"
+        android:gravity="center"
+        android:paddingBottom="12dp"/>
 
-// Das neongrüne Markenzeichen von JUARIS
-val NeonGiftgruen = Color(0xFF00E676)
+    <!-- Status-Karte -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#1E1E1E"
+        android:padding="12dp"
+        android:layout_marginBottom="16dp">
 
-/**
- * JUARIS LIVE SECURITY CONSOLE
- * Das hochperformante, native Jetpack Compose Äquivalent zum alten XML-Layout.
- * Optimiert für den weltweiten Massenmarkt: 100% flüssig via LazyColumn (Anti-RAM-Spike)
- * und vollkommen multilingual lokalisiert.
- */
-@Composable
-fun JuarisConsoleScreen(
-    swarmStatusText: String, // Wird dynamisch aus dem Live-Flow der GlobalMeshEngine gespeist
-    securityLogs: List<SecurityLogEntity> // Kommt direkt aus dem optimierten SecurityLogDao-Flow
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF121212)) // Tiefes Cyber-Schwarz
-            .padding(16.dp)
-    ) {
-        // 1. TITEL / APP NAME (Sprachunabhängig aus der strings.xml)
-        Text(
-            text = stringResource(R.string.app_ui_title_security).uppercase(),
-            color = NeonGiftgruen,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 12.dp)
-        )
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="STATUS: WÄCHTER AKTIV (OFFLINE)"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"/>
 
-        // 2. STATUS-KARTE
-        Card(
-            shape = RoundedCornerShape(4.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-        ) {
-            Column(modifier = Modifier.padding(12.dp)) {
-                Text(
-                    text = stringResource(R.string.status_guardian_active_offline),
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = swarmStatusText, // e.g., "Schwarm-Signaturen lokal: ${logs.size} (P2P bereit)"
-                    color = Color(0xFFB0BEC5),
-                    fontSize = 12.sp
-                )
-            }
-        }
+        <TextView
+            android:id="@+id/mainTxtSwarmStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Schwarm-Signaturen lokal: 0 (P2P bereit)"
+            android:textColor="#B0BEC5"
+            android:textSize="12sp"
+            android:paddingTop="4dp"/>
+    </LinearLayout>
 
-        // 3. ÜBERSCHRIFT FÜR DAS BEDROHUNGS-LOG
-        Text(
-            text = stringResource(R.string.title_intercepted_logs),
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 14.sp,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
+    <!-- Überschrift für das Bedrohungs-Log -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Abgefangene Anrufe &amp; SMS (Log):"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:paddingBottom="8dp"/>
 
-        // 4. KORREKTUR FÜR DIE WELTSPITZE: Die speicherschonende Live-Ereignis-Liste!
-        // Läuft über eine LazyColumn. Sie rendert nur die Kacheln, die der Nutzer sieht.
-        // Selbst bei Millionen Logs im Hintergrund bleibt das Handy absolut ruckelfrei!
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .background(Color(0xFF1E1E1E), shape = RoundedCornerShape(2.dp))
-                .padding(8.dp)
-        ) {
-            if (securityLogs.isEmpty()) {
-                // Wartezustand (Sprachunterstützt)
-                Text(
-                    text = "[System] " + stringResource(R.string.logs_waiting_for_events),
-                    color = Color(0xFFE0E0E0),
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 12.sp
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    items(securityLogs) { log ->
-                        Text(
-                            text = "[${log.module}] ${log.description}\n-> ${log.details}",
-                            color = when (log.status) {
-                                "BLOCKED" -> Color(0xFFFF3333) // Aggressives Warn-Rot bei Abwehr
-                                "WARNING" -> Color(0xFFFF9800) // Warn-Orange bei Risiken
-                                else -> Color(0xFFE0E0E0)      // Dezentes Hellgrau für Standard-Infos
-                            },
-                            fontFamily = FontFamily.Monospace,
-                            fontSize = 12.sp,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
+    <!-- Liste / Textfeld für die Live-Ereignisse -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#1E1E1E"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/mainTxtLogList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="[System] Warten auf erste Ereignisse...\n"
+            android:textColor="#E0E0E0"
+            android:fontFamily="monospace"
+            android:textSize="12sp"/>
+    </ScrollView>
+
+</LinearLayout>
