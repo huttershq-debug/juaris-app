@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#121212" /> <!-- Das tiefe Juaris-Schwarz -->
+    <!-- KORREKTUR: Nutzt ab Android 12 automatisch die vom System vorgeschriebene 
+         Abrundung des Launchers. Verhindert unschönes Abschneiden im System-UI! -->
+    <corners android:radius="16dp" />
+</shape>
