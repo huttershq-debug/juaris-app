@@ -1,6 +1,5 @@
 package com.juaris.app
 
-import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -9,42 +8,77 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 
 object JuarisNotificationDispatcher {
 
-    private const val CHANNEL_ID = "juaris_priority_channel"
-    private const val NOTIFICATION_ID_HIGH = 9999
+    // KORREKTUR 1: Strikt getrennte Kanäle für Infos und Alarme.
+    // Verhindert, dass das Android-System die Wichtigkeitsstufen dauerhaft falsch einfriert!
+    private const val CHANNEL_ID_CRITICAL = "juaris_critical_alerts_channel"
+    private const val CHANNEL_ID_DEFAULT = "juaris_info_alerts_channel"
 
-    @SuppressLint("MissingPermission")
     fun sendPriorityAlert(context: Context, title: String, message: String, isCritical: Boolean) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        // Erstelle den High-Importance Kanal für echte Pop-ups (Heads-Up)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val importance = if (isCritical) NotificationManager.IMPORTANCE_HIGH else NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(CHANNEL_ID, "Juaris Priority Alerts", importance).apply {
-                description = "Wichtige Sicherheits- und Versorger-Warnungen"
-                enableVibration(true)
+        // KORREKTUR 2: Laufzeit-Berechtigungsprüfung für Android 13+ statt Unterdrückung via SuppressLint
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) !=
+                android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                return // Keine Rechte vorhanden, Abbruch um Systemkonflikte zu vermeiden
             }
-            notificationManager.createNotificationChannel(channel)
+        }
+
+        // Ziel-Kanal und Priorität anhand der Dringlichkeit bestimmen
+        val activeChannelId = if (isCritical) CHANNEL_ID_CRITICAL else CHANNEL_ID_DEFAULT
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (isCritical) {
+                // High-Importance Kanal für lautstarke Heads-Up Popups
+                if (notificationManager.getNotificationChannel(CHANNEL_ID_CRITICAL) == null) {
+                    val channel = NotificationChannel(
+                        CHANNEL_ID_CRITICAL, 
+                        "Juaris Kritische Alarme", 
+                        NotificationManager.IMPORTANCE_HIGH
+                    ).apply {
+                        description = "Echtzeit-Popups bei akuten Sicherheitsbedrohungen"
+                        enableVibration(true)
+                    }
+                    notificationManager.createNotificationChannel(channel)
+                }
+            } else {
+                // Default-Importance Kanal für lautlose oder dezente Info-Meldungen
+                if (notificationManager.getNotificationChannel(CHANNEL_ID_DEFAULT) == null) {
+                    val channel = NotificationChannel(
+                        CHANNEL_ID_DEFAULT, 
+                        "Juaris Sicherheits-Protokolle", 
+                        NotificationManager.IMPORTANCE_DEFAULT
+                    ).apply {
+                        description = "Hintergrund-Informationen und Status-Updates"
+                    }
+                    notificationManager.createNotificationChannel(channel)
+                }
+            }
         }
 
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
+        
+        // Dynamischer Request-Code basierend auf dem Titel-Hash, um Intent-Kollisionen zu vermeiden
+        val uniqueRequestCode = title.hashCode()
+
         val pendingIntent = PendingIntent.getActivity(
-            context, 0, intent,
+            context, uniqueRequestCode, intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        // Konstruiere das Pop-up mit maximaler Priorität
-        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(context, activeChannelId)
             .setSmallIcon(R.drawable.app_icon)
             .setContentTitle(title)
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
             .setPriority(if (isCritical) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_DEFAULT)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setCategory(if (isCritical) NotificationCompat.CATEGORY_ALARM else NotificationCompat.CATEGORY_STATUS)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
 
@@ -52,10 +86,14 @@ object JuarisNotificationDispatcher {
             builder.setDefaults(NotificationCompat.DEFAULT_ALL)
         }
 
-        with(NotificationManagerCompat.from(context)) {
-            // Löst das Pop-up sofort auf dem Gerät aus
-            notify(NOTIFICATION_ID_HIGH, builder.build())
+        // KORREKTUR 3: Dynamische ID-Generierung mittels Hash-Wert der Nachricht.
+        // Garantiert, dass mehrere Bedrohungen gleichzeitig als separate Kacheln sichtbar bleiben!
+        val dynamicNotificationId = (title + message).hashCode()
+
+        try {
+            NotificationManagerCompat.from(context).notify(dynamicNotificationId, builder.build())
+        } catch (e: SecurityException) {
+            e.printStackTrace()
         }
     }
 }
-
