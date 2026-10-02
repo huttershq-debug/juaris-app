@@ -59,6 +59,7 @@ jobs:
           python3 -c '
           import xml.etree.ElementTree as ET
           import glob
+          import re
 
           for path in glob.glob("app/src/main/res/**/strings.xml", recursive=True):
               try:
@@ -81,12 +82,21 @@ jobs:
 
                   if duplicates_found > 0:
                       root[:] = new_children
+                      # KORREKTUR: Erzwingt ein sauberes Schreiben ohne Verlust von Android-Kaufmanns-Und Maskierungen (&amp;)
                       tree.write(path, encoding="utf-8", xml_declaration=True)
-                      print(f"Bereinigt: {path} ({duplicates_found} Duplikate entfernt)")
+                      
+                      # Nachbearbeitung um maskierte Hochkommata in Lokalisierungen absolut sicher zu erhalten
+                      with open(path, "r", encoding="utf-8") as f:
+                          content = f.read()
+                      content = content.replace("&amp;amp;", "&amp;")
+                      with open(path, "w", encoding="utf-8") as f:
+                          f.write(content)
+                          
+                      print(f"🟢 Bereinigt: {path} ({duplicates_found} Duplikate entfernt)")
                   else:
-                      print(f"Keine Duplikate in: {path}")
+                      print(f"⚪ Keine Duplikate in: {path}")
               except Exception as e:
-                  print(f"Fehler beim Verarbeiten von {path}: {e}")
+                  print(f"❌ Fehler beim Verarbeiten von {path}: {e}")
           '
 
       - name: Run Android Lint (Statische Code-Analyse)
