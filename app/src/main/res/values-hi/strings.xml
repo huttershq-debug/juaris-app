@@ -208,5 +208,19 @@
     <string name="protection_modules_title">सुरक्षा मॉड्यूल</string>
     <string name="protection_modules_subtitle">सक्रिय वास्तविक समय सुरक्षा फ़िल्टर</string>
     <string name="toast_enable_listener_manual">कृपया सेटिंग्स में नोटिफिकेशन लिसनर सक्षम करें</string>
+        <!-- Juaris Core Extensions -->
+    <string name="comm_filter_title">संचार फ़िल्टर</string>
+    <string name="call_prot_title">कॉल सुरक्षा</string>
+    <string name="call_prot_desc">संदिग्ध कॉल से सुरक्षा</string>
+    <string name="sms_prot_title">एसएमएस सुरक्षा</string>
+    <string name="sms_prot_desc">फिशिंग टेक्स्ट संदेशों से सुरक्षा</string>
+    <string name="email_prot_title">ईमेल सुरक्षा</string>
+    <string name="email_prot_desc">दुर्भावनापूर्ण ईमेल से सुरक्षा</string>
+    <string name="offline_vault_title">ऑफ़लाइन वॉल्ट</string>
+    <string name="offline_vault_desc">संवेदनशील डेटा के लिए सुरक्षित स्थानीय भंडारण</string>
+    <string name="vault_status_unlocked">वॉल्ट अनलॉक किया गया</string>
+    <string name="vault_status_locked">वॉल्ट लॉक किया गया</string>
+    <string name="status_health_title">सिस्टम स्वास्थ्य स्थिति</string>
+    <string name="status_health_subtitle">वास्तविक समय कर्नेल सुरक्षा अवलोकन</string>
 </resources>
 
