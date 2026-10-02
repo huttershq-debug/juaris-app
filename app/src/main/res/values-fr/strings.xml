@@ -208,6 +208,20 @@
     <string name="protection_modules_title">"Modules de protection"</string>
     <string name="protection_modules_subtitle">"Filtres de sécurité actifs en temps réel"</string>
     <string name="toast_enable_listener_manual">"Veuillez activer l'écouteur de notifications dans les paramètres"</string>
+        <!-- Juaris Core Extensions -->
+    <string name="comm_filter_title">Filtre de Communication</string>
+    <string name="call_prot_title">Protection des Appels</string>
+    <string name="call_prot_desc">Protection contre les appels suspects</string>
+    <string name="sms_prot_title">Protection des SMS</string>
+    <string name="sms_prot_desc">Protection contre les SMS de phishing</string>
+    <string name="email_prot_title">Protection des E-mails</string>
+    <string name="email_prot_desc">Protection contre les e-mails malveillants</string>
+    <string name="offline_vault_title">Coffre-fort Offline</string>
+    <string name="offline_vault_desc">Stockage local sécurisé pour les données sensibles</string>
+    <string name="vault_status_unlocked">Coffre-fort Déverrouillé</string>
+    <string name="vault_status_locked">Coffre-fort Verrouillé</string>
+    <string name="status_health_title">État de Santé du Système</string>
+    <string name="status_health_subtitle">Aperçu de la protection du noyau en temps réel</string>
 </resources>
 
 
