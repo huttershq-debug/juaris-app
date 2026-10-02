@@ -208,5 +208,19 @@
     <string name="protection_modules_title">保护模块</string>
     <string name="protection_modules_subtitle">实时活动安全过滤器</string>
     <string name="toast_enable_listener_manual">请在设置中启用通知监听器</string>
+        <!-- Juaris Core Extensions -->
+    <string name="comm_filter_title">通信过滤</string>
+    <string name="call_prot_title">通话防护</string>
+    <string name="call_prot_desc">防御可疑来电</string>
+    <string name="sms_prot_title">短信防护</string>
+    <string name="sms_prot_desc">防御钓鱼短信</string>
+    <string name="email_prot_title">邮件防护</string>
+    <string name="email_prot_desc">防御恶意电子邮件</string>
+    <string name="offline_vault_title">离线保险库</string>
+    <string name="offline_vault_desc">安全存储本地敏感数据</string>
+    <string name="vault_status_unlocked">保险库已解锁</string>
+    <string name="vault_status_locked">保险库已锁定</string>
+    <string name="status_health_title">系统健康状态</string>
+    <string name="status_health_subtitle">实时内核防护概述</string>
 </resources>
 
