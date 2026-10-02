@@ -208,4 +208,18 @@
     <string name="protection_modules_title">Модули защиты</string>
     <string name="protection_modules_subtitle">Активные фильтры безопасности в реальном времени</string>
     <string name="toast_enable_listener_manual">Пожалуйста, включите службу уведомлений в настройках</string>
+        <!-- Juaris Core Extensions -->
+    <string name="comm_filter_title">Фильтр связи</string>
+    <string name="call_prot_title">Защита звонков</string>
+    <string name="call_prot_desc">Защита от подозрительных звонков</string>
+    <string name="sms_prot_title">Защита SMS</string>
+    <string name="sms_prot_desc">Защита от фишинговых текстовых сообщений</string>
+    <string name="email_prot_title">Защита электронной почты</string>
+    <string name="email_prot_desc">Защита от вредоносных писем</string>
+    <string name="offline_vault_title">Автономное хранилище</string>
+    <string name="offline_vault_desc">Безопасное локальное хранилище для конфиденциальных данных</string>
+    <string name="vault_status_unlocked">Хранилище разблокировано</string>
+    <string name="vault_status_locked">Хранилище заблокировано</string>
+    <string name="status_health_title">Состояние системы</string>
+    <string name="status_health_subtitle">Обзор защиты ядра в реальном времени</string>
 </resources>
