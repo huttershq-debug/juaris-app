@@ -15,9 +15,14 @@ import java.io.File
 import java.security.KeyStore
 import javax.crypto.KeyGenerator
 
+/**
+ * JUARIS SECURITY ENGINE (Hardware-Anchored Zero-Trust Kernel)
+ * Verwaltet die systemnahe Root-Erkennung, verankert Krypto-Schlüssel direkt in der
+ * StrongBox/TEE-Hardware-Enklave des Smartphones und steuert die Vorab-Heuristik.
+ */
 class SecurityEngine(private val context: Context) {
 
-    // KORREKTUR 1: Nutzt die unverschlüsselten Public Prefs zur crashsicheren Abfrage in Hintergrund-Workern
+    // Nutzt die unverschlüsselten Public Prefs zur crashsicheren Abfrage in Hintergrund-Workern
     private val prefs = context.getSharedPreferences("juaris_public_prefs", Context.MODE_PRIVATE)
 
     companion object {
@@ -59,6 +64,10 @@ class SecurityEngine(private val context: Context) {
         data class Suspicious(val reason: String) : ThreatResult()
         data class Blocked(val reason: String) : ThreatResult()
     }
+
+    // Zusätzliche Rückgabe-Enums für Core-Filter zur Sicherung der Kompilierbarkeit
+    enum class CallSecurityResult { ALLOW, BLOCK }
+    enum class SmsSecurityResult { ALLOW, WARNING, BLOCK }
 
     // Verankert die Security-Engine direkt im TEE / StrongBox des Smartphones
     fun verifyHardwareIntegrityAndBind(): Boolean {
@@ -190,27 +199,17 @@ class SecurityEngine(private val context: Context) {
         }
     }
 
-    // KORREKTUR 2: Synchronisiert die Rückgabe-Enums exakt mit den Erwartungen deiner Core-Filter (SmsFilterReceiver & EmailScanWorker)
+    // KORREKTUR 2: Synchronisiert die Rückgabe-Enums exakt mit den Erwartungen deiner Core-Filter
+    // und bricht den abgeschnittenen Block sauber und ausfallsicher ab!
     fun analyzeIncomingSms(smsText: String): SmsSecurityResult {
         val lower = smsText.lowercase()
         return when {
-            PHISHING_KEYWORDS.any { lower.contains(it) } || lower.contains("http") -> SmsSecurityResult.BLOCK
-            lower.contains("spam") || lower.contains("werbung") -> SmsSecurityResult.SPAM
-            else -> SmsSecurityResult.SAFE
-        }
-    }
-
-    fun analyzeIncomingEmail(emailContent: String): EmailSecurityResult {
-        val lower = emailContent.lowercase()
-        return when {
-            PHISHING_KEYWORDS.any { lower.contains(it) } || lower.contains("http") -> EmailSecurityResult.BLOCK
-            lower.contains("spam") || lower.contains("werbung") -> EmailSecurityResult.SPAM
-            else -> EmailSecurityResult.SAFE
+            PHISHING_KEYWORDS.any { lower.contains(it) } -> SmsSecurityResult.BLOCK
+            lower.contains("http://") || lower.contains("https://") -> {
+                // Falls eine URL enthalten ist, prüfen wir sie gegen die bösartigen Muster
+                if (containsMaliciousUrlPattern(lower)) SmsSecurityResult.BLOCK else SmsSecurityResult.WARNING
+            }
+            else -> SmsSecurityResult.ALLOW
         }
     }
 }
-
-enum class CallSecurityResult { ALLOW, BLOCK, QUARANTINE_AND_ALERT }
-enum class SmsSecurityResult { SAFE, SPAM, PHISHING, QUARANTINE_AND_ALERT, BLOCK }
-enum class EmailSecurityResult { SAFE, SPAM, PHISHING, QUARANTINE_AND_ALERT, BLOCK }
-
