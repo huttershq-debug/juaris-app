@@ -3,6 +3,7 @@ name: Build and Release Juaris
 on:
   push:
     branches: [ "main", "master" ]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -25,7 +26,7 @@ jobs:
         run: |
           if [ ! -f "./gradlew" ]; then
             echo "Gradle wrapper not found, generating it automatically..."
-            wget -q https://services.gradle.org/distributions/gradle-8.5-bin.zip
+            wget -q https://gradle.org
             unzip -q gradle-8.5-bin.zip
             ./gradle-8.5/bin/gradle wrapper --gradle-version 8.5
           fi
@@ -90,14 +91,17 @@ jobs:
             -Pandroid.injected.signing.keyAlias="${{ secrets.KEY_ALIAS }}" \
             -Pandroid.injected.signing.keyPassword="${{ secrets.KEY_PASSWORD }}"
 
+      # KORREKTUR FÜR DIE WELTSPITZE:
+      # Durch die Verwendung von '**/*.aab' und '**/*.apk' durchsucht GitHub alle 
+      # Unterordner vollautomatisch. Es ist völlig egal, wie Gradle die Dateien nennt – 
+      # GitHub findet sie garantiert und lädt sie getrennt und sauber hoch!
       - name: Release Both Files
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            app/build/outputs/bundle/release/app-release.aab
-            app/build/outputs/apk/release/*.apk
+            app/build/outputs/bundle/release/**/*.aab
+            app/build/outputs/apk/release/**/*.apk
           tag_name: v1.0.0-${{ github.run_number }}
           name: "Juaris Release v1.0.0-${{ github.run_number }} (AAB & APK)"
           body: "Dieses Release enthält sowohl die .aab-Datei für den Google Play Store als auch die .apk-Datei zum direkten Installieren auf dem Handy."
           token: ${{ secrets.GITHUB_TOKEN }}
-
