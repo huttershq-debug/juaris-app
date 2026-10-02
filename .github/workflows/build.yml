@@ -53,35 +53,41 @@ jobs:
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > $GITHUB_WORKSPACE/juaris-release-key.jks
 
-      # KORREKTUR FÜR DIE WELTSPITZE (Anti-Duplicate Kernel):
-      # Dieses Skript sucht nach dem allerersten Vorkommen von 'comm_filter_title' und schneidet ALLES ab 
-      # dieser Zeile bis zum Dateiende ab. Danach setzt es die sauberen, eindeutigen Lint-Strings ein.
-      # Das verhindert jegliche Ressourcen-Konflikte (mergeReleaseResources) vollkommen!
-      - name: Automatisches Bereinigen doppelter XML-Ressourcen (Anti-Bloat Kernel)
+      # INTELLIGENTE XML-DEDUPLIZIERUNG (Sprach-Erhaltend für alle 12 Sprachen)
+      - name: Intelligente XML-Deduplizierung für alle 12 Sprachen (Python-Kernel)
         run: |
-          echo "Führe krypto-grafischen Zeilen-Schnitt über alle 12 strings.xml Dateien aus..."
-          find app/src/main/res/ -name "strings.xml" -exec sh -c '
-            for file; do
-              if grep -q "comm_filter_title" "$file"; then
-                sed -i "/comm_filter_title/,\$d" "$file"
-                echo "    <!-- Clean Core Resources Hook -->" >> "$file"
-                echo "    <string name=\"comm_filter_title\">Kommunikations-Filter</string>" >> "$file"
-                echo "    <string name=\"call_prot_title\">Anrufschutz</string>" >> "$file"
-                echo "    <string name=\"call_prot_desc\">Schutz vor verdächtigen Anrufen</string>" >> "$file"
-                echo "    <string name=\"sms_prot_title\">SMS-Schutz</string>" >> "$file"
-                echo "    <string name=\"sms_prot_desc\">Schutz vor Phishing-Textnachrichten</string>" >> "$file"
-                echo "    <string name=\"email_prot_title\">E-Mail-Schutz</string>" >> "$file"
-                echo "    <string name=\"email_prot_desc\">Schutz vor schädlichen E-Mails</string>" >> "$file"
-                echo "    <string name=\"offline_vault_title\">Offline-Tresor</string>" >> "$file"
-                echo "    <string name=\"offline_vault_desc\">Sicherer lokaler Speicher</string>" >> "$file"
-                echo "    <string name=\"vault_status_unlocked\">Tresor entriegelt</string>" >> "$file"
-                echo "    <string name=\"vault_status_locked\">Tresor gesperrt</string>" >> "$file"
-                echo "    <string name=\"status_health_title\">Systemstatus-Gesundheit</string>" >> "$file"
-                echo "    <string name=\"status_health_subtitle\">Echtzeit-Kernel-Schutzübersicht</string>" >> "$file"
-                echo "</resources>" >> "$file"
-              fi
-            done
-          ' _ {} + || true
+          python3 -c '
+          import xml.etree.ElementTree as ET
+          import glob
+
+          for path in glob.glob("app/src/main/res/**/strings.xml", recursive=True):
+              try:
+                  parser = ET.XMLParser(target=ET.TreeBuilder(insert_comments=True))
+                  tree = ET.parse(path, parser=parser)
+                  root = tree.getroot()
+                  
+                  seen_names = set()
+                  new_children = []
+                  duplicates_found = 0
+
+                  for child in root:
+                      if child.tag == "string":
+                          name = child.attrib.get("name")
+                          if name in seen_names:
+                              duplicates_found += 1
+                              continue # Doppeltes Element verwerfen, Original-Übersetzung behalten
+                          seen_names.add(name)
+                      new_children.append(child)
+
+                  if duplicates_found > 0:
+                      root[:] = new_children
+                      tree.write(path, encoding="utf-8", xml_declaration=True)
+                      print(f"Bereinigt: {path} ({duplicates_found} Duplikate entfernt)")
+                  else:
+                      print(f"Keine Duplikate in: {path}")
+              except Exception as e:
+                  print(f"Fehler beim Verarbeiten von {path}: {e}")
+          '
 
       - name: Run Android Lint (Statische Code-Analyse)
         run: |
