@@ -208,5 +208,19 @@
     <string name="protection_modules_title">پروٹیکشن ماڈیولز</string>
     <string name="protection_modules_subtitle">فعال ریئل ٹائم سیکیورٹی فلٹرز</string>
     <string name="toast_enable_listener_manual">براہ کرم سیٹنگز میں نوٹیفیکیشن لسنر کو فعال کریں</string>
+        <!-- Juaris Core Extensions -->
+    <string name="comm_filter_title">مواصلاتی فلٹر</string>
+    <string name="call_prot_title">کال کی حفاظت</string>
+    <string name="call_prot_desc">مشکوک کالوں سے تحفظ</string>
+    <string name="sms_prot_title">ایس ایم ایس تحفظ</string>
+    <string name="sms_prot_desc">فشنگ ٹیکسٹ پیغامات سے تحفظ</string>
+    <string name="email_prot_title">ای میل تحفظ</string>
+    <string name="email_prot_desc">نقصان دہ ای میلز سے تحفظ</string>
+    <string name="offline_vault_title">آف لائن والٹ</string>
+    <string name="offline_vault_desc">حساس ڈیٹا کے لیے محفوظ مقامی اسٹوريج</string>
+    <string name="vault_status_unlocked">والٹ انلاک ہو گیا</string>
+    <string name="vault_status_locked">والٹ لاک ہو گیا</string>
+    <string name="status_health_title">سستم کی صحت کی حالت</string>
+    <string name="status_health_subtitle">ریئل ٹائم مانیٹرنگ اور پروٹیکشن اوور ویو</string>
 </resources>
 
