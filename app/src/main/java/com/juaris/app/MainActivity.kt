@@ -16,6 +16,7 @@ import android.net.Uri
 import android.net.VpnService
 import android.os.Build
 import android.os.Bundle
+import android.os.Debug
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -40,6 +41,9 @@ import com.juaris.app.ui.AirGesturePage
 import com.juaris.app.ui.NeonGiftgruen
 import com.juaris.app.ui.SecurityLogsPage
 import kotlinx.coroutines.delay
+import java.io.BufferedReader
+import java.io.File
+import java.io.InputStreamReader
 
 class MainActivity : AppCompatActivity() {
 
@@ -77,7 +81,7 @@ class MainActivity : AppCompatActivity() {
         if (isGranted) {
             Toast.makeText(this, getString(R.string.toast_calendar_granted), Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(this, getString(R.string.toast_calendar_warning), Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.toast_calendar_warning), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -175,19 +179,15 @@ class MainActivity : AppCompatActivity() {
         checkAndBootProtectionServices()
     }
 
-    // KORREKTUR 1: Den abgebrochenen Berechtigungsblock sauber geschlossen und logisch vollendet!
     private fun checkAndBootProtectionServices() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) !=
                 android.content.pm.PackageManager.PERMISSION_GRANTED) {
                 
-                // Fordert die zwingend benötigte Benachrichtigungsberechtigung für Android 13+ an
                 notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
                 return
             }
         }
-        
-        // Wenn Benachrichtigungen erlaubt sind, prüfen wir die restlichen Services
         checkAndRequestVpnPermission()
     }
 
@@ -214,7 +214,40 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkRuntimeIntegrity() {
-        // Kernfunktion zur Abwehr von manipulierten Runtimes oder gerooteten Systemumgebungen
+        // 1. Lokaler Check auf unbefugte Debugger-Verbindungen (Abwehr von Reverse-Engineering)
+        if (Debug.isDebuggerConnected() || Debug.waitingForDebugger()) {
+            executeEmergencyProtocol("Sicherheitsverletzung: Unbefugter Debugger angehängt!")
+            return
+        }
+
+        // 2. Lokaler Root-Erkennungs-Kernel (Sucht nach su-Binaries auf Geräteebene)
+        val rootPaths = arrayOf(
+            "/system/app/Superuser.apk", "/sbin/su", "/system/bin/su",
+            "/system/xbin/su", "/data/local/xbin/su", "/data/local/bin/su",
+            "/system/sd/xbin/su", "/system/bin/failsafe/su", "/data/local/su"
+        )
+        for (path in rootPaths) {
+            if (File(path).exists()) {
+                executeEmergencyProtocol("Systemintegrität kompromittiert: Root-Rechte (su) lokal detektiert!")
+                return
+            }
+        }
+
+        // 3. Lokale Erkennung von Dynamic-Memory-Injektionen (z. B. Frida-Server-Prozesse im RAM)
+        try {
+            val process = Runtime.getRuntime().exec("ps")
+            val reader = BufferedReader(InputStreamReader(process.inputStream))
+            var line: String?
+            while (reader.readLine().also { line = it } != null) {
+                if (line != null && (line!!.contains("frida") || line!!.contains("magisk") || line!!.contains("xposed"))) {
+                    executeEmergencyProtocol("Angriff abgewehrt: Aktive Runtime-Injektionswerkzeuge im Speicher gefunden!")
+                    return
+                }
+            }
+            reader.close()
+        } catch (e: Exception) {
+            // Falls das System den ps-Befehl einschränkt, läuft der Schutz isoliert weiter
+        }
     }
 
     private fun registerEmergencyReceiver() {
@@ -255,57 +288,55 @@ class MainActivity : AppCompatActivity() {
     }
 
     // =================================================================
-    // JETPACK COMPOSE UI-KOMPONENTEN (Hält das Projekt vollständig kompilierbar)
+    // JETPACK COMPOSE UI-KOMPONENTEN
     // =================================================================
-
     @Composable
     fun WelcomeScreen() {
         Box(
             modifier = Modifier.fillMaxSize().background(Color.Black),
-contentAlignment = Alignment.Center
-) {
-Column(horizontalAlignment = Alignment.CenterHorizontally) {
-Text("JUARIS", color = NeonGiftgruen, fontSize = 36.sp, fontWeight = FontWeight.Bold)
-Spacer(modifier = Modifier.height(8.dp))
-Text("Zero-Cloud Protection Kernel", color = Color.Gray, fontSize = 14.sp)
-}
-}
-}
-@Composable
-fun LoginScreen(onLoginSuccess: () -> Unit) {
-Box(
-modifier = Modifier.fillMaxSize().background(Color.Black),
-contentAlignment = Alignment.Center
-) {
-Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(24.dp)) {
-Text("Tresor gesperrt", color = NeonGiftgruen, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-Spacer(modifier = Modifier.height(24.dp))
-Button(
-onClick = { launchBiometricVaultAuthentication(onLoginSuccess) },
-colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen, contentColor = Color.Black)
-) {
-Text("Biometrisch entsperren", fontWeight = FontWeight.Bold)
-}
-}
-}
-}
-@Composable
-fun JuarisMainDashboard(
-prefs: SharedPreferences,
-onAuthenticateVault: (() -> Unit) -> Unit,
-onTriggerPanicEmergency: () -> Unit
-) {
-// Hier docken die im ersten Schritt gesehenen Reiter an.
-// Für saubere Anzeige lädt das Dashboard die Pages aus deinen ui-Packages.
-Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-Text("JUARIS CONSOLE", color = NeonGiftgruen, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-Spacer(modifier = Modifier.height(16.dp))
-// Beispiel-Anzeige für die Live-Konsole
-Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-SecurityLogsPage()
-}
-}
-}
-}
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("JUARIS", color = NeonGiftgruen, fontSize = 36.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Zero-Cloud Protection Kernel", color = Color.Gray, fontSize = 14.sp)
+            }
+        }
+    }
+
+    @Composable
+    fun LoginScreen(onLoginSuccess: () -> Unit) {
+        Box(
+            modifier = Modifier.fillMaxSize().background(Color.Black),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(24.dp)) {
+                Text("Tresor gesperrt", color = NeonGiftgruen, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(24.dp))
+                Button(
+                    onClick = { launchBiometricVaultAuthentication(onLoginSuccess) },
+                    colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen, contentColor = Color.Black)
+                ) {
+                    Text("Biometrisch entsperren", fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun JuarisMainDashboard(
+        prefs: SharedPreferences,
+        onAuthenticateVault: (() -> Unit) -> Unit,
+        onTriggerPanicEmergency: () -> Unit
+    ) {
+        Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+            Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                Text("JUARIS CONSOLE", color = NeonGiftgruen, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(16.dp))
+                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                    SecurityLogsPage()
+                }
+            }
+        }
+    }
 }
