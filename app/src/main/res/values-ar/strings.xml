@@ -208,5 +208,19 @@
     <string name="protection_modules_title">وحدات الحماية</string>
     <string name="protection_modules_subtitle">مرشحات الأمان النشطة في الوقت الفعلي</string>
     <string name="toast_enable_listener_manual">يرجى تمكين مستمع الإشعارات في الإعدادات</string>
+        <!-- Juaris Core Extensions -->
+    <string name="comm_filter_title">مرشح الاتصالات</string>
+    <string name="call_prot_title">حماية المكالمات</string>
+    <string name="call_prot_desc">الحماية من المكالمات المشبوهة</string>
+    <string name="sms_prot_title">حماية الرسائل القصيرة</string>
+    <string name="sms_prot_desc">الحماية من رسائل التصيد الاحتيالي</string>
+    <string name="email_prot_title">حماية البريد الإلكتروني</string>
+    <string name="email_prot_desc">الحماية من رسائل البريد الإلكتروني الخبيثة</string>
+    <string name="offline_vault_title">خزنة دون اتصال</string>
+    <string name="offline_vault_desc">تخزين محلي آمن للبيانات الحساسة</string>
+    <string name="vault_status_unlocked">تم إلغاء قفل الخزنة</string>
+    <string name="vault_status_locked">الخزنة مغلقة</string>
+    <string name="status_health_title">حالة سلامة النظام</string>
+    <string name="status_health_subtitle">نظرة عامة على حماية النواة في الوقت الحقيقي</string>
 </resources>
 
