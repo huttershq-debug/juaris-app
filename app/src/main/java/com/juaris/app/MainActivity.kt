@@ -1113,7 +1113,8 @@ fun PermissionsAuditPage() {
 fun SwarmMeshPage() {
     val context = LocalContext.current
     val db = remember { JuarisDatabase.getDatabase(context) }
-    val postsFlow = remember { db.meshDao().getAllActivePosts() }
+    // KORREKTUR: Übergabe des aktuellen Zeitstempels für die ephemere Filterung
+    val postsFlow = remember { db.meshDao().getAllActivePosts(System.currentTimeMillis()) }
     val posts by postsFlow.collectAsState(initial = emptyList())
 
     var inputMessage by remember { mutableStateOf("") }
