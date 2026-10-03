@@ -26,7 +26,8 @@ import com.juaris.app.R
 fun SwarmMeshPage() {
     val context = LocalContext.current
     val db = remember { JuarisDatabase.getDatabase(context) }
-    val postsFlow = remember { db.meshDao().getAllActivePosts() }
+    // KORREKTUR: currentTime übergeben, damit der Compiler nicht meckert
+    val postsFlow = remember { db.meshDao().getAllActivePosts(currentTime = System.currentTimeMillis()) }
     val posts by postsFlow.collectAsState(initial = emptyList())
 
     val statusReadyText = stringResource(R.string.status_ready)
@@ -160,7 +161,6 @@ fun SwarmMeshPage() {
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                    // KORREKTUR: post.senderNode -> post.senderNodeHash (passt zur Entität)
                     Text(text = post.senderNodeHash, color = neonGreen, style = MaterialTheme.typography.bodySmall)
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(text = post.content, color = Color.White)
