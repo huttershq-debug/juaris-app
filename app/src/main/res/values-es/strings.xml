@@ -222,4 +222,12 @@
     <string name="vault_status_locked">Bóveda Bloqueada</string>
     <string name="status_health_title">Estado de Salud del Sistema</string>
     <string name="status_health_subtitle">Resumen de protección del kernel en tiempo real</string>
+        <!-- Juaris Console & Widget Extensions -->
+    <string name="widget_title">🛡️ Juaris 360°</string>
+    <string name="widget_subtitle">100% Seguro y Local</string>
+    <string name="btn_emergency_widget">🚨 EMERGENCIA</string>
+    <string name="app_ui_title_security">Consola Juaris</string>
+    <string name="status_guardian_active_offline">ESTADO: GUARDIÁN ACTIVO (OFFLINE)</string>
+    <string name="title_intercepted_logs">Llamadas y SMS Interceptados (Log):</string>
+    <string name="logs_waiting_for_events">Esperando eventos...</string>
 </resources>
