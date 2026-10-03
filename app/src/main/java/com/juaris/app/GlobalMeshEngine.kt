@@ -47,8 +47,6 @@ object GlobalMeshEngine {
         // Verwendung des persistenten, kontrollierten Mesh-Scopes
         meshScope.launch {
             try {
-                // KORREKTUR FÜR DIE WELTSPITZE: Die Parameter-Zuweisung wurde exakt an die 
-                // Krypto-Tabellenstruktur der MeshPostEntity angepasst.
                 val post = MeshPostEntity(
                     postId = UUID.randomUUID().toString(),
                     senderNodeHash = if (isEphemeral) "[Ephemerer PQC-Node]" else "[Verifizierter PQC-Node]",
