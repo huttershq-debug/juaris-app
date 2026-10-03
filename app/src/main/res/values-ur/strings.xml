@@ -222,5 +222,13 @@
     <string name="vault_status_locked">والٹ لاک ہو گیا</string>
     <string name="status_health_title">سستم کی صحت کی حالت</string>
     <string name="status_health_subtitle">ریئل ٹائم مانیٹرنگ اور پروٹیکشن اوور ویو</string>
+        <!-- Juaris Console & Widget Extensions -->
+    <string name="widget_title">🛡️ Juaris 360°</string>
+    <string name="widget_subtitle">100% محفوظ اور مقامی</string>
+    <string name="btn_emergency_widget">🚨 ہنگامی صورتحال</string>
+    <string name="app_ui_title_security">جواريس کنسول</string>
+    <string name="status_guardian_active_offline">حالت: تحفظ فعال ہے (آف لائن)</string>
+    <string name="title_intercepted_logs">روکی گئی کالیں اور ایس ایم ایس (لاگ):</string>
+    <string name="logs_waiting_for_events">واقعات کا انتظار ہے...</string>
 </resources>
 
