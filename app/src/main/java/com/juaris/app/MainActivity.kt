@@ -1112,9 +1112,9 @@ fun PermissionsAuditPage() {
 @Composable
 fun SwarmMeshPage() {
     val context = LocalContext.current
-    val db = remember { JuarisDatabase.getDatabase(context) }
-    // KORREKTUR: Übergabe des aktuellen Zeitstempels für die ephemere Filterung
-    val postsFlow = remember { db.meshDao().getAllActivePosts(System.currentTimeMillis()) }
+    val db = remember { JuarisDatabase.getDatabase(context.applicationContext) }
+    // KORREKTUR: Eindeutige, namentliche Parameter-Zuweisung löscht die verbleibende Fehlermeldung aus!
+    val postsFlow = remember { db.meshDao().getAllActivePosts(currentTime = System.currentTimeMillis()) }
     val posts by postsFlow.collectAsState(initial = emptyList())
 
     var inputMessage by remember { mutableStateOf("") }
@@ -1125,7 +1125,8 @@ fun SwarmMeshPage() {
 
     val meshManager = remember {
         NearbyMeshManager(
-            context = context,
+            // KORREKTUR: Koppelung an den ApplicationContext schützt vor RAM-Lecks ab Android 14+
+            context = context.applicationContext,
             onDeviceDiscovered = { endpointId ->
                 discoveredDevicesCount += 1
                 scanStatusText = "Verbunden: $endpointId"
@@ -1136,7 +1137,7 @@ fun SwarmMeshPage() {
             },
             onMessageReceived = { _, msg ->
                 GlobalMeshEngine.broadcastToSwarm(
-                    context = context,
+                    context = context.applicationContext,
                     content = msg,
                     isEphemeral = false,
                     meshManager = null,
@@ -1146,6 +1147,107 @@ fun SwarmMeshPage() {
             }
         )
     }
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        item {
+            Text(
+                text = "Swarm Mesh Netzwerk",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Status: $scanStatusText (Geräte in Reichweite: $discoveredDevicesCount)",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        item {
+            OutlinedTextField(
+                value = inputMessage,
+                onValueChange = { inputMessage = it },
+                label = { Text("Nachricht in den Schwarm senden") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = isEphemeral,
+                        onCheckedChange = { isEphemeral = it }
+                    )
+                    Text("Ephemer (nur temporär)")
+                }
+                Button(
+                    onClick = {
+                        if (inputMessage.isNotBlank()) {
+                            GlobalMeshEngine.broadcastToSwarm(
+                                context = context,
+                                content = inputMessage,
+                                isEphemeral = isEphemeral,
+                                meshManager = meshManager,
+                                onBlocked = { reason -> statusMessage = "Blockiert: $reason" },
+                                onSuccess = {
+                                    statusMessage = "Erfolgreich gesendet!"
+                                    inputMessage = ""
+                                }
+                            )
+                        }
+                    }
+                ) {
+                    Text("Senden")
+                }
+            }
+            if (statusMessage.isNotBlank()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = statusMessage, color = MaterialTheme.colorScheme.secondary)
+            }
+        }
+
+        item {
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) // KORREKTUR: Aktualisiert auf Material 3 Standard
+            Text(
+                text = "Empfangene Mesh-Nachrichten (${posts.size}):",
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
+
+        items(posts) { post ->
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp)
+                ) {
+                    Text(
+                        text = "Von Node: ${post.senderNodeHash}",
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = post.content,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        }
+    }
+}
 
     DisposableEffect(Unit) {
         onDispose { meshManager.stopMeshNode() }
