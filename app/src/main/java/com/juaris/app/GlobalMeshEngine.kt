@@ -47,23 +47,24 @@ object GlobalMeshEngine {
         // Verwendung des persistenten, kontrollierten Mesh-Scopes
         meshScope.launch {
             try {
+                // KORREKTUR FÜR DIE WELTSPITZE: Die Parameter-Zuweisung wurde exakt an die 
+                // Krypto-Tabellenstruktur der MeshPostEntity angepasst.
                 val post = MeshPostEntity(
                     postId = UUID.randomUUID().toString(),
-                    senderNode = if (isEphemeral) "[Ephemerer PQC-Node]" else "[Verifizierter PQC-Node]",
+                    senderNodeHash = if (isEphemeral) "[Ephemerer PQC-Node]" else "[Verifizierter PQC-Node]",
                     content = content,
-                    timestamp = System.currentTimeMillis(),
-                    isEphemeral = isEphemeral,
                     mediaUri = null, 
                     mediaType = "TEXT",
+                    timestamp = System.currentTimeMillis(),
+                    isEphemeral = isEphemeral,
                     ttlHopCount = 3,
-                    pqcSignature = signatureBase64, // Dedizierte Signatur-Sicherung
-                    pqcPublicKey = publicKeyBase64  // Dedizierte Schlüssel-Sicherung
+                    pqcSignature = signatureBase64, 
+                    pqcPublicKey = publicKeyBase64  
                 )
                
                 db.meshDao().insertPost(post)
 
                 // P2P-Broadcast: Überträgt das verpackte Post-Quantum-Sicherheitspaket ins Bluetooth-Mesh
-                // (Hinweis für den NearbyMeshManager bei extrem großen PQC-Schlüsseln: Ggf. hier ein Chunking-Protokoll einplanen)
                 val meshPacket = "JUARIS_PQC_SECURE:$signatureBase64:$publicKeyBase64:$content"
                 meshManager?.broadcastMessage(meshPacket)
 
