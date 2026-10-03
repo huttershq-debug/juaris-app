@@ -222,5 +222,13 @@
     <string name="vault_status_locked">Cofre Bloqueado</string>
     <string name="status_health_title">Status de Saúde do Systema</string>
     <string name="status_health_subtitle">Visão geral da proteção do kernel em tempo real</string>
+        <!-- Juaris Console & Widget Extensions -->
+    <string name="widget_title">🛡️ Juaris 360°</string>
+    <string name="widget_subtitle">100% Seguro e Local</string>
+    <string name="btn_emergency_widget">🚨 EMERGÊNCIA</string>
+    <string name="app_ui_title_security">Console Juaris</string>
+    <string name="status_guardian_active_offline">STATUS: GUARDIÃO ATIVO (OFFLINE)</string>
+    <string name="title_intercepted_logs">Chamadas e SMS Interceptados (Log):</string>
+    <string name="logs_waiting_for_events">Aguardando eventos...</string>
 </resources>
 
