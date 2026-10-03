@@ -222,5 +222,13 @@
     <string name="vault_status_locked">保险库已锁定</string>
     <string name="status_health_title">系统健康状态</string>
     <string name="status_health_subtitle">实时内核防护概述</string>
+        <!-- Juaris Console & Widget Extensions -->
+    <string name="widget_title">🛡️ Juaris 360°</string>
+    <string name="widget_subtitle">100% 本地安全</string>
+    <string name="btn_emergency_widget">🚨 紧急状态</string>
+    <string name="app_ui_title_security">Juaris 控制台</string>
+    <string name="status_guardian_active_offline">状态: 防护已激活 (离线)</string>
+    <string name="title_intercepted_logs">已拦截的电话和短信 (日志):</string>
+    <string name="logs_waiting_for_events">等待事件中...</string>
 </resources>
 
