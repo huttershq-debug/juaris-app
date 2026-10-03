@@ -1113,7 +1113,6 @@ fun PermissionsAuditPage() {
 fun SwarmMeshPage() {
     val context = LocalContext.current
     val db = remember { JuarisDatabase.getDatabase(context.applicationContext) }
-    // KORREKTUR: Eindeutige, namentliche Parameter-Zuweisung löscht die verbleibende Fehlermeldung aus!
     val postsFlow = remember { db.meshDao().getAllActivePosts(currentTime = System.currentTimeMillis()) }
     val posts by postsFlow.collectAsState(initial = emptyList())
 
@@ -1125,7 +1124,6 @@ fun SwarmMeshPage() {
 
     val meshManager = remember {
         NearbyMeshManager(
-            // KORREKTUR: Koppelung an den ApplicationContext schützt vor RAM-Lecks ab Android 14+
             context = context.applicationContext,
             onDeviceDiscovered = { endpointId ->
                 discoveredDevicesCount += 1
@@ -1147,107 +1145,6 @@ fun SwarmMeshPage() {
             }
         )
     }
-
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        item {
-            Text(
-                text = "Swarm Mesh Netzwerk",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Status: $scanStatusText (Geräte in Reichweite: $discoveredDevicesCount)",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-
-        item {
-            OutlinedTextField(
-                value = inputMessage,
-                onValueChange = { inputMessage = it },
-                label = { Text("Nachricht in den Schwarm senden") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = isEphemeral,
-                        onCheckedChange = { isEphemeral = it }
-                    )
-                    Text("Ephemer (nur temporär)")
-                }
-                Button(
-                    onClick = {
-                        if (inputMessage.isNotBlank()) {
-                            GlobalMeshEngine.broadcastToSwarm(
-                                context = context,
-                                content = inputMessage,
-                                isEphemeral = isEphemeral,
-                                meshManager = meshManager,
-                                onBlocked = { reason -> statusMessage = "Blockiert: $reason" },
-                                onSuccess = {
-                                    statusMessage = "Erfolgreich gesendet!"
-                                    inputMessage = ""
-                                }
-                            )
-                        }
-                    }
-                ) {
-                    Text("Senden")
-                }
-            }
-            if (statusMessage.isNotBlank()) {
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(text = statusMessage, color = MaterialTheme.colorScheme.secondary)
-            }
-        }
-
-        item {
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) // KORREKTUR: Aktualisiert auf Material 3 Standard
-            Text(
-                text = "Empfangene Mesh-Nachrichten (${posts.size}):",
-                style = MaterialTheme.typography.titleMedium
-            )
-        }
-
-        items(posts) { post ->
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp)
-                ) {
-                    Text(
-                        text = "Von Node: ${post.senderNodeHash}",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = post.content,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-        }
-    }
-}
 
     DisposableEffect(Unit) {
         onDispose { meshManager.stopMeshNode() }
@@ -1316,17 +1213,24 @@ fun SwarmMeshPage() {
                             Text("Broadcast", color = Color.Black, fontWeight = FontWeight.Bold)
                         }
                     }
+                    if (statusMessage.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(text = statusMessage, color = MaterialTheme.colorScheme.secondary)
+                    }
                 }
             }
         }
-        item { Text("Schwarm-Pakete (${posts.size})", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen) }
+        item {
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            Text("Schwarm-Pakete (${posts.size})", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+        }
         items(posts) { post ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                    Text(text = post.senderNode, color = NeonGiftgruen, style = MaterialTheme.typography.bodySmall)
+                    Text(text = "Von Node: ${post.senderNodeHash}", color = NeonGiftgruen, style = MaterialTheme.typography.bodySmall)
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(text = post.content, color = Color.White)
                 }
@@ -1339,7 +1243,7 @@ fun SwarmMeshPage() {
             ) {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Bluetooth Mesh Hardware", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                    Text("Status: $scanStatusText", color = Color.White)
+                    Text("Status: $scanStatusText (Geräte in Reichweite: $discoveredDevicesCount)", color = Color.White)
                     Button(
                         onClick = {
                             bluetoothPermissionLauncher.launch(
