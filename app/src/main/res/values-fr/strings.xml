@@ -222,6 +222,14 @@
     <string name="vault_status_locked">Coffre-fort Verrouillé</string>
     <string name="status_health_title">État de Santé du Système</string>
     <string name="status_health_subtitle">Aperçu de la protection du noyau en temps réel</string>
+        <!-- Juaris Console & Widget Extensions -->
+    <string name="widget_title">🛡️ Juaris 360°</string>
+    <string name="widget_subtitle">100% Sécurisé &amp; Local</string>
+    <string name="btn_emergency_widget">🚨 URGENCE</string>
+    <string name="app_ui_title_security">Console Juaris</string>
+    <string name="status_guardian_active_offline">STATUT: GARDIEN ACTIF (OFFLINE)</string>
+    <string name="title_intercepted_logs">Appels &amp; SMS Interceptés (Log):</string>
+    <string name="logs_waiting_for_events">En attente d\'événements...</string>
 </resources>
 
 
