@@ -222,6 +222,14 @@
     <string name="vault_status_locked">Brankas Terkunci</string>
     <string name="status_health_title">Status Kesehatan Sistem</string>
     <string name="status_health_subtitle">Ikhtisar perlindungan kernel waktu nyata</string>
+        <!-- Juaris Console & Widget Extensions -->
+    <string name="widget_title">🛡️ Juaris 360°</string>
+    <string name="widget_subtitle">100% Aman &amp; Lokal</string>
+    <string name="btn_emergency_widget">🚨 DARURAT</string>
+    <string name="app_ui_title_security">Konsol Juaris</string>
+    <string name="status_guardian_active_offline">STATUS: GUARDIAN AKTIF (OFFLINE)</string>
+    <string name="title_intercepted_logs">Panggilan &amp; SMS Dicegat (Log):</string>
+    <string name="logs_waiting_for_events">Menunggu aktivitas...</string>
 </resources>
 
 
