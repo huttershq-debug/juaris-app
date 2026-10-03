@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 
 /**
  * JUARIS SECURITY LOG DAO
- * Bietet die krypto-grafisch gesicherten SQLite-Schnittstellen für Forensik-Protokolle.
+ * Bietet die kryptografisch gesicherten SQLite-Schnittstellen für Forensik-Protokolle.
  * Optimiert für Jetpack Compose Live-Zustände (Flow) und automatische Speicherbereinigung.
  */
 @Dao
@@ -29,7 +29,6 @@ interface SecurityLogDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertLog(log: SecurityLogEntity)
 
-    // KORREKTUR: Den unvollständigen Pruning-Befehl fehlerfrei ausprogrammiert und geschlossen!
     // Löscht im Hintergrund-Worker (z. B. jede Nacht) alle Protokolle, die älter als der 
     // Schwellenwert (Threshold) sind, um den Speicher des Smartphones absolut schlank zu halten.
     @Query("DELETE FROM security_logs WHERE timestamp < :expirationThreshold")
