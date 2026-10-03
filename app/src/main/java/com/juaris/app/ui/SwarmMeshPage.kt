@@ -153,18 +153,21 @@ fun SwarmMeshPage() {
             }
         }
         item { Text(stringResource(R.string.mesh_packets_count, posts.size), style = MaterialTheme.typography.titleMedium, color = neonGreen) }
+        
         items(posts) { post ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                    Text(text = post.senderNode, color = neonGreen, style = MaterialTheme.typography.bodySmall)
+                    // KORREKTUR: post.senderNode -> post.senderNodeHash (passt zur Entität)
+                    Text(text = post.senderNodeHash, color = neonGreen, style = MaterialTheme.typography.bodySmall)
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(text = post.content, color = Color.White)
                 }
             }
         }
+
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -198,5 +201,3 @@ fun SwarmMeshPage() {
         }
     }
 }
-
-
