@@ -222,4 +222,12 @@
     <string name="vault_status_locked">Хранилище заблокировано</string>
     <string name="status_health_title">Состояние системы</string>
     <string name="status_health_subtitle">Обзор защиты ядра в реальном времени</string>
+        <!-- Juaris Console & Widget Extensions -->
+    <string name="widget_title">🛡️ Juaris 360°</string>
+    <string name="widget_subtitle">100% Локально и Безопасно</string>
+    <string name="btn_emergency_widget">🚨 СOS / ПАНИКА</string>
+    <string name="app_ui_title_security">Консоль Juaris</string>
+    <string name="status_guardian_active_offline">СТАТУС: ЗАЩИТА АКТИВНА (ОФФЛАЙН)</string>
+    <string name="title_intercepted_logs">Перехваченные вызовы и SMS (Лог):</string>
+    <string name="logs_waiting_for_events">Ожидание событий...</string>
 </resources>
