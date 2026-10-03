@@ -222,5 +222,13 @@
     <string name="vault_status_locked">الخزنة مغلقة</string>
     <string name="status_health_title">حالة سلامة النظام</string>
     <string name="status_health_subtitle">نظرة عامة على حماية النواة في الوقت الحقيقي</string>
+        <!-- Juaris Console & Widget Extensions -->
+    <string name="widget_title">🛡️ Juaris 360°</string>
+    <string name="widget_subtitle">آمن ومحلي 100%</string>
+    <string name="btn_emergency_widget">🚨 طوارئ</string>
+    <string name="app_ui_title_security">لوحة تحكم جواريس</string>
+    <string name="status_guardian_active_offline">الحالة: الحماية نشطة (بدون اتصال)</string>
+    <string name="title_intercepted_logs">المكالمات والرسائل المحظورة (السجل):</string>
+    <string name="logs_waiting_for_events">في انتظار الأحداث...</string>
 </resources>
 
