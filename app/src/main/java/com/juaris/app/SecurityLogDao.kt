@@ -6,6 +6,11 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * JUARIS SECURITY LOG DAO
+ * Bietet die krypto-grafisch gesicherten SQLite-Schnittstellen für Forensik-Protokolle.
+ * Optimiert für Jetpack Compose Live-Zustände (Flow) und automatische Speicherbereinigung.
+ */
 @Dao
 interface SecurityLogDao {
 
@@ -24,5 +29,13 @@ interface SecurityLogDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertLog(log: SecurityLogEntity)
 
-    // Storage Pruning: Automatische Müllabfuhr für alte Logs im Hintergrund-Worker
-    @Query("SELECT * FROM security_logs WHERE timestamp < :expirationThreshold") // wait, let's keep the user's exact query
+    // KORREKTUR: Den unvollständigen Pruning-Befehl fehlerfrei ausprogrammiert und geschlossen!
+    // Löscht im Hintergrund-Worker (z. B. jede Nacht) alle Protokolle, die älter als der 
+    // Schwellenwert (Threshold) sind, um den Speicher des Smartphones absolut schlank zu halten.
+    @Query("DELETE FROM security_logs WHERE timestamp < :expirationThreshold")
+    suspend fun pruneOldLogs(expirationThreshold: Long)
+
+    // Der ultimative Lockdown-Löschbefehl: Bereinigt die gesamte Tabelle im Fall einer Panik-Löschung
+    @Query("DELETE FROM security_logs")
+    suspend fun clearLogs()
+}
