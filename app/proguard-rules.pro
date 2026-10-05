@@ -30,8 +30,8 @@
 -keep class org.tensorflow.lite.** { *; }
 -dontwarn org.tensorflow.lite.**
 
-# Kotlin Coroutines
--keep class kotlinx.coroutines.** { { *; } }
+# Kotlin Coroutines (Krig korrigiert: einfache Klammern)
+-keep class kotlinx.coroutines.** { *; }
 
 # Google Play Billing Client (Absicherung für In-App-Abos)
 -keep class com.android.billingclient.** { *; }
@@ -59,3 +59,21 @@
 # Allgemeine Beibehaltung von AndroidX-Komponenten
 -dontwarn androidx.core.**
 -keep class androidx.core.** { *; }
+
+
+Hütter
+Founder & Chief Executive Officer
+
+HUTTER’S | Global Headquarters
+E: hutters.hq@gmail.com
+
+"One Bowl. One Mission. One World."
+--------------------------------------------------
+This message is intended solely for the addressee and may contain confidential information.
+Think before you print. Save our planet.
+
+
+
+
+
+   
