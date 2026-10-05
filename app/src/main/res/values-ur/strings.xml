@@ -1,3 +1,4 @@
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">جوارس سیکیورٹی</string>
     <string name="status_protected">آلہ مکمل طور پر محفوظ ہے (آنے اور جانے والا)</string>
@@ -32,7 +33,7 @@
     <string name="btn_understood">سمجھ گیا اور فعال کریں</string>
     <string name="btn_cancel">منسوخ کریں</string>
    
-    <!-- P2P Swarm & Mesh Strings -->
+    
     <string name="p2p_swarm_title">جوارِس سورم میش (P2P)</string>
     <string name="p2p_swarm_subtitle">انٹرنیٹ کے بغیر محفوظ، غیرمرکزی مواصلات</string>
     <string name="mesh_broadcast_title">سورم کو پیغام نشر کریں</string>
@@ -52,13 +53,13 @@
     <string name="toast_p2p_started">P2P میش نوڈ کامیابی سے شروع ہو گیا!</string>
     <string name="toast_bluetooth_missing">بلوٹوتھ کی اجازتیں درکار ہیں!</string>
 
-    <!-- Security Logs Strings -->
+    
     <string name="logs_page_title">سیکیورٹی لاگز</string>
     <string name="logs_page_subtitle">تمام روکی گئی دھمکیوں اور واقعات کا خلاصہ</string>
     <string name="logs_empty_message">ابھی تک کوئی واقعہ درج نہیں ہوا۔ آپ کا سسٹم محفوظ ہے۔</string>
     <string name="logs_module_prefix">ماڈیول: %s</string>
 
-    <!-- Privacy & Imprint Strings -->
+    
     <string name="privacy_text">رازداری کی پالیسی</string>
     <string name="privacy_link">رازداری کی پالیسی پڑھیں</string>
     <string name="imprint_title">امپرنٹ (قانونی تفصیلات)</string>
@@ -73,13 +74,13 @@
     <string name="imprint_name_y">دستبرداری (Disclaimer)</string>
     <string name="company_footer">جوارِس سیکیورٹی - تمام حقوق محفوظ ہیں</string>
 
-    <!-- Air Gesture Additional Strings -->
+    
     <string name="air_gesture_subtitle">اپنے ہاتھ کے اشاروں سے اپنے آلے کو کنٹرول کریں</string>
     <string name="air_gesture_desc">نیویگیٹ کرنے کے لیے بغیر چھوئے اشارے استعمال کریں</string>
     <string name="air_gesture_status">سینسر تیار ہے</string>
     <string name="air_gesture_action">عمل شروع کریں</string>
     
-    <!-- اضافی UI اسٹرنگز -->
+    
     <string name="mesh_page_title">میش نیٹ ورک</string>
     <string name="mesh_page_subtitle">غیرمرکزی مواصلات</string>
     <string name="legal_page_title">قانونی معلومات</string>
@@ -116,7 +117,7 @@
     <string name="btn_release">آزاد کریں</string>
     <string name="clipboard_page_title">کلپ بورڈ</string>
     
-    <!-- نئے Lint اسٹرنگز -->
+    
     <string name="comm_filter_title">مواصلاتی فلٹر</string>
     <string name="call_prot_title">کال پروٹیکشن</string>
     <string name="call_prot_desc">مشکوک کالوں سے حفاظت کریں</string>
@@ -208,21 +209,7 @@
     <string name="protection_modules_title">پروٹیکشن ماڈیولز</string>
     <string name="protection_modules_subtitle">فعال ریئل ٹائم سیکیورٹی فلٹرز</string>
     <string name="toast_enable_listener_manual">براہ کرم سیٹنگز میں نوٹیفیکیشن لسنر کو فعال کریں</string>
-        <!-- Juaris Core Extensions -->
-    <string name="comm_filter_title">مواصلاتی فلٹر</string>
-    <string name="call_prot_title">کال کی حفاظت</string>
-    <string name="call_prot_desc">مشکوک کالوں سے تحفظ</string>
-    <string name="sms_prot_title">ایس ایم ایس تحفظ</string>
-    <string name="sms_prot_desc">فشنگ ٹیکسٹ پیغامات سے تحفظ</string>
-    <string name="email_prot_title">ای میل تحفظ</string>
-    <string name="email_prot_desc">نقصان دہ ای میلز سے تحفظ</string>
-    <string name="offline_vault_title">آف لائن والٹ</string>
-    <string name="offline_vault_desc">حساس ڈیٹا کے لیے محفوظ مقامی اسٹوريج</string>
-    <string name="vault_status_unlocked">والٹ انلاک ہو گیا</string>
-    <string name="vault_status_locked">والٹ لاک ہو گیا</string>
-    <string name="status_health_title">سستم کی صحت کی حالت</string>
-    <string name="status_health_subtitle">ریئل ٹائم مانیٹرنگ اور پروٹیکشن اوور ویو</string>
-        <!-- Juaris Console & Widget Extensions -->
+        
     <string name="widget_title">🛡️ Juaris 360°</string>
     <string name="widget_subtitle">100% محفوظ اور مقامی</string>
     <string name="btn_emergency_widget">🚨 ہنگامی صورتحال</string>
@@ -231,4 +218,3 @@
     <string name="title_intercepted_logs">روکی گئی کالیں اور ایس ایم ایس (لاگ):</string>
     <string name="logs_waiting_for_events">واقعات کا انتظار ہے...</string>
 </resources>
-

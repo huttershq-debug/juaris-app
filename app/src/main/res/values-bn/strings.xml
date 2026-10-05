@@ -1,3 +1,4 @@
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">জুয়ারিস</string>
     <string name="status_protected">ডিভাইস সম্পূর্ণ সুরক্ষিত (আসা ও যাওয়া)</string>
@@ -32,7 +33,7 @@
     <string name="btn_understood">বুঝেছি এবং সক্রিয় করুন</string>
     <string name="btn_cancel">বাতিল</string>
    
-    <!-- P2P Swarm & Mesh Strings -->
+    
     <string name="p2p_swarm_title">জুয়ারিস সোয়ার্ম মেশ (P2P)</string>
     <string name="p2p_swarm_subtitle">ইন্টারনেট ছাড়াই নিরাপদ, বিকেন্দ্রীকৃত যোগাযোগ</string>
     <string name="mesh_broadcast_title">সোয়ার্মে বার্তা সম্প্রচার করুন</string>
@@ -52,13 +53,13 @@
     <string name="toast_p2p_started">P2P মেশ নোড সফলভাবে শুরু হয়েছে!</string>
     <string name="toast_bluetooth_missing">ব্লুটুথ অনুমতি প্রয়োজন!</string>
 
-    <!-- Security Logs Strings -->
+    
     <string name="logs_page_title">সুরক্ষা লগ</string>
     <string name="logs_page_subtitle">সমস্ত বাধাগ্রস্ত হুমকি এবং ইভেন্টের সংক্ষিপ্ত বিবরণ</string>
     <string name="logs_empty_message">এখনও কোনো ইভেন্ট রেকর্ড করা হয়নি। আপনার সিস্টেম নিরাপদ।</string>
     <string name="logs_module_prefix">মডিউল: %s</string>
 
-    <!-- Privacy & Imprint Strings -->
+    
     <string name="privacy_text">গোপনীয়তা নীতি</string>
     <string name="privacy_link">গোপনীয়তা নীতি পড়ুন</string>
     <string name="imprint_title">ইমপ্রিন্ট (আইনি তথ্য)</string>
@@ -73,13 +74,13 @@
     <string name="imprint_name_y">দায়মুক্তি (Disclaimer)</string>
     <string name="company_footer">জুয়ারিস সিকিউরিটি - সর্বস্বত্ব সংরক্ষিত</string>
 
-    <!-- Air Gesture Additional Strings -->
+    
     <string name="air_gesture_subtitle">হাতের ইশারায় আপনার ডিভাইস নিয়ন্ত্রণ করুন</string>
     <string name="air_gesture_desc">নেভিগেট করতে কন্ট্যাক্টলেস ইশারা ব্যবহার করুন</string>
     <string name="air_gesture_status">সেন্সর প্রস্তুত</string>
     <string name="air_gesture_action">অ্যাকশন ট্রিগার করুন</string>
     
-    <!-- অতিরিক্ত UI স্ট্রিং -->
+    
     <string name="mesh_page_title">মেশ নেটওয়ার্ক</string>
     <string name="mesh_page_subtitle">বিকেন্দ্রীকৃত যোগাযোগ</string>
     <string name="legal_page_title">আইনি তথ্য</string>
@@ -116,7 +117,7 @@
     <string name="btn_release">মুক্ত করুন</string>
     <string name="clipboard_page_title">ক্লিপবোর্ড</string>
     
-    <!-- নতুন Lint স্ট্রিং -->
+    
     <string name="comm_filter_title">কমিউনিকেশন ফিল্টার</string>
     <string name="call_prot_title">কল সুরক্ষা</string>
     <string name="call_prot_desc">সন্দেহজনক কল থেকে সুরক্ষা</string>
@@ -208,21 +209,7 @@
     <string name="protection_modules_title">সুরক্ষা মডিউল</string>
     <string name="protection_modules_subtitle">সক্রিয় রিয়েল-টাইম নিরাপত্তা ফিল্টার</string>
     <string name="toast_enable_listener_manual">অনুগ্রহ করে সেটিংসে নোটিফিকেশন লিসনার সক্ষম করুন</string>
-        <!-- Juaris Core Extensions -->
-    <string name="comm_filter_title">যোগাযোগ ফিল্টার</string>
-    <string name="call_prot_title">কল সুরক্ষা</string>
-    <string name="call_prot_desc">সন্দেহজনক কল থেকে সুরক্ষা</string>
-    <string name="sms_prot_title">এসএমএস সুরক্ষা</string>
-    <string name="sms_prot_desc">ফিশিং টেক্সট মেসেজ থেকে সুরক্ষা</string>
-    <string name="email_prot_title">ইমেল সুরক্ষা</string>
-    <string name="email_prot_desc">ক্ষতিকারক ইমেল থেকে সুরক্ষা</string>
-    <string name="offline_vault_title">অফলাইন ভল্ট</string>
-    <string name="offline_vault_desc">সংবেদনশীল ডেটার জন্য নিরাপদ স্থানীয় স্টোরেজ</string>
-    <string name="vault_status_unlocked">ভল্ট আনলক করা হয়েছে</string>
-    <string name="vault_status_locked">ভল্ট लॉक করা হয়েছে</string>
-    <string name="status_health_title">সিস্টেম স্বাস্থ্য অবস্থা</string>
-    <string name="status_health_subtitle">রিয়েল-টাইม কার্নেল সুরক্ষা ওভারভিউ</string>
-        <!-- Juaris Console & Widget Extensions -->
+        
     <string name="widget_title">🛡️ Juaris 360°</string>
     <string name="widget_subtitle">100% সুরক্ষিত এবং স্থানীয়</string>
     <string name="btn_emergency_widget">🚨 জরুরি অবস্থা</string>

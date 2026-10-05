@@ -1,3 +1,4 @@
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">Juaris</string>
     <string name="status_protected">उपकरण पूरी तरह से सुरक्षित है (आने-जाने दोनों)</string>
@@ -32,7 +33,7 @@
     <string name="btn_understood">समझ गया और सक्रिय करें</string>
     <string name="btn_cancel">रद्द करें</string>
    
-    <!-- P2P Swarm & Mesh Strings -->
+    
     <string name="p2p_swarm_title">जुआरिस स्वार्म मेश (P2P)</string>
     <string name="p2p_swarm_subtitle">इंटरनेट के बिना सुरक्षित, विकेंद्रीकृत संचार</string>
     <string name="mesh_broadcast_title">स्वार्म में संदेश प्रसारित करें</string>
@@ -52,13 +53,13 @@
     <string name="toast_p2p_started">P2P मेश नोड सफलतापूर्वक शुरू हो गया!</string>
     <string name="toast_bluetooth_missing">ब्लूटूथ अनुमति आवश्यक है!</string>
 
-    <!-- Security Logs Strings -->
+    
     <string name="logs_page_title">सुरक्षा लॉग</string>
     <string name="logs_page_subtitle">सभी अवरोधित खतरों और घटनाओं का अवलोकन</string>
     <string name="logs_empty_message">अभी तक कोई घटना दर्ज नहीं की गई है। आपका सिस्टम सुरक्षित है।</string>
     <string name="logs_module_prefix">मॉड्यूल: %s</string>
 
-    <!-- Privacy & Imprint Strings -->
+    
     <string name="privacy_text">गोपनीयता नीति</string>
     <string name="privacy_link">गोपनीयता नीति पढ़ें</string>
     <string name="imprint_title">छाप (इंप्रिंट)</string>
@@ -73,13 +74,13 @@
     <string name="imprint_name_y">अस्वीकरण</string>
     <string name="company_footer">जुआरिस सिक्योरिटी - सर्वाधिकार सुरक्षित</string>
 
-    <!-- Air Gesture Additional Strings -->
+    
     <string name="air_gesture_subtitle">हाथ के इशारों से अपने डिवाइस को नियंत्रित करें</string>
     <string name="air_gesture_desc">नेविगेट करने के लिए संपर्क रहित इशारों का उपयोग करें</string>
     <string name="air_gesture_status">सेंसर तैयार है</string>
     <string name="air_gesture_action">एक्शन ट्रिगर करें</string>
     
-    <!-- अतिरिक्त UI स्ट्रिंग्स -->
+    
     <string name="mesh_page_title">मेश नेटवर्क</string>
     <string name="mesh_page_subtitle">विकेंद्रीकृत संचार</string>
     <string name="legal_page_title">कानूनी जानकारी</string>
@@ -116,7 +117,7 @@
     <string name="btn_release">मुक्त करें</string>
     <string name="clipboard_page_title">क्लिपबोर्ड</string>
     
-    <!-- नए Lint स्ट्रिंग्स -->
+    
     <string name="comm_filter_title">संचार फ़िल्टर</string>
     <string name="call_prot_title">कॉल सुरक्षा</string>
     <string name="call_prot_desc">संदिग्ध कॉलों से सुरक्षा</string>
@@ -208,21 +209,7 @@
     <string name="protection_modules_title">सुरक्षा मॉड्यूल</string>
     <string name="protection_modules_subtitle">सक्रिय वास्तविक समय सुरक्षा फ़िल्टर</string>
     <string name="toast_enable_listener_manual">कृपया सेटिंग्स में नोटिफिकेशन लिसनर सक्षम करें</string>
-        <!-- Juaris Core Extensions -->
-    <string name="comm_filter_title">संचार फ़िल्टर</string>
-    <string name="call_prot_title">कॉल सुरक्षा</string>
-    <string name="call_prot_desc">संदिग्ध कॉल से सुरक्षा</string>
-    <string name="sms_prot_title">एसएमएस सुरक्षा</string>
-    <string name="sms_prot_desc">फिशिंग टेक्स्ट संदेशों से सुरक्षा</string>
-    <string name="email_prot_title">ईमेल सुरक्षा</string>
-    <string name="email_prot_desc">दुर्भावनापूर्ण ईमेल से सुरक्षा</string>
-    <string name="offline_vault_title">ऑफ़लाइन वॉल्ट</string>
-    <string name="offline_vault_desc">संवेदनशील डेटा के लिए सुरक्षित स्थानीय भंडारण</string>
-    <string name="vault_status_unlocked">वॉल्ट अनलॉक किया गया</string>
-    <string name="vault_status_locked">वॉल्ट लॉक किया गया</string>
-    <string name="status_health_title">सिस्टम स्वास्थ्य स्थिति</string>
-    <string name="status_health_subtitle">वास्तविक समय कर्नेल सुरक्षा अवलोकन</string>
-        <!-- Juaris Console & Widget Extensions -->
+        
     <string name="widget_title">🛡️ Juaris 360°</string>
     <string name="widget_subtitle">100% सुरक्षित और स्थानीय</string>
     <string name="btn_emergency_widget">🚨 आपातकाल</string>
@@ -231,4 +218,3 @@
     <string name="title_intercepted_logs">रोके गए कॉल और एसएमएस (लॉग):</string>
     <string name="logs_waiting_for_events">घटनाओं की प्रतीक्षा है...</string>
 </resources>
-

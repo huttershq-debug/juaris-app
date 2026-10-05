@@ -1,3 +1,4 @@
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">Keamanan</string>
     <string name="status_protected">Perangkat dilindungi penuh (Masuk &amp; Keluar)</string>
@@ -32,7 +33,7 @@
     <string name="btn_understood">Mengerti &amp; Aktifkan</string>
     <string name="btn_cancel">Batal</string>
    
-    <!-- P2P Swarm & Mesh Strings -->
+    
     <string name="p2p_swarm_title">Mesh Swarm Juaris (P2P)</string>
     <string name="p2p_swarm_subtitle">Komunikasi terdesentralisasi yang aman tanpa internet</string>
     <string name="mesh_broadcast_title">Siarkan pesan ke swarm</string>
@@ -52,13 +53,13 @@
     <string name="toast_p2p_started">Node Mesh P2P berhasil dimulai!</string>
     <string name="toast_bluetooth_missing">Izin Bluetooth diperlukan!</string>
 
-    <!-- Security Logs Strings -->
+    
     <string name="logs_page_title">Log Keamanan</string>
     <string name="logs_page_subtitle">Ringkasan semua ancaman dan peristiwa yang dicegat</string>
     <string name="logs_empty_message">Belum ada peristiwa yang dicatat. Sistem Anda aman.</string>
     <string name="logs_module_prefix">Modul: %s</string>
 
-    <!-- Privacy & Imprint Strings -->
+    
     <string name="privacy_text">Kebijakan Privasi</string>
     <string name="privacy_link">Baca Kebijakan Privasi</string>
     <string name="imprint_title">Imprint (Keterangan)</string>
@@ -73,13 +74,13 @@
     <string name="imprint_name_y">Penyangkalan (Disclaimer)</string>
     <string name="company_footer">Juaris Security - Hak cipta dilindungi undang-undang</string>
 
-    <!-- Air Gesture Additional Strings -->
+    
     <string name="air_gesture_subtitle">Kontrol perangkat Anda dengan gerakan tangan</string>
     <string name="air_gesture_desc">Gunakan gestur nirkontak untuk navigasi</string>
     <string name="air_gesture_status">Sensor Siap</string>
     <string name="air_gesture_action">Picu Aksi</string>
     
-    <!-- String UI Tambahan -->
+    
     <string name="mesh_page_title">Jaringan Mesh</string>
     <string name="mesh_page_subtitle">Komunikasi terdesentralisasi</string>
     <string name="legal_page_title">Informasi Hukum</string>
@@ -116,7 +117,7 @@
     <string name="btn_release">Lepaskan</string>
     <string name="clipboard_page_title">Papan Klip</string>
     
-    <!-- String Lint Baru -->
+    
     <string name="comm_filter_title">Filter Komunikasi</string>
     <string name="call_prot_title">Perlindungan Panggilan</string>
     <string name="call_prot_desc">Lindungi dari panggilan mencurigakan</string>
@@ -208,21 +209,7 @@
     <string name="protection_modules_title">Modul Perlindungan</string>
     <string name="protection_modules_subtitle">Filter keamanan waktu nyata aktif</string>
     <string name="toast_enable_listener_manual">Harap aktifkan pendengar notifikasi di pengaturan</string>
-        <!-- Juaris Core Extensions -->
-    <string name="comm_filter_title">Filter Komunikasi</string>
-    <string name="call_prot_title">Perlindungan Panggilan</string>
-    <string name="call_prot_desc">Perlindungan terhadap panggilan mencurigakan</string>
-    <string name="sms_prot_title">Perlindungan SMS</string>
-    <string name="sms_prot_desc">Perlindungan terhadap pesan teks phishing</string>
-    <string name="email_prot_title">Perlindungan Email</string>
-    <string name="email_prot_desc">Perlindungan terhadap email berbahaya</string>
-    <string name="offline_vault_title">Brankas Offline</string>
-    <string name="offline_vault_desc">Penyimpanan lokal yang aman untuk data sensitif</string>
-    <string name="vault_status_unlocked">Brankas Terbuka</string>
-    <string name="vault_status_locked">Brankas Terkunci</string>
-    <string name="status_health_title">Status Kesehatan Sistem</string>
-    <string name="status_health_subtitle">Ikhtisar perlindungan kernel waktu nyata</string>
-        <!-- Juaris Console & Widget Extensions -->
+        
     <string name="widget_title">🛡️ Juaris 360°</string>
     <string name="widget_subtitle">100% Aman &amp; Lokal</string>
     <string name="btn_emergency_widget">🚨 DARURAT</string>
@@ -231,5 +218,3 @@
     <string name="title_intercepted_logs">Panggilan &amp; SMS Dicegat (Log):</string>
     <string name="logs_waiting_for_events">Menunggu aktivitas...</string>
 </resources>
-
-

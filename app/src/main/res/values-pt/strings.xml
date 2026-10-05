@@ -1,3 +1,4 @@
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">Juaris</string>
     <string name="status_protected">Dispositivo totalmente protegido (Entrada e Saída)</string>
@@ -32,7 +33,7 @@
     <string name="btn_understood">Entendido e Ativar</string>
     <string name="btn_cancel">Cancelar</string>
    
-    <!-- P2P Swarm & Mesh Strings -->
+    
     <string name="p2p_swarm_title">Malha de Enxame Juaris (P2P)</string>
     <string name="p2p_swarm_subtitle">Comunicação segura e descentralizada sem internet</string>
     <string name="mesh_broadcast_title">Transmitir mensagem para o enxame</string>
@@ -52,13 +53,13 @@
     <string name="toast_p2p_started">Nó de malha P2P iniciado com sucesso!</string>
     <string name="toast_bluetooth_missing">Permissões de Bluetooth são necessárias!</string>
 
-    <!-- Security Logs Strings -->
+    
     <string name="logs_page_title">Registros de segurança</string>
     <string name="logs_page_subtitle">Visão geral de todas as ameaças e eventos interceptados</string>
     <string name="logs_empty_message">Nenhum evento registrado ainda. Seu sistema está seguro.</string>
     <string name="logs_module_prefix">Módulo: %s</string>
 
-    <!-- Privacy & Imprint Strings -->
+    
     <string name="privacy_text">Política de privacidade</string>
     <string name="privacy_link">Ler política de privacidade</string>
     <string name="imprint_title">Aviso legal</string>
@@ -73,13 +74,13 @@
     <string name="imprint_name_y">Isenção de responsabilidade</string>
     <string name="company_footer">Juaris Security - Todos os direitos reservados</string>
 
-    <!-- Air Gesture Additional Strings -->
+    
     <string name="air_gesture_subtitle">Controle seu dispositivo com movimentos das mãos</string>
     <string name="air_gesture_desc">Use gestos sem contato para navegar</string>
     <string name="air_gesture_status">Sensor pronto</string>
     <string name="air_gesture_action">Disparar ação</string>
     
-    <!-- UI Strings adicionais -->
+    
     <string name="mesh_page_title">Rede Mesh</string>
     <string name="mesh_page_subtitle">Comunicação descentralizada</string>
     <string name="legal_page_title">Informações legais</string>
@@ -116,7 +117,7 @@
     <string name="btn_release">Liberar</string>
     <string name="clipboard_page_title">Área de transferência</string>
     
-    <!-- Novas strings do Lint -->
+    
     <string name="comm_filter_title">Filtro de comunicação</string>
     <string name="call_prot_title">Proteção de chamadas</string>
     <string name="call_prot_desc">Proteger contra chamadas suspeitas</string>
@@ -208,21 +209,7 @@
     <string name="protection_modules_title">Módulos de proteção</string>
     <string name="protection_modules_subtitle">Filtros de segurança ativos em tempo real</string>
     <string name="toast_enable_listener_manual">Ative o listener de notificações nas configurações</string>
-        <!-- Juaris Core Extensions -->
-    <string name="comm_filter_title">Filtro de Comunicação</string>
-    <string name="call_prot_title">Proteção de Chamadas</string>
-    <string name="call_prot_desc">Proteção contra chamadas suspeitas</string>
-    <string name="sms_prot_title">Proteção de SMS</string>
-    <string name="sms_prot_desc">Proteção contra mensagens de texto phishing</string>
-    <string name="email_prot_title">Proteção de E-mail</string>
-    <string name="email_prot_desc">Proteção contra e-mails maliciosos</string>
-    <string name="offline_vault_title">Cofre Offline</string>
-    <string name="offline_vault_desc">Armazenamento local seguro para dados sensíveis</string>
-    <string name="vault_status_unlocked">Cofre Desbloqueado</string>
-    <string name="vault_status_locked">Cofre Bloqueado</string>
-    <string name="status_health_title">Status de Saúde do Systema</string>
-    <string name="status_health_subtitle">Visão geral da proteção do kernel em tempo real</string>
-        <!-- Juaris Console & Widget Extensions -->
+        
     <string name="widget_title">🛡️ Juaris 360°</string>
     <string name="widget_subtitle">100% Seguro e Local</string>
     <string name="btn_emergency_widget">🚨 EMERGÊNCIA</string>
@@ -231,4 +218,3 @@
     <string name="title_intercepted_logs">Chamadas e SMS Interceptados (Log):</string>
     <string name="logs_waiting_for_events">Aguardando eventos...</string>
 </resources>
-

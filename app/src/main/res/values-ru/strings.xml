@@ -1,3 +1,4 @@
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">Juaris</string>
     <string name="status_protected">Устройство полностью защищено (Вкл. &amp; Выкл.)</string>
@@ -32,7 +33,7 @@
     <string name="btn_understood">Понятно и Активировать</string>
     <string name="btn_cancel">Отмена</string>
    
-    <!-- P2P Swarm & Mesh Strings -->
+    
     <string name="p2p_swarm_title">Роевая ячеистая сеть Juaris (P2P)</string>
     <string name="p2p_swarm_subtitle">Безопасная децентрализованная связь без интернета</string>
     <string name="mesh_broadcast_title">Передать сообщение в рой</string>
@@ -52,13 +53,13 @@
     <string name="toast_p2p_started">Узел P2P-сети успешно запущен!</string>
     <string name="toast_bluetooth_missing">Требуются разрешения Bluetooth!</string>
 
-    <!-- Security Logs Strings -->
+    
     <string name="logs_page_title">Журналы безопасности</string>
     <string name="logs_page_subtitle">Обзор всех перехваченных угроз и событий</string>
     <string name="logs_empty_message">Событий пока нет. Ваша система защищена.</string>
     <string name="logs_module_prefix">Модуль: %s</string>
 
-    <!-- Privacy & Imprint Strings -->
+    
     <string name="privacy_text">Политика конфиденциальности</string>
     <string name="privacy_link">Читать политику конфиденциальности</string>
     <string name="imprint_title">Импрессум (О сайте)</string>
@@ -73,13 +74,13 @@
     <string name="imprint_name_y">Отказ от ответственности</string>
     <string name="company_footer">Juaris Security – Все права защищены</string>
 
-    <!-- Air Gesture Additional Strings -->
+    
     <string name="air_gesture_subtitle">Управляйте устройством движениями рук</string>
     <string name="air_gesture_desc">Используйте бесконтактные жесты для навигации</string>
     <string name="air_gesture_status">Датчик готов</string>
     <string name="air_gesture_action">Выполнить действие</string>
     
-    <!-- Дополнительные UI строки -->
+    
     <string name="mesh_page_title">Ячеистая сеть</string>
     <string name="mesh_page_subtitle">Децентрализованная связь</string>
     <string name="legal_page_title">Правовая информация</string>
@@ -116,7 +117,7 @@
     <string name="btn_release">Освободить</string>
     <string name="clipboard_page_title">Буфер обмена</string>
     
-    <!-- Новые строки Lint -->
+    
     <string name="comm_filter_title">Фильтр связи</string>
     <string name="call_prot_title">Защита вызовов</string>
     <string name="call_prot_desc">Защита от подозрительных вызовов</string>
@@ -208,21 +209,7 @@
     <string name="protection_modules_title">Модули защиты</string>
     <string name="protection_modules_subtitle">Активные фильтры безопасности в реальном времени</string>
     <string name="toast_enable_listener_manual">Пожалуйста, включите службу уведомлений в настройках</string>
-        <!-- Juaris Core Extensions -->
-    <string name="comm_filter_title">Фильтр связи</string>
-    <string name="call_prot_title">Защита звонков</string>
-    <string name="call_prot_desc">Защита от подозрительных звонков</string>
-    <string name="sms_prot_title">Защита SMS</string>
-    <string name="sms_prot_desc">Защита от фишинговых текстовых сообщений</string>
-    <string name="email_prot_title">Защита электронной почты</string>
-    <string name="email_prot_desc">Защита от вредоносных писем</string>
-    <string name="offline_vault_title">Автономное хранилище</string>
-    <string name="offline_vault_desc">Безопасное локальное хранилище для конфиденциальных данных</string>
-    <string name="vault_status_unlocked">Хранилище разблокировано</string>
-    <string name="vault_status_locked">Хранилище заблокировано</string>
-    <string name="status_health_title">Состояние системы</string>
-    <string name="status_health_subtitle">Обзор защиты ядра в реальном времени</string>
-        <!-- Juaris Console & Widget Extensions -->
+        
     <string name="widget_title">🛡️ Juaris 360°</string>
     <string name="widget_subtitle">100% Локально и Безопасно</string>
     <string name="btn_emergency_widget">🚨 СOS / ПАНИКА</string>

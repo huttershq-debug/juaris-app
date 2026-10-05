@@ -1,3 +1,4 @@
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">Juaris</string>
     <string name="status_protected">"Appareil totalement protégé (Entrant &amp; Sortant)"</string>
@@ -32,7 +33,7 @@
     <string name="btn_understood">"Compris et Activer"</string>
     <string name="btn_cancel">"Annuler"</string>
    
-    <!-- P2P Swarm & Mesh Strings -->
+    
     <string name="p2p_swarm_title">"Mesh d'essaim Juaris (P2P)"</string>
     <string name="p2p_swarm_subtitle">"Communication sécurisée et décentralisée sans Internet"</string>
     <string name="mesh_broadcast_title">"Diffuser un message à l'essaim"</string>
@@ -52,13 +53,13 @@
     <string name="toast_p2p_started">"Nœud Mesh P2P démarré avec succès !"</string>
     <string name="toast_bluetooth_missing">"Les autorisations Bluetooth sont requises !"</string>
 
-    <!-- Security Logs Strings -->
+    
     <string name="logs_page_title">"Journaux de sécurité"</string>
     <string name="logs_page_subtitle">"Aperçu de toutes les menaces et événements interceptés"</string>
     <string name="logs_empty_message">"Aucun événement enregistré pour l'instant. Votre système est sécurisé."</string>
     <string name="logs_module_prefix">"Module : %s"</string>
 
-    <!-- Privacy & Imprint Strings -->
+    
     <string name="privacy_text">"Politique de confidentialité"</string>
     <string name="privacy_link">"Lire la politique de confidentialité"</string>
     <string name="imprint_title">"Mentions légales"</string>
@@ -73,13 +74,13 @@
     <string name="imprint_name_y">"Clause de non-responsabilité"</string>
     <string name="company_footer">"Juaris Security - Tous droits réservés"</string>
 
-    <!-- Air Gesture Additional Strings -->
+    
     <string name="air_gesture_subtitle">"Contrôlez votre appareil avec des mouvements de main"</string>
     <string name="air_gesture_desc">"Utilisez des gestes sans contact pour naviguer"</string>
     <string name="air_gesture_status">"Capteur prêt"</string>
     <string name="air_gesture_action">"Déclencher l'action"</string>
     
-    <!-- UI additionnels -->
+    
     <string name="mesh_page_title">"Réseau mesh"</string>
     <string name="mesh_page_subtitle">"Communication décentralisée"</string>
     <string name="legal_page_title">"Informations légales"</string>
@@ -116,7 +117,7 @@
     <string name="btn_release">"Libérer"</string>
     <string name="clipboard_page_title">"Presse-papiers"</string>
     
-    <!-- Nouveaux strings de Lint -->
+    
     <string name="comm_filter_title">"Filtre de communication"</string>
     <string name="call_prot_title">"Protection des appels"</string>
     <string name="call_prot_desc">"Protéger contre les appels suspects"</string>
@@ -208,21 +209,7 @@
     <string name="protection_modules_title">"Modules de protection"</string>
     <string name="protection_modules_subtitle">"Filtres de sécurité actifs en temps réel"</string>
     <string name="toast_enable_listener_manual">"Veuillez activer l'écouteur de notifications dans les paramètres"</string>
-        <!-- Juaris Core Extensions -->
-    <string name="comm_filter_title">Filtre de Communication</string>
-    <string name="call_prot_title">Protection des Appels</string>
-    <string name="call_prot_desc">Protection contre les appels suspects</string>
-    <string name="sms_prot_title">Protection des SMS</string>
-    <string name="sms_prot_desc">Protection contre les SMS de phishing</string>
-    <string name="email_prot_title">Protection des E-mails</string>
-    <string name="email_prot_desc">Protection contre les e-mails malveillants</string>
-    <string name="offline_vault_title">Coffre-fort Offline</string>
-    <string name="offline_vault_desc">Stockage local sécurisé pour les données sensibles</string>
-    <string name="vault_status_unlocked">Coffre-fort Déverrouillé</string>
-    <string name="vault_status_locked">Coffre-fort Verrouillé</string>
-    <string name="status_health_title">État de Santé du Système</string>
-    <string name="status_health_subtitle">Aperçu de la protection du noyau en temps réel</string>
-        <!-- Juaris Console & Widget Extensions -->
+        
     <string name="widget_title">🛡️ Juaris 360°</string>
     <string name="widget_subtitle">100% Sécurisé &amp; Local</string>
     <string name="btn_emergency_widget">🚨 URGENCE</string>
@@ -231,5 +218,3 @@
     <string name="title_intercepted_logs">Appels &amp; SMS Interceptés (Log):</string>
     <string name="logs_waiting_for_events">En attente d\'événements...</string>
 </resources>
-
-

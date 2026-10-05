@@ -1,3 +1,4 @@
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">أمان جواريس</string>
     <string name="status_protected">الجهاز محمي بالكامل (وارد وصادر)</string>
@@ -32,7 +33,7 @@
     <string name="btn_understood">فهمت والتفعيل</string>
     <string name="btn_cancel">إلغاء</string>
    
-    <!-- P2P Swarm &amp; Mesh Strings -->
+    
     <string name="p2p_swarm_title">شبكة سُحُب جواريس (P2P)</string>
     <string name="p2p_swarm_subtitle">اتصالات آمنة لامركزية بدون إنترنت</string>
     <string name="mesh_broadcast_title">بث رسالة إلى الشبكة</string>
@@ -52,13 +53,13 @@
     <string name="toast_p2p_started">تم بدء عقدة شبكة P2P بنجاح!</string>
     <string name="toast_bluetooth_missing">أذونات البلوتوث مطلوبة!</string>
 
-    <!-- Security Logs Strings -->
+    
     <string name="logs_page_title">سجلات الأمان</string>
     <string name="logs_page_subtitle">نظرة عامة على جميع التهديدات والأحداث التي تم اعتراضها</string>
     <string name="logs_empty_message">لم يتم تسجيل أي أحداث حتى الآن. نظامك آمن.</string>
     <string name="logs_module_prefix">الوحدة: %s</string>
 
-    <!-- Privacy &amp; Imprint Strings -->
+    
     <string name="privacy_text">سياسة الخصوصية</string>
     <string name="privacy_link">قراءة سياسة الخصوصية</string>
     <string name="imprint_title">معلومات النشر (Imprint)</string>
@@ -73,13 +74,13 @@
     <string name="imprint_name_y">إخلاء المسؤولية</string>
     <string name="company_footer">جواريس للأمان - جميع الحقوق محفوظة</string>
 
-    <!-- Air Gesture Additional Strings -->
+    
     <string name="air_gesture_subtitle">تحكم في جهازك بحركات اليد</string>
     <string name="air_gesture_desc">استخدم إيماءات بدون تلامس للتنقل</string>
     <string name="air_gesture_status">المستشعر جاهز</string>
     <string name="air_gesture_action">تفعيل الإجراء</string>
     
-    <!-- نصوص واجهة إضافية -->
+    
     <string name="mesh_page_title">شبكة Mesh</string>
     <string name="mesh_page_subtitle">اتصالات لامركزية</string>
     <string name="legal_page_title">المعلومات القانونية</string>
@@ -116,7 +117,7 @@
     <string name="btn_release">إلغاء الحظر</string>
     <string name="clipboard_page_title">الحافظة</string>
     
-    <!-- نصوص Lint الجديدة -->
+    
     <string name="comm_filter_title">مرشح الاتصالات</string>
     <string name="call_prot_title">حماية المكالمات</string>
     <string name="call_prot_desc">الحماية من المكالمات المشبوهة</string>
@@ -208,21 +209,7 @@
     <string name="protection_modules_title">وحدات الحماية</string>
     <string name="protection_modules_subtitle">مرشحات الأمان النشطة في الوقت الفعلي</string>
     <string name="toast_enable_listener_manual">يرجى تمكين مستمع الإشعارات في الإعدادات</string>
-        <!-- Juaris Core Extensions -->
-    <string name="comm_filter_title">مرشح الاتصالات</string>
-    <string name="call_prot_title">حماية المكالمات</string>
-    <string name="call_prot_desc">الحماية من المكالمات المشبوهة</string>
-    <string name="sms_prot_title">حماية الرسائل القصيرة</string>
-    <string name="sms_prot_desc">الحماية من رسائل التصيد الاحتيالي</string>
-    <string name="email_prot_title">حماية البريد الإلكتروني</string>
-    <string name="email_prot_desc">الحماية من رسائل البريد الإلكتروني الخبيثة</string>
-    <string name="offline_vault_title">خزنة دون اتصال</string>
-    <string name="offline_vault_desc">تخزين محلي آمن للبيانات الحساسة</string>
-    <string name="vault_status_unlocked">تم إلغاء قفل الخزنة</string>
-    <string name="vault_status_locked">الخزنة مغلقة</string>
-    <string name="status_health_title">حالة سلامة النظام</string>
-    <string name="status_health_subtitle">نظرة عامة على حماية النواة في الوقت الحقيقي</string>
-        <!-- Juaris Console & Widget Extensions -->
+        
     <string name="widget_title">🛡️ Juaris 360°</string>
     <string name="widget_subtitle">آمن ومحلي 100%</string>
     <string name="btn_emergency_widget">🚨 طوارئ</string>
@@ -231,4 +218,3 @@
     <string name="title_intercepted_logs">المكالمات والرسائل المحظورة (السجل):</string>
     <string name="logs_waiting_for_events">في انتظار الأحداث...</string>
 </resources>
-
