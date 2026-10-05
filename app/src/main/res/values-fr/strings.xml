@@ -29,7 +29,7 @@
     <string name="juaris_app_welcome_text" formatted="false">Bienvenue chez Juaris, votre application de sécurité du futur. 100% transparente, 100% sur votre téléphone. Pas de cloud. Votre protection, votre maison, vos règles.</string>
     <string name="juaris_app_welcome_audio_file">platzhalter_fr.m4a</string>
     <string name="vpn_disclosure_title">"Avis de sécurité Juaris VPN"</string>
-    <string name="vpn_disclosure_message">Juaris utilise un VpnService local pour détecter le phishing et les logiciels malveillants directement sur votre appareil.\n\nDonnées 100% locales. Rien n\'est envoyé vers des serveurs externes ou le cloud.</string>
+    <string name="vpn_disclosure_message">Juaris utilise un VpnService local pour détecter le phishing et les logiciels malveillants directement sur votre appareil.\n\nDonnées 100%% locales. Rien n\'est envoyé vers des serveurs externes ou le cloud.</string>
     <string name="btn_understood">"Compris et Activer"</string>
     <string name="btn_cancel">"Annuler"</string>
    
@@ -177,7 +177,7 @@
     <string name="status_filters_active">"Tous les filtres actifs fonctionnent"</string>
     <string name="card_blocked_caps">"BLOQUÉ"</string>
     <string name="card_data_flow">"FLUX DE DONNÉES"</string>
-    <string name="card_local_only">"100% Local"</string>
+    <string name="card_local_only">"100%% Local"</string>
     <string name="section_actions">"Urgence &amp; Actions"</string>
     <string name="btn_simulate_phishing">"Simuler une attaque de phishing"</string>
     <string name="btn_export_vault_logs">"Exporter les journaux du coffre"</string>
@@ -211,7 +211,7 @@
     <string name="toast_enable_listener_manual">"Veuillez activer l'écouteur de notifications dans les paramètres"</string>
         
     <string name="widget_title">🛡️ Juaris 360°</string>
-    <string name="widget_subtitle">100% Sécurisé &amp; Local</string>
+    <string name="widget_subtitle">100%% Sécurisé &amp; Local</string>
     <string name="btn_emergency_widget">🚨 URGENCE</string>
     <string name="app_ui_title_security">Console Juaris</string>
     <string name="status_guardian_active_offline">STATUT: GARDIEN ACTIF (OFFLINE)</string>

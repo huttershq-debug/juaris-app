@@ -29,7 +29,7 @@
     <string name="juaris_app_welcome_text" formatted="false">Bem-vindo à Juaris, a sua app de segurança do futuro. 100% transparente, 100% no seu telemóvel. Sem nuvem. A sua proteção, a sua casa, as suas regras.</string>
     <string name="juaris_app_welcome_audio_file">platzhalter_pt.m4a</string>
     <string name="vpn_disclosure_title">Aviso de Segurança Juaris VPN</string>
-    <string name="vpn_disclosure_message">O Juaris usa um VpnService local para detectar phishing e malware diretamente no seu dispositivo.\n\nTodos os dados permanecem 100% locais. Nada é enviado para servidores externos ou nuvem.</string>
+    <string name="vpn_disclosure_message">O Juaris usa um VpnService local para detectar phishing e malware diretamente no seu dispositivo.\n\nTodos os dados permanecem 100%% locais. Nada é enviado para servidores externos ou nuvem.</string>
     <string name="btn_understood">Entendido e Ativar</string>
     <string name="btn_cancel">Cancelar</string>
    
@@ -177,7 +177,7 @@
     <string name="status_filters_active">Todos os filtros ativos em execução</string>
     <string name="card_blocked_caps">BLOQUEADO</string>
     <string name="card_data_flow">FLUXO DE DADOS</string>
-    <string name="card_local_only">100% Local</string>
+    <string name="card_local_only">100%% Local</string>
     <string name="section_actions">Emergência e Ações</string>
     <string name="btn_simulate_phishing">Simular ataque de phishing</string>
     <string name="btn_export_vault_logs">Exportar registros do Cofre</string>
@@ -211,7 +211,7 @@
     <string name="toast_enable_listener_manual">Ative o listener de notificações nas configurações</string>
         
     <string name="widget_title">🛡️ Juaris 360°</string>
-    <string name="widget_subtitle">100% Seguro e Local</string>
+    <string name="widget_subtitle">100%% Seguro e Local</string>
     <string name="btn_emergency_widget">🚨 EMERGÊNCIA</string>
     <string name="app_ui_title_security">Console Juaris</string>
     <string name="status_guardian_active_offline">STATUS: GUARDIÃO ATIVO (OFFLINE)</string>

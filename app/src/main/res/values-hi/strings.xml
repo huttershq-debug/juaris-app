@@ -29,7 +29,7 @@
     <string name="juaris_app_welcome_text" formatted="false">जुआरीस में आपका स्वागत है, भविष्य का आपका security app। 100% पारदर्शी, 100% आपके फोन पर। कोई क्लाउड नहीं। आपकी सुरक्षा, आपका घर, आपके नियम।</string>
     <string name="juaris_app_welcome_audio_file">platzhalter_hi.m4a</string>
     <string name="vpn_disclosure_title">Juaris VPN सुरक्षा सूचना</string>
-    <string name="vpn_disclosure_message">Juaris सीधे आपके डिवाइस पर फ़िशिंग और मैलवेयर का पता लगाने के लिए एक स्थानीय VpnService का उपयोग करता है।\n\nसभी डेटा 100% स्थानीय रहता है। बाहरी सर्वर या क्लाउड पर कुछ भी नहीं भेजा जाता है।</string>
+    <string name="vpn_disclosure_message">Juaris सीधे आपके डिवाइस पर फ़िशिंग और मैलवेयर का पता लगाने के लिए एक स्थानीय VpnService का उपयोग करता है।\n\nसभी डेटा 100%% स्थानीय रहता है। बाहरी सर्वर या क्लाउड पर कुछ भी नहीं भेजा जाता है।</string>
     <string name="btn_understood">समझ गया और सक्रिय करें</string>
     <string name="btn_cancel">रद्द करें</string>
    
@@ -177,7 +177,7 @@
     <string name="status_filters_active">सभी सक्रिय फ़िल्टर चल रहे हैं</string>
     <string name="card_blocked_caps">अवरोधित</string>
     <string name="card_data_flow">डेटा प्रवाह</string>
-    <string name="card_local_only">100% स्थानीय</string>
+    <string name="card_local_only">100%% स्थानीय</string>
     <string name="section_actions">आपातकालीन और क्रियाएँ</string>
     <string name="btn_simulate_phishing">फ़िशिंग हमले का अनुकरण करें</string>
     <string name="btn_export_vault_logs">वॉल्ट लॉग निर्यात करें</string>
@@ -211,7 +211,7 @@
     <string name="toast_enable_listener_manual">कृपया सेटिंग्स में नोटिफिकेशन लिसनर सक्षम करें</string>
         
     <string name="widget_title">🛡️ Juaris 360°</string>
-    <string name="widget_subtitle">100% सुरक्षित और स्थानीय</string>
+    <string name="widget_subtitle">100%% सुरक्षित और स्थानीय</string>
     <string name="btn_emergency_widget">🚨 आपातकाल</string>
     <string name="app_ui_title_security">Juaris कंसोल</string>
     <string name="status_guardian_active_offline">स्थिति: रक्षक सक्रिय (ऑफ़लाइन)</string>

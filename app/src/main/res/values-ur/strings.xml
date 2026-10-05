@@ -29,7 +29,7 @@
     <string name="juaris_app_welcome_text" formatted="false">جوارس میں خوش آمدید، مستقبل کی آپ کی سیکیورٹی ایپ۔ 100% شفاف، 100% آپ کے فون پر۔ کوئی کلاؤڈ نہیں۔ آپ کی حفاظت، آپ کا گھر، آپ کے قوانین۔</string>
     <string name="juaris_app_welcome_audio_file">platzhalter_ur.m4a</string>
     <string name="vpn_disclosure_title">Juaris VPN سیکیورٹی نوٹس</string>
-    <string name="vpn_disclosure_message">Juaris آپ کے آلے پر براہ راست فشنگ اور میلویئر کا پتہ لگانے کے لیے ایک مقامی VpnService استعمال کرتا ہے۔\n\nتمام ڈیٹا 100% مقامی رہتا ہے۔ کسی بھی بیرونی سرور یا کلاؤڈ پر کچھ نہیں بھیجا جاتا۔</string>
+    <string name="vpn_disclosure_message">Juaris آپ کے آلے پر براہ راست فشنگ اور میلویئر کا پتہ لگانے کے لیے ایک مقامی VpnService استعمال کرتا ہے۔\n\nتمام ڈیٹا 100%% مقامی رہتا ہے۔ کسی بھی بیرونی سرور یا کلاؤڈ پر کچھ نہیں بھیجا جاتا۔</string>
     <string name="btn_understood">سمجھ گیا اور فعال کریں</string>
     <string name="btn_cancel">منسوخ کریں</string>
    
@@ -177,7 +177,7 @@
     <string name="status_filters_active">تمام فعال فلٹرز چل رہے ہیں</string>
     <string name="card_blocked_caps">مسدود</string>
     <string name="card_data_flow">ڈیٹا کا بہاؤ</string>
-    <string name="card_local_only">100% مقامی</string>
+    <string name="card_local_only">100%% مقامی</string>
     <string name="section_actions">ہنگامی اور اقدامات</string>
     <string name="btn_simulate_phishing">فشنگ حملے کی نقل کریں</string>
     <string name="btn_export_vault_logs">والٹ لاگز برآمد کریں</string>
@@ -211,7 +211,7 @@
     <string name="toast_enable_listener_manual">براہ کرم سیٹنگز میں نوٹیفیکیشن لسنر کو فعال کریں</string>
         
     <string name="widget_title">🛡️ Juaris 360°</string>
-    <string name="widget_subtitle">100% محفوظ اور مقامی</string>
+    <string name="widget_subtitle">100%% محفوظ اور مقامی</string>
     <string name="btn_emergency_widget">🚨 ہنگامی صورتحال</string>
     <string name="app_ui_title_security">جواريس کنسول</string>
     <string name="status_guardian_active_offline">حالت: تحفظ فعال ہے (آف لائن)</string>

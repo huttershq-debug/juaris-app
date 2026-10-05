@@ -29,7 +29,7 @@
     <string name="juaris_app_welcome_text" formatted="false">জুয়ারিস-এ স্বাগতম, ভবিষ্যতের জন্য আপনার নিরাপত্তা অ্যাপ। ১০০% স্বচ্ছ, ১০০% আপনার ফোনে। কোনো ক্লাউড নেই। আপনার সুরক্ষা, আপনার বাড়ি, আপনার নিয়ম।</string>
     <string name="juaris_app_welcome_audio_file">platzhalter_bn.m4a</string>
     <string name="vpn_disclosure_title">Juaris VPN নিরাপত্তা বিজ্ঞপ্তি</string>
-    <string name="vpn_disclosure_message">Juaris আপনার ডিভাইসেই ফিশিং এবং মেলওয়্যার সনাক্ত করতে একটি স্থানীয় VpnService ব্যবহার করে。\n\nসমস্ত ডেটা ১০০% স্থানীয় থাকে। বাহ্যিক সার্ভার বা ক্লাউডে কিছুই পাঠানো হয় না।</string>
+    <string name="vpn_disclosure_message">Juaris আপনার ডিভাইসেই ফিশিং এবং মেলওয়্যার সনাক্ত করতে একটি স্থানীয় VpnService ব্যবহার করে。\n\nসমস্ত ডেটা ১০০%% স্থানীয় থাকে। বাহ্যিক সার্ভার বা ক্লাউডে কিছুই পাঠানো হয় না।</string>
     <string name="btn_understood">বুঝেছি এবং সক্রিয় করুন</string>
     <string name="btn_cancel">বাতিল</string>
    
@@ -177,7 +177,7 @@
     <string name="status_filters_active">সমস্ত সক্রিয় ফিল্টার চলছে</string>
     <string name="card_blocked_caps">অবরুদ্ধ</string>
     <string name="card_data_flow">ডেটা ফ্লো</string>
-    <string name="card_local_only">১০০% স্থানীয়</string>
+    <string name="card_local_only">১০০%% স্থানীয়</string>
     <string name="section_actions">জরুরি অবস্থা এবং অ্যাকশন</string>
     <string name="btn_simulate_phishing">ফিশিং আক্রমণ সিমুলেট করুন</string>
     <string name="btn_export_vault_logs">ভল্ট লগ এক্সপোর্ট করুন</string>
@@ -211,7 +211,7 @@
     <string name="toast_enable_listener_manual">অনুগ্রহ করে সেটিংসে নোটিফিকেশন লিসনার সক্ষম করুন</string>
         
     <string name="widget_title">🛡️ Juaris 360°</string>
-    <string name="widget_subtitle">100% সুরক্ষিত এবং স্থানীয়</string>
+    <string name="widget_subtitle">100%% সুরক্ষিত এবং স্থানীয়</string>
     <string name="btn_emergency_widget">🚨 জরুরি অবস্থা</string>
     <string name="app_ui_title_security">Juaris কনসোল</string>
     <string name="status_guardian_active_offline">অবস্থা: অভিভাবক সক্রিয় (অফলাইন)</string>

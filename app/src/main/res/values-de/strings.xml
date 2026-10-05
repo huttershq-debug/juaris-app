@@ -29,7 +29,7 @@
     <string name="juaris_app_welcome_text" formatted="false">Willkommen bei Juaris, deiner Sicherheitsapp der Zukunft. 100% transparent, 100% auf deinem Handy. Keine Cloud. Dein Schutz, dein Heim, deine Regeln.</string>
     <string name="juaris_app_welcome_audio_file">platzhalter_de.m4a</string>
     <string name="vpn_disclosure_title">Sicherheitshinweis zu Juaris VPN</string>
-    <string name="vpn_disclosure_message">Juaris nutzt einen lokalen VpnService, um Phishing und Malware direkt auf deinem Gerät zu erkennen.\n\nAlle Daten bleiben zu 100% lokal. Es wird absolut nichts an externe Server oder Clouds gesendet.</string>
+    <string name="vpn_disclosure_message">Juaris nutzt einen lokalen VpnService, um Phishing und Malware direkt auf deinem Gerät zu erkennen.\n\nAlle Daten bleiben zu 100%% lokal. Es wird absolut nichts an externe Server oder Clouds gesendet.</string>
     <string name="btn_understood">Verstanden &amp; Aktivieren</string>
     <string name="btn_cancel">Abbrechen</string>
    
@@ -176,7 +176,7 @@
     <string name="status_filters_active">Alle aktiven Filter laufen</string>
     <string name="card_blocked_caps">BLOCKIERT</string>
     <string name="card_data_flow">DATENFLUSS</string>
-    <string name="card_local_only">100% Lokal</string>
+    <string name="card_local_only">100%% Lokal</string>
     <string name="section_actions">Notfall &amp; Aktionen</string>
     <string name="btn_simulate_phishing">Phishing-Angriff simulieren</string>
     <string name="btn_export_vault_logs">Tresor-Protokolle exportieren</string>
@@ -211,7 +211,7 @@
 
     
     <string name="widget_title">🛡️ Juaris 360°</string>
-    <string name="widget_subtitle">100% Geschützt &amp; Lokal</string>
+    <string name="widget_subtitle">100%% Geschützt &amp; Lokal</string>
     <string name="btn_emergency_widget">🚨 NOTFALL</string>
     <string name="app_ui_title_security">Juaris Konsole</string>
     <string name="status_guardian_active_offline">STATUS: WÄCHTER AKTIV (OFFLINE)</string>

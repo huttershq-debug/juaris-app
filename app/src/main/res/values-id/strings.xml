@@ -29,7 +29,7 @@
     <string name="juaris_app_welcome_text" formatted="false">Selamat datang di Juaris, aplikasi keamanan masa depan Anda. 100% transparan, 100% di ponsel Anda. Tanpa cloud. Perlindungan Anda, rumah Anda, aturan Anda.</string>
     <string name="juaris_app_welcome_audio_file">platzhalter_id.m4a</string>
     <string name="vpn_disclosure_title">Pemberitahuan Keamanan Juaris VPN</string>
-    <string name="vpn_disclosure_message">Juaris menggunakan VpnService lokal untuk mendeteksi phishing dan malware langsung di perangkat Anda.\n\nSemua data tetap 100% lokal. Tidak ada yang dikirim ke server eksternal atau cloud.</string>
+    <string name="vpn_disclosure_message">Juaris menggunakan VpnService lokal untuk mendeteksi phishing dan malware langsung di perangkat Anda.\n\nSemua data tetap 100%% lokal. Tidak ada yang dikirim ke server eksternal atau cloud.</string>
     <string name="btn_understood">Mengerti &amp; Aktifkan</string>
     <string name="btn_cancel">Batal</string>
    
@@ -177,7 +177,7 @@
     <string name="status_filters_active">Semua filter aktif berjalan</string>
     <string name="card_blocked_caps">DIBLOKIR</string>
     <string name="card_data_flow">ALIRAN DATA</string>
-    <string name="card_local_only">100% Lokal</string>
+    <string name="card_local_only">100%% Lokal</string>
     <string name="section_actions">Darurat &amp; Aksi</string>
     <string name="btn_simulate_phishing">Simulasikan Serangan Phishing</string>
     <string name="btn_export_vault_logs">Ekspor Log Vault</string>
