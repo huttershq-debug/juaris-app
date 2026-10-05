@@ -40,15 +40,15 @@
     <string name="label_message_placeholder">Masukkan pesan...</string>
     <string name="checkbox_ephemeral">Hapus pesan setelah dibaca (Ephemeral)</string>
     <string name="btn_broadcast">Kirim ke Swarm</string>
-    <string name="mesh_packets_count">Paket Swarm Aktif (%d)</string>
+    <string name="mesh_packets_count">Paket Swarm Aktif (%%d)</string>
     <string name="mesh_hardware_title">Perangkat &amp; Koneksi P2P</string>
-    <string name="mesh_status_format">Status: %s</string>
+    <string name="mesh_status_format">Status: %%s</string>
     <string name="btn_start_mesh_node">Mulai Node Mesh P2P</string>
     <string name="status_ready">Siap untuk koneksi swarm</string>
     <string name="status_mesh_active_search">Mencari node swarm...</string>
     <string name="toast_mesh_device_discovered">Perangkat swarm baru ditemukan!</string>
-    <string name="status_mesh_connected_format" formatted="false">Terhubung ke %s (Perangkat: %d)</string>
-    <string name="status_mesh_connected_devices_format">Perangkat terhubung: %d</string>
+    <string name="status_mesh_connected_format" formatted="false">Terhubung ke %%s (Perangkat: %d)</string>
+    <string name="status_mesh_connected_devices_format">Perangkat terhubung: %%d</string>
     <string name="status_sent">Pesan berhasil dikirim ke swarm</string>
     <string name="toast_p2p_started">Node Mesh P2P berhasil dimulai!</string>
     <string name="toast_bluetooth_missing">Izin Bluetooth diperlukan!</string>
@@ -57,7 +57,7 @@
     <string name="logs_page_title">Log Keamanan</string>
     <string name="logs_page_subtitle">Ringkasan semua ancaman dan peristiwa yang dicegat</string>
     <string name="logs_empty_message">Belum ada peristiwa yang dicatat. Sistem Anda aman.</string>
-    <string name="logs_module_prefix">Modul: %s</string>
+    <string name="logs_module_prefix">Modul: %%s</string>
 
     
     <string name="privacy_text">Kebijakan Privasi</string>
@@ -106,8 +106,8 @@
     <string name="btn_allow_notification">Izinkan Notifikasi</string>
     <string name="toast_audit_ready">Audit keamanan siap</string>
     <string name="btn_start_audit_scan">Mulai Pemindaian Audit</string>
-    <string name="mesh_connected">Mesh Terhubung: %s</string>
-    <string name="mesh_disconnected">Mesh Terputus: %s</string>
+    <string name="mesh_connected">Mesh Terhubung: %%s</string>
+    <string name="mesh_disconnected">Mesh Terputus: %%s</string>
     <string name="vault_status_label">Status Vault</string>
     <string name="blacklist_page_title">Daftar Hitam</string>
     <string name="blacklist_page_subtitle">Kelola nomor dan kontak yang diblokir</string>
@@ -130,7 +130,7 @@
     <string name="offline_vault_desc">Penyimpanan lokal yang aman untuk data sensitif</string>
     <string name="vault_status_unlocked">Vault Terbuka</string>
     <string name="vault_status_locked">Vault Terkunci</string>
-    <string name="blacklist_items_count">Item Diblokir (%d)</string>
+    <string name="blacklist_items_count">Item Diblokir (%%d)</string>
     <string name="clipboard_security_title">Keamanan Papan Klip</string>
     <string name="clipboard_autoclear_title">Hapus Otomatis Papan Klip</string>
     <string name="air_gesture_store_notice">Pengaturan gestur disimpan secara lokal</string>
@@ -149,7 +149,7 @@
     <string name="biometric_vault_title">Autentikasi Vault</string>
     <string name="biometric_vault_subtitle">Konfirmasi identitas untuk mengakses vault aman</string>
     <string name="toast_vault_success">Vault berhasil dibuka</string>
-    <string name="toast_biometric_error">Kesalahan biometrik: %s</string>
+    <string name="toast_biometric_error">Kesalahan biometrik: %%s</string>
     <string name="toast_vpn_started">Layanan Juaris VPN dimulai</string>
     <string name="disclosure_dialog_title">Pemberitahuan Aksesibilitas &amp; Notifikasi</string>
     <string name="disclosure_message">Juaris memerlukan akses notifikasi untuk memfilter pesan phishing secara lokal di perangkat Anda.</string>
@@ -165,7 +165,7 @@
     <string name="kernel_subtitle">Enklave Aman Aktif</string>
     <string name="btn_fingerprint_login">Masuk Sidik Jari</string>
     <string name="btn_debug_bypass">Pintasan Debug</string>
-    <string name="toast_login_aborted">Masuk dibatalkan: %s</string>
+    <string name="toast_login_aborted">Masuk dibatalkan: %%s</string>
     <string name="log_module_guardian">Pengawas Keamanan</string>
     <string name="log_desc_phishing_blocked">Ancaman phishing dicegat</string>
     <string name="log_details_simulation">Serangan simulasi berhasil diblokir</string>
