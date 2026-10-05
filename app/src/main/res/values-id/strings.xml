@@ -211,7 +211,7 @@
     <string name="toast_enable_listener_manual">Harap aktifkan pendengar notifikasi di pengaturan</string>
         
     <string name="widget_title">🛡️ Juaris 360°</string>
-    <string name="widget_subtitle">100% Aman &amp; Lokal</string>
+    <string name="widget_subtitle">100%% Aman &amp; Lokal</string>
     <string name="btn_emergency_widget">🚨 DARURAT</string>
     <string name="app_ui_title_security">Konsol Juaris</string>
     <string name="status_guardian_active_offline">STATUS: GUARDIAN AKTIF (OFFLINE)</string>
