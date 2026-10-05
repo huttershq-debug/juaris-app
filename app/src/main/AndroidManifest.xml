@@ -7,11 +7,10 @@
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
-    <!-- KORREKTUR 1: Vollbild-Intent Berechtigung für Android 14+ hinzugefügt! -->
-    <!-- Ohne diesen Eintrag stürzt die EmergencyActivity ab oder wird von Google abgelehnt. -->
+    <!-- Vollbild-Intent Berechtigung für Android 14+ -->
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
-    <!-- Bluetooth & P2P-Mesh Berechtigungen (Sauber getrennt für Android 12+) -->
+    <!-- Bluetooth & P2P-Mesh Berechtigungen -->
     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
@@ -35,15 +34,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
-    <!-- CRITICAL FIX 2: VPN-Service-Type korrigiert! -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    
-    <!-- CRITICAL FIX 2: VPN-Service-Type korrigiert! -->
-    <!-- 'specialUse' darf laut Google NUR genutzt werden, wenn KEIN anderer Typ passt. -->
-    <!-- Ein lokales VPN MUSS zwingend als 'systemExempted' deklariert werden! -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!-- Google Play Billing Berechtigung für In-App-Abos -->
@@ -104,7 +96,7 @@
             </intent-filter>
         </service>
 
-        <!-- 3. Benachrichtigungs-Monitor (Liest Nachrichten & Mails sicher aus) -->
+        <!-- 3. Benachrichtigungs-Monitor -->
         <service
             android:name="com.juaris.app.JuarisNotificationListenerService"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
@@ -126,7 +118,7 @@
             </intent-filter>
         </service>
 
-        <!-- 5. Quick Settings Tile (Schnelleinstellungs-Kachel) -->
+        <!-- 5. Quick Settings Tile -->
         <service
             android:name=".JuarisTileService"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
@@ -152,13 +144,8 @@
         <service
             android:name=".JuarisNpuAnomalyEngine"
             android:exported="false" />
-           
 
-        <!-- ================================================================= -->
-        <!-- OBLIGATORISCHE SMS-ROLLEN-KOMPONENTEN (STANDARD-SMS-SCHUTZ ENGINE) -->
-        <!-- ================================================================= -->
-
-        <!-- 8. Standard-SMS-Empfänger (Pflicht für SMS-Rolle) -->
+        <!-- 8. Standard-SMS-Empfänger -->
         <receiver android:name=".sms.SmsDeliveryReceiver"
             android:permission="android.permission.BROADCAST_SMS"
             android:exported="true">
@@ -167,7 +154,7 @@
             </intent-filter>
         </receiver>
 
-        <!-- 9. WAP-Push-Empfänger (Pflicht für SMS-Rolle) -->
+        <!-- 9. WAP-Push-Empfänger -->
         <receiver android:name=".sms.WapPushDeliveryReceiver"
             android:permission="android.permission.BROADCAST_WAP_PUSH"
             android:exported="true">
@@ -177,8 +164,7 @@
             </intent-filter>
         </receiver>
 
-        <!-- 10. Hintergrund-Antwortdienst (Pflicht für SMS-Rolle) -->
-        <!-- KORREKTUR 3: Abgebrochenen Block sauber vervollständigt! -->
+        <!-- 10. Hintergrund-Antwortdienst -->
         <service android:name=".sms.SmsRespondService"
             android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE"
             android:exported="true">
