@@ -97,11 +97,7 @@ jobs:
                   print(f"❌ Fehler beim Verarbeiten von {path}: {e}")
           '
 
-      # QUELLEXTRACT-BEREINIGUNG (Entfernt geschützte Leerzeichen / UTF-8 u00A0 aus Kotlin-Dateien)
-      - name: Sanitize Source Encoding
-        run: |
-          echo "Entferne unsichtbare Steuerzeichen aus allen Kotlin-Quelldateien..."
-          find app/src/main/java -name "*.kt" -exec perl -i -pe 's/\xc2\xa0/ /g' {} +
+      # HIER WURDE DER FEHLERHAFTE "Sanitize Source Encoding" SCHRITT ENTFERNT, DER DIE KOTLIN-DATEIEN BESCHÄDIGT HAT
 
       - name: Run Android Lint (Statische Code-Analyse)
         run: |
@@ -149,4 +145,5 @@ jobs:
           name: "Juaris Release v1.0.0-${{ github.run_number }} (AAB & APK)"
           body: "Dieses Release enthält sowohl die .aab-Datei für den Google Play Store als auch die .apk-Datei zum direkten Installieren auf dem Handy."
           token: ${{ secrets.GITHUB_TOKEN }}
+
 
