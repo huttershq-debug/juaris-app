@@ -10,15 +10,17 @@
     <!-- Vollbild-Intent Berechtigung für Android 14+ -->
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
-    <!-- Bluetooth & P2P-Mesh Berechtigungen -->
+    <!-- Bluetooth & P2P-Mesh Berechtigungen (Ab Android 12+) -->
     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
+    <uses-permission 
+        android:name="android.permission.BLUETOOTH_SCAN"
         android:usesPermissionFlags="neverForLocation"
         tools:targetApi="31" />
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
-   
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" tools:targetApi="31" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" tools:targetApi="31" />
+    <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" android:usesPermissionFlags="neverForLocation" tools:targetApi="33" />
+
     <!-- Schutzmodule: Anruf-, SMS- und Notfall-Filter -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
@@ -31,12 +33,14 @@
     <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.RECEIVE_WAP_PUSH" />
-   
-    <!-- Vordergrunddienste (Foreground Services) -->
+
+    <!-- Vordergrunddienste (Foreground Services nach Android 14/15 Spezifikation) -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -75,7 +79,7 @@
             android:turnScreenOn="true"
             android:theme="@style/Theme.Juaris" />
 
-        <!-- SMS Compose Activity (Pflichtkomponente für Google Default SMS App Role) -->
+        <!-- SMS Compose Activity (Pflichtkomponente für Default SMS App Role) -->
         <activity
             android:name=".sms.SmsComposeActivity"
             android:exported="true"
@@ -107,7 +111,7 @@
 
         <!-- 2. Anruf-Schutz (Scam Call Screening) -->
         <service
-            android:name="com.juaris.app.ScamCallScreeningService"
+            android:name=".ScamCallScreeningService"
             android:permission="android.permission.BIND_SCREENING_SERVICE"
             android:exported="true">
             <intent-filter>
@@ -117,16 +121,21 @@
 
         <!-- 3. Benachrichtigungs-Monitor -->
         <service
-            android:name="com.juaris.app.JuarisNotificationListenerService"
+            android:name=".JuarisNotificationListenerService"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
-            android:exported="true"
-            android:foregroundServiceType="dataSync|microphone">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
 
-        <!-- 4. VPN-Dienst für Netzwerkschutz -->
+        <!-- 4. Akustischer Wächter (Dauerhafter Mikrofon-Foreground-Service) -->
+        <service
+            android:name=".AcousticThreatService"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
+
+        <!-- 5. VPN-Dienst für Netzwerkschutz -->
         <service
             android:name=".JuarisVpnService"
             android:permission="android.permission.BIND_VPN_SERVICE"
@@ -140,9 +149,9 @@
                 android:value="Local zero-cloud packet inspection for network-based phishing and malware prevention." />
         </service>
 
-        <!-- 5. Quick Settings Tile -->
+        <!-- 6. Quick Settings Tile -->
         <service
-            android:name="com.juaris.app.JuarisTileService"
+            android:name=".JuarisTileService"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
             android:exported="true">
             <intent-filter>
@@ -150,7 +159,7 @@
             </intent-filter>
         </service>
 
-        <!-- 6. Startbildschirm App-Widget -->
+        <!-- 7. Startbildschirm App-Widget -->
         <receiver
             android:name=".JuarisAppWidgetProvider"
             android:exported="true">
@@ -162,12 +171,12 @@
                 android:resource="@xml/juaris_widget_info" />
         </receiver>
 
-        <!-- 7. Lokale NPU- und Anomalie-Erkennungs-Engine -->
+        <!-- 8. Lokale NPU- und Anomalie-Erkennungs-Engine -->
         <service
             android:name=".JuarisNpuAnomalyEngine"
             android:exported="false" />
 
-        <!-- 8. Lokaler SMS-Wächter & Phishing-Filter (SmsFilterReceiver) -->
+        <!-- 9. Lokaler SMS-Wächter & Phishing-Filter -->
         <receiver
             android:name=".sms.SmsFilterReceiver"
             android:permission="android.permission.BROADCAST_SMS"
@@ -178,7 +187,7 @@
             </intent-filter>
         </receiver>
 
-        <!-- 9. Standard-SMS-Empfänger Stub -->
+        <!-- 10. Standard-SMS-Empfänger Stub -->
         <receiver
             android:name=".sms.SmsDeliveryReceiver"
             android:permission="android.permission.BROADCAST_SMS"
@@ -188,7 +197,7 @@
             </intent-filter>
         </receiver>
 
-        <!-- 10. WAP-Push-Empfänger Stub -->
+        <!-- 11. WAP-Push-Empfänger Stub -->
         <receiver
             android:name=".sms.WapPushDeliveryReceiver"
             android:permission="android.permission.BROADCAST_WAP_PUSH"
@@ -199,7 +208,7 @@
             </intent-filter>
         </receiver>
 
-        <!-- 11. Hintergrund-Antwortdienst Stub -->
+        <!-- 12. Hintergrund-Antwortdienst Stub -->
         <service
             android:name=".sms.SmsRespondService"
             android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE"
