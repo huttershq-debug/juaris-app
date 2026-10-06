@@ -14,7 +14,8 @@ import java.util.Arrays
 class QuantumEngine {
 
     private val random = SecureRandom()
-    private val parameters: DilithiumParameters = DilithiumParameters.dilithium2
+    // Öffentlich machen, damit GlobalMeshEngine darauf zugreifen kann
+    val parameters: DilithiumParameters = DilithiumParameters.dilithium2
 
     class PostQuantumKeyPair(
         val publicKeyBase64: String,
@@ -85,3 +86,4 @@ class QuantumEngine {
         }
     }
 }
+
