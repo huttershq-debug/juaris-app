@@ -17,37 +17,49 @@ class AcousticThreatDetector(
 ) {
     companion object {
         private const val TAG = "JuarisAudioKernel"
+        private const val SAMPLE_RATE = 8000
+        private const val AMPLITUDE_THRESHOLD = 27000
+        private const val REQUIRED_HIGH_FRAMES = 3
     }
 
+    @Volatile
     private var isMonitoring = false
     private var monitoringJob: Job? = null
     private var audioRecord: AudioRecord? = null
 
-    // KORREKTUR 1: Eigener, kontrollierter Scope verhindert ungebundene Thread-Leaks im Ruhezustand!
+    // Eigenes SupervisorJob-Scope für sauberes Thread-Management
     private val detectorScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     fun startListening() {
         if (isMonitoring) return
+
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            Log.w(TAG, "Mikrofon-Berechtigung fehlt.")
             return
         }
 
         try {
-            val sampleRate = 8000
             val channelConfig = AudioFormat.CHANNEL_IN_MONO
             val audioFormat = AudioFormat.ENCODING_PCM_16BIT
-            val bufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat)
+            val minBufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, channelConfig, audioFormat)
+
+            if (minBufferSize <= 0) {
+                Log.e(TAG, "Ungültige Mindestpuffergröße für AudioRecord.")
+                return
+            }
 
             audioRecord = AudioRecord(
                 MediaRecorder.AudioSource.MIC,
-                sampleRate,
+                SAMPLE_RATE,
                 channelConfig,
                 audioFormat,
-                bufferSize
+                minBufferSize
             )
 
             if (audioRecord?.state != AudioRecord.STATE_INITIALIZED) {
                 Log.e(TAG, "Mikrofon-Hardware konnte nicht initialisiert werden.")
+                audioRecord?.release()
+                audioRecord = null
                 return
             }
 
@@ -55,65 +67,76 @@ class AcousticThreatDetector(
             isMonitoring = true
 
             monitoringJob = detectorScope.launch {
-                val shortBufferSize = bufferSize / 2
-                val buffer = ShortArray(shortBufferSize)
+                val buffer = ShortArray(minBufferSize / 2)
                 var highAmplitudeCount = 0
 
-                // KORREKTUR 2: Prüft vor jedem Durchlauf bitgenau, ob die Hardware noch aktiv geschaltet ist!
-                while (isMonitoring && isActive && audioRecord?.recordingState == AudioRecord.RECORDSTATE_RECORDING) {
-                    try {
+                try {
+                    while (isMonitoring && isActive && audioRecord?.recordingState == AudioRecord.RECORDSTATE_RECORDING) {
+                        // Synchoner, blockierender Read schützt vor Buffer Overflows
                         val read = audioRecord?.read(buffer, 0, buffer.size) ?: 0
+
                         if (read > 0) {
                             var sum = 0L
                             for (i in 0 until read) {
                                 sum += abs(buffer[i].toInt())
                             }
                             val averageAmplitude = sum / read
-                           
-                            // Unbestechliche Erkennung von anhaltendem Lärm/Schreien (3 Frames Multi-Validierung)
-                            if (averageAmplitude > 27000) {
+
+                            // Multi-Validierung anhaltender Schalleignisse
+                            if (averageAmplitude > AMPLITUDE_THRESHOLD) {
                                 highAmplitudeCount++
-                                if (highAmplitudeCount >= 3) {
+                                if (highAmplitudeCount >= REQUIRED_HIGH_FRAMES) {
                                     withContext(Dispatchers.Main) {
                                         onEmergencyDetected()
                                     }
                                     highAmplitudeCount = 0
                                     
-                                    // 10 Sekunden Sicherheits-Pause nach Alarm-Auslöser
-                                    delay(10000L) 
+                                    // 10 Sekunden Cool-Down nach Notfall-Auslösung
+                                    delay(10000L)
                                 }
                             } else {
                                 highAmplitudeCount = (highAmplitudeCount - 1).coerceAtLeast(0)
                             }
+                        } else if (read < 0) {
+                            Log.e(TAG, "AudioRecord Read-Fehler Code: $read")
+                            break
                         }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Fehler im Audio-Stream-Parsing: ${e.message}")
                     }
-                    delay(100L)
+                } catch (e: CancellationException) {
+                    Log.d(TAG, "Audio-Überwachungsschleife beendet.")
+                } catch (e: Exception) {
+                    Log.e(TAG, "Fehler in der Audio-Verarbeitung: ${e.message}", e)
+                } finally {
+                    releaseAudioRecord()
                 }
             }
 
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Fehler beim Starten der Audio-Erkennung: ${e.message}", e)
+            stopListening()
         }
     }
 
     fun stopListening() {
         isMonitoring = false
         monitoringJob?.cancel()
-        
+        detectorScope.coroutineContext.cancelChildren()
+        releaseAudioRecord()
+    }
+
+    private synchronized fun releaseAudioRecord() {
         try {
-            // KORREKTUR 3: Erst den State prüfen, dann stoppen – Verhindert die gefürchtete IllegalStateException!
-            if (audioRecord?.recordingState == AudioRecord.RECORDSTATE_RECORDING) {
-                audioRecord?.stop()
+            audioRecord?.let { record ->
+                if (record.recordingState == AudioRecord.RECORDSTATE_RECORDING) {
+                    record.stop()
+                }
+                record.release()
             }
-            audioRecord?.release()
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Fehler beim Freigeben der AudioRecord-Ressource: ${e.message}")
         } finally {
             audioRecord = null
             Log.d(TAG, "🛑 Akustischer Wächter sicher heruntergefahren.")
         }
     }
 }
-
