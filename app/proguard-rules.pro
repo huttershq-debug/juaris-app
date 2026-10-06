@@ -3,37 +3,68 @@
 # =====================================================================
 
 # Allgemeine Android-Attribute sichern
--keepattributes Signature,InnerClasses,EnclosingMethod,*Annotation*,SourceFile,LineNumberTable
+-keepattributes Signature, InnerClasses, EnclosingMethod, *Annotation*, SourceFile, LineNumberTable, RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations
 
-# Room Database (Verhindert das Entfernen von Entities, DAOs und Modellen)
+# =====================================================================
+# 1. ROOM DATABASE & ENITIES (Alle Entities & DAOs pauschal schützen)
+# =====================================================================
 -keep class androidx.room.** { *; }
 -dontwarn androidx.room.**
 -keep class * extends androidx.room.RoomDatabase
--keep class com.juaris.app.SecurityLogEntity { *; }
--keep class com.juaris.app.MeshPostEntity { *; }
 -keep class * implements androidx.room.RoomDatabase$Callback
 
-# KORREKTUR 1: Schützt deine Datenzugriffs-Schnittstellen (DAOs) vor der Zerstörung!
-# Ohne diese Regeln kann Room die SQL-Befehle im Release-Build nicht mehr zuordnen.
+# Schützt alle Klassen, die als Room Entities oder DAOs dienen
+-keep class com.juaris.app.** { 
+    @androidx.room.Entity *;
+    @androidx.room.Dao *;
+    <init>();
+}
+-keep interface com.juaris.app.**Dao { *; }
+-keep class com.juaris.app.SecurityLogEntity { *; }
+-keep class com.juaris.app.MeshPostEntity { *; }
 -keep interface com.juaris.app.SecurityLogDao { *; }
 -keep interface com.juaris.app.MeshDao { *; }
 
-# KORREKTUR 2: Schutz für die militärische SQLCipher-Datenbankverschlüsselung!
-# Verhindert, dass R8 die nativen C/C++ Krypto-Treiber (.so-Dateien) im Release-Build beschädigt.
+# =====================================================================
+# 2. SERIALISIERUNG & DATENMODELLE (Verhindert Start-Crashes bei JSON/Prefs)
+# =====================================================================
+-keepclassmembers class * implements java.io.Serializable {
+    private static final java.io.ObjectStreamField[] serialPersistentFields;
+    private !static !transient <fields>;
+    private !static !transient <methods>;
+    private <methods>;
+}
+
+# Schutz für Kotlinx Serialization / Gson / Moshi Modelle
+-keepclassmembers class * {
+    @kotlinx.serialization.Serializable *;
+}
+
+# =====================================================================
+# 3. ARCHITECTURE COMPONENTS (ViewModels & Lifecycle)
+# =====================================================================
+-keep class androidx.lifecycle.** { *; }
+-keep class * extends androidx.lifecycle.ViewModel { *; }
+
+# =====================================================================
+# 4. NATIVE BIBLIOTHEKEN & SICHERHEIT (SQLCipher, TFLite, Krypto)
+# =====================================================================
 -keep class net.zetetic.database.sqlcipher.** { *; }
 -keep class net.zetetic.database.** { *; }
 -dontwarn net.zetetic.database.sqlcipher.**
 -dontwarn androidx.sqlite.db.**
 
-# KORREKTUR 3: Schutz für das On-Device KI-Modell (TensorFlow Lite)!
-# Sichert die mathematischen Strukturen, mit denen die NPU gefüttert wird.
 -keep class org.tensorflow.lite.** { *; }
 -dontwarn org.tensorflow.lite.**
 
-# Kotlin Coroutines (Krig korrigiert: einfache Klammern)
+-keepclassmembers class * {
+    @native <methods>;
+}
+
+# Kotlin Coroutines
 -keep class kotlinx.coroutines.** { *; }
 
-# Google Play Billing Client (Absicherung für In-App-Abos)
+# Google Play Billing Client (In-App-Abos)
 -keep class com.android.billingclient.** { *; }
 -dontwarn com.android.billingclient.**
 
@@ -48,15 +79,14 @@
 -keep class com.google.crypto.tink.** { *; }
 -dontwarn com.google.crypto.tink.**
 
-# Google Play Services Nearby (Pflicht für dein Bluetooth P2P-Mesh)
+# Google Play Services Nearby (Bluetooth P2P-Mesh)
 -keep class com.google.android.gms.nearby.** { *; }
 -dontwarn com.google.android.gms.nearby.**
 
-# BouncyCastle Post-Quantum Kryptografie (Absicherung für Dilithium)
+# BouncyCastle Post-Quantum Kryptografie (Dilithium)
 -keep class org.bouncycastle.** { *; }
 -dontwarn org.bouncycastle.**
 
 # Allgemeine Beibehaltung von AndroidX-Komponenten
 -dontwarn androidx.core.**
 -keep class androidx.core.** { *; }
-
