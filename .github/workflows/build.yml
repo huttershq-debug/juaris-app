@@ -1,4 +1,4 @@
-Name: Build and Release Juaris
+name: Build and Release Juaris
 
 on:
   push:
