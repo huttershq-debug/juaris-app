@@ -116,8 +116,20 @@
 -keep class androidx.core.** { *; }
 
 # =====================================================================
-# 5. DOMAIN MODELLE DER JUARIS APP
+# 5. DOMAIN MODELLE & DATA CLASSES DER JUARIS APP
 # =====================================================================
+# Gezielter Schutz für wichtige Domain-Modelle statt des gesamten Packages
 -keep class com.juaris.app.QuantumEngine$PostQuantumKeyPair { *; }
--keep class com.juaris.app.** { *; }
+
+# Schützt alle Kotlin Data Classes oder Modelle, die serialisiert oder per Reflection genutzt werden
+-keepclassmembers class com.juaris.app.model.** {
+    <fields>;
+    <methods>;
+}
+
+# Falls Sie Jetpack Compose verwenden, schützt dies die State-Holder und UI-States
+-keepclassmembers class com.juaris.app.ui.** {
+    <fields>;
+    <methods>;
+}
 
