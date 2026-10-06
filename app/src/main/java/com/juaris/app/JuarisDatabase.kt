@@ -1,13 +1,15 @@
 package com.juaris.app
 
 import android.content.Context
+import android.util.Base64
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.security.crypto.MasterKey
 import androidx.security.crypto.EncryptedSharedPreferences
-import net.sqlcipher.database.SupportFactory
+import androidx.security.crypto.MasterKey
 import net.sqlcipher.database.SQLiteDatabase
+import net.sqlcipher.database.SupportFactory
+import java.security.SecureRandom
 
 @Database(
     entities = [SecurityLogEntity::class, MeshPostEntity::class],
@@ -15,6 +17,7 @@ import net.sqlcipher.database.SQLiteDatabase
     exportSchema = false
 )
 abstract class JuarisDatabase : RoomDatabase() {
+
     abstract fun securityLogDao(): SecurityLogDao
     abstract fun meshDao(): MeshDao
 
@@ -22,24 +25,29 @@ abstract class JuarisDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: JuarisDatabase? = null
 
+        private const val DB_NAME = "juaris_security_db"
+        private const val PREFS_FILE_NAME = "juaris_db_vault_key"
+        private const val PASSPHRASE_KEY = "db_crypto_passphrase"
+
         fun getDatabase(context: Context): JuarisDatabase {
             return INSTANCE ?: synchronized(this) {
-                // 1. ARCHITEKTUR-UPGRADE FÜR WELTSPITZE: Echten SQLCipher-Passphrasen-Schlüssel
-                // sicher und verschlüsselt aus dem Android-Hardware-Keystore generieren/laden
-                val passphrase = getOrCreateDatabasePassphrase(context.applicationContext)
+                val appContext = context.applicationContext
+
+                // Initialisiert die nativen SQLCipher C++ Bibliotheken für Android
+                SQLiteDatabase.loadLibs(appContext)
+
+                val passphrase = getOrCreateDatabasePassphrase(appContext)
                 val factory = SupportFactory(passphrase)
 
                 val instance = Room.databaseBuilder(
-                    context.applicationContext,
+                    appContext,
                     JuarisDatabase::class.java,
-                    "juaris_security_db"
+                    DB_NAME
                 )
-                    .openHelperFactory(factory) // Injiziert die militärische AES-256 Verschlüsselung
-                    // KORREKTUR: 'fallbackToDestructiveMigration()' ENTFERNT! 
-                    // Verhindert, dass App-Updates im Play Store jemals die Daten der Nutzer löschen.
-                    .fallbackToDestructiveMigrationOnDowngrade() // Nur bei absichtlichem Downgrade löschen
+                    .openHelperFactory(factory) // Injiziert AES-256 Datenbank-Verschlüsselung
+                    .fallbackToDestructiveMigrationOnDowngrade() // Verhindert Datenverlust bei regulären App-Updates
                     .build()
-                
+
                 INSTANCE = instance
                 instance
             }
@@ -47,31 +55,47 @@ abstract class JuarisDatabase : RoomDatabase() {
 
         private fun getOrCreateDatabasePassphrase(context: Context): ByteArray {
             return try {
-                // Wir nutzen den bereits in der MainActivity etablierten MasterKey, 
-                // um einen absolut unknackbaren Datenbankschlüssel hardwarebasiert zu sichern.
                 val masterKey = MasterKey.Builder(context)
                     .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
                     .build()
 
                 val securePrefs = EncryptedSharedPreferences.create(
                     context,
-                    "juaris_db_vault_key",
+                    PREFS_FILE_NAME,
                     masterKey,
                     EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                     EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
                 )
 
-                var savedKey = securePrefs.getString("db_crypto_passphrase", null)
-                if (savedKey == null) {
-                    // Falls noch kein Schlüssel existiert, generieren wir einen zufälligen Krypto-Schlüssel
-                    savedKey = java.util.UUID.randomUUID().toString() + java.util.UUID.randomUUID().toString()
-                    securePrefs.edit().putString("db_crypto_passphrase", savedKey).apply()
+                var savedKeyBase64 = securePrefs.getString(PASSPHRASE_KEY, null)
+
+                if (savedKeyBase64 == null) {
+                    // Kryptografisch sichere 256-Bit (32 Byte) Schlüsselgenerierung
+                    val randomBytes = ByteArray(32)
+                    SecureRandom().nextBytes(randomBytes)
+                    savedKeyBase64 = Base64.encodeToString(randomBytes, Base64.NO_WRAP)
+                    securePrefs.edit().putString(PASSPHRASE_KEY, savedKeyBase64).apply()
                 }
-                savedKey.toByteArray(Charsets.UTF_8)
+
+                Base64.decode(savedKeyBase64, Base64.NO_WRAP)
             } catch (e: Exception) {
-                // Sicherer Fallback-Schlüssel, falls der Hardware-Keystore auf Billig-Geräten blockiert
-                "JuarisLocalFirstSecurePassphraseFallbackKey1337".toByteArray(Charsets.UTF_8)
+                // Sichert den Zugriff ab, falls der Android KeyStore fehlschlägt
+                getFallbackPassphrase(context)
             }
+        }
+
+        private fun getFallbackPassphrase(context: Context): ByteArray {
+            val fallbackPrefs = context.getSharedPreferences("juaris_db_fallback_prefs", Context.MODE_PRIVATE)
+            var fallbackKey = fallbackPrefs.getString("fallback_key", null)
+
+            if (fallbackKey == null) {
+                val randomBytes = ByteArray(32)
+                SecureRandom().nextBytes(randomBytes)
+                fallbackKey = Base64.encodeToString(randomBytes, Base64.NO_WRAP)
+                fallbackPrefs.edit().putString("fallback_key", fallbackKey).apply()
+            }
+
+            return Base64.decode(fallbackKey, Base64.NO_WRAP)
         }
     }
 }
