@@ -23,7 +23,7 @@ android {
 
     signingConfigs {
         release {
-            storeFile file("$rootProject.projectDir/juaris-release-key.jks")
+            storeFile file("$rootProject.rootDir/juaris-release-key.jks")
             storePassword = findProperty("android.injected.signing.storePassword") ?: findProperty("storePassword") ?: System.getenv("KEYSTORE_PASSWORD")
             keyAlias = findProperty("android.injected.signing.keyAlias") ?: findProperty("keyAlias") ?: System.getenv("KEY_ALIAS")
             keyPassword = findProperty("android.injected.signing.keyPassword") ?: findProperty("keyPassword") ?: System.getenv("KEY_PASSWORD")
@@ -57,15 +57,12 @@ android {
     }
 
     composeOptions {
-        // KORREKTUR 1 (Kompilier-Garantie): Aktualisiert auf Version 1.5.14, um absolut 
-        // fehlerfrei mit Kotlin 1.9.24 und dem neuen BOM zu kompilieren!
         kotlinCompilerExtensionVersion '1.5.14'
     }
 
-    packagingOptions {
+    packaging {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
-            // Verhindert Krypto-Signaturkonflikte beim Kompilieren mit BouncyCastle
             pickFirsts += 'META-INF/versions/9/OSGI-INF/MANIFEST.MF'
         }
     }
@@ -77,21 +74,20 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
     implementation 'androidx.activity:activity-compose:1.8.2'
 
-    // Google Material Components (Wichtig für das XML-Theme!)
+    // Google Material Components
     implementation 'com.google.android.material:material:1.11.0'
 
-    // KORREKTUR 2 (Versions-Symmetrie): Das Compose-BOM wurde auf Version '2024.06.00' aktualisiert.
-    // Das eliminiert alle internen Versionsmischungen und behebt die 'Incompatible Version'-Abstürze komplett!
+    // Compose BOM
     implementation platform('androidx.compose:compose-bom:2024.06.00')
     implementation 'androidx.compose.ui:ui'
     implementation 'androidx.compose.ui:ui-graphics'
     implementation 'androidx.compose.ui:ui-tooling-preview'
     implementation 'androidx.compose.material3:material3'
 
-    // Google Play Billing (für das In-App-Abo)
+    // Google Play Billing
     implementation 'com.android.billingclient:billing-ktx:6.1.0'
 
-    // Security & EncryptedSharedPreferences (für den lokalen Vault)
+    // Security & EncryptedSharedPreferences
     implementation 'androidx.security:security-crypto:1.1.0-alpha06'
     implementation 'androidx.biometric:biometric:1.1.0'
 
@@ -100,19 +96,16 @@ dependencies {
     implementation 'androidx.room:room-ktx:2.6.1'
     ksp 'androidx.room:room-compiler:2.6.1'
     
-    // KORREKTUR 3 (Militärischer SQLCipher-Datenbankschutz): 
-    // Diese Treiber sind zwingend erforderlich, damit der Room-Krypto-Tresor physisch 
-    // verschlüsselt auf dem Smartphone-Speicher abgelegt werden kann!
+    // SQLCipher
     implementation 'net.zetetic:android-database-sqlcipher:4.5.4'
     implementation 'androidx.sqlite:sqlite-ktx:2.4.0'
     
-    // KORREKTUR 4 (On-Device KI-Kernel): Ermöglicht das Laden von hochentwickelten, 
-    // lokalen Transformer-Modellen (.tflite) direkt auf dem Hardware-KI-Chip (NPU) des Handys!
+    // TensorFlow Lite
     implementation 'org.tensorflow:tensorflow-lite:2.14.0'
     implementation 'org.tensorflow:tensorflow-lite-gpu:2.14.0'
     implementation 'org.tensorflow:tensorflow-lite-api:2.14.0'
 
-    // Background-Worker, Kamera-Sensoren & BouncyCastle Post-Quantum
+    // Background-Worker, Camera & BouncyCastle
     implementation 'androidx.work:work-runtime-ktx:2.9.0'
     implementation 'androidx.camera:camera-core:1.3.1'
     implementation 'androidx.camera:camera-camera2:1.3.1'
