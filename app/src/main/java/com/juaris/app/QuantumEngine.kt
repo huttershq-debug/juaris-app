@@ -1,65 +1,87 @@
 package com.juaris.app
 
 import android.util.Base64
-import org.bouncycastle.crypto.AsymmetricCipherKeyPair
 import org.bouncycastle.crypto.params.ParametersWithRandom
-import org.bouncycastle.pqc.crypto.crystals.dilithium.*
+import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumKeyGenerationParameters
+import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumKeyPairGenerator
+import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumParameters
+import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumPrivateKeyParameters
+import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumPublicKeyParameters
+import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumSigner
 import java.security.SecureRandom
 import java.util.Arrays
 
 class QuantumEngine {
+
     private val random = SecureRandom()
     private val parameters: DilithiumParameters = DilithiumParameters.dilithium2
 
-    data class PostQuantumKeyPair(
-        val publicKeyBase64: String, 
-        val privateKeyBytes: ByteArray, 
-        val publicKeyBytes: ByteArray,
-        val privateKeyObj: DilithiumPrivateKeyParameters, 
-        val publicKeyObj: DilithiumPublicKeyParameters
+    class PostQuantumKeyPair(
+        val publicKeyBase64: String,
+        private var privateKeyBytes: ByteArray?,
+        val publicKeyBytes: ByteArray
     ) {
-        fun shredPrivateKey() { Arrays.fill(privateKeyBytes, 0.toByte()) }
+        fun getPrivateKeyParameters(params: DilithiumParameters): DilithiumPrivateKeyParameters? {
+            val bytes = privateKeyBytes ?: return null
+            return DilithiumPrivateKeyParameters(params, bytes)
+        }
+
+        fun shredPrivateKey() {
+            privateKeyBytes?.let {
+                Arrays.fill(it, 0.toByte())
+            }
+            privateKeyBytes = null
+        }
     }
 
     fun generatePostQuantumKeyPair(): PostQuantumKeyPair {
-        val keyGen = DilithiumKeyPairGenerator().apply { 
-            init(DilithiumKeyGenerationParameters(random, parameters)) 
+        val keyGen = DilithiumKeyPairGenerator().apply {
+            init(DilithiumKeyGenerationParameters(random, parameters))
         }
         val keyPair = keyGen.generateKeyPair()
         val pub = keyPair.public as DilithiumPublicKeyParameters
         val priv = keyPair.private as DilithiumPrivateKeyParameters
+
+        val pubEncoded = pub.encoded
+        val privEncoded = priv.encoded
+
         return PostQuantumKeyPair(
-            Base64.encodeToString(pub.encoded, Base64.NO_WRAP), 
-            priv.encoded, 
-            pub.encoded, 
-            priv, 
-            pub
+            publicKeyBase64 = Base64.encodeToString(pubEncoded, Base64.NO_WRAP),
+            privateKeyBytes = privEncoded,
+            publicKeyBytes = pubEncoded
         )
     }
 
-    // KORREKTUR: Nutzt die offizielle BouncyCastle-Signatur unter automatischer 
-    // Ableitung des symmetrischen Public-Key-Zweigs aus den encodeten Rohdaten!
     fun recreatePrivateKeyFromBytes(bytes: ByteArray): DilithiumPrivateKeyParameters {
-        return DilithiumPrivateKeyParameters(parameters, bytes, null)
+        return DilithiumPrivateKeyParameters(parameters, bytes)
     }
 
     fun recreatePublicKeyFromBase64(base64: String): DilithiumPublicKeyParameters {
-        return DilithiumPublicKeyParameters(parameters, Base64.decode(base64, Base64.NO_WRAP))
+        val decoded = Base64.decode(base64, Base64.NO_WRAP)
+        return DilithiumPublicKeyParameters(parameters, decoded)
     }
 
     fun signThreatData(privateKeyObj: DilithiumPrivateKeyParameters, payload: ByteArray): String {
-        val signer = DilithiumSigner().apply { 
-            init(true, ParametersWithRandom(privateKeyObj, random)) 
-        }
-        return Base64.encodeToString(signer.generateSignature(payload), Base64.NO_WRAP)
+        val signer = DilithiumSigner()
+        signer.init(true, ParametersWithRandom(privateKeyObj, random))
+        val signatureBytes = signer.generateSignature(payload)
+        return Base64.encodeToString(signatureBytes, Base64.NO_WRAP)
     }
 
-    fun verifySwarmSignature(publicKeyObj: DilithiumPublicKeyParameters, payload: ByteArray, base64Signature: String): Boolean {
+    fun verifySwarmSignature(
+        publicKeyObj: DilithiumPublicKeyParameters,
+        payload: ByteArray,
+        base64Signature: String
+    ): Boolean {
         return try {
             val signature = Base64.decode(base64Signature, Base64.NO_WRAP)
-            val result = DilithiumSigner().apply { init(false, publicKeyObj) }.verifySignature(payload, signature)
-            Arrays.fill(signature, 0.toByte()) 
+            val signer = DilithiumSigner()
+            signer.init(false, publicKeyObj)
+            val result = signer.verifySignature(payload, signature)
+            Arrays.fill(signature, 0.toByte())
             result
-        } catch (e: Exception) { false }
+        } catch (e: Exception) {
+            false
+        }
     }
 }
