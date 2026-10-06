@@ -14,24 +14,19 @@ import java.util.Arrays
 class QuantumEngine {
 
     private val random = SecureRandom()
-    // Öffentlich machen, damit GlobalMeshEngine darauf zugreifen kann
     val parameters: DilithiumParameters = DilithiumParameters.dilithium2
 
     class PostQuantumKeyPair(
         val publicKeyBase64: String,
-        private var privateKeyBytes: ByteArray?,
+        private var privateKeyObj: DilithiumPrivateKeyParameters?,
         val publicKeyBytes: ByteArray
     ) {
-        fun getPrivateKeyParameters(params: DilithiumParameters): DilithiumPrivateKeyParameters? {
-            val bytes = privateKeyBytes ?: return null
-            return DilithiumPrivateKeyParameters(params, bytes)
+        fun getPrivateKeyParameters(): DilithiumPrivateKeyParameters? {
+            return privateKeyObj
         }
 
         fun shredPrivateKey() {
-            privateKeyBytes?.let {
-                Arrays.fill(it, 0.toByte())
-            }
-            privateKeyBytes = null
+            privateKeyObj = null
         }
     }
 
@@ -44,17 +39,12 @@ class QuantumEngine {
         val priv = keyPair.private as DilithiumPrivateKeyParameters
 
         val pubEncoded = pub.encoded
-        val privEncoded = priv.encoded
 
         return PostQuantumKeyPair(
             publicKeyBase64 = Base64.encodeToString(pubEncoded, Base64.NO_WRAP),
-            privateKeyBytes = privEncoded,
+            privateKeyObj = priv,
             publicKeyBytes = pubEncoded
         )
-    }
-
-    fun recreatePrivateKeyFromBytes(bytes: ByteArray): DilithiumPrivateKeyParameters {
-        return DilithiumPrivateKeyParameters(parameters, bytes)
     }
 
     fun recreatePublicKeyFromBase64(base64: String): DilithiumPublicKeyParameters {
