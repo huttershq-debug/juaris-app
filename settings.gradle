@@ -8,13 +8,10 @@ pluginManagement {
         // Das unerschütterliche Fundament für deinen Release-Build
         id 'com.android.application' version '8.2.2'
         
-        // KORREKTUR 1 (Kompilier-Garantie): Aktualisiert auf Kotlin 1.9.24!
-        // Nur so harmoniert der Compiler perfekt mit der Compose-Erweiterung '1.5.14' in der build.gradle.
+        // Kotlin 1.9.24 für Compose Compiler 1.5.14
         id 'org.jetbrains.kotlin.android' version '1.9.24'
         
-        // KORREKTUR 2 (Symmetrische Datenbank-Generierung): 
-        // Aktualisiert auf die exakt passgenaue KSP-Compilerversion für Kotlin 1.9.24.
-        // Das stellt sicher, dass KSP die Room-Krypto-Tresore fehlerfrei kompilieren kann.
+        // KSP Compiler passend zu Kotlin 1.9.24
         id 'com.google.devtools.ksp' version '1.9.24-1.0.20'
     }
 }
@@ -24,11 +21,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        
-        // UPGRADE FÜR ABSOLUTE WELTSPITZE: Falls dezentrale Krypto-Erweiterungen oder 
-        // ältere SQLCipher-Bibliotheken Maven-Zusatzpakete benötigen, ist das Projekt 
-        // hierdurch global abgesichert.
-        maven { url 'https://google.com' }
+        // JitPack für dezentrale Open-Source-Krypto-Bibliotheken
+        maven { url 'https://jitpack.io' }
     }
 }
 
