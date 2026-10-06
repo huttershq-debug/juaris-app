@@ -8,7 +8,16 @@ import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.util.Log
 import androidx.core.content.ContextCompat
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.abs
 
 class AcousticThreatDetector(
@@ -72,7 +81,7 @@ class AcousticThreatDetector(
 
                 try {
                     while (isMonitoring && isActive && audioRecord?.recordingState == AudioRecord.RECORDSTATE_RECORDING) {
-                        // Synchoner, blockierender Read schützt vor Buffer Overflows
+                        // Synchroner, blockierender Read schützt vor Buffer Overflows
                         val read = audioRecord?.read(buffer, 0, buffer.size) ?: 0
 
                         if (read > 0) {
