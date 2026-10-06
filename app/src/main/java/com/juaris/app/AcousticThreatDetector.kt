@@ -36,7 +36,6 @@ class AcousticThreatDetector(
     private var monitoringJob: Job? = null
     private var audioRecord: AudioRecord? = null
 
-    // Eigenes SupervisorJob-Scope für sauberes Thread-Management
     private val detectorScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     fun startListening() {
@@ -81,7 +80,6 @@ class AcousticThreatDetector(
 
                 try {
                     while (isMonitoring && isActive && audioRecord?.recordingState == AudioRecord.RECORDSTATE_RECORDING) {
-                        // Synchroner, blockierender Read schützt vor Buffer Overflows
                         val read = audioRecord?.read(buffer, 0, buffer.size) ?: 0
 
                         if (read > 0) {
@@ -91,7 +89,6 @@ class AcousticThreatDetector(
                             }
                             val averageAmplitude = sum / read
 
-                            // Multi-Validierung anhaltender Schalleignisse
                             if (averageAmplitude > AMPLITUDE_THRESHOLD) {
                                 highAmplitudeCount++
                                 if (highAmplitudeCount >= REQUIRED_HIGH_FRAMES) {
@@ -99,8 +96,6 @@ class AcousticThreatDetector(
                                         onEmergencyDetected()
                                     }
                                     highAmplitudeCount = 0
-                                    
-                                    // 10 Sekunden Cool-Down nach Notfall-Auslösung
                                     delay(10000L)
                                 }
                             } else {
