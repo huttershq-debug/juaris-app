@@ -29,6 +29,8 @@
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.RECEIVE_WAP_PUSH" />
    
     <!-- Vordergrunddienste (Foreground Services) -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -73,6 +75,23 @@
             android:turnScreenOn="true"
             android:theme="@style/Theme.Juaris" />
 
+        <!-- SMS Compose Activity (Pflichtkomponente für Google Default SMS App Role) -->
+        <activity
+            android:name=".sms.SmsComposeActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Juaris">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SENDTO" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="sms" />
+                <data android:scheme="smsto" />
+                <data android:scheme="mms" />
+                <data android:scheme="mmsto" />
+            </intent-filter>
+        </activity>
+
         <!-- 1. Autostart-Schutz nach Systemstart -->
         <receiver
             android:name=".JuarisBootReceiver"
@@ -116,6 +135,9 @@
             <intent-filter>
                 <action android:name="android.net.VpnService"/>
             </intent-filter>
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Local zero-cloud packet inspection for network-based phishing and malware prevention." />
         </service>
 
         <!-- 5. Quick Settings Tile -->
@@ -145,8 +167,20 @@
             android:name=".JuarisNpuAnomalyEngine"
             android:exported="false" />
 
-        <!-- 8. Standard-SMS-Empfänger -->
-        <receiver android:name=".sms.SmsDeliveryReceiver"
+        <!-- 8. Lokaler SMS-Wächter & Phishing-Filter (SmsFilterReceiver) -->
+        <receiver
+            android:name=".sms.SmsFilterReceiver"
+            android:permission="android.permission.BROADCAST_SMS"
+            android:exported="true">
+            <intent-filter android:priority="999">
+                <action android:name="android.provider.Telephony.SMS_DELIVER" />
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- 9. Standard-SMS-Empfänger Stub -->
+        <receiver
+            android:name=".sms.SmsDeliveryReceiver"
             android:permission="android.permission.BROADCAST_SMS"
             android:exported="true">
             <intent-filter>
@@ -154,8 +188,9 @@
             </intent-filter>
         </receiver>
 
-        <!-- 9. WAP-Push-Empfänger -->
-        <receiver android:name=".sms.WapPushDeliveryReceiver"
+        <!-- 10. WAP-Push-Empfänger Stub -->
+        <receiver
+            android:name=".sms.WapPushDeliveryReceiver"
             android:permission="android.permission.BROADCAST_WAP_PUSH"
             android:exported="true">
             <intent-filter>
@@ -164,14 +199,18 @@
             </intent-filter>
         </receiver>
 
-        <!-- 10. Hintergrund-Antwortdienst -->
-        <service android:name=".sms.SmsRespondService"
+        <!-- 11. Hintergrund-Antwortdienst Stub -->
+        <service
+            android:name=".sms.SmsRespondService"
             android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.RESPOND_VIA_MESSAGE" />
                 <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="sms" />
                 <data android:scheme="smsto" />
+                <data android:scheme="mms" />
+                <data android:scheme="mmsto" />
             </intent-filter>
         </service>
 
