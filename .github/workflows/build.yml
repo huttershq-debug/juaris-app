@@ -76,16 +76,14 @@ jobs:
                           name = child.attrib.get("name")
                           if name in seen_names:
                               duplicates_found += 1
-                              continue # Doppeltes Element verwerfen, Original-Übersetzung behalten
+                              continue
                           seen_names.add(name)
                       new_children.append(child)
 
                   if duplicates_found > 0:
                       root[:] = new_children
-                      # KORREKTUR: Erzwingt ein sauberes Schreiben ohne Verlust von Android-Kaufmanns-Und Maskierungen (&amp;)
                       tree.write(path, encoding="utf-8", xml_declaration=True)
                       
-                      # Nachbearbeitung um maskierte Hochkommata in Lokalisierungen absolut sicher zu erhalten
                       with open(path, "r", encoding="utf-8") as f:
                           content = f.read()
                       content = content.replace("&amp;amp;", "&amp;")
@@ -124,16 +122,16 @@ jobs:
           path: app/build/reports/tests/testDebugUnitTest/
 
       - name: Build Both AAB and APK
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           echo "kompiliere APK und AAB mit 3GB Heap..."
           ./gradlew assembleRelease bundleRelease --stacktrace \
             -Dorg.gradle.jvmargs="-Xmx3g" \
             -Pandroid.useAndroidX=true \
-            -Pandroid.enableJetifier=false \
-            -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/juaris-release-key.jks" \
-            -Pandroid.injected.signing.storePassword="${{ secrets.KEYSTORE_PASSWORD }}" \
-            -Pandroid.injected.signing.keyAlias="${{ secrets.KEY_ALIAS }}" \
-            -Pandroid.injected.signing.keyPassword="${{ secrets.KEY_PASSWORD }}"
+            -Pandroid.enableJetifier=false
 
       - name: Release Both Files
         uses: softprops/action-gh-release@v1
