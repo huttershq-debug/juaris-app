@@ -1,4 +1,4 @@
-name: Build and Release Juaris
+Name: Build and Release Juaris
 
 on:
   push:
@@ -66,7 +66,7 @@ jobs:
                   parser = ET.XMLParser(target=ET.TreeBuilder(insert_comments=True))
                   tree = ET.parse(path, parser=parser)
                   root = tree.getroot()
-                  
+                 
                   seen_names = set()
                   new_children = []
                   duplicates_found = 0
@@ -83,19 +83,25 @@ jobs:
                   if duplicates_found > 0:
                       root[:] = new_children
                       tree.write(path, encoding="utf-8", xml_declaration=True)
-                      
+                     
                       with open(path, "r", encoding="utf-8") as f:
                           content = f.read()
                       content = content.replace("&amp;amp;", "&amp;")
                       with open(path, "w", encoding="utf-8") as f:
                           f.write(content)
-                          
+                         
                       print(f"🟢 Bereinigt: {path} ({duplicates_found} Duplikate entfernt)")
                   else:
                       print(f"⚪ Keine Duplikate in: {path}")
               except Exception as e:
                   print(f"❌ Fehler beim Verarbeiten von {path}: {e}")
           '
+
+      # QUELLEXTRACT-BEREINIGUNG (Entfernt geschützte Leerzeichen / UTF-8 u00A0 aus Kotlin-Dateien)
+      - name: Sanitize Source Encoding
+        run: |
+          echo "Entferne unsichtbare Steuerzeichen aus allen Kotlin-Quelldateien..."
+          find app/src/main/java -name "*.kt" -exec perl -i -pe 's/\xc2\xa0/ /g' {} +
 
       - name: Run Android Lint (Statische Code-Analyse)
         run: |
@@ -143,3 +149,4 @@ jobs:
           name: "Juaris Release v1.0.0-${{ github.run_number }} (AAB & APK)"
           body: "Dieses Release enthält sowohl die .aab-Datei für den Google Play Store als auch die .apk-Datei zum direkten Installieren auf dem Handy."
           token: ${{ secrets.GITHUB_TOKEN }}
+
