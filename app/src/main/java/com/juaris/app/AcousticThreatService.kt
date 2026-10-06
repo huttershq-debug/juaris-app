@@ -26,7 +26,7 @@ class AcousticThreatService : Service() {
         val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Juaris Akustik-Wächter")
             .setContentText("Überwacht die Umgebung auf akustische Bedrohungen...")
-            .setSmallIcon(R.drawable.ic_launcher_foreground) // Passe dies an dein Icon an falls nötig
+            .setSmallIcon(R.mipmap.ic_launcher_foreground) // Passe dies an dein Icon an falls nötig
             .setOngoing(true)
             .build()
 
