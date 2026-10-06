@@ -128,7 +128,8 @@ class AcousticThreatDetector(
         releaseAudioRecord()
     }
 
-    private synchronized fun releaseAudioRecord() {
+    @Synchronized
+    private fun releaseAudioRecord() {
         try {
             audioRecord?.let { record ->
                 if (record.recordingState == AudioRecord.RECORDSTATE_RECORDING) {
