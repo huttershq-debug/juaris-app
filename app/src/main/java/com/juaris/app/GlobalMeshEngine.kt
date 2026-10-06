@@ -37,9 +37,10 @@ object GlobalMeshEngine {
         val payloadBytes = content.toByteArray(Charsets.UTF_8)
        
         // Echte Dilithium-Signatur mit deiner QuantumEngine erzeugen
-        val privateKey = nodeKeyPair.getPrivateKeyParameters(quantumEngine.parameters)
-            ?: throw IllegalStateExcepttion("Private Key wurde bereits vernichtet!")
-        val signatureBase64 = quantumEngine.signThreatData(nodeKeyPair.privateKeyObj, payloadBytes)
+        val privateKey = nodeKeyPair.getPrivateKeyParameters()
+            ?: throw IllegalStateException("Private Key wurde bereits vernichtet!")
+            
+        val signatureBase64 = quantumEngine.signThreatData(privateKey, payloadBytes)
         val publicKeyBase64 = nodeKeyPair.publicKeyBase64
 
         Log.d(TAG, "Dilithium-Signatur erfolgreich erstellt: ${signatureBase64.take(12)}...")
@@ -53,12 +54,12 @@ object GlobalMeshEngine {
                     postId = UUID.randomUUID().toString(),
                     senderNodeHash = if (isEphemeral) "[Ephemerer PQC-Node]" else "[Verifizierter PQC-Node]",
                     content = content,
-                    mediaUri = null, 
+                    mediaUri = null,
                     mediaType = "TEXT",
                     timestamp = System.currentTimeMillis(),
                     isEphemeral = isEphemeral,
                     ttlHopCount = 3,
-                    pqcSignature = signatureBase64, 
+                    pqcSignature = signatureBase64,
                     pqcPublicKey = publicKeyBase64  
                 )
                
@@ -78,3 +79,4 @@ object GlobalMeshEngine {
         }
     }
 }
+
