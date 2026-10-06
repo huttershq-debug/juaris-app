@@ -19,7 +19,7 @@
 -keep class **_Impl { *; }
 
 # Schützt alle Klassen, die als Room Entities oder DAOs dienen
--keep class com.juaris.app.** { 
+-keep class com.juaris.app.** {
     @androidx.room.Entity *;
     @androidx.room.Dao *;
     <init>();
@@ -74,9 +74,9 @@
     @native <methods>;
 }
 
-# Kotlin Coroutines
+# Kotlin Coroutines (Korrigierter Syntax)
 -keep class kotlinx.coroutines.** { *; }
--keepclassmembers class * kotlin.coroutines.Continuation { *; }
+-keep class kotlin.coroutines.Continuation { *; }
 
 # Google Play Billing Client (In-App-Abos)
 -keep class com.android.billingclient.** { *; }
@@ -120,3 +120,4 @@
 # =====================================================================
 -keep class com.juaris.app.QuantumEngine$PostQuantumKeyPair { *; }
 -keep class com.juaris.app.** { *; }
+
