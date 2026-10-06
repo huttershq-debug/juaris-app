@@ -37,6 +37,8 @@ object GlobalMeshEngine {
         val payloadBytes = content.toByteArray(Charsets.UTF_8)
        
         // Echte Dilithium-Signatur mit deiner QuantumEngine erzeugen
+        val privateKey = nodeKeyPair.getPrivateKeyParameters(quantumEngine.parameters)
+            ?: throw IllegalStateExcepttion("Private Key wurde bereits vernichtet!")
         val signatureBase64 = quantumEngine.signThreatData(nodeKeyPair.privateKeyObj, payloadBytes)
         val publicKeyBase64 = nodeKeyPair.publicKeyBase64
 
