@@ -5,6 +5,7 @@
 
 package com.juaris.app
 
+import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.role.RoleManager
@@ -13,6 +14,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.net.VpnService
 import android.os.Build
@@ -103,7 +105,19 @@ class MainActivity : AppCompatActivity() {
         if (isGranted) {
             Toast.makeText(this, "Kalender-Zugriff erlaubt! Fristen-Wächter aktiv.", Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(this, "Hinweis: Ohne Kalender-Zugriff kann Juaris Termine nicht automatisch scannen.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Hinweis: Ohne Kalender-Zugriff kann Juaris Termine nicht automatisch scannen.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val acousticPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val micGranted = permissions[Manifest.permission.RECORD_AUDIO] ?: false
+        if (micGranted) {
+            Toast.makeText(this, "Akustischer Wächter aktiv!", Toast.LENGTH_SHORT).show()
+            startAcousticThreatService()
+        } else {
+            Toast.makeText(this, "Hinweis: Akustischer Wächter benötigt Mikrofon-Berechtigung.", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -203,16 +217,33 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkAndBootProtectionServices() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) !=
-                android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
+                PackageManager.PERMISSION_GRANTED) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 return
             }
         }
 
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_CALENDAR) !=
-            android.content.pm.PackageManager.PERMISSION_GRANTED) {
-            calendarPermissionLauncher.launch(android.Manifest.permission.READ_CALENDAR)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) !=
+            PackageManager.PERMISSION_GRANTED) {
+            calendarPermissionLauncher.launch(Manifest.permission.READ_CALENDAR)
+        }
+
+        // Akustischer Schutzprüfung & Start (falls in SharedPreferences aktiviert / standardmäßig an)
+        val acousticProtEnabled = securePrefs.getBoolean("acoustic_prot", true)
+        if (acousticProtEnabled) {
+            val permissionsNeeded = mutableListOf(Manifest.permission.RECORD_AUDIO)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                permissionsNeeded.add(Manifest.permission.FOREGROUND_SERVICE_MICROPHONE)
+            }
+            val hasMicPermission = permissionsNeeded.all {
+                ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+            }
+            if (hasMicPermission) {
+                startAcousticThreatService()
+            } else {
+                acousticPermissionLauncher.launch(permissionsNeeded.toTypedArray())
+            }
         }
 
         val calendarWorkRequest = androidx.work.PeriodicWorkRequestBuilder<CalendarScanWorker>(6, java.util.concurrent.TimeUnit.HOURS)
@@ -256,6 +287,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun startAcousticThreatService() {
+        val serviceIntent = Intent(this, AcousticThreatService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
+    }
+
+    private fun stopAcousticThreatService() {
+        val serviceIntent = Intent(this, AcousticThreatService::class.java)
+        stopService(serviceIntent)
+    }
+
     @Suppress("UnspecifiedRegisterReceiverFlag")
     private fun registerEmergencyReceiver() {
         emergencyReceiver = object : BroadcastReceiver() {
@@ -278,6 +323,9 @@ class MainActivity : AppCompatActivity() {
     fun executeEmergencyProtocol(reason: String) {
         try {
             securePrefs.edit().clear().apply()
+
+            // Stoppe auch den akustischen Dienst bei Panik
+            stopAcousticThreatService()
 
             val emergencyIntent = Intent(this, EmergencyActivity::class.java).apply {
                 putExtra("reason", reason)
@@ -616,6 +664,7 @@ fun JuarisMainDashboard(
     var callProtection by remember { mutableStateOf(prefs.getBoolean("call_prot", true)) }
     var smsProtection by remember { mutableStateOf(prefs.getBoolean("sms_prot", true)) }
     var emailProtection by remember { mutableStateOf(prefs.getBoolean("email_prot", true)) }
+    var acousticProtection by remember { mutableStateOf(prefs.getBoolean("acoustic_prot", true)) }
     var vaultUnlocked by remember { mutableStateOf(false) }
     var clipboardAutoClear by remember { mutableStateOf(prefs.getBoolean("clip_auto", true)) }
 
@@ -685,6 +734,28 @@ fun JuarisMainDashboard(
                         emailProtection = it
                         prefs.edit().putBoolean("email_prot", it).apply()
                     },
+                    acousticProtection = acousticProtection,
+                    onAcousticChange = { newState ->
+                        acousticProtection = newState
+                        prefs.edit().putBoolean("acoustic_prot", newState).apply()
+                        val activity = context.findActivity() as? MainActivity
+                        if (newState) {
+                            activity?.let {
+                                val serviceIntent = Intent(it, AcousticThreatService::class.java)
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                    it.startForegroundService(serviceIntent)
+                                } else {
+                                    it.startService(serviceIntent)
+                                }
+                            }
+                            Toast.makeText(context, "Akustischer Wächter aktiviert", Toast.LENGTH_SHORT).show()
+                        } else {
+                            activity?.let {
+                                it.stopService(Intent(it, AcousticThreatService::class.java))
+                            }
+                            Toast.makeText(context, "Akustischer Wächter deaktiviert", Toast.LENGTH_SHORT).show()
+                        }
+                    },
                     vaultUnlocked = vaultUnlocked,
                     onVaultToggle = { newState ->
                         if (newState) {
@@ -743,13 +814,13 @@ fun JuarisMainDashboard(
                         onToggleGesture = { newState ->
                             if (newState) {
                                 val permissionGranted = ContextCompat.checkSelfPermission(
-                                    context, android.Manifest.permission.CAMERA
-                                ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                                    context, Manifest.permission.CAMERA
+                                ) == PackageManager.PERMISSION_GRANTED
 
                                 if (permissionGranted) {
                                     gestureEnabled = true
                                 } else {
-                                    cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+                                    cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                                 }
                             } else {
                                 gestureEnabled = false
@@ -895,13 +966,14 @@ fun ProtectionModulesPage(
     callProtection: Boolean, onCallChange: (Boolean) -> Unit,
     smsProtection: Boolean, onSmsChange: (Boolean) -> Unit,
     emailProtection: Boolean, onEmailChange: (Boolean) -> Unit,
+    acousticProtection: Boolean, onAcousticChange: (Boolean) -> Unit,
     vaultUnlocked: Boolean, onVaultToggle: (Boolean) -> Unit
 ) {
     val context = LocalContext.current
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
             Text("Schutz-Module", style = MaterialTheme.typography.titleLarge, color = Color.White)
-            Text("Echtzeit-Wächter für Anrufe, SMS und E-Mails.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text("Echtzeit-Wächter für Anrufe, SMS, E-Mails & Audio.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         item {
             Card(
@@ -909,7 +981,8 @@ fun ProtectionModulesPage(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("Kommunikations-Filter", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    Text("Kommunikations- & Sensor-Filter", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
+                    
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text("Anruf-Schutz", style = MaterialTheme.typography.bodyLarge, color = Color.White)
@@ -918,6 +991,7 @@ fun ProtectionModulesPage(
                         Switch(checked = callProtection, onCheckedChange = onCallChange)
                     }
                     HorizontalDivider(color = Color(0xFF112211))
+                    
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text("SMS-Phishing-Filter", style = MaterialTheme.typography.bodyLarge, color = Color.White)
@@ -926,6 +1000,7 @@ fun ProtectionModulesPage(
                         Switch(checked = smsProtection, onCheckedChange = onSmsChange)
                     }
                     HorizontalDivider(color = Color(0xFF112211))
+                    
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text("E-Mail-Benachrichtigungs-Scan", style = MaterialTheme.typography.bodyLarge, color = Color.White)
@@ -950,6 +1025,15 @@ fun ProtectionModulesPage(
                                 }
                             }
                         )
+                    }
+                    HorizontalDivider(color = Color(0xFF112211))
+
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Akustischer Wächter", style = MaterialTheme.typography.bodyLarge, color = Color.White)
+                            Text("Lokale Audio-Anomalieerkennung", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                        }
+                        Switch(checked = acousticProtection, onCheckedChange = onAcousticChange)
                     }
                 }
             }
@@ -1248,10 +1332,10 @@ fun SwarmMeshPage() {
                         onClick = {
                             bluetoothPermissionLauncher.launch(
                                 arrayOf(
-                                    android.Manifest.permission.BLUETOOTH_SCAN,
-                                    android.Manifest.permission.BLUETOOTH_ADVERTISE,
-                                    android.Manifest.permission.BLUETOOTH_CONNECT,
-                                    android.Manifest.permission.ACCESS_FINE_LOCATION
+                                    Manifest.permission.BLUETOOTH_SCAN,
+                                    Manifest.permission.BLUETOOTH_ADVERTISE,
+                                    Manifest.permission.BLUETOOTH_CONNECT,
+                                    Manifest.permission.ACCESS_FINE_LOCATION
                                 )
                             )
                         },
@@ -1315,4 +1399,3 @@ fun PrivacyAndLegalContent() {
         }
     }
 }
-
