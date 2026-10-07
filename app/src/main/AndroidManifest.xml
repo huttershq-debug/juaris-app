@@ -13,7 +13,7 @@
     <!-- Bluetooth & P2P-Mesh Berechtigungen (Ab Android 12+) -->
     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
-    <uses-permission 
+    <uses-permission
         android:name="android.permission.BLUETOOTH_SCAN"
         android:usesPermissionFlags="neverForLocation"
         tools:targetApi="31" />
@@ -21,7 +21,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" tools:targetApi="31" />
     <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" android:usesPermissionFlags="neverForLocation" tools:targetApi="33" />
 
-    <!-- Schutzmodule: Anruf-, SMS- und Notfall-Filter -->
+    <!-- Schutzmodule: Anruf- und Benachrichtigungs-Filter (SMS passiv) -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-feature android:name="android.hardware.telephony" android:required="false" />
@@ -30,9 +30,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
-    <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
-    <uses-permission android:name="android.permission.RECEIVE_WAP_PUSH" />
 
     <!-- Vordergrunddienste (Foreground Services nach Android 14/15 Spezifikation) -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -40,7 +38,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-    
+   
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -78,23 +76,6 @@
             android:showWhenLocked="true"
             android:turnScreenOn="true"
             android:theme="@style/Theme.Juaris" />
-
-        <!-- SMS Compose Activity (Pflichtkomponente für Default SMS App Role) -->
-        <activity
-            android:name=".sms.SmsComposeActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Juaris">
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <action android:name="android.intent.action.SENDTO" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="sms" />
-                <data android:scheme="smsto" />
-                <data android:scheme="mms" />
-                <data android:scheme="mmsto" />
-            </intent-filter>
-        </activity>
 
         <!-- 1. Autostart-Schutz nach Systemstart -->
         <receiver
@@ -152,7 +133,7 @@
         <!-- 6. Quick Settings Tile -->
         <service
             android:name=".JuarisTileService"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            android:permission="android.permission.BIND_QU_ICK_SETTINGS_TILE"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
@@ -176,52 +157,16 @@
             android:name=".JuarisNpuAnomalyEngine"
             android:exported="false" />
 
-        <!-- 9. Lokaler SMS-Wächter & Phishing-Filter -->
+        <!-- 9. Reiner passiver SMS-Wächter (Kein Abfangen/Löschen mehr, absolut Play-Store-konform) -->
         <receiver
             android:name=".sms.SmsFilterReceiver"
-            android:permission="android.permission.BROADCAST_SMS"
             android:exported="true">
-            <intent-filter android:priority="999">
-                <action android:name="android.provider.Telephony.SMS_DELIVER" />
+            <intent-filter>
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
 
-        <!-- 10. Standard-SMS-Empfänger Stub -->
-        <receiver
-            android:name=".sms.SmsDeliveryReceiver"
-            android:permission="android.permission.BROADCAST_SMS"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.provider.Telephony.SMS_DELIVER" />
-            </intent-filter>
-        </receiver>
-
-        <!-- 11. WAP-Push-Empfänger Stub -->
-        <receiver
-            android:name=".sms.WapPushDeliveryReceiver"
-            android:permission="android.permission.BROADCAST_WAP_PUSH"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.provider.Telephony.WAP_PUSH_DELIVER" />
-                <data android:mimeType="application/vnd.wap.mms-message" />
-            </intent-filter>
-        </receiver>
-
-        <!-- 12. Hintergrund-Antwortdienst Stub -->
-        <service
-            android:name=".sms.SmsRespondService"
-            android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.RESPOND_VIA_MESSAGE" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="sms" />
-                <data android:scheme="smsto" />
-                <data android:scheme="mms" />
-                <data android:scheme="mmsto" />
-            </intent-filter>
-        </service>
-
     </application>
 </manifest>
+
+
