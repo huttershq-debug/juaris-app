@@ -8,7 +8,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.juaris.app.JuarisDatabase
 import com.juaris.app.MeshPostEntity
-import com.juaris.app.mesh.NearbyMeshManager
+import com.juaris.app.NearbyMeshManager
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
