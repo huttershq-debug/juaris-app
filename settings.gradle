@@ -5,13 +5,8 @@ pluginManagement {
         gradlePluginPortal()
     }
     plugins {
-        // Das unerschütterliche Fundament für deinen Release-Build
         id 'com.android.application' version '8.2.2'
-        
-        // Kotlin 1.9.24 für Compose Compiler 1.5.14
         id 'org.jetbrains.kotlin.android' version '1.9.24'
-        
-        // KSP Compiler passend zu Kotlin 1.9.24
         id 'com.google.devtools.ksp' version '1.9.24-1.0.20'
     }
 }
@@ -21,10 +16,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        // JitPack für dezentrale Open-Source-Krypto-Bibliotheken
         maven { url 'https://jitpack.io' }
     }
 }
 
 rootProject.name = "Juaris"
 include ':app'
+
