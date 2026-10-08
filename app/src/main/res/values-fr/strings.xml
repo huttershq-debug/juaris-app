@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">Juaris</string>
-    <string name="status_protected">Appareil entièrement protégé</string>
+    <string name="status_protected">Appareil entièrement protégé (entrant et sortant)</string>
     <string name="status_warning">Alerte de sécurité détectée</string>
     <string name="tab_status">Statut</string>
     <string name="tab_protection">Protection</string>
@@ -26,31 +26,31 @@
     <string name="email_protection_title">Sécurité des e-mails</string>
     <string name="log_email_incoming_blocked">E-mail malveillant entrant bloqué : %1$s</string>
     <string name="log_email_outgoing_blocked">E-mail sortant arrêté (Risque de sécurité) : %1$s</string>
-    <string name="juaris_app_welcome_text" formatted="false">Bienvenue sur Juaris, votre application de sécurité du futur. 100 pourcent transparent, 100 pourcent sur votre mobile. Sans cloud. Votre protection, votre maison, vos règles.</string>
+    <string name="juaris_app_welcome_text" formatted="false">Bienvenue sur Juaris, votre application de sécurité du futur. 100%% transparent, 100%% sur votre mobile. Sans cloud. Votre protection, votre maison, vos règles.</string>
     <string name="juaris_app_welcome_audio_file">welcome_audio_fr.m4a</string>
     <string name="vpn_disclosure_title">Avis de sécurité Juaris VPN</string>
-    <string name="vpn_disclosure_message">Juaris utilise un VpnService local pour détecter le phishing et les logiciels malveillants directement sur votre appareil.\n\nToutes les données restent locales. Rien n\'est envoyé à des serveurs externes.</string>
+    <string name="vpn_disclosure_message">Juaris utilise un VpnService local pour détecter le phishing et les logiciels malveillants directement sur votre appareil.\n\nToutes les données restent locales à 100%%. Rien n\'est envoyé à des serveurs externes ou au cloud.</string>
     <string name="btn_understood">Compris et Activer</string>
     <string name="btn_cancel">Annuler</string>
 
-    <string name="p2p_swarm_title">Essaim Juaris P2P</string>
+    <string name="p2p_swarm_title">Essaim Juaris (P2P)</string>
     <string name="p2p_swarm_subtitle">Communication sécurisée et décentralisée sans Internet</string>
     <string name="mesh_broadcast_title">Diffuser un message à l\'essaim</string>
     <string name="label_message_input">Écrire un message...</string>
-    <string name="checkbox_ephemeral">Supprimer après lecture</string>
+    <string name="checkbox_ephemeral">Supprimer après lecture (Éphémère)</string>
     <string name="btn_broadcast">Envoyer à l\'essaim</string>
-    <string name="mesh_packets_count">Paquets d\'essaim actifs</string>
+    <string name="mesh_packets_count">Paquets d\'essaim actifs (%d)</string>
     <string name="mesh_hardware_title">Matériel P2P et Connexions</string>
     <string name="mesh_status_format">Statut : %s</string>
     <string name="btn_start_mesh_node">Démarrer le nœud maillé P2P</string>
     <string name="status_ready">Prêt pour la connexion en essaim</string>
     <string name="status_mesh_active_search">Recherche de nœuds d\'essaim...</string>
-    <string name="toast_mesh_device_discovered">Nouvel appareil d\'essaim découvert</string>
-    <string name="status_mesh_connected_format" formatted="false">Connecté à %s</string>
-    <string name="status_mesh_connected_devices_format">Appareils connectés</string>
+    <string name="toast_mesh_device_discovered">Nouvel appareil d\'essaim découvert !</string>
+    <string name="status_mesh_connected_format" formatted="false">Connecté à %s (Appareils : %d)</string>
+    <string name="status_mesh_connected_devices_format">Appareils connectés : %d</string>
     <string name="status_sent">Message envoyé avec succès à l\'essaim</string>
-    <string name="toast_p2p_started">Nœud maillé P2P démarré avec succès</string>
-    <string name="toast_bluetooth_missing">Autorisations Bluetooth requises</string>
+    <string name="toast_p2p_started">Nœud maillé P2P démarré avec succès !</string>
+    <string name="toast_bluetooth_missing">Autorisations Bluetooth requises !</string>
 
     <string name="logs_page_title">Journaux de sécurité</string>
     <string name="logs_page_subtitle">Aperçu de toutes les menaces et événements interceptés</string>
@@ -124,7 +124,7 @@
     <string name="offline_vault_desc">Stockage local sécurisé pour les données sensibles</string>
     <string name="vault_status_unlocked">Coffre-fort déverrouillé</string>
     <string name="vault_status_locked">Coffre-fort verrouillé</string>
-    <string name="blacklist_items_count">Éléments bloqués</string>
+    <string name="blacklist_items_count">Éléments bloqués (%d)</string>
     <string name="clipboard_security_title">Sécurité du presse-papiers</string>
     <string name="clipboard_autoclear_title">Effacer automatiquement le presse-papiers</string>
     <string name="air_gesture_store_notice">Les paramètres de gestes sont enregistrés localement</string>
@@ -139,14 +139,14 @@
     <string name="toast_enable_notification_manual">Veuillez activer le service d\'écoute des notifications manuellement</string>
     <string name="emergency_reason_sensor">Urgence déclenchée par capteur</string>
     <string name="emergency_reason_manual">Bouton de panique manuel activé</string>
-    <string name="toast_debugger_detected">Avertissement : Débogueur détecté</string>
+    <string name="toast_debugger_detected">Avertissement : Débogueur détecté !</string>
     <string name="biometric_vault_title">Authentification du coffre-fort</string>
     <string name="biometric_vault_subtitle">Confirmez votre identité pour accéder au coffre-fort</string>
     <string name="toast_vault_success">Coffre-fort déverrouillé avec succès</string>
     <string name="toast_biometric_error">Erreur biométrique : %s</string>
     <string name="toast_vpn_started">Service VPN Juaris démarré</string>
     <string name="disclosure_dialog_title">Avis d\'accessibilité et notifications</string>
-    <string name="disclosure_message">Juaris nécessite l\'accès aux notifications pour protéger votre appareil localement.</string>
+    <string name="disclosure_message">Juaris nécessite l\'accès aux notifications pour filtrer le phishing localement.</string>
     <string name="toast_dialog_error">Erreur de dialogue</string>
     <string name="toast_vpn_dialog_error">Erreur de dialogue VPN</string>
     <string name="desc_hologram">Avatar hologramme</string>
@@ -163,7 +163,7 @@
     <string name="log_module_guardian">Gardien de sécurité</string>
     <string name="log_desc_phishing_blocked">Menace de phishing interceptée</string>
     <string name="log_details_simulation">Attaque simulée bloquée avec succès</string>
-    <string name="toast_threat_neutralized">Menace neutralisée</string>
+    <string name="toast_threat_neutralized">Menace neutralisée !</string>
     <string name="toast_logs_vault_secured">Journaux chiffrés en toute sécurité dans le coffre-fort</string>
     <string name="status_health_title">État de santé du système</string>
     <string name="status_health_subtitle">Résumé de la protection du noyau en temps réel</string>
@@ -171,7 +171,7 @@
     <string name="status_filters_active">Tous les filtres actifs fonctionnent</string>
     <string name="card_blocked_caps">BLOQUÉ</string>
     <string name="card_data_flow">FLUX DE DONNÉES</string>
-    <string name="card_local_only">100 pourcent Local</string>
+    <string name="card_local_only">100%% Local</string>
     <string name="section_actions">Urgence et Actions</string>
     <string name="btn_simulate_phishing">Simuler une attaque de phishing</string>
     <string name="btn_export_vault_logs">Exporter les journaux du coffre-fort</string>
@@ -204,12 +204,12 @@
     <string name="protection_modules_subtitle">Filtres de sécurité actifs en temps réel</string>
     <string name="toast_enable_listener_manual">Veuillez activer le service d\'écoute des notifications dans les paramètres</string>
 
-    <string name="widget_title">Juaris 360</string>
-    <string name="widget_subtitle">100 pourcent Sécurisé et Local</string>
-    <string name="btn_emergency_widget">URGENCE</string>
+    <string name="widget_title">🛡️ Juaris 360°</string>
+    <string name="widget_subtitle">100%% Sécurisé et Local</string>
+    <string name="btn_emergency_widget">🚨 URGENCE</string>
     <string name="app_ui_title_security">Console Juaris</string>
     <string name="status_guardian_active_offline">STATUT : GARDIEN ACTIF (HORS LIGNE)</string>
-    <string name="title_intercepted_logs">Appels et SMS interceptés :</string>
+    <string name="title_intercepted_logs">Appels et SMS interceptés (Journal) :</string>
     <string name="logs_waiting_for_events">En attente d\'événements...</string>
 </resources>
 
