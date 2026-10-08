@@ -73,6 +73,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var securePrefs: SharedPreferences
     private var emergencyReceiver: BroadcastReceiver? = null
+    private lateinit var billingManager: BillingManager
 
     private val callScreeningRoleLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -150,6 +151,11 @@ class MainActivity : AppCompatActivity() {
             securePrefs = getPreferences(Context.MODE_PRIVATE)
         }
 
+        billingManager = BillingManager(this, "juaris_monats_abo") {
+            securePrefs.edit().putBoolean("subscription_active", true).apply()
+        }
+        billingManager.startConnection {}
+
         checkRuntimeIntegrity()
         checkAndBootProtectionServices()
         registerEmergencyReceiver()
@@ -201,6 +207,9 @@ class MainActivity : AppCompatActivity() {
                                 },
                                 onTriggerPanicEmergency = {
                                     executeEmergencyProtocol("Manueller Panic-Button Trigger")
+                                },
+                                onSubscribe = {
+                                    billingManager.launchBillingFlow(this)
                                 }
                             )
                         }
@@ -229,7 +238,6 @@ class MainActivity : AppCompatActivity() {
             calendarPermissionLauncher.launch(Manifest.permission.READ_CALENDAR)
         }
 
-        // Akustischer Schutzprüfung & Start (falls in SharedPreferences aktiviert / standardmäßig an)
         val acousticProtEnabled = securePrefs.getBoolean("acoustic_prot", true)
         if (acousticProtEnabled) {
             val permissionsNeeded = mutableListOf(Manifest.permission.RECORD_AUDIO)
@@ -323,8 +331,6 @@ class MainActivity : AppCompatActivity() {
     fun executeEmergencyProtocol(reason: String) {
         try {
             securePrefs.edit().clear().apply()
-
-            // Stoppe auch den akustischen Dienst bei Panik
             stopAcousticThreatService()
 
             val emergencyIntent = Intent(this, EmergencyActivity::class.java).apply {
@@ -582,17 +588,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
             ) {
                 Text(text = "🔓 Mit Fingerabdruck anmelden", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.Black)
             }
-
-            if (BuildConfig.DEBUG) {
-                Spacer(modifier = Modifier.height(24.dp))
-                OutlinedButton(
-                    onClick = { onLoginSuccess() },
-                    modifier = Modifier.fillMaxWidth(),
-                    border = BorderStroke(1.dp, Color(0xFFFF9900))
-                ) {
-                    Text(text = "[DEBUG] Entwickler-Bypass", color = Color(0xFFFF9900), fontSize = 12.sp)
-                }
-            }
         }
     }
 }
@@ -601,7 +596,8 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 fun JuarisMainDashboard(
     prefs: SharedPreferences,
     onAuthenticateVault: (() -> Unit) -> Unit,
-    onTriggerPanicEmergency: () -> Unit
+    onTriggerPanicEmergency: () -> Unit,
+    onSubscribe: () -> Unit
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -667,6 +663,7 @@ fun JuarisMainDashboard(
     var acousticProtection by remember { mutableStateOf(prefs.getBoolean("acoustic_prot", true)) }
     var vaultUnlocked by remember { mutableStateOf(false) }
     var clipboardAutoClear by remember { mutableStateOf(prefs.getBoolean("clip_auto", true)) }
+    val isSubscribed by remember { mutableStateOf(prefs.getBoolean("subscription_active", false)) }
 
     Scaffold(
         topBar = {
@@ -696,20 +693,8 @@ fun JuarisMainDashboard(
             when (page) {
                 0 -> StatusPage(
                     logs = liveLogs,
-                    onSimulateThreat = {
-                        coroutineScope.launch {
-                            db.securityLogDao().insertLog(
-                                SecurityLogEntity(
-                                    timestamp = System.currentTimeMillis(),
-                                    status = "BLOCKED",
-                                    module = "Echtzeit-Wächter",
-                                    description = "Phishing-Angriff lokal erkannt und blockiert!",
-                                    details = "Simulierter Testlauf erfolgreich ausgeführt."
-                                )
-                            )
-                        }
-                        Toast.makeText(context, "Bedrohung auf dem Gerät neutralisiert & protokolliert!", Toast.LENGTH_SHORT).show()
-                    },
+                    isSubscribed = isSubscribed,
+                    onSubscribe = onSubscribe,
                     onExportLogs = {
                         Toast.makeText(context, "Logs sicher im verschlüsselten Vault gesichert.", Toast.LENGTH_LONG).show()
                     },
@@ -848,7 +833,8 @@ fun JuarisMainDashboard(
 @Composable
 fun StatusPage(
     logs: List<SecurityLogEntity>,
-    onSimulateThreat: () -> Unit,
+    isSubscribed: Boolean,
+    onSubscribe: () -> Unit,
     onExportLogs: () -> Unit,
     onPanicWipe: () -> Unit
 ) {
@@ -923,14 +909,14 @@ fun StatusPage(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(
-                        onClick = onSimulateThreat,
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
-                    ) {
-                        Icon(Icons.Default.Refresh, contentDescription = null, tint = Color.Black)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Phishing-Angriff (SMS/Mail) simulieren", color = Color.Black, fontWeight = FontWeight.Bold)
+                    if (!isSubscribed) {
+                        Button(
+                            onClick = onSubscribe,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
+                        ) {
+                            Text("Juaris Monats-Abo aktivieren", color = Color.Black, fontWeight = FontWeight.Bold)
+                        }
                     }
                     OutlinedButton(
                         onClick = onExportLogs,
@@ -982,7 +968,7 @@ fun ProtectionModulesPage(
             ) {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("Kommunikations- & Sensor-Filter", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
-                    
+                   
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text("Anruf-Schutz", style = MaterialTheme.typography.bodyLarge, color = Color.White)
@@ -991,7 +977,7 @@ fun ProtectionModulesPage(
                         Switch(checked = callProtection, onCheckedChange = onCallChange)
                     }
                     HorizontalDivider(color = Color(0xFF112211))
-                    
+                   
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text("SMS-Phishing-Filter", style = MaterialTheme.typography.bodyLarge, color = Color.White)
@@ -1000,7 +986,7 @@ fun ProtectionModulesPage(
                         Switch(checked = smsProtection, onCheckedChange = onSmsChange)
                     }
                     HorizontalDivider(color = Color(0xFF112211))
-                    
+                   
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text("E-Mail-Benachrichtigungs-Scan", style = MaterialTheme.typography.bodyLarge, color = Color.White)
