@@ -82,6 +82,9 @@ jobs:
                   print(f"❌ Fehler beim Verarbeiten von {path}: {e}")
           '
 
+      - name: Gradlew ausführbar machen
+        run: chmod +x ./gradlew
+
       - name: Run Android Lint (Statische Code-Analyse)
         run: |
           echo "Scanne den Code nach Fehlern und Problemen..."
