@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Juaris</string>
-    <string name="status_protected">Perangkat sepenuhnya dilindungi</string>
+    <string name="app_name">Keamanan Juaris</string>
+    <string name="status_protected">Perangkat sepenuhnya dilindungi (masuk dan keluar)</string>
     <string name="status_warning">Peringatan keamanan terdeteksi</string>
     <string name="tab_status">Status</string>
     <string name="tab_protection">Perlindungan</string>
@@ -26,10 +26,10 @@
     <string name="email_protection_title">Keamanan Email</string>
     <string name="log_email_incoming_blocked">Email berbahaya masuk diblokir: %1$s</string>
     <string name="log_email_outgoing_blocked">Email keluar dihentikan (Risiko keamanan): %1$s</string>
-    <string name="juaris_app_welcome_text" formatted="false">Selamat datang di Juaris, aplikasi keamanan masa depan Anda. 100% transparan, 100% di ponsel Anda. Tanpa cloud. Perlindungan Anda, rumah Anda, aturan Anda.</string>
+    <string name="juaris_app_welcome_text" formatted="false">Selamat datang di Juaris, aplikasi keamanan masa depan Anda. 100%% transparan, 100%% di ponsel Anda. Tanpa cloud. Perlindungan Anda, rumah Anda, aturan Anda.</string>
     <string name="juaris_app_welcome_audio_file">welcome_audio_id.m4a</string>
     <string name="vpn_disclosure_title">Pemberitahuan Keamanan Juaris VPN</string>
-    <string name="vpn_disclosure_message">Juaris menggunakan VpnService lokal untuk mendeteksi phishing dan malware secara langsung di perangkat Anda.\n\nSemua data tetap 100%% lokal. Tidak ada yang dikirim ke server eksternal.</string>
+    <string name="vpn_disclosure_message">Juaris menggunakan VpnService lokal untuk mendeteksi phishing dan malware secara langsung di perangkat Anda.\n\nSemua data tetap lokal 100%%. Tidak ada yang dikirim ke server eksternal atau cloud.</string>
     <string name="btn_understood">Mengerti dan Aktifkan</string>
     <string name="btn_cancel">Batal</string>
 
@@ -59,7 +59,7 @@
 
     <string name="privacy_text">Kebijakan Privasi</string>
     <string name="privacy_link">Baca kebijakan privasi</string>
-    <string name="imprint_title">Kesan</string>
+    <string name="imprint_title">Kesan (Imprint)</string>
     <string name="imprint_subtitle">Informasi hukum</string>
     <string name="imprint_name">Nama perusahaan</string>
     <string name="imprint_address">Alamat</string>
