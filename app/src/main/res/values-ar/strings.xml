@@ -27,7 +27,7 @@
     <string name="log_email_incoming_blocked">تم حظر البريد الإلكتروني الضار الوارد: %1$s</string>
     <string name="log_email_outgoing_blocked">تم إيقاف البريد الإلكتروني الصادر (خطر أمني): %1$s</string>
     <string name="juaris_app_welcome_text" formatted="false">مرحباً بك في جواريس، تطبيق الأمان الخاص بك للمستقبل. 100% شفاف، 100% على هاتفك. لا توجد سحابة الكترونية. حمايتك، بيتك، قواعدك.</string>
-    <string name="juaris_app_welcome_audio_file">platzhalter_ar.m4a</string>
+    <string name="juaris_app_welcome_audio_file">welcome_audio_ar.m4a</string>
     <string name="vpn_disclosure_title">إشعار أمان Juaris VPN</string>
     <string name="vpn_disclosure_message">تستخدم Juaris خدمة شبكة VPN محلية لاكتشاف البرامج الضارة والتصيد الاحتيالي مباشرة على جهازك.\n\nتظل جميع البيانات محلية بنسبة 100%%. لا يتم إرسال أي شيء إلى خوادم خارجية أو السحابة.</string>
     <string name="btn_understood">فهمت والتفعيل</string>
@@ -36,7 +36,7 @@
     <string name="p2p_swarm_title">شبكة سُحُب جواريس (P2P)</string>
     <string name="p2p_swarm_subtitle">اتصالات آمنة لامركزية بدون إنترنت</string>
     <string name="mesh_broadcast_title">بث رسالة إلى الشبكة</string>
-    <string name="label_message_placeholder">أدخل رسالة...</string>
+    <string name="label_message_input">أدخل رسالة...</string>
     <string name="checkbox_ephemeral">حذف الرسالة بعد القراءة (مؤقتة)</string>
     <string name="btn_broadcast">إرسال إلى الشبكة</string>
     <string name="mesh_packets_count">حزم الشبكة النشطة (%d)</string>
@@ -212,3 +212,4 @@
     <string name="title_intercepted_logs">المكالمات والرسائل المحظورة (السجل):</string>
     <string name="logs_waiting_for_events">في انتظار الأحداث...</string>
 </resources>
+
