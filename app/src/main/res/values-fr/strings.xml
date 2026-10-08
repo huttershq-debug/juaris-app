@@ -29,26 +29,26 @@
     <string name="juaris_app_welcome_text" formatted="false">Bienvenue sur Juaris, votre application de sécurité du futur. 100 pourcent transparent, 100 pourcent sur votre mobile. Sans cloud. Votre protection, votre maison, vos règles.</string>
     <string name="juaris_app_welcome_audio_file">welcome_audio_fr.m4a</string>
     <string name="vpn_disclosure_title">Avis de sécurité Juaris VPN</string>
-    <string name="vpn_disclosure_message">Juaris utilise un VpnService local pour détecter le phishing et les logiciels malveillants directement sur votre appareil.\n\nToutes les données restent locales. Rien n'est envoyé à des serveurs externes.</string>
+    <string name="vpn_disclosure_message">Juaris utilise un VpnService local pour détecter le phishing et les logiciels malveillants directement sur votre appareil.\n\nToutes les données restent locales. Rien n\'est envoyé à des serveurs externes.</string>
     <string name="btn_understood">Compris et Activer</string>
     <string name="btn_cancel">Annuler</string>
 
     <string name="p2p_swarm_title">Essaim Juaris P2P</string>
     <string name="p2p_swarm_subtitle">Communication sécurisée et décentralisée sans Internet</string>
-    <string name="mesh_broadcast_title">Diffuser un message à l'essaim</string>
+    <string name="mesh_broadcast_title">Diffuser un message à l\'essaim</string>
     <string name="label_message_input">Écrire un message...</string>
     <string name="checkbox_ephemeral">Supprimer après lecture</string>
-    <string name="btn_broadcast">Envoyer à l'essaim</string>
-    <string name="mesh_packets_count">Paquets d'essaim actifs</string>
+    <string name="btn_broadcast">Envoyer à l\'essaim</string>
+    <string name="mesh_packets_count">Paquets d\'essaim actifs</string>
     <string name="mesh_hardware_title">Matériel P2P et Connexions</string>
     <string name="mesh_status_format">Statut : %s</string>
     <string name="btn_start_mesh_node">Démarrer le nœud maillé P2P</string>
     <string name="status_ready">Prêt pour la connexion en essaim</string>
-    <string name="status_mesh_active_search">Recherche de nœuds d'essaim...</string>
-    <string name="toast_mesh_device_discovered">Nouvel appareil d'essaim découvert</string>
+    <string name="status_mesh_active_search">Recherche de nœuds d\'essaim...</string>
+    <string name="toast_mesh_device_discovered">Nouvel appareil d\'essaim découvert</string>
     <string name="status_mesh_connected_format" formatted="false">Connecté à %s</string>
     <string name="status_mesh_connected_devices_format">Appareils connectés</string>
-    <string name="status_sent">Message envoyé avec succès à l'essaim</string>
+    <string name="status_sent">Message envoyé avec succès à l\'essaim</string>
     <string name="toast_p2p_started">Nœud maillé P2P démarré avec succès</string>
     <string name="toast_bluetooth_missing">Autorisations Bluetooth requises</string>
 
@@ -61,7 +61,7 @@
     <string name="privacy_link">Lire la politique de confidentialité</string>
     <string name="imprint_title">Mentions légales</string>
     <string name="imprint_subtitle">Informations légales</string>
-    <string name="imprint_name">Nom de l'entreprise</string>
+    <string name="imprint_name">Nom de l\'entreprise</string>
     <string name="imprint_address">Adresse</string>
     <string name="imprint_email">E-mail de contact</string>
     <string name="imprint_responsible">Personne responsable</string>
@@ -74,7 +74,7 @@
     <string name="air_gesture_subtitle">Contrôlez votre appareil avec des mouvements de main</string>
     <string name="air_gesture_desc">Utilisez des gestes sans contact pour naviguer</string>
     <string name="air_gesture_status">Capteur prêt</string>
-    <string name="air_gesture_action">Déclencher l'action</string>
+    <string name="air_gesture_action">Déclencher l\'action</string>
 
     <string name="mesh_page_title">Réseau maillé</string>
     <string name="mesh_page_subtitle">Communication décentralisée</string>
@@ -82,10 +82,10 @@
     <string name="legal_page_subtitle">Avis importants</string>
     <string name="privacy_title">Politique de confidentialité</string>
     <string name="privacy_link_text">Lire la politique complète</string>
-    <string name="imprint_name_val">Détails de l'entreprise</string>
-    <string name="air_gesture_page_title">Gestes en l'air</string>
+    <string name="imprint_name_val">Détails de l\'entreprise</string>
+    <string name="air_gesture_page_title">Gestes en l\'air</string>
     <string name="air_gesture_page_subtitle">Contrôle sans contact</string>
-    <string name="air_gesture_toggle_label">Activer les gestes en l'air</string>
+    <string name="air_gesture_toggle_label">Activer les gestes en l\'air</string>
     <string name="air_gesture_store_notification">Enregistrer les paramètres de gestes</string>
     <string name="clipboard_page_subtitle">Protection et historique du presse-papiers</string>
     <string name="clipboard_security_status">Surveillance du presse-papiers active</string>
@@ -93,14 +93,14 @@
     <string name="clipboard_autoclear_desc">Supprimer automatiquement les données sensibles</string>
     <string name="toast_clipboard_cleared">Presse-papiers effacé avec succès</string>
     <string name="btn_clear_now">Effacer maintenant</string>
-    <string name="permissions_page_title">Permissions de l'application</string>
-    <string name="permissions_page_subtitle">Gérer les droits d'accès de sécurité</string>
+    <string name="permissions_page_title">Permissions de l\'application</string>
+    <string name="permissions_page_subtitle">Gérer les droits d\'accès de sécurité</string>
     <string name="email_listener_card_title">Bouclier anti-phishing des e-mails</string>
     <string name="email_listener_card_desc">Analyse du contenu des e-mails entrants</string>
-    <string name="toast_settings_error">Erreur lors de l'enregistrement des paramètres</string>
+    <string name="toast_settings_error">Erreur lors de l\'enregistrement des paramètres</string>
     <string name="btn_allow_notification">Autoriser les notifications</string>
     <string name="toast_audit_ready">Audit de sécurité prêt</string>
-    <string name="btn_start_audit_scan">Lancer l'analyse d'audit</string>
+    <string name="btn_start_audit_scan">Lancer l\'analyse d\'audit</string>
     <string name="mesh_connected">Maillage connecté : %s</string>
     <string name="mesh_disconnected">Maillage déconnecté : %s</string>
     <string name="vault_status_label">Statut du coffre-fort</string>
@@ -119,7 +119,7 @@
     <string name="sms_prot_desc">Protéger contre les SMS de phishing</string>
     <string name="email_prot_title">Protection des e-mails</string>
     <string name="email_prot_desc">Protéger contre les e-mails malveillants</string>
-    <string name="toast_enable_listener">Service d'écoute activé avec succès</string>
+    <string name="toast_enable_listener">Service d\'écoute activé avec succès</string>
     <string name="offline_vault_title">Coffre-fort hors ligne</string>
     <string name="offline_vault_desc">Stockage local sécurisé pour les données sensibles</string>
     <string name="vault_status_unlocked">Coffre-fort déverrouillé</string>
@@ -136,7 +136,7 @@
     <string name="toast_calendar_warning">Permission de calendrier requise</string>
     <string name="toast_vpn_granted">Permission VPN accordée</string>
     <string name="toast_vpn_rejected">Permission VPN rejetée</string>
-    <string name="toast_enable_notification_manual">Veuillez activer le service d'écoute des notifications manuellement</string>
+    <string name="toast_enable_notification_manual">Veuillez activer le service d\'écoute des notifications manuellement</string>
     <string name="emergency_reason_sensor">Urgence déclenchée par capteur</string>
     <string name="emergency_reason_manual">Bouton de panique manuel activé</string>
     <string name="toast_debugger_detected">Avertissement : Débogueur détecté</string>
@@ -145,8 +145,8 @@
     <string name="toast_vault_success">Coffre-fort déverrouillé avec succès</string>
     <string name="toast_biometric_error">Erreur biométrique : %s</string>
     <string name="toast_vpn_started">Service VPN Juaris démarré</string>
-    <string name="disclosure_dialog_title">Avis d'accessibilité et notifications</string>
-    <string name="disclosure_message">Juaris nécessite l'accès aux notifications pour filtrer le phishing localement.</string>
+    <string name="disclosure_dialog_title">Avis d\'accessibilité et notifications</string>
+    <string name="disclosure_message">Juaris nécessite l\'accès aux notifications pour protéger votre appareil localement.</string>
     <string name="toast_dialog_error">Erreur de dialogue</string>
     <string name="toast_vpn_dialog_error">Erreur de dialogue VPN</string>
     <string name="desc_hologram">Avatar hologramme</string>
@@ -182,27 +182,27 @@
     <string name="toast_camera_started">Caméra de gestes aériens démarrée</string>
     <string name="toast_permission_denied">Permission de caméra refusée</string>
     <string name="status_paused">En pause</string>
-    <string name="btn_allow_notification_access">Autoriser l'accès aux notifications</string>
+    <string name="btn_allow_notification_access">Autoriser l\'accès aux notifications</string>
     <string name="alert_financial_title">Alerte financière</string>
     <string name="alert_service_title">Alerte de service</string>
-    <string name="alert_anniversary_title">Rappel d'anniversaire</string>
-    <string name="alert_birthday_title">Rappel d'anniversaire</string>
+    <string name="alert_anniversary_title">Rappel d\'anniversaire</string>
+    <string name="alert_birthday_title">Rappel d\'anniversaire</string>
     <string name="alert_medical_title">Alerte de rendez-vous médical</string>
     <string name="alert_travel_title">Alerte de sécurité de voyage</string>
     <string name="alert_general_title">Alerte de sécurité générale</string>
-    <string name="emergency_reason_default">Déclencheur d'urgence manuel</string>
-    <string name="emergency_channel_name">Canal d'urgence</string>
-    <string name="emergency_notification_title">Mode d'urgence actif</string>
+    <string name="emergency_reason_default">Déclencheur d\'urgence manuel</string>
+    <string name="emergency_channel_name">Canal d\'urgence</string>
+    <string name="emergency_notification_title">Mode d\'urgence actif</string>
     <string name="emergency_notification_text">Les préférences système et le coffre-fort sont sécurisés.</string>
-    <string name="emergency_screen_heading">PROTOCOLE D'URGENCE</string>
+    <string name="emergency_screen_heading">PROTOCOLE D\'URGENCE</string>
     <string name="emergency_screen_countdown_desc">Effacement sécurisé en cours de compte à rebours...</string>
     <string name="btn_emergency_call_now">Appeler les urgences maintenant</string>
-    <string name="btn_emergency_cancel">Annuler l'urgence</string>
-    <string name="disclosure_dialog_message">Juaris nécessite l'accès aux notifications pour protéger votre appareil localement.</string>
+    <string name="btn_emergency_cancel">Annuler l\'urgence</string>
+    <string name="disclosure_dialog_message">Juaris nécessite l\'accès aux notifications pour protéger votre appareil localement.</string>
     <string name="toast_vault_locked">Coffre-fort verrouillé avec succès</string>
     <string name="protection_modules_title">Modules de protection</string>
     <string name="protection_modules_subtitle">Filtres de sécurité actifs en temps réel</string>
-    <string name="toast_enable_listener_manual">Veuillez activer le service d'écoute des notifications dans les paramètres</string>
+    <string name="toast_enable_listener_manual">Veuillez activer le service d\'écoute des notifications dans les paramètres</string>
 
     <string name="widget_title">Juaris 360</string>
     <string name="widget_subtitle">100 pourcent Sécurisé et Local</string>
@@ -210,6 +210,7 @@
     <string name="app_ui_title_security">Console Juaris</string>
     <string name="status_guardian_active_offline">STATUT : GARDIEN ACTIF (HORS LIGNE)</string>
     <string name="title_intercepted_logs">Appels et SMS interceptés :</string>
-    <string name="logs_waiting_for_events">En attente d'événements...</string>
+    <string name="logs_waiting_for_events">En attente d\'événements...</string>
 </resources>
+
 
