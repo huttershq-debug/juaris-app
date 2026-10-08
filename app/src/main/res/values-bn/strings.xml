@@ -27,17 +27,16 @@
     <string name="log_email_incoming_blocked">আটকানো ক্ষতিকর ইনকামিং ইমেল: %1$s</string>
     <string name="log_email_outgoing_blocked">আটকানো আউটগোয়িং ইমেল (নিরাপত্তা ঝুঁকি): %1$s</string>
     <string name="juaris_app_welcome_text" formatted="false">জুয়ারিস-এ স্বাগতম, ভবিষ্যতের জন্য আপনার নিরাপত্তা অ্যাপ। ১০০% স্বচ্ছ, ১০০% আপনার ফোনে। কোনো ক্লাউড নেই। আপনার সুরক্ষা, আপনার বাড়ি, আপনার নিয়ম।</string>
-    <string name="juaris_app_welcome_audio_file">platzhalter_bn.m4a</string>
+    <string name="juaris_app_welcome_audio_file">welcome_audio_bn.m4a</string>
     <string name="vpn_disclosure_title">Juaris VPN নিরাপত্তা বিজ্ঞপ্তি</string>
     <string name="vpn_disclosure_message">Juaris আপনার ডিভাইসেই ফিশিং এবং মেলওয়্যার সনাক্ত করতে একটি স্থানীয় VpnService ব্যবহার করে。\n\nসমস্ত ডেটা ১০০%% স্থানীয় থাকে। বাহ্যিক সার্ভার বা ক্লাউডে কিছুই পাঠানো হয় না।</string>
     <string name="btn_understood">বুঝেছি এবং সক্রিয় করুন</string>
     <string name="btn_cancel">বাতিল</string>
    
-    
     <string name="p2p_swarm_title">জুয়ারিস সোয়ার্ম মেশ (P2P)</string>
     <string name="p2p_swarm_subtitle">ইন্টারনেট ছাড়াই নিরাপদ, বিকেন্দ্রীকৃত যোগাযোগ</string>
     <string name="mesh_broadcast_title">সোয়ার্মে বার্তা সম্প্রচার করুন</string>
-    <string name="label_message_placeholder">বার্তা লিখুন...</string>
+    <string name="label_message_input">বার্তা লিখুন...</string>
     <string name="checkbox_ephemeral">পড়ার পর বার্তা মুছে ফেলুন (ক্ষণস্থায়ী)</string>
     <string name="btn_broadcast">সোয়ার্মে পাঠান</string>
     <string name="mesh_packets_count">সক্রিয় সোয়ার্ম প্যাকেট (%d)</string>
@@ -47,19 +46,17 @@
     <string name="status_ready">সোয়ার্ম সংযোগের জন্য প্রস্তুত</string>
     <string name="status_mesh_active_search">সোয়ার্ম নোড খোঁজা হচ্ছে...</string>
     <string name="toast_mesh_device_discovered">নতুন সোয়ার্ম ডিভাইস আবিষ্কৃত হয়েছে!</string>
-    <string name="status_mesh_connected_format" formatted="false">%স এর সাথে সংযুক্ত (ডিভাইস: %d)</string>
+    <string name="status_mesh_connected_format" formatted="false">%s এর সাথে সংযুক্ত (ডিভাইস: %d)</string>
     <string name="status_mesh_connected_devices_format">সংযুক্ত ডিভাইস: %d</string>
     <string name="status_sent">সফলভাবে সোয়ার্মে বার্তা পাঠানো হয়েছে</string>
     <string name="toast_p2p_started">P2P মেশ নোড সফলভাবে শুরু হয়েছে!</string>
     <string name="toast_bluetooth_missing">ব্লুটুথ অনুমতি প্রয়োজন!</string>
 
-    
     <string name="logs_page_title">সুরক্ষা লগ</string>
     <string name="logs_page_subtitle">সমস্ত বাধাগ্রস্ত হুমকি এবং ইভেন্টের সংক্ষিপ্ত বিবরণ</string>
     <string name="logs_empty_message">এখনও কোনো ইভেন্ট রেকর্ড করা হয়নি। আপনার সিস্টেম নিরাপদ।</string>
     <string name="logs_module_prefix">মডিউল: %s</string>
 
-    
     <string name="privacy_text">গোপনীয়তা নীতি</string>
     <string name="privacy_link">গোপনীয়তা নীতি পড়ুন</string>
     <string name="imprint_title">ইমপ্রিন্ট (আইনি তথ্য)</string>
@@ -74,13 +71,11 @@
     <string name="imprint_name_y">দায়মুক্তি (Disclaimer)</string>
     <string name="company_footer">জুয়ারিস সিকিউরিটি - সর্বস্বত্ব সংরক্ষিত</string>
 
-    
     <string name="air_gesture_subtitle">হাতের ইশারায় আপনার ডিভাইস নিয়ন্ত্রণ করুন</string>
     <string name="air_gesture_desc">নেভিগেট করতে কন্ট্যাক্টলেস ইশারা ব্যবহার করুন</string>
     <string name="air_gesture_status">সেন্সর প্রস্তুত</string>
     <string name="air_gesture_action">অ্যাকশন ট্রিগার করুন</string>
-    
-    
+   
     <string name="mesh_page_title">মেশ নেটওয়ার্ক</string>
     <string name="mesh_page_subtitle">বিকেন্দ্রীকৃত যোগাযোগ</string>
     <string name="legal_page_title">আইনি তথ্য</string>
@@ -101,7 +96,7 @@
     <string name="permissions_page_title">অ্যাপের অনুমতিসমূহ</string>
     <string name="permissions_page_subtitle">নিরাপত্তা অ্যাক্সেস অধিকার পরিচালনা করুন</string>
     <string name="email_listener_card_title">ইমেল ফিশিং শিল্ড</string>
-    <string name="email_listener_card_desc">ইনকামিং মেইল ​​কন্টেন্ট স্ক্যান করা হচ্ছে</string>
+    <string name="email_listener_card_desc">ইনকামিং মেইল কন্টেন্ট স্ক্যান করা হচ্ছে</string>
     <string name="toast_settings_error">সেটিংস সংরক্ষণে ত্রুটি</string>
     <string name="btn_allow_notification">বিজ্ঞপ্তি অনুমতি দিন</string>
     <string name="toast_audit_ready">নিরাপত্তা অডিট প্রস্তুত</string>
@@ -116,8 +111,7 @@
     <string name="blacklist_items_title">ব্লক করা এন্ট্রি</string>
     <string name="btn_release">মুক্ত করুন</string>
     <string name="clipboard_page_title">ক্লিপবোর্ড</string>
-    
-    
+   
     <string name="comm_filter_title">কমিউনিকেশন ফিল্টার</string>
     <string name="call_prot_title">কল সুরক্ষা</string>
     <string name="call_prot_desc">সন্দেহজনক কল থেকে সুরক্ষা</string>
@@ -142,7 +136,7 @@
     <string name="toast_calendar_warning">স্বায়ত্তশাসিত স্ক্যানের জন্য ক্যালেন্ডারের অনুমতি প্রয়োজন</string>
     <string name="toast_vpn_granted">ভিপিএন অনুমতি দেওয়া হয়েছে</string>
     <string name="toast_vpn_rejected">ভিপিএন অনুমতি প্রত্যাখ্যাত</string>
-    <string name="toast_enable_notification_manual">দ দয়া করে ম্যানুয়ালি নোটিফিকেশন লিসনার সক্ষম করুন</string>
+    <string name="toast_enable_notification_manual">দয়া করে ম্যানুয়ালি নোটিফিকেশন লিসনার সক্ষম করুন</string>
     <string name="emergency_reason_sensor">সেন্সর দ্বারা জরুরি অবস্থা ট্রিগার করা হয়েছে</string>
     <string name="emergency_reason_manual">ম্যানুয়াল প্যানিক বোতাম ট্রিগার করা হয়েছে</string>
     <string name="toast_debugger_detected">সতর্কতা: ডিবাগার সনাক্ত হয়েছে!</string>
@@ -155,7 +149,7 @@
     <string name="disclosure_message">আপনার ডিভাইসে স্থানীয়ভাবে ফিশিং বার্তাগুলি ফিল্টার করতে জুয়ারিস-এর বিজ্ঞপ্তি অ্যাক্সেস প্রয়োজন।</string>
     <string name="toast_dialog_error">ডায়ালগ ত্রুটি</string>
     <string name="toast_vpn_dialog_error">ভিপিএন ডায়ালগ ত্রুটি</string>
-    <string name="desc_hologram">হologram অবতার</string>
+    <string name="desc_hologram">হোলোগ্রাম অবতার</string>
     <string name="welcome_title">জুয়ারিস এআই সিকিউরিটি</string>
     <string name="welcome_subtitle">বিকেন্দ্রীকৃত মোবাইল সুরক্ষা</string>
     <string name="biometric_login_title">লগইন প্রমাণীকরণ</string>
@@ -207,9 +201,9 @@
     <string name="disclosure_dialog_message">স্থানীয়ভাবে আপনার ডিভাইস সুরক্ষিত করতে Juaris-এর নোটিফিকেশন/অ্যাক্সেসিবিলিটি অ্যাক্সেস প্রয়োজন।</string>
     <string name="toast_vault_locked">ভল্ট সফলভাবে লক করা হয়েছে</string>
     <string name="protection_modules_title">সুরক্ষা মডিউল</string>
-    <string name="protection_modules_subtitle">সক্রিয় রিয়েল-টাইম নিরাপত্তা ফিল্টার</string>
+    <string name="protection_modules_subtitle">সক্রিয় রিয়েল-टाइम নিরাপত্তা ফিল্টার</string>
     <string name="toast_enable_listener_manual">অনুগ্রহ করে সেটিংসে নোটিফিকেশন লিসনার সক্ষম করুন</string>
-        
+       
     <string name="widget_title">🛡️ Juaris 360°</string>
     <string name="widget_subtitle">100%% সুরক্ষিত এবং স্থানীয়</string>
     <string name="btn_emergency_widget">🚨 জরুরি অবস্থা</string>
@@ -218,3 +212,5 @@
     <string name="title_intercepted_logs">আটক করা কল এবং এসএমএস (লগ):</string>
     <string name="logs_waiting_for_events">ইভেন্টের জন্য অপেক্ষা করা হচ্ছে...</string>
 </resources>
+
+
