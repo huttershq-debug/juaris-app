@@ -77,11 +77,11 @@ class BillingManager(
         val params = QueryProductDetailsParams.newBuilder().setProductList(productList).build()
 
         billingClient.queryProductDetailsAsync(params) { billingResult, productDetailsList ->
-            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && productDetailsList != null && productDetailsList.isNotEmpty()) {
+            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && productDetailsList != null && productDetailsList.size>0()) {
                 val productDetails = productDetailsList[0]
                 val offerDetailsList = productDetails.subscriptionOfferDetails
 
-                if (offerDetailsList != null && offerDetailsList.isNotEmpty()) {
+                if (offerDetailsList != null && offerDetailsList.size>0()) {
                     val offerToken = offerDetailsList[0].offerToken
 
                     val productDetailsParamsList = listOf(
