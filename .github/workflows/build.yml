@@ -22,12 +22,11 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Generate and Make Gradle Wrapper Executable
+      - name: Gradle Wrapper bereitstellen
         run: |
-          if [ ! -f "./gradlew" ]; then
-            echo "Gradle wrapper not found, generating it via gradle-command..."
-            gradle wrapper --gradle-version 8.11.1
-          fi
+          # Erzwingt Gradle 8.11.1 – perfekt abgestimmt auf AGP 8.11.1 und zukunftssicher für Android 13 bis 17+
+          rm -rf gradle/wrapper/gradle-wrapper.properties gradle/wrapper/gradle-wrapper.jar
+          gradle wrapper --gradle-version 8.11.1 --distribution-type bin
           chmod +x ./gradlew
 
       - name: Setup Android SDK
