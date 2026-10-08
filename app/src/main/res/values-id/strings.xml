@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Keamanan</string>
-    <string name="status_protected">Perangkat dilindungi penuh (Masuk &amp; Keluar)</string>
+    <string name="app_name">Juaris</string>
+    <string name="status_protected">Perangkat dilindungi sepenuhnya (Masuk &amp; Keluar)</string>
     <string name="status_warning">Peringatan keamanan terdeteksi</string>
     <string name="tab_status">Status</string>
     <string name="tab_protection">Perlindungan</string>
@@ -27,43 +27,40 @@
     <string name="log_email_incoming_blocked">Email berbahaya masuk diblokir: %1$s</string>
     <string name="log_email_outgoing_blocked">Email keluar dihentikan (Risiko Keamanan): %1$s</string>
     <string name="juaris_app_welcome_text" formatted="false">Selamat datang di Juaris, aplikasi keamanan masa depan Anda. 100% transparan, 100% di ponsel Anda. Tanpa cloud. Perlindungan Anda, rumah Anda, aturan Anda.</string>
-    <string name="juaris_app_welcome_audio_file">platzhalter_id.m4a</string>
+    <string name="juaris_app_welcome_audio_file">welcome_audio_id.m4a</string>
     <string name="vpn_disclosure_title">Pemberitahuan Keamanan Juaris VPN</string>
     <string name="vpn_disclosure_message">Juaris menggunakan VpnService lokal untuk mendeteksi phishing dan malware langsung di perangkat Anda.\n\nSemua data tetap 100%% lokal. Tidak ada yang dikirim ke server eksternal atau cloud.</string>
     <string name="btn_understood">Mengerti &amp; Aktifkan</string>
     <string name="btn_cancel">Batal</string>
-   
-    
+
     <string name="p2p_swarm_title">Mesh Swarm Juaris (P2P)</string>
     <string name="p2p_swarm_subtitle">Komunikasi terdesentralisasi yang aman tanpa internet</string>
     <string name="mesh_broadcast_title">Siarkan pesan ke swarm</string>
-    <string name="label_message_placeholder">Masukkan pesan...</string>
-    <string name="checkbox_ephemeral">Hapus pesan setelah dibaca (Ephemeral)</string>
+    <string name="label_message_input">Masukkan pesan...</string>
+    <string name="checkbox_ephemeral">Hapus pesan setelah dibaca (Ephemer)</string>
     <string name="btn_broadcast">Kirim ke Swarm</string>
-    <string name="mesh_packets_count">Paket Swarm Aktif (%%d)</string>
+    <string name="mesh_packets_count">Paket Swarm Aktif (%d)</string>
     <string name="mesh_hardware_title">Perangkat &amp; Koneksi P2P</string>
-    <string name="mesh_status_format">Status: %%s</string>
+    <string name="mesh_status_format">Status: %s</string>
     <string name="btn_start_mesh_node">Mulai Node Mesh P2P</string>
     <string name="status_ready">Siap untuk koneksi swarm</string>
     <string name="status_mesh_active_search">Mencari node swarm...</string>
     <string name="toast_mesh_device_discovered">Perangkat swarm baru ditemukan!</string>
-    <string name="status_mesh_connected_format" formatted="false">Terhubung ke %%s (Perangkat: %d)</string>
-    <string name="status_mesh_connected_devices_format">Perangkat terhubung: %%d</string>
+    <string name="status_mesh_connected_format" formatted="false">Terhubung ke %s (Perangkat: %d)</string>
+    <string name="status_mesh_connected_devices_format">Perangkat terhubung: %d</string>
     <string name="status_sent">Pesan berhasil dikirim ke swarm</string>
     <string name="toast_p2p_started">Node Mesh P2P berhasil dimulai!</string>
     <string name="toast_bluetooth_missing">Izin Bluetooth diperlukan!</string>
 
-    
     <string name="logs_page_title">Log Keamanan</string>
     <string name="logs_page_subtitle">Ringkasan semua ancaman dan peristiwa yang dicegat</string>
     <string name="logs_empty_message">Belum ada peristiwa yang dicatat. Sistem Anda aman.</string>
-    <string name="logs_module_prefix">Modul: %%s</string>
+    <string name="logs_module_prefix">Modul: %s</string>
 
-    
     <string name="privacy_text">Kebijakan Privasi</string>
     <string name="privacy_link">Baca Kebijakan Privasi</string>
-    <string name="imprint_title">Imprint (Keterangan)</string>
-    <string name="imprint_subtitle">Informasi hukum</string>
+    <string name="imprint_title">Imprint</string>
+    <string name="imprint_subtitle">Informasi Hukum</string>
     <string name="imprint_name">Nama Perusahaan</string>
     <string name="imprint_address">Alamat</string>
     <string name="imprint_email">Email Kontak</string>
@@ -71,16 +68,14 @@
     <string name="imprint_name_v">Perwakilan Resmi</string>
     <string name="imprint_design">Desain &amp; Implementasi</string>
     <string name="imprint_name_va">Pengungkapan Tambahan</string>
-    <string name="imprint_name_y">Penyangkalan (Disclaimer)</string>
+    <string name="imprint_name_y">Penyangkalan</string>
     <string name="company_footer">Juaris Security - Hak cipta dilindungi undang-undang</string>
 
-    
     <string name="air_gesture_subtitle">Kontrol perangkat Anda dengan gerakan tangan</string>
     <string name="air_gesture_desc">Gunakan gestur nirkontak untuk navigasi</string>
     <string name="air_gesture_status">Sensor Siap</string>
     <string name="air_gesture_action">Picu Aksi</string>
-    
-    
+
     <string name="mesh_page_title">Jaringan Mesh</string>
     <string name="mesh_page_subtitle">Komunikasi terdesentralisasi</string>
     <string name="legal_page_title">Informasi Hukum</string>
@@ -88,133 +83,5 @@
     <string name="privacy_title">Kebijakan Privasi</string>
     <string name="privacy_link_text">Baca kebijakan lengkap</string>
     <string name="imprint_name_val">Detail Perusahaan</string>
-    <string name="air_gesture_page_title">Gestur Udara</string>
-    <string name="air_gesture_page_subtitle">Kontrol nirkontak</string>
-    <string name="air_gesture_toggle_label">Aktifkan Gestur Udara</string>
-    <string name="air_gesture_store_notification">Simpan Pengaturan Gestur</string>
-    <string name="clipboard_page_subtitle">Perlindungan dan riwayat papan klip</string>
-    <string name="clipboard_security_status">Pemantauan papan klip aktif</string>
-    <string name="clipboard_autoclear_toggle">Hapus otomatis papan klip</string>
-    <string name="clipboard_autoclear_desc">Hapus data sensitif secara otomatis</string>
-    <string name="toast_clipboard_cleared">Papan klip berhasil dibersihkan</string>
-    <string name="btn_clear_now">Bersihkan Sekarang</string>
-    <string name="permissions_page_title">Izin Aplikasi</string>
-    <string name="permissions_page_subtitle">Kelola hak akses keamanan</string>
-    <string name="email_listener_card_title">Perisai Phishing Email</string>
-    <string name="email_listener_card_desc">Memindai konten email masuk</string>
-    <string name="toast_settings_error">Kesalahan menyimpan pengaturan</string>
-    <string name="btn_allow_notification">Izinkan Notifikasi</string>
-    <string name="toast_audit_ready">Audit keamanan siap</string>
-    <string name="btn_start_audit_scan">Mulai Pemindaian Audit</string>
-    <string name="mesh_connected">Mesh Terhubung: %%s</string>
-    <string name="mesh_disconnected">Mesh Terputus: %%s</string>
-    <string name="vault_status_label">Status Vault</string>
-    <string name="blacklist_page_title">Daftar Hitam</string>
-    <string name="blacklist_page_subtitle">Kelola nomor dan kontak yang diblokir</string>
-    <string name="blacklist_add_title">Tambahkan ke Daftar Hitam</string>
-    <string name="label_phone_number">Nomor Telepon</string>
-    <string name="blacklist_items_title">Entri yang Diblokir</string>
-    <string name="btn_release">Lepaskan</string>
-    <string name="clipboard_page_title">Papan Klip</string>
-    
-    
-    <string name="comm_filter_title">Filter Komunikasi</string>
-    <string name="call_prot_title">Perlindungan Panggilan</string>
-    <string name="call_prot_desc">Lindungi dari panggilan mencurigakan</string>
-    <string name="sms_prot_title">Perlindungan SMS</string>
-    <string name="sms_prot_desc">Lindungi dari pesan teks phishing</string>
-    <string name="email_prot_title">Perlindungan Email</string>
-    <string name="email_prot_desc">Lindungi dari email berbahaya</string>
-    <string name="toast_enable_listener">Listener berhasil diaktifkan</string>
-    <string name="offline_vault_title">Vault Offline</string>
-    <string name="offline_vault_desc">Penyimpanan lokal yang aman untuk data sensitif</string>
-    <string name="vault_status_unlocked">Vault Terbuka</string>
-    <string name="vault_status_locked">Vault Terkunci</string>
-    <string name="blacklist_items_count">Item Diblokir (%%d)</string>
-    <string name="clipboard_security_title">Keamanan Papan Klip</string>
-    <string name="clipboard_autoclear_title">Hapus Otomatis Papan Klip</string>
-    <string name="air_gesture_store_notice">Pengaturan gestur disimpan secara lokal</string>
-    <string name="toast_sms_active">Perlindungan SMS diaktifkan</string>
-    <string name="toast_sms_rejected">Peran SMS ditolak</string>
-    <string name="toast_notification_granted">Izin notifikasi diberikan</string>
-    <string name="toast_notification_warning">Izin notifikasi diperlukan untuk perlindungan</string>
-    <string name="toast_calendar_granted">Izin kalender diberikan</string>
-    <string name="toast_calendar_warning">Izin kalender diperlukan untuk pemindaian otonom</string>
-    <string name="toast_vpn_granted">Izin VPN diberikan</string>
-    <string name="toast_vpn_rejected">Izin VPN ditolak</string>
-    <string name="toast_enable_notification_manual">Harap aktifkan listener notifikasi secara manual</string>
-    <string name="emergency_reason_sensor">Darurat dipicu oleh sensor</string>
-    <string name="emergency_reason_manual">Tombol panik manual dipicu</string>
-    <string name="toast_debugger_detected">Peringatan: Debugger terdeteksi!</string>
-    <string name="biometric_vault_title">Autentikasi Vault</string>
-    <string name="biometric_vault_subtitle">Konfirmasi identitas untuk mengakses vault aman</string>
-    <string name="toast_vault_success">Vault berhasil dibuka</string>
-    <string name="toast_biometric_error">Kesalahan biometrik: %%s</string>
-    <string name="toast_vpn_started">Layanan Juaris VPN dimulai</string>
-    <string name="disclosure_dialog_title">Pemberitahuan Aksesibilitas &amp; Notifikasi</string>
-    <string name="disclosure_message">Juaris memerlukan akses notifikasi untuk memfilter pesan phishing secara lokal di perangkat Anda.</string>
-    <string name="toast_dialog_error">Kesalahan dialog</string>
-    <string name="toast_vpn_dialog_error">Kesalahan dialog VPN</string>
-    <string name="desc_hologram">Avatar Hologram</string>
-    <string name="welcome_title">Keamanan AI Juaris</string>
-    <string name="welcome_subtitle">Perlindungan Seluler Terdesentralisasi</string>
-    <string name="biometric_login_title">Autentikasi Masuk</string>
-    <string name="biometric_login_subtitle">Autentikasi untuk masuk ke Kernel Juaris</string>
-    <string name="toast_login_success">Masuk berhasil</string>
-    <string name="kernel_title">Kernel Juaris</string>
-    <string name="kernel_subtitle">Enklave Aman Aktif</string>
-    <string name="btn_fingerprint_login">Masuk Sidik Jari</string>
-    <string name="btn_debug_bypass">Pintasan Debug</string>
-    <string name="toast_login_aborted">Masuk dibatalkan: %%s</string>
-    <string name="log_module_guardian">Pengawas Keamanan</string>
-    <string name="log_desc_phishing_blocked">Ancaman phishing dicegat</string>
-    <string name="log_details_simulation">Serangan simulasi berhasil diblokir</string>
-    <string name="toast_threat_neutralized">Ancaman dinetralkan!</string>
-    <string name="toast_logs_vault_secured">Log dienkripsi dengan aman di Vault</string>
-    <string name="status_health_title">Status Kesehatan Sistem</string>
-    <string name="status_health_subtitle">Ikhtisar perlindungan kernel waktu nyata</string>
-    <string name="status_aes_encrypted">Terenkripsi AES-256 GCM</string>
-    <string name="status_filters_active">Semua filter aktif berjalan</string>
-    <string name="card_blocked_caps">DIBLOKIR</string>
-    <string name="card_data_flow">ALIRAN DATA</string>
-    <string name="card_local_only">100%% Lokal</string>
-    <string name="section_actions">Darurat &amp; Aksi</string>
-    <string name="btn_simulate_phishing">Simulasikan Serangan Phishing</string>
-    <string name="btn_export_vault_logs">Ekspor Log Vault</string>
-    <string name="btn_panic_wipe">HAPUS DARURAT (PANIC WIPE)</string>
-    <string name="default_spam_label">Nomor Spam Dikenal</string>
-    <string name="toast_number_blocked">Nomor ditambahkan ke daftar hitam</string>
-    <string name="toast_number_released">Nomor dihapus dari daftar hitam</string>
-    <string name="toast_camera_started">Kamera Gestur Udara dimulai</string>
-    <string name="toast_permission_denied">Izin kamera ditolak</string>
-    <string name="status_paused">Dijeda</string>
-    <string name="btn_allow_notification_access">Izinkan Akses Notifikasi</string>
-    <string name="alert_financial_title">Peringatan Keuangan</string>
-    <string name="alert_service_title">Peringatan Layanan</string>
-    <string name="alert_anniversary_title">Pengingat Hari Jadi</string>
-    <string name="alert_birthday_title">Pengingat Ulang Tahun</string>
-    <string name="alert_medical_title">Peringatan Janji Medis</string>
-    <string name="alert_travel_title">Peringatan Keamanan Perjalanan</string>
-    <string name="alert_general_title">Peringatan Keamanan Umum</string>
-    <string name="emergency_reason_default">Pemicu darurat manual</string>
-    <string name="emergency_channel_name">Saluran Darurat</string>
-    <string name="emergency_notification_title">Mode Darurat Aktif</string>
-    <string name="emergency_notification_text">Preferensi sistem dan vault sedang diamankan.</string>
-    <string name="emergency_screen_heading">PROTOKOL DARURAT</string>
-    <string name="emergency_screen_countdown_desc">Penghapusan aman sedang berjalan dalam hitungan mundur...</string>
-    <string name="btn_emergency_call_now">Panggil Darurat Sekarang</string>
-    <string name="btn_emergency_cancel">Batalkan Darurat</string>
-    <string name="disclosure_dialog_message">Juaris memerlukan akses notifikasi/aksesibilitas untuk melindungi perangkat Anda secara lokal.</string>
-    <string name="toast_vault_locked">Vault berhasil dikunci</string>
-    <string name="protection_modules_title">Modul Perlindungan</string>
-    <string name="protection_modules_subtitle">Filter keamanan waktu nyata aktif</string>
-    <string name="toast_enable_listener_manual">Harap aktifkan pendengar notifikasi di pengaturan</string>
-        
-    <string name="widget_title">🛡️ Juaris 360°</string>
-    <string name="widget_subtitle">100%% Aman &amp; Lokal</string>
-    <string name="btn_emergency_widget">🚨 DARURAT</string>
-    <string name="app_ui_title_security">Konsol Juaris</string>
-    <string name="status_guardian_active_offline">STATUS: GUARDIAN AKTIF (OFFLINE)</string>
-    <string name="title_intercepted_logs">Panggilan &amp; SMS Dicegat (Log):</string>
-    <string name="logs_waiting_for_events">Menunggu aktivitas...</string>
-</resources>
+    <string name="air_gesture_page_title">Gest
+
