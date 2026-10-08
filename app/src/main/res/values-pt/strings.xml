@@ -27,17 +27,16 @@
     <string name="log_email_incoming_blocked">E-mail malicioso recebido bloqueado: %1$s</string>
     <string name="log_email_outgoing_blocked">E-mail enviado interrompido (Risco de segurança): %1$s</string>
     <string name="juaris_app_welcome_text" formatted="false">Bem-vindo à Juaris, a sua app de segurança do futuro. 100% transparente, 100% no seu telemóvel. Sem nuvem. A sua proteção, a sua casa, as suas regras.</string>
-    <string name="juaris_app_welcome_audio_file">platzhalter_pt.m4a</string>
+    <string name="juaris_app_welcome_audio_file">welcome_audio_pt.m4a</string>
     <string name="vpn_disclosure_title">Aviso de Segurança Juaris VPN</string>
     <string name="vpn_disclosure_message">O Juaris usa um VpnService local para detectar phishing e malware diretamente no seu dispositivo.\n\nTodos os dados permanecem 100%% locais. Nada é enviado para servidores externos ou nuvem.</string>
     <string name="btn_understood">Entendido e Ativar</string>
     <string name="btn_cancel">Cancelar</string>
-   
-    
+
     <string name="p2p_swarm_title">Malha de Enxame Juaris (P2P)</string>
     <string name="p2p_swarm_subtitle">Comunicação segura e descentralizada sem internet</string>
     <string name="mesh_broadcast_title">Transmitir mensagem para o enxame</string>
-    <string name="label_message_placeholder">Digite uma mensagem...</string>
+    <string name="label_message_input">Digite uma mensagem...</string>
     <string name="checkbox_ephemeral">Excluir mensagem após leitura (Efêmera)</string>
     <string name="btn_broadcast">Enviar para o enxame</string>
     <string name="mesh_packets_count">Pacotes de enxame ativos (%d)</string>
@@ -53,13 +52,11 @@
     <string name="toast_p2p_started">Nó de malha P2P iniciado com sucesso!</string>
     <string name="toast_bluetooth_missing">Permissões de Bluetooth são necessárias!</string>
 
-    
     <string name="logs_page_title">Registros de segurança</string>
     <string name="logs_page_subtitle">Visão geral de todas as ameaças e eventos interceptados</string>
     <string name="logs_empty_message">Nenhum evento registrado ainda. Seu sistema está seguro.</string>
     <string name="logs_module_prefix">Módulo: %s</string>
 
-    
     <string name="privacy_text">Política de privacidade</string>
     <string name="privacy_link">Ler política de privacidade</string>
     <string name="imprint_title">Aviso legal</string>
@@ -74,13 +71,11 @@
     <string name="imprint_name_y">Isenção de responsabilidade</string>
     <string name="company_footer">Juaris Security - Todos os direitos reservados</string>
 
-    
     <string name="air_gesture_subtitle">Controle seu dispositivo com movimentos das mãos</string>
     <string name="air_gesture_desc">Use gestos sem contato para navegar</string>
     <string name="air_gesture_status">Sensor pronto</string>
     <string name="air_gesture_action">Disparar ação</string>
-    
-    
+
     <string name="mesh_page_title">Rede Mesh</string>
     <string name="mesh_page_subtitle">Comunicação descentralizada</string>
     <string name="legal_page_title">Informações legais</string>
@@ -116,8 +111,7 @@
     <string name="blacklist_items_title">Entradas bloqueadas</string>
     <string name="btn_release">Liberar</string>
     <string name="clipboard_page_title">Área de transferência</string>
-    
-    
+
     <string name="comm_filter_title">Filtro de comunicação</string>
     <string name="call_prot_title">Proteção de chamadas</string>
     <string name="call_prot_desc">Proteger contra chamadas suspeitas</string>
@@ -125,7 +119,7 @@
     <string name="sms_prot_desc">Proteger contra mensagens de texto de phishing</string>
     <string name="email_prot_title">Proteção de e-mail</string>
     <string name="email_prot_desc">Proteger contra e-mails maliciosos</string>
-    <string name="toast_enable_listener">Ouvinte ativado com sucesso</string>
+    <string name="toast_enable_listener">Serviço de notificação ativado com sucesso</string>
     <string name="offline_vault_title">Cofre offline</string>
     <string name="offline_vault_desc">Armazenamento local seguro para dados sensíveis</string>
     <string name="vault_status_unlocked">Cofre desbloqueado</string>
@@ -142,7 +136,7 @@
     <string name="toast_calendar_warning">Permissão de calendário necessária para verificação autônoma</string>
     <string name="toast_vpn_granted">Permissão de VPN concedida</string>
     <string name="toast_vpn_rejected">Permissão de VPN rejeitada</string>
-    <string name="toast_enable_notification_manual">Ative o ouvinte de notificações manualmente</string>
+    <string name="toast_enable_notification_manual">Ative o serviço de notificação nas configurações</string>
     <string name="emergency_reason_sensor">Emergência acionada por sensor</string>
     <string name="emergency_reason_manual">Botão de pânico manual acionado</string>
     <string name="toast_debugger_detected">Aviso: Depurador detectado!</string>
@@ -181,7 +175,7 @@
     <string name="section_actions">Emergência e Ações</string>
     <string name="btn_simulate_phishing">Simular ataque de phishing</string>
     <string name="btn_export_vault_logs">Exportar registros do Cofre</string>
-    <string name="btn_panic_wipe">APAGAR TUDO (PÂNICO)</string>
+    <string name="btn_panic_wipe">APAGAR TUDO</string>
     <string name="default_spam_label">Número de spam conhecido</string>
     <string name="toast_number_blocked">Número adicionado à lista negra</string>
     <string name="toast_number_released">Número removido da lista negra</string>
@@ -204,12 +198,12 @@
     <string name="emergency_screen_countdown_desc">Apagamento seguro executando em contagem regressiva...</string>
     <string name="btn_emergency_call_now">Ligar para a emergência agora</string>
     <string name="btn_emergency_cancel">Cancelar emergência</string>
-    <string name="disclosure_dialog_message">O Juaris requer acesso a notificações/acessibilidade para proteger seu dispositivo localmente.</string>
+    <string name="disclosure_dialog_message">O Juaris precisa de acesso às notificações para proteger seu dispositivo localmente.</string>
     <string name="toast_vault_locked">Cofre bloqueado com sucesso</string>
     <string name="protection_modules_title">Módulos de proteção</string>
     <string name="protection_modules_subtitle">Filtros de segurança ativos em tempo real</string>
-    <string name="toast_enable_listener_manual">Ative o listener de notificações nas configurações</string>
-        
+    <string name="toast_enable_listener_manual">Ative o serviço de notificação nas configurações</string>
+
     <string name="widget_title">🛡️ Juaris 360°</string>
     <string name="widget_subtitle">100%% Seguro e Local</string>
     <string name="btn_emergency_widget">🚨 EMERGÊNCIA</string>
@@ -218,3 +212,4 @@
     <string name="title_intercepted_logs">Chamadas e SMS Interceptados (Log):</string>
     <string name="logs_waiting_for_events">Aguardando eventos...</string>
 </resources>
+
