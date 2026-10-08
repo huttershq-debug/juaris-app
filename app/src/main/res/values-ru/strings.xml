@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Juaris</string>
-    <string name="status_protected">Устройство полностью защищено</string>
+    <string name="app_name">Безопасность Juaris</string>
+    <string name="status_protected">Устройство полностью защищено (входящие и исходящие)</string>
     <string name="status_warning">Обнаружена угроза безопасности</string>
     <string name="tab_status">Статус</string>
     <string name="tab_protection">Защита</string>
@@ -26,10 +26,10 @@
     <string name="email_protection_title">Безопасность почты</string>
     <string name="log_email_incoming_blocked">Входящее вредоносное письмо заблокировано: %1$s</string>
     <string name="log_email_outgoing_blocked">Исходящее письмо остановлено (Риск): %1$s</string>
-    <string name="juaris_app_welcome_text" formatted="false">Добро пожаловать в Juaris, ваше приложение безопасности будущего. 100% прозрачно, 100% на вашем устройстве. Без облаков. Ваша защита, ваши правила.</string>
+    <string name="juaris_app_welcome_text" formatted="false">Добро пожаловать в Juaris, ваше приложение безопасности будущего. 100%% прозрачно, 100%% на вашем устройстве. Без облаков. Ваша защита, ваши правила.</string>
     <string name="juaris_app_welcome_audio_file">welcome_audio_ru.m4a</string>
     <string name="vpn_disclosure_title">Уведомление безопасности Juaris VPN</string>
-    <string name="vpn_disclosure_message">Juaris использует локальный VpnService для обнаружения фишинга и вредоносного ПО прямо на вашем устройстве.\n\nВсе данные остаются на 100%% локальными. Ничего не отправляется на внешние серверы.</string>
+    <string name="vpn_disclosure_message">Juaris использует локальный VpnService для обнаружения фишинга и вредоносного ПО прямо на вашем устройстве.\n\nВсе данные остаются локальными на 100%%. Ничего не отправляется на внешние серверы или в облако.</string>
     <string name="btn_understood">Понятно и активировать</string>
     <string name="btn_cancel">Отмена</string>
 
@@ -59,7 +59,7 @@
 
     <string name="privacy_text">Политика конфиденциальности</string>
     <string name="privacy_link">Читать политику</string>
-    <string name="imprint_title">Отпечаток</string>
+    <string name="imprint_title">Отпечаток (Imprint)</string>
     <string name="imprint_subtitle">Юридическая информация</string>
     <string name="imprint_name">Название компании</string>
     <string name="imprint_address">Адрес</string>
@@ -131,7 +131,7 @@
     <string name="toast_sms_active">Защита SMS активирована</string>
     <string name="toast_sms_rejected">Роль SMS отклонена</string>
     <string name="toast_notification_granted">Разрешение на уведомления предоставлено</string>
-    <string name="toast_notification_warning">Требуется разрешение на уведомления</string>
+    <string name="toast_notification_warning">Требуется разрешение на уведомления для защиты</string>
     <string name="toast_calendar_granted">Разрешение календаря предоставлено</string>
     <string name="toast_calendar_warning">Требуется разрешение календаря</string>
     <string name="toast_vpn_granted">Разрешение VPN предоставлено</string>
