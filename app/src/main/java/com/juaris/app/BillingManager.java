@@ -16,6 +16,7 @@ import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.QueryProductDetailsParams;
+import com.android.billingclient.api.QueryProductDetailsResult;
 import com.android.billingclient.api.QueryPurchasesParams;
 
 import java.util.Collections;
@@ -24,14 +25,12 @@ import java.util.List;
 public class BillingManager implements PurchasesUpdatedListener {
 
     private static final String TAG = "JuarisBillingKernel";
-    
-    private final Context context;
+
     private final String skuId;
     private final Runnable onSubscriptionActive;
     private final BillingClient billingClient;
 
     public BillingManager(@NonNull Context context, @NonNull String skuId, @NonNull Runnable onSubscriptionActive) {
-        this.context = context;
         this.skuId = skuId;
         this.onSubscriptionActive = onSubscriptionActive;
 
@@ -57,7 +56,7 @@ public class BillingManager implements PurchasesUpdatedListener {
 
             @Override
             public void onBillingServiceDisconnected() {
-                // Automatischer Reconnect im Live-Betrieb
+                // Live Reconnect
             }
         });
     }
@@ -86,26 +85,29 @@ public class BillingManager implements PurchasesUpdatedListener {
                 .setProductList(Collections.singletonList(product))
                 .build();
 
-        billingClient.queryProductDetailsAsync(params, (billingResult, productDetailsList) -> {
-            if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && productDetailsList != null && !productDetailsList.isEmpty()) {
-                ProductDetails productDetails = productDetailsList.get(0);
-                List<ProductDetails.SubscriptionOfferDetails> offerDetailsList = productDetails.getSubscriptionOfferDetails();
+        billingClient.queryProductDetailsAsync(params, (billingResult, productDetailsResult) -> {
+            if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && productDetailsResult != null) {
+                List<ProductDetails> productDetailsList = productDetailsResult.getProductDetailsList();
+                if (productDetailsList != null && !productDetailsList.isEmpty()) {
+                    ProductDetails productDetails = productDetailsList.get(0);
+                    List<ProductDetails.SubscriptionOfferDetails> offerDetailsList = productDetails.getSubscriptionOfferDetails();
 
-                if (offerDetailsList != null && !offerDetailsList.isEmpty()) {
-                    String offerToken = offerDetailsList.get(0).getOfferToken();
+                    if (offerDetailsList != null && !offerDetailsList.isEmpty()) {
+                        String offerToken = offerDetailsList.get(0).getOfferToken();
 
-                    List<BillingFlowParams.ProductDetailsParams> productDetailsParamsList = Collections.singletonList(
-                            BillingFlowParams.ProductDetailsParams.newBuilder()
-                                    .setProductDetails(productDetails)
-                                    .setOfferToken(offerToken)
-                                    .build()
-                    );
+                        List<BillingFlowParams.ProductDetailsParams> productDetailsParamsList = Collections.singletonList(
+                                BillingFlowParams.ProductDetailsParams.newBuilder()
+                                        .setProductDetails(productDetails)
+                                        .setOfferToken(offerToken)
+                                        .build()
+                        );
 
-                    BillingFlowParams billingFlowParams = BillingFlowParams.newBuilder()
-                            .setProductDetailsParamsList(productDetailsParamsList)
-                            .build();
+                        BillingFlowParams billingFlowParams = BillingFlowParams.newBuilder()
+                                .setProductDetailsParamsList(productDetailsParamsList)
+                                .build();
 
-                    billingClient.launchBillingFlow(activity, billingFlowParams);
+                        billingClient.launchBillingFlow(activity, billingFlowParams);
+                    }
                 }
             }
         });
