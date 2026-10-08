@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">Juaris</string>
-    <string name="status_protected">Устройство полностью защищено (Вкл. &amp; Выкл.)</string>
+    <string name="status_protected">Устройство полностью защищено (Входящие и исходящие)</string>
     <string name="status_warning">Обнаружено предупреждение безопасности</string>
     <string name="tab_status">Статус</string>
     <string name="tab_protection">Защита</string>
@@ -27,17 +27,16 @@
     <string name="log_email_incoming_blocked">Заблокировано входящее вредоносное письмо: %1$s</string>
     <string name="log_email_outgoing_blocked">Исходящее письмо остановлено (угроза безопасности): %1$s</string>
     <string name="juaris_app_welcome_text" formatted="false">Добро пожаловать в Juaris — ваше приложение безопасности будущего. 100% прозрачно, 100% на вашем телефоне. Никакого облака. Ваша защита, ваш дом, ваши правила.</string>
-    <string name="juaris_app_welcome_audio_file">platzhalter_ru.m4a</string>
+    <string name="juaris_app_welcome_audio_file">welcome_audio_ru.m4a</string>
     <string name="vpn_disclosure_title">Уведомление безопасности Juaris VPN</string>
     <string name="vpn_disclosure_message">Juaris использует локальный VpnService для обнаружения фишинга и вредоносных программ прямо на вашем устройстве.\n\nВсе данные остаются локальными на 100%%. Ничего не отправляется на внешние серверы или в облако.</string>
     <string name="btn_understood">Понятно и Активировать</string>
     <string name="btn_cancel">Отмена</string>
-   
-    
+
     <string name="p2p_swarm_title">Роевая ячеистая сеть Juaris (P2P)</string>
     <string name="p2p_swarm_subtitle">Безопасная децентрализованная связь без интернета</string>
     <string name="mesh_broadcast_title">Передать сообщение в рой</string>
-    <string name="label_message_placeholder">Введите сообщение...</string>
+    <string name="label_message_input">Введите сообщение...</string>
     <string name="checkbox_ephemeral">Удалить сообщение после прочтения (Исчезающее)</string>
     <string name="btn_broadcast">Отправить в рой</string>
     <string name="mesh_packets_count">Активные пакеты роя (%d)</string>
@@ -53,16 +52,14 @@
     <string name="toast_p2p_started">Узел P2P-сети успешно запущен!</string>
     <string name="toast_bluetooth_missing">Требуются разрешения Bluetooth!</string>
 
-    
     <string name="logs_page_title">Журналы безопасности</string>
     <string name="logs_page_subtitle">Обзор всех перехваченных угроз и событий</string>
     <string name="logs_empty_message">Событий пока нет. Ваша система защищена.</string>
     <string name="logs_module_prefix">Модуль: %s</string>
 
-    
     <string name="privacy_text">Политика конфиденциальности</string>
     <string name="privacy_link">Читать политику конфиденциальности</string>
-    <string name="imprint_title">Импрессум (О сайте)</string>
+    <string name="imprint_title">Импрессум</string>
     <string name="imprint_subtitle">Правовая информация</string>
     <string name="imprint_name">Название компании</string>
     <string name="imprint_address">Адрес</string>
@@ -72,15 +69,13 @@
     <string name="imprint_design">Дизайн и реализация</string>
     <string name="imprint_name_va">Дополнительная информация</string>
     <string name="imprint_name_y">Отказ от ответственности</string>
-    <string name="company_footer">Juaris Security – Все права защищены</string>
+    <string name="company_footer">Juaris Security — Все права защищены</string>
 
-    
     <string name="air_gesture_subtitle">Управляйте устройством движениями рук</string>
     <string name="air_gesture_desc">Используйте бесконтактные жесты для навигации</string>
     <string name="air_gesture_status">Датчик готов</string>
     <string name="air_gesture_action">Выполнить действие</string>
-    
-    
+
     <string name="mesh_page_title">Ячеистая сеть</string>
     <string name="mesh_page_subtitle">Децентрализованная связь</string>
     <string name="legal_page_title">Правовая информация</string>
@@ -116,8 +111,7 @@
     <string name="blacklist_items_title">Заблокированные записи</string>
     <string name="btn_release">Освободить</string>
     <string name="clipboard_page_title">Буфер обмена</string>
-    
-    
+
     <string name="comm_filter_title">Фильтр связи</string>
     <string name="call_prot_title">Защита вызовов</string>
     <string name="call_prot_desc">Защита от подозрительных вызовов</string>
@@ -125,7 +119,7 @@
     <string name="sms_prot_desc">Защита от фишинговых текстовых сообщений</string>
     <string name="email_prot_title">Защита почты</string>
     <string name="email_prot_desc">Защита от вредоносных писем</string>
-    <string name="toast_enable_listener">Прослушиватель успешно включен</string>
+    <string name="toast_enable_listener">Служба уведомлений успешно включена</string>
     <string name="offline_vault_title">Автономное хранилище</string>
     <string name="offline_vault_desc">Безопасное локальное хранилище для конфиденциальных данных</string>
     <string name="vault_status_unlocked">Хранилище разблокировано</string>
@@ -142,7 +136,7 @@
     <string name="toast_calendar_warning">Для автономного сканирования требуется разрешение на календарь</string>
     <string name="toast_vpn_granted">Разрешение VPN предоставлено</string>
     <string name="toast_vpn_rejected">Разрешение VPN отклонено</string>
-    <string name="toast_enable_notification_manual">Включите службу прослушивания уведомлений вручную</string>
+    <string name="toast_enable_notification_manual">Пожалуйста, включите службу уведомлений в настройках</string>
     <string name="emergency_reason_sensor">Чрезвычайная ситуация вызвана датчиком</string>
     <string name="emergency_reason_manual">Активирована ручная кнопка паники</string>
     <string name="toast_debugger_detected">Предупреждение: обнаружен отладчик!</string>
@@ -161,60 +155,5 @@
     <string name="biometric_login_title">Аутентификация входа</string>
     <string name="biometric_login_subtitle">Пройдите аутентификацию для входа в ядро Juaris</string>
     <string name="toast_login_success">Вход выполнен успешно</string>
-    <string name="kernel_title">Ядро Juaris</string>
-    <string name="kernel_subtitle">Безопасный анклав активен</string>
-    <string name="btn_fingerprint_login">Вход по отпечатку пальца</string>
-    <string name="btn_debug_bypass">Обход отладки</string>
-    <string name="toast_login_aborted">Вход прерван: %s</string>
-    <string name="log_module_guardian">Страж безопасности</string>
-    <string name="log_desc_phishing_blocked">Фишинговая угроза перехвачена</string>
-    <string name="log_details_simulation">Симулированная атака успешно заблокирована</string>
-    <string name="toast_threat_neutralized">Угроза нейтрализована!</string>
-    <string name="toast_logs_vault_secured">Журналы надежно зашифрованы в хранилище</string>
-    <string name="status_health_title">Состояние системы</string>
-    <string name="status_health_subtitle">Обзор защиты ядра в реальном времени</string>
-    <string name="status_aes_encrypted">Зашифровано AES-256 GCM</string>
-    <string name="status_filters_active">Все активные фильтры запущены</string>
-    <string name="card_blocked_caps">ЗАБЛОКИРОВАНО</string>
-    <string name="card_data_flow">ПОТОК ДАННЫХ</string>
-    <string name="card_local_only">100%% Локально</string>
-    <string name="section_actions">Чрезвычайные ситуации и действия</string>
-    <string name="btn_simulate_phishing">Симулировать фишинговую атаку</string>
-    <string name="btn_export_vault_logs">Экспортировать журналы хранилища</string>
-    <string name="btn_panic_wipe">ЭКСТРЕННАЯ ОЧИСТКА</string>
-    <string name="default_spam_label">Известный спам-номер</string>
-    <string name="toast_number_blocked">Номер добавлен в черный список</string>
-    <string name="toast_number_released">Номер удален из черного списка</string>
-    <string name="toast_camera_started">Камера жестов в воздухе запущен</string>
-    <string name="toast_permission_denied">Разрешение на камеру отклонено</string>
-    <string name="status_paused">Приостановлено</string>
-    <string name="btn_allow_notification_access">Разрешить доступ к уведомлениям</string>
-    <string name="alert_financial_title">Финансовое предупреждение</string>
-    <string name="alert_service_title">Предупреждение сервиса</string>
-    <string name="alert_anniversary_title">Напоминание о годовщине</string>
-    <string name="alert_birthday_title">Напоминание о дне рождения</string>
-    <string name="alert_medical_title">Предупреждение о приеме у врача</string>
-    <string name="alert_travel_title">Предупреждение о безопасности поездки</string>
-    <string name="alert_general_title">Общее предупреждение безопасности</string>
-    <string name="emergency_reason_default">Ручной аварийный запуск</string>
-    <string name="emergency_channel_name">Экстренный канал</string>
-    <string name="emergency_notification_title">Режим ЧП активен</string>
-    <string name="emergency_notification_text">Системные настройки и хранилище защищаются.</string>
-    <string name="emergency_screen_heading">ЭКСТРЕННЫЙ ПРОТОКОЛ</string>
-    <string name="emergency_screen_countdown_desc">Безопасная очистка выполняется по обратном отсчете...</string>
-    <string name="btn_emergency_call_now">Позвонить в службу спасения</string>
-    <string name="btn_emergency_cancel">Отменить чрезвычайную ситуацию</string>
-    <string name="disclosure_dialog_message">Juaris требует доступ к уведомлениям/специальным возможностям для локальной защиты вашего устройства.</string>
-    <string name="toast_vault_locked">Хранилище успешно заблокировано</string>
-    <string name="protection_modules_title">Модули защиты</string>
-    <string name="protection_modules_subtitle">Активные фильтры безопасности в реальном времени</string>
-    <string name="toast_enable_listener_manual">Пожалуйста, включите службу уведомлений в настройках</string>
-        
-    <string name="widget_title">🛡️ Juaris 360°</string>
-    <string name="widget_subtitle">100%% Локально и Безопасно</string>
-    <string name="btn_emergency_widget">🚨 СOS / ПАНИКА</string>
-    <string name="app_ui_title_security">Консоль Juaris</string>
-    <string name="status_guardian_active_offline">СТАТУС: ЗАЩИТА АКТИВНА (ОФФЛАЙН)</string>
-    <string name="title_intercepted_logs">Перехваченные вызовы и SMS (Лог):</string>
-    <string name="logs_waiting_for_events">Ожидание событий...</string>
-</resources>
+
+
