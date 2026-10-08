@@ -54,8 +54,9 @@ class BillingManager(
                 .build()
         ) { result, purchases ->
             if (result.responseCode == BillingClient.BillingResponseCode.OK) {
-                for (purchase in purchases) {
-                    handlePurchase(purchase)
+                val purchaseList: List<Purchase> = purchases
+                for (i in 0 until purchaseList.size) {
+                    handlePurchase(purchaseList.get(i))
                 }
             }
         }
@@ -77,12 +78,12 @@ class BillingManager(
         val params = QueryProductDetailsParams.newBuilder().setProductList(productList).build()
 
         billingClient.queryProductDetailsAsync(params) { billingResult, productDetailsList ->
-            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && productDetailsList != null && !productDetailsList.isEmpty()) {
-                val productDetails = productDetailsList[0]
+            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && productDetailsList != null && productDetailsList.size > 0) {
+                val productDetails: ProductDetails = productDetailsList.get(0)
                 val offerDetailsList = productDetails.subscriptionOfferDetails
                 
-                if (offerDetailsList != null && !offerDetailsList.isEmpty()) {
-                    val offerToken = offerDetailsList[0].offerToken
+                if (offerDetailsList != null && offerDetailsList.size > 0) {
+                    val offerToken = offerDetailsList.get(0).offerToken
 
                     val productDetailsParamsList = listOf(
                         BillingFlowParams.ProductDetailsParams.newBuilder()
@@ -103,8 +104,9 @@ class BillingManager(
 
     override fun onPurchasesUpdated(billingResult: BillingResult, purchases: List<Purchase>?) {
         if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
-            for (purchase in purchases) {
-                handlePurchase(purchase)
+            val purchaseList: List<Purchase> = purchases
+            for (i in 0 until purchaseList.size) {
+                handlePurchase(purchaseList.get(i))
             }
         }
     }
