@@ -27,13 +27,12 @@
     <string name="log_email_incoming_blocked">Eingehende schädliche E-Mail blockiert: %1$s</string>
     <string name="log_email_outgoing_blocked">Ausgehende E-Mail gestoppt (Sicherheitsrisiko): %1$s</string>
     <string name="juaris_app_welcome_text" formatted="false">Willkommen bei Juaris, deiner Sicherheitsapp der Zukunft. 100% transparent, 100% auf deinem Handy. Keine Cloud. Dein Schutz, dein Heim, deine Regeln.</string>
-    <string name="juaris_app_welcome_audio_file">platzhalter_de.m4a</string>
+    <string name="juaris_app_welcome_audio_file">welcome_audio_de.m4a</string>
     <string name="vpn_disclosure_title">Sicherheitshinweis zu Juaris VPN</string>
     <string name="vpn_disclosure_message">Juaris nutzt einen lokalen VpnService, um Phishing und Malware direkt auf deinem Gerät zu erkennen.\n\nAlle Daten bleiben zu 100%% lokal. Es wird absolut nichts an externe Server oder Clouds gesendet.</string>
     <string name="btn_understood">Verstanden &amp; Aktivieren</string>
     <string name="btn_cancel">Abbrechen</string>
    
-    
     <string name="p2p_swarm_title">Juaris Schwarm-Mesh (P2P)</string>
     <string name="p2p_swarm_subtitle">Sichere, dezentrale Kommunikation ohne Internet</string>
     <string name="mesh_broadcast_title">Nachricht in den Schwarm senden</string>
@@ -53,13 +52,11 @@
     <string name="toast_p2p_started">P2P-Mesh Knoten erfolgreich gestartet!</string>
     <string name="toast_bluetooth_missing">Bluetooth-Berechtigungen werden benötigt!</string>
 
-    
     <string name="logs_page_title">Sicherheits-Logs</string>
     <string name="logs_page_subtitle">Alle abgefangenen Bedrohungen und Ereignisse im Überblick</string>
     <string name="logs_empty_message">Bisher keine Ereignisse verzeichnet. Ihr System ist sicher.</string>
     <string name="logs_module_prefix">Modul: %s</string>
 
-    
     <string name="privacy_text">Datenschutzerklärung</string>
     <string name="privacy_link">Datenschutzerklärung lesen</string>
     <string name="imprint_title">Impressum</string>
@@ -74,13 +71,11 @@
     <string name="imprint_name_y">Haftungsausschluss</string>
     <string name="company_footer">Juaris Security – Alle Rechte vorbehalten</string>
 
-    
     <string name="air_gesture_subtitle">Steuere dein Gerät mit Handbewegungen</string>
     <string name="air_gesture_desc">Nutze kontaktlose Gesten zur Navigation</string>
     <string name="air_gesture_status">Sensor bereit</string>
     <string name="air_gesture_action">Aktion auslösen</string>
-    
-    
+   
     <string name="mesh_page_title">Mesh-Netzwerk</string>
     <string name="mesh_page_subtitle">Dezentrale Kommunikation</string>
     <string name="legal_page_title">Rechtliche Hinweise</string>
@@ -116,8 +111,7 @@
     <string name="blacklist_items_title">Gesperrte Einträge</string>
     <string name="btn_release">Freigeben</string>
     <string name="clipboard_page_title">Zwischenablage</string>
-    
-    
+   
     <string name="call_prot_title">Anrufschutz</string>
     <string name="call_prot_desc">Schutz vor verdächtigen Anrufen</string>
     <string name="sms_prot_title">SMS-Schutz</string>
@@ -209,7 +203,6 @@
     <string name="protection_modules_subtitle">Aktive Echtzeit-Sicherheitsfilter</string>
     <string name="toast_enable_listener_manual">Bitte aktiviere den Benachrichtigungs-Listener in den Einstellungen</string>
 
-    
     <string name="widget_title">🛡️ Juaris 360°</string>
     <string name="widget_subtitle">100%% Geschützt &amp; Lokal</string>
     <string name="btn_emergency_widget">🚨 NOTFALL</string>
