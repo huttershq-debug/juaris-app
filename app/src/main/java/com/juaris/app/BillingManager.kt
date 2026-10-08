@@ -42,7 +42,7 @@ class BillingManager(
             }
 
             override fun onBillingServiceDisconnected() {
-                // Echte Reconnect-Logik für den Live-Betrieb
+                // Reconnect
             }
         })
     }
@@ -53,10 +53,9 @@ class BillingManager(
                 .setProductType(BillingClient.ProductType.SUBS)
                 .build()
         ) { result, purchases ->
-            if (result.responseCode == BillingClient.BillingResponseCode.OK) {
-                val purchaseList: List<Purchase> = purchases
-                for (i in 0 until purchaseList.size) {
-                    handlePurchase(purchaseList.get(i))
+            if (result.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
+                for (purchase in purchases) {
+                    handlePurchase(purchase)
                 }
             }
         }
@@ -78,12 +77,12 @@ class BillingManager(
         val params = QueryProductDetailsParams.newBuilder().setProductList(productList).build()
 
         billingClient.queryProductDetailsAsync(params) { billingResult, productDetailsList ->
-            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && productDetailsList != null && productDetailsList.size > 0) {
-                val productDetails: ProductDetails = productDetailsList.get(0)
+            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && productDetailsList != null && productDetailsList.isNotEmpty()) {
+                val productDetails = productDetailsList[0]
                 val offerDetailsList = productDetails.subscriptionOfferDetails
-                
-                if (offerDetailsList != null && offerDetailsList.size > 0) {
-                    val offerToken = offerDetailsList.get(0).offerToken
+
+                if (offerDetailsList != null && offerDetailsList.isNotEmpty()) {
+                    val offerToken = offerDetailsList[0].offerToken
 
                     val productDetailsParamsList = listOf(
                         BillingFlowParams.ProductDetailsParams.newBuilder()
@@ -104,9 +103,8 @@ class BillingManager(
 
     override fun onPurchasesUpdated(billingResult: BillingResult, purchases: List<Purchase>?) {
         if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
-            val purchaseList: List<Purchase> = purchases
-            for (i in 0 until purchaseList.size) {
-                handlePurchase(purchaseList.get(i))
+            for (purchase in purchases) {
+                handlePurchase(purchase)
             }
         }
     }
@@ -117,7 +115,7 @@ class BillingManager(
                 val acknowledgePurchaseParams = AcknowledgePurchaseParams.newBuilder()
                     .setPurchaseToken(purchase.purchaseToken)
                     .build()
-               
+
                 billingClient.acknowledgePurchase(acknowledgePurchaseParams) { billingResult ->
                     if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                         Log.d(TAG, "✅ Kauf erfolgreich bei Google bestätigt!")
@@ -132,4 +130,3 @@ class BillingManager(
         }
     }
 }
-
