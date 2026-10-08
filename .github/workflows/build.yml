@@ -51,7 +51,7 @@ jobs:
           echo "$KEYSTORE_BASE64" | base64 --decode > "$GITHUB_WORKSPACE/juaris-release-key.jks"
 
       - name: Android Lint
-        run: ./gradlew lintRelease --stacktrace
+        run: ./gradlew :app:lintRelease --stacktrace
 
       - name: Lint-Berichte hochladen
         if: always()
