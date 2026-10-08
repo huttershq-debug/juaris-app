@@ -22,7 +22,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-       - name: Gradle Wrapper initialisieren
+      - name: Gradle Wrapper initialisieren
         run: |
           mkdir -p gradle/wrapper
           cat << 'EOF' > gradle/wrapper/gradle-wrapper.properties
@@ -34,7 +34,7 @@ jobs:
           EOF
           gradle wrapper --gradle-version 8.7 --distribution-type bin
           chmod +x ./gradlew
-          
+
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
@@ -58,7 +58,6 @@ jobs:
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "$GITHUB_WORKSPACE/juaris-release-key.jks"
 
-      # Intelligente XML-Deduplizierung für alle Sprachen
       - name: Intelligente XML-Deduplizierung für alle Sprachen (Python-Kernel)
         run: |
           python3 -c '
@@ -151,4 +150,5 @@ jobs:
       - name: Keystore entfernen
         if: always()
         run: rm -f "$GITHUB_WORKSPACE/juaris-release-key.jks"
+
 
