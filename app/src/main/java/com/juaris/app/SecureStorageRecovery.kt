@@ -12,13 +12,9 @@ object SecureStorageRecovery {
     private const val TAG = "JuarisKeyStoreRecovery"
     private const val SECURE_PREFS_NAME = "juaris_secure_prefs"
 
-    /**
-     * Versucht, auf sichere Speicher zuzugreifen. Fängt KeyStore-Fehler ab 
-     * und führt einen kontrollierten Reset durch, wenn das Keystore-Blob beschädigt ist.
-     */
     fun initializeOrRecoverStorage(context: Context) {
         try {
-            loadOrTestEncryptedStorage(context)
+            loadEncryptedStorage(context)
         } catch (e: GeneralSecurityException) {
             Log.e(TAG, "⚠️ Kritischer KeyStore-Fehler erkannt (Device-Corrupt / Key Invalid): ${e.message}")
             performEmergencyReset(context)
@@ -27,7 +23,7 @@ object SecureStorageRecovery {
         }
     }
 
-    private fun loadOrTestEncryptedStorage(context: Context) {
+    private fun loadEncryptedStorage(context: Context) {
         val masterKey = MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
             .build()
