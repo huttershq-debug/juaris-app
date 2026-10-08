@@ -27,17 +27,16 @@
     <string name="log_email_incoming_blocked">已拦截恶意电子邮件：%1$s</string>
     <string name="log_email_outgoing_blocked">已阻止外发邮件（安全风险）：%1$s</string>
     <string name="juaris_app_welcome_text" formatted="false">欢迎来到 Juaris——您面向未来的安全应用程序。100% 透明，100% 在您的手机上。无需云端。您的保护，您的家，您的规则。</string>
-    <string name="juaris_app_welcome_audio_file">platzhalter_zh.m4a</string>
+    <string name="juaris_app_welcome_audio_file">welcome_audio_zh.m4a</string>
     <string name="vpn_disclosure_title">Juaris VPN 安全通知</string>
     <string name="vpn_disclosure_message">Juaris 使用本地 VpnService 直接在您的设备上检测网络钓鱼和恶意软件。\n\n所有数据保持 100%% 本地化。绝对不会向外部服务器或云端发送任何数据。</string>
     <string name="btn_understood">明白了并激活</string>
     <string name="btn_cancel">取消</string>
-   
-    
+
     <string name="p2p_swarm_title">Juaris 网状群蜂 (P2P)</string>
     <string name="p2p_swarm_subtitle">安全、无互联网的去中心化通信</string>
     <string name="mesh_broadcast_title">向群蜂广播消息</string>
-    <string name="label_message_placeholder">输入消息...</string>
+    <string name="label_message_input">输入消息...</string>
     <string name="checkbox_ephemeral">读取后删除消息（阅后即焚）</string>
     <string name="btn_broadcast">发送至群蜂</string>
     <string name="mesh_packets_count">活跃群蜂数据包 (%d)</string>
@@ -53,16 +52,14 @@
     <string name="toast_p2p_started">P2P 网状节点启动成功！</string>
     <string name="toast_bluetooth_missing">需要蓝牙权限！</string>
 
-    
     <string name="logs_page_title">安全日志</string>
     <string name="logs_page_subtitle">拦截的所有威胁与事件概览</string>
     <string name="logs_empty_message">暂无记录的事件。您的系统非常安全。</string>
     <string name="logs_module_prefix">模块：%s</string>
 
-    
     <string name="privacy_text">隐私政策</string>
     <string name="privacy_link">阅读隐私政策</string>
-    <string name="imprint_title">版权声明 / 法律说明</string>
+    <string name="imprint_title">版权声明</string>
     <string name="imprint_subtitle">法律信息</string>
     <string name="imprint_name">公司名称</string>
     <string name="imprint_address">地址</string>
@@ -74,13 +71,11 @@
     <string name="imprint_name_y">免责声明</string>
     <string name="company_footer">Juaris Security - 保留所有权利</string>
 
-    
     <string name="air_gesture_subtitle">通过手部动作控制您的设备</string>
     <string name="air_gesture_desc">使用非接触式手势进行导航</string>
     <string name="air_gesture_status">传感器就绪</string>
     <string name="air_gesture_action">触发动作</string>
-    
-    
+
     <string name="mesh_page_title">网状网络</string>
     <string name="mesh_page_subtitle">去中心化通信</string>
     <string name="legal_page_title">法律信息</string>
@@ -116,8 +111,7 @@
     <string name="blacklist_items_title">已拦截条目</string>
     <string name="btn_release">解除</string>
     <string name="clipboard_page_title">剪贴板</string>
-    
-    
+
     <string name="comm_filter_title">通信过滤</string>
     <string name="call_prot_title">来电保护</string>
     <string name="call_prot_desc">防止可疑来电</string>
@@ -125,7 +119,7 @@
     <string name="sms_prot_desc">防止钓鱼短信</string>
     <string name="email_prot_title">邮件保护</string>
     <string name="email_prot_desc">防止恶意电子邮件</string>
-    <string name="toast_enable_listener">已成功启用监听器</string>
+    <string name="toast_enable_listener">通知服务已成功启用</string>
     <string name="offline_vault_title">离线保险库</string>
     <string name="offline_vault_desc">用于敏感数据的安全本地存储</string>
     <string name="vault_status_unlocked">保险库已解锁</string>
@@ -142,7 +136,7 @@
     <string name="toast_calendar_warning">自主扫描需要日历权限</string>
     <string name="toast_vpn_granted">已授予 VPN 权限</string>
     <string name="toast_vpn_rejected">VPN 权限被拒绝</string>
-    <string name="toast_enable_notification_manual">请手动启用通知监听器</string>
+    <string name="toast_enable_notification_manual">请在设置中手动启用通知服务</string>
     <string name="emergency_reason_sensor">由传感器触发的紧急情况</string>
     <string name="emergency_reason_manual">手动触发紧急按钮</string>
     <string name="toast_debugger_detected">警告：检测到调试器！</string>
@@ -169,7 +163,7 @@
     <string name="log_module_guardian">安全卫士</string>
     <string name="log_desc_phishing_blocked">已拦截网络钓鱼威胁</string>
     <string name="log_details_simulation">成功阻止模拟攻击</string>
-    <string name="toast_threat_neutralized">威胁已 p平息/neutralized！</string>
+    <string name="toast_threat_neutralized">威胁已中和！</string>
     <string name="toast_logs_vault_secured">日志已安全加密至保险库</string>
     <string name="status_health_title">系统健康状态</string>
     <string name="status_health_subtitle">实时内核保护概览</string>
@@ -181,7 +175,7 @@
     <string name="section_actions">紧急与操作</string>
     <string name="btn_simulate_phishing">模拟钓鱼攻击</string>
     <string name="btn_export_vault_logs">导出保险库日志</string>
-    <string name="btn_panic_wipe">一键清空（Panic Wipe）</string>
+    <string name="btn_panic_wipe">一键清空</string>
     <string name="default_spam_label">已知垃圾号码</string>
     <string name="toast_number_blocked">号码已加入黑名单</string>
     <string name="toast_number_released">号码已从黑名单移除</string>
@@ -189,7 +183,7 @@
     <string name="toast_permission_denied">相机权限被拒绝</string>
     <string name="status_paused">已暂停</string>
     <string name="btn_allow_notification_access">允许通知访问</string>
-     <string name="alert_financial_title">财务警报</string>
+    <string name="alert_financial_title">财务警报</string>
     <string name="alert_service_title">服务警报</string>
     <string name="alert_anniversary_title">周年纪念提醒</string>
     <string name="alert_birthday_title">生日提醒</string>
@@ -204,17 +198,18 @@
     <string name="emergency_screen_countdown_desc">安全擦除正在倒计时执行...</string>
     <string name="btn_emergency_call_now">立即呼叫紧急救援</string>
     <string name="btn_emergency_cancel">取消紧急情况</string>
-    <string name="disclosure_dialog_message">Juaris 需要通知/无障碍访问权限以在本地保护您的设备。</string>
+    <string name="disclosure_dialog_message">Juaris 需要通知访问权限以在本地保护您的设备。</string>
     <string name="toast_vault_locked">保险库已成功锁定</string>
     <string name="protection_modules_title">保护模块</string>
     <string name="protection_modules_subtitle">实时活动安全过滤器</string>
-    <string name="toast_enable_listener_manual">请在设置中启用通知监听器</string>
-        
+    <string name="toast_enable_listener_manual">请在设置中启用通知服务</string>
+
     <string name="widget_title">🛡️ Juaris 360°</string>
     <string name="widget_subtitle">100%% 本地安全</string>
     <string name="btn_emergency_widget">🚨 紧急状态</string>
     <string name="app_ui_title_security">Juaris 控制台</string>
-    <string name="status_guardian_active_offline">状态: 防护已激活 (离线)</string>
-    <string name="title_intercepted_logs">已拦截的电话和短信 (日志):</string>
+    <string name="status_guardian_active_offline">状态：防护已激活（离线）</string>
+    <string name="title_intercepted_logs">已拦截的电话和短信（日志）：</string>
     <string name="logs_waiting_for_events">等待事件中...</string>
 </resources>
+
