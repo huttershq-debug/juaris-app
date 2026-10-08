@@ -24,7 +24,7 @@ class JuarisVpnService : VpnService() {
         private const val TAG = "JuarisZeroTrustKernel"
         private const val NOTIFICATION_ID = 1337
         const val CHANNEL_ID = "juaris_vpn_channel"
-       
+        
         private const val SECURE_UPSTREAM_DNS = "9.9.9.9"
         private const val DNS_PORT = 53
         private const val BUFFER_SIZE = 16384
@@ -41,7 +41,7 @@ class JuarisVpnService : VpnService() {
 
         startForegroundServiceWithNotification()
         startClockworkShieldEngine()
-        Log.d(TAG, "🚀 Juaris Uhrwerk-Engine aktiv: Gesicherter lokaler DNS-Tunnel gestartet.")
+        Log.d(TAG, "Juaris Uhrwerk-Engine aktiv: Gesicherter lokaler DNS-Tunnel gestartet.")
         return START_STICKY
     }
 
@@ -66,14 +66,14 @@ class JuarisVpnService : VpnService() {
         )
 
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Juaris 360° Schutz aktiv")
+            .setContentTitle("Juaris 360 Schutz aktiv")
             .setContentText("Lokaler Datenschutz-Filter läuft reibungslos.")
             .setSmallIcon(R.drawable.app_icon)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
-           
+            
         try {
             startForeground(NOTIFICATION_ID, notification)
         } catch (e: Exception) {
@@ -85,9 +85,9 @@ class JuarisVpnService : VpnService() {
         try {
             val builder = Builder()
                 .setSession("Juaris Uhrwerk Shield")
-                .addAddress("10.0.0.2", 32)
-                .addDnsServer("10.0.0.2")  
-                .addRoute("10.0.0.2", 32)
+                .addAddress("10.0.0.2", 24)
+                .addDnsServer("9.9.9.9")  
+                .addRoute("0.0.0.0", 0)
                 .setMtu(BUFFER_SIZE)
 
             vpnInterface = builder.establish()
@@ -103,13 +103,13 @@ class JuarisVpnService : VpnService() {
                         soTimeout = 5000
                     }
 
-                    Log.d(TAG, "📁 Juaris Uhrwerk-Shield erfolgreich etabliert. Schleife gestartet.")
+                    Log.d(TAG, "Juaris Uhrwerk-Shield erfolgreich etabliert. Schleife gestartet.")
 
                     while (isActive && isRunning) {
                         try {
                             packetBuffer.clear()
                             val length = inputStream.read(packetBuffer.array())
-                           
+                            
                             if (length > 0) {
                                 packetBuffer.limit(length)
                                 processLocalIpPacket(packetBuffer, length, outputStream, dnsSocket)
@@ -120,12 +120,12 @@ class JuarisVpnService : VpnService() {
                             delay(50)
                         }
                     }
-                   
+                    
                     try { dnsSocket.close() } catch (e: Exception) {}
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Kritischer Fehler beim Starten des Shields: ${e.message}")
+            Log.e(TAG, "Kritischer Fehler beim Starten des Shields: ${e.message}")
         }
     }
 
@@ -136,7 +136,7 @@ class JuarisVpnService : VpnService() {
         dnsSocket: DatagramSocket
     ) {
         val packetData = buffer.array()
-       
+        
         val ipVersionAndHeaderLength = packetData[0].toInt() and 0xFF
         val protocol = packetData[9].toInt() and 0xFF
 
@@ -174,7 +174,7 @@ class JuarisVpnService : VpnService() {
                     }
                 }
             } else {
-                Log.w(TAG, "🛡️ Juaris Firewall: Phishing/Spam-Domain lokal blockiert!")
+                Log.w(TAG, "Juaris Firewall: Phishing-Domain lokal blockiert!")
                 val blockPacket = buildDnsBlockPacket(packetData)
                 synchronized(vpnOutput) {
                     vpnOutput.write(blockPacket)
@@ -199,34 +199,31 @@ class JuarisVpnService : VpnService() {
         replyBuffer[5] = originalIpPacket[5]
         replyBuffer[6] = originalIpPacket[6]
         replyBuffer[7] = originalIpPacket[7]
-        replyBuffer[8] = 64 // TTL
-        replyBuffer[9] = 17 // UDP Protocol
+        replyBuffer[8] = 64
+        replyBuffer[9] = 17
         
-        // IP-Header Checksum initial auf 0 setzen vor Berechnung
         replyBuffer[10] = 0
         replyBuffer[11] = 0
 
-        System.arraycopy(originalIpPacket, 16, replyBuffer, 12, 4) // Source IP
-        System.arraycopy(originalIpPacket, 12, replyBuffer, 16, 4) // Dest IP
+        System.arraycopy(originalIpPacket, 16, replyBuffer, 12, 4)
+        System.arraycopy(originalIpPacket, 12, replyBuffer, 16, 4)
 
-        System.arraycopy(originalIpPacket, 22, replyBuffer, 20, 2) // Source Port
-        System.arraycopy(originalIpPacket, 20, replyBuffer, 22, 2) // Dest Port
+        System.arraycopy(originalIpPacket, 22, replyBuffer, 20, 2)
+        System.arraycopy(originalIpPacket, 20, replyBuffer, 22, 2)
         
         val udpLength = 8 + replyLength
         replyBuffer[24] = ((udpLength ushr 8) and 0xFF).toByte()
         replyBuffer[25] = (udpLength and 0xFF).toByte()
         
-        // UDP Checksum auf 0 (optional bei IPv4)
         replyBuffer[26] = 0
         replyBuffer[27] = 0
 
         System.arraycopy(dnsReply, 0, replyBuffer, 28, replyLength)
 
-        // Korrekte IP-Header-Prüfsumme berechnen
         val checksum = calculateIpChecksum(replyBuffer, 20)
         replyBuffer[10] = ((checksum ushr 8) and 0xFF).toByte()
         replyBuffer[11] = (checksum and 0xFF).toByte()
-       
+        
         return replyBuffer
     }
 
@@ -234,7 +231,7 @@ class JuarisVpnService : VpnService() {
         val replyBuffer = buildDnsReplyPacket(originalIpPacket, ByteArray(12), 12)
         System.arraycopy(originalIpPacket, 28, replyBuffer, 28, 2)
         replyBuffer[30] = 0x81.toByte()        
-        replyBuffer[31] = 0x83.toByte() // NXDOMAIN
+        replyBuffer[31] = 0x83.toByte()
         return replyBuffer
     }
 
@@ -263,9 +260,9 @@ class JuarisVpnService : VpnService() {
         try {
             vpnInterface?.close()
             vpnInterface = null
-            Log.d(TAG, "🛑 Juaris Engine sicher heruntergefahren.")
+            Log.d(TAG, "Juaris Engine sicher heruntergefahren.")
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Fehler beim Schließen: ${e.message}")
+            Log.e(TAG, "Fehler beim Schließen: ${e.message}")
         }
     }
 }
