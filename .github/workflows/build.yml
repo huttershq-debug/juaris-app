@@ -22,18 +22,20 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      -  name: Gradle Wrapper bereitstellen
-         run: |
-           mkdir -p gradle/wrapper
-           cat << 'EOF' > gradle/wrapper/gradle-wrapper.properties
-           distributionBase=GRADLE_USER_HOME
-           distributionPath=wrapper/dists
-           distributionUrl=https\://services.gradle.org/distributions/gradle-8.7-bin.zip
-           zipStoreBase=GRADLE_USER_HOME
-           zipStorePath=wrapper/dists
-           EOF
-           gradle wrapper --gradle-version 8.7 --distribution-type bin
-           chmod +x ./gradlew
+      - name: Gradle Wrapper bereitstellen
+        run: |
+          mkdir -p gradle/wrapper
+          cat << 'EOF' > gradle/wrapper/gradle-wrapper.properties
+          distributionBase=GRADLE_USER_HOME
+          distributionPath=wrapper/dists
+          distributionUrl=https\://services.gradle.org/distributions/gradle-8.7-bin.zip
+          zipStoreBase=GRADLE_USER_HOME
+          zipStorePath=wrapper/dists
+          EOF
+          
+          # Erzeugt das gradlew-Skript direkt über den Distribution-Befehl
+          gradle wrapper --gradle-version 8.7 --distribution-type bin
+          chmod +x ./gradlew
           
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
