@@ -1,101 +1,87 @@
 package com.juaris.app
 
 import android.content.Context
-import android.util.Base64
+import android.util.Log
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
-import net.sqlcipher.database.SQLiteDatabase
-import net.sqlcipher.database.SupportFactory
-import java.security.SecureRandom
+import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 
 @Database(
-    entities = [SecurityLogEntity::class, MeshPostEntity::class],
-    version = 2,
+    entities = [SecurityLogEntity::class],
+    version = 3,
     exportSchema = false
 )
 abstract class JuarisDatabase : RoomDatabase() {
 
     abstract fun securityLogDao(): SecurityLogDao
-    abstract fun meshDao(): MeshDao
 
     companion object {
-        @Volatile
-        private var INSTANCE: JuarisDatabase? = null
-
+        private const val TAG = "JuarisDb"
         private const val DB_NAME = "juaris_security_db"
-        private const val PREFS_FILE_NAME = "juaris_db_vault_key"
-        private const val PASSPHRASE_KEY = "db_crypto_passphrase"
 
-        fun getDatabase(context: Context): JuarisDatabase {
-            return INSTANCE ?: synchronized(this) {
-                val appContext = context.applicationContext
+        @Volatile
+        private var instance: JuarisDatabase? = null
 
-                // Initialisiert die nativen SQLCipher C++ Bibliotheken für Android
-                SQLiteDatabase.loadLibs(appContext)
+        /** true, wenn die Datenbank verschluesselt auf dem Geraet liegt. */
+        @Volatile
+        var isEncrypted: Boolean = false
+            private set
 
-                val passphrase = getOrCreateDatabasePassphrase(appContext)
-                val factory = SupportFactory(passphrase)
+        /** false, wenn nur ein fluechtiger Speicher im RAM verfuegbar war. */
+        @Volatile
+        var isPersistent: Boolean = false
+            private set
 
-                val instance = Room.databaseBuilder(
-                    appContext,
-                    JuarisDatabase::class.java,
-                    DB_NAME
-                )
-                    .openHelperFactory(factory) // Injiziert AES-256 Datenbank-Verschlüsselung
-                    .fallbackToDestructiveMigrationOnDowngrade() // Verhindert Datenverlust bei regulären App-Updates
-                    .build()
-
-                INSTANCE = instance
-                instance
+        /**
+         * Wirft nie. Nicht auf dem Main-Thread aufrufen (Keystore und native Bibliothek).
+         * Reihenfolge: verschluesselt -> Schluessel/DB zuruecksetzen und erneut -> RAM-Datenbank.
+         */
+        fun getDatabase(context: Context): JuarisDatabase =
+            instance ?: synchronized(this) {
+                instance ?: build(context.applicationContext).also { instance = it }
             }
+
+        private fun build(ctx: Context): JuarisDatabase {
+            openEncrypted(ctx)?.let {
+                isEncrypted = true
+                isPersistent = true
+                return it
+            }
+            Log.w(TAG, "Setze Schluessel und Datenbank zurueck und versuche es erneut.")
+            KeystoreVault.reset(ctx)
+            ctx.deleteDatabase(DB_NAME)
+            openEncrypted(ctx)?.let {
+                isEncrypted = true
+                isPersistent = true
+                return it
+            }
+            Log.e(TAG, "Verschluesselter Speicher nicht verfuegbar. Nutze fluechtigen Speicher.")
+            isEncrypted = false
+            isPersistent = false
+            return Room.inMemoryDatabaseBuilder(ctx, JuarisDatabase::class.java).build()
         }
 
-        private fun getOrCreateDatabasePassphrase(context: Context): ByteArray {
+        private fun openEncrypted(ctx: Context): JuarisDatabase? {
+            var db: JuarisDatabase? = null
             return try {
-                val masterKey = MasterKey.Builder(context)
-                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                System.loadLibrary("sqlcipher")
+                val passphrase = KeystoreVault.getOrCreatePassphrase(ctx)
+                db = Room.databaseBuilder(ctx, JuarisDatabase::class.java, DB_NAME)
+                    .openHelperFactory(SupportOpenHelperFactory(passphrase))
+                    .fallbackToDestructiveMigration()
                     .build()
-
-                val securePrefs = EncryptedSharedPreferences.create(
-                    context,
-                    PREFS_FILE_NAME,
-                    masterKey,
-                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                )
-
-                var savedKeyBase64 = securePrefs.getString(PASSPHRASE_KEY, null)
-
-                if (savedKeyBase64 == null) {
-                    // Kryptografisch sichere 256-Bit (32 Byte) Schlüsselgenerierung
-                    val randomBytes = ByteArray(32)
-                    SecureRandom().nextBytes(randomBytes)
-                    savedKeyBase64 = Base64.encodeToString(randomBytes, Base64.NO_WRAP)
-                    securePrefs.edit().putString(PASSPHRASE_KEY, savedKeyBase64).apply()
+                db.openHelper.writableDatabase // erzwingt das Oeffnen und die Schema-Pruefung jetzt
+                db
+            } catch (t: Throwable) {
+                Log.e(TAG, "Verschluesselte DB nicht verfuegbar: ${t.javaClass.simpleName}")
+                try {
+                    db?.close()
+                } catch (e: Throwable) {
+                    // ignorieren
                 }
-
-                Base64.decode(savedKeyBase64, Base64.NO_WRAP)
-            } catch (e: Exception) {
-                // Sichert den Zugriff ab, falls der Android KeyStore fehlschlägt
-                getFallbackPassphrase(context)
+                null
             }
-        }
-
-        private fun getFallbackPassphrase(context: Context): ByteArray {
-            val fallbackPrefs = context.getSharedPreferences("juaris_db_fallback_prefs", Context.MODE_PRIVATE)
-            var fallbackKey = fallbackPrefs.getString("fallback_key", null)
-
-            if (fallbackKey == null) {
-                val randomBytes = ByteArray(32)
-                SecureRandom().nextBytes(randomBytes)
-                fallbackKey = Base64.encodeToString(randomBytes, Base64.NO_WRAP)
-                fallbackPrefs.edit().putString("fallback_key", fallbackKey).apply()
-            }
-
-            return Base64.decode(fallbackKey, Base64.NO_WRAP)
         }
     }
 }
