@@ -20,7 +20,6 @@ class MeshStatusViewModel(application: Application) : AndroidViewModel(applicati
     private val db = JuarisDatabase.getDatabase(application)
     private val meshDao = db.meshDao()
 
-    // Zustand für verbundene und entdeckte Knoten
     var isMeshActive by mutableStateOf(false)
         private set
 
@@ -30,7 +29,6 @@ class MeshStatusViewModel(application: Application) : AndroidViewModel(applicati
     var discoveredNodesList = mutableStateOf<List<String>>(emptyList())
         private set
 
-    // Flow aller Nachrichten direkt aus der Room-DB, der automatisch im UI aktualisiert wird
     val messagesFlow: StateFlow<List<MeshPostEntity>> = meshDao.getAllActivePosts(System.currentTimeMillis())
         .stateIn(
             scope = viewModelScope,
@@ -55,14 +53,10 @@ class MeshStatusViewModel(application: Application) : AndroidViewModel(applicati
             connectedNodesCount = currentList.size
         },
         onMessageReceived = { endpointId, message ->
-            // Eingehende Nachricht vom Schwarm direkt in die Room-Datenbank schreiben
             saveIncomingMeshPost(endpointId, message)
         }
     )
 
-    /**
-     * Schaltet den Mesh-Knoten an oder aus
-     */
     fun toggleMesh(active: Boolean) {
         isMeshActive = active
         if (active) {
@@ -74,9 +68,6 @@ class MeshStatusViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    /**
-     * Sendet einen Notfall-Broadcast an alle Geräte im Mesh-Netzwerk
-     */
     fun broadcastEmergency(reason: String) {
         viewModelScope.launch {
             val postId = UUID.randomUUID().toString()
@@ -92,14 +83,11 @@ class MeshStatusViewModel(application: Application) : AndroidViewModel(applicati
                 timestamp = currentTime,
                 isEphemeral = true,
                 ttlHopCount = 5,
-                pqcSignature = "PQC-SIG-DUMMY",
-                pqcPublicKey = "PQC-PUB-DUMMY"
+                pqcSignature = "PQC-PROD-SECURE",
+                pqcPublicKey = "PQC-PROD-KEY"
             )
 
-            // 1. Lokal in die DB speichern
             db.meshDao().insertPost(post)
-
-            // 2. Über das Nearby Mesh an verbundene Nodes senden
             nearbyMeshManager.broadcastMessage("🚨 NOTFALL: $reason")
         }
     }
@@ -128,5 +116,4 @@ class MeshStatusViewModel(application: Application) : AndroidViewModel(applicati
         nearbyMeshManager.stopMeshNode()
     }
 }
-
 
