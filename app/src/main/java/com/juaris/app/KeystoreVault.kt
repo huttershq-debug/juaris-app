@@ -11,10 +11,6 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
-/**
- * Verwahrt die Datenbank-Passphrase: eine zufaellige 32-Byte-Passphrase wird mit einem
- * Android-Keystore-Schluessel (AES-GCM) verschluesselt abgelegt. Es gibt keinen Klartext-Fallback.
- */
 internal object KeystoreVault {
     private const val ANDROID_KEYSTORE = "AndroidKeyStore"
     private const val ALIAS = "juaris_db_wrap_key_v1"
@@ -23,7 +19,6 @@ internal object KeystoreVault {
     private const val TRANSFORMATION = "AES/GCM/NoPadding"
     private const val GCM_TAG_BITS = 128
 
-    /** Wirft eine Exception, wenn der Keystore nicht nutzbar ist; der Aufrufer behandelt das. */
     fun getOrCreatePassphrase(context: Context): ByteArray {
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         val wrapKey = getOrCreateWrapKey()
@@ -41,12 +36,10 @@ internal object KeystoreVault {
         try {
             context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().clear().commit()
         } catch (e: Throwable) {
-            // ignorieren
         }
         try {
             KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }.deleteEntry(ALIAS)
         } catch (e: Throwable) {
-            // ignorieren
         }
     }
 
@@ -84,3 +77,5 @@ internal object KeystoreVault {
         cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(GCM_TAG_BITS, iv))
         return cipher.doFinal(cipherText)
     }
+}
+
