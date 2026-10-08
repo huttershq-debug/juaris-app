@@ -13,15 +13,16 @@ class BillingManager(
 
     companion object {
         private const val TAG = "JuarisBillingKernel"
-        
-        // KORREKTUR 1: Nutze das automatische BuildConfig-Flag.
-        // Garantiert 100% kostenloses Testen im Debug-Modus, schaltet das Abo im Store aber unfehlbar scharf!
         private val IS_BETA_BYPASS_ACTIVE: Boolean = BuildConfig.DEBUG
     }
 
     private var billingClient: BillingClient = BillingClient.newBuilder(context)
         .setListener(this)
-        .enablePendingPurchases()
+        .enablePendingPurchases(
+            PendingPurchasesParams.newBuilder()
+                .enableOneTimeProducts()
+                .build()
+        )
         .build()
 
     fun startConnection(onReady: () -> Unit = {}) {
@@ -41,7 +42,7 @@ class BillingManager(
             }
 
             override fun onBillingServiceDisconnected() {
-                // Automatischer Reconnect-Versuch bei nächster Gelegenheit
+                // Reconnect
             }
         })
     }
@@ -52,9 +53,8 @@ class BillingManager(
                 .setProductType(BillingClient.ProductType.SUBS)
                 .build()
         ) { result, purchases ->
-            if (result.responseCode == BillingClient.BillingResponseCode.OK && purchases.isNotEmpty()) {
+            if (result.responseCode == BillingClient.BillingResponseCode.OK) {
                 for (purchase in purchases) {
-                    // Bestehende Käufe beim App-Start ebenfalls verifizieren & bestätigen
                     handlePurchase(purchase)
                 }
             }
@@ -77,8 +77,8 @@ class BillingManager(
         val params = QueryProductDetailsParams.newBuilder().setProductList(productList).build()
 
         billingClient.queryProductDetailsAsync(params) { billingResult, productDetailsList ->
-            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && productDetailsList.isNotEmpty()) {
-                val productDetails = productDetailsList.first()
+            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && !productDetailsList.isNullOrEmpty()) {
+                val productDetails = productDetailsList[0]
                 val offerToken = productDetails.subscriptionOfferDetails?.firstOrNull()?.offerToken ?: return@queryProductDetailsAsync
 
                 val productDetailsParamsList = listOf(
@@ -105,17 +105,13 @@ class BillingManager(
         }
     }
 
-    /**
-     * KORREKTUR 2: Verarbeitet und bestätigt (Acknowledged) den Kauf bei Google.
-     * Verhindert das automatische Google-Storno nach 3 Tagen und sichert deine Umsätze!
-     */
     private fun handlePurchase(purchase: Purchase) {
         if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
             if (!purchase.isAcknowledged) {
                 val acknowledgePurchaseParams = AcknowledgePurchaseParams.newBuilder()
                     .setPurchaseToken(purchase.purchaseToken)
                     .build()
-                
+               
                 billingClient.acknowledgePurchase(acknowledgePurchaseParams) { billingResult ->
                     if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                         Log.d(TAG, "✅ Kauf erfolgreich bei Google bestätigt!")
@@ -125,11 +121,9 @@ class BillingManager(
                     }
                 }
             } else {
-                // Bereits bestätigter, aktiver Kauf
                 onSubscriptionActive()
             }
         }
     }
 }
-
 
