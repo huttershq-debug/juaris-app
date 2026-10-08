@@ -27,17 +27,16 @@
     <string name="log_email_incoming_blocked">Incoming malicious email blocked: %1$s</string>
     <string name="log_email_outgoing_blocked">Outgoing email stopped (Security Risk): %1$s</string>
     <string name="juaris_app_welcome_text" formatted="false">Welcome to Juaris, your security app of the future. 100% transparent, 100% on your phone. No cloud. Your protection, your home, your rules.</string>
-    <string name="juaris_app_welcome_audio_file">platzhalter_en.m4a</string>
+    <string name="juaris_app_welcome_audio_file">welcome_audio_en.m4a</string>
     <string name="vpn_disclosure_title">Juaris VPN Security Notice</string>
     <string name="vpn_disclosure_message">Juaris uses a local VpnService to detect phishing and malware directly on your device.\n\nAll data remains 100%% local. Nothing is sent to external servers or clouds.</string>
     <string name="btn_understood">Understood &amp; Activate</string>
     <string name="btn_cancel">Cancel</string>
-   
-    
+
     <string name="p2p_swarm_title">Juaris Swarm Mesh (P2P)</string>
     <string name="p2p_swarm_subtitle">Secure, decentralized communication without internet</string>
     <string name="mesh_broadcast_title">Broadcast message to swarm</string>
-    <string name="label_message_placeholder">Enter message...</string>
+    <string name="label_message_input">Enter message...</string>
     <string name="checkbox_ephemeral">Delete message after reading (Ephemeral)</string>
     <string name="btn_broadcast">Send to Swarm</string>
     <string name="mesh_packets_count">Active Swarm Packets (%d)</string>
@@ -53,13 +52,11 @@
     <string name="toast_p2p_started">P2P Mesh node started successfully!</string>
     <string name="toast_bluetooth_missing">Bluetooth permissions are required!</string>
 
-    
     <string name="logs_page_title">Security Logs</string>
     <string name="logs_page_subtitle">Overview of all intercepted threats and events</string>
     <string name="logs_empty_message">No events recorded yet. Your system is secure.</string>
     <string name="logs_module_prefix">Module: %s</string>
 
-    
     <string name="privacy_text">Privacy Policy</string>
     <string name="privacy_link">Read Privacy Policy</string>
     <string name="imprint_title">Imprint</string>
@@ -74,13 +71,11 @@
     <string name="imprint_name_y">Disclaimer</string>
     <string name="company_footer">Juaris Security - All rights reserved</string>
 
-    
     <string name="air_gesture_subtitle">Control your device with hand movements</string>
     <string name="air_gesture_desc">Use contactless gestures to navigate</string>
     <string name="air_gesture_status">Sensor Ready</string>
     <string name="air_gesture_action">Trigger Action</string>
-    
-    
+
     <string name="mesh_page_title">Mesh Network</string>
     <string name="mesh_page_subtitle">Decentralized communication</string>
     <string name="legal_page_title">Legal Information</string>
@@ -116,8 +111,7 @@
     <string name="blacklist_items_title">Blocked Entries</string>
     <string name="btn_release">Release</string>
     <string name="clipboard_page_title">Clipboard</string>
-    
-    
+
     <string name="comm_filter_title">Communication Filter</string>
     <string name="call_prot_title">Call Protection</string>
     <string name="call_prot_desc">Protect against suspicious calls</string>
@@ -125,7 +119,7 @@
     <string name="sms_prot_desc">Protect against phishing text messages</string>
     <string name="email_prot_title">Email Protection</string>
     <string name="email_prot_desc">Protect against malicious emails</string>
-    <string name="toast_enable_listener">Listener successfully enabled</string>
+    <string name="toast_enable_listener">Notification service successfully enabled</string>
     <string name="offline_vault_title">Offline Vault</string>
     <string name="offline_vault_desc">Secure local storage for sensitive data</string>
     <string name="vault_status_unlocked">Vault Unlocked</string>
@@ -142,7 +136,7 @@
     <string name="toast_calendar_warning">Calendar permission needed for autonomous scan</string>
     <string name="toast_vpn_granted">VPN permission granted</string>
     <string name="toast_vpn_rejected">VPN permission rejected</string>
-    <string name="toast_enable_notification_manual">Please enable notification listener manually</string>
+    <string name="toast_enable_notification_manual">Please enable notification service in settings</string>
     <string name="emergency_reason_sensor">Emergency triggered by sensor</string>
     <string name="emergency_reason_manual">Manual panic button triggered</string>
     <string name="toast_debugger_detected">Warning: Debugger detected!</string>
@@ -204,12 +198,12 @@
     <string name="emergency_screen_countdown_desc">Secure wipe executing in countdown...</string>
     <string name="btn_emergency_call_now">Call Emergency Now</string>
     <string name="btn_emergency_cancel">Cancel Emergency</string>
-    <string name="disclosure_dialog_message">Juaris requires notification/accessibility access to protect your device locally.</string>
+    <string name="disclosure_dialog_message">Juaris requires notification access to protect your device locally.</string>
     <string name="toast_vault_locked">Vault locked successfully</string>
     <string name="protection_modules_title">Protection Modules</string>
     <string name="protection_modules_subtitle">Active real-time security filters</string>
-    <string name="toast_enable_listener_manual">Please enable notification listener in settings</string>
-        
+    <string name="toast_enable_listener_manual">Please enable notification service in settings</string>
+
     <string name="widget_title">🛡️ Juaris 360°</string>
     <string name="widget_subtitle">100%% Secure &amp; Local</string>
     <string name="btn_emergency_widget">🚨 EMERGENCY</string>
@@ -218,3 +212,4 @@
     <string name="title_intercepted_logs">Intercepted Calls &amp; SMS (Log):</string>
     <string name="logs_waiting_for_events">Waiting for events...</string>
 </resources>
+
