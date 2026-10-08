@@ -26,7 +26,6 @@ import com.juaris.app.R
 fun SwarmMeshPage() {
     val context = LocalContext.current
     val db = remember { JuarisDatabase.getDatabase(context) }
-    // KORREKTUR: currentTime übergeben, damit der Compiler nicht meckert
     val postsFlow = remember { db.meshDao().getAllActivePosts(currentTime = System.currentTimeMillis()) }
     val posts by postsFlow.collectAsState(initial = emptyList())
 
@@ -112,7 +111,7 @@ fun SwarmMeshPage() {
                     OutlinedTextField(
                         value = inputMessage,
                         onValueChange = { inputMessage = it },
-                        label = { Text(stringResource(R.string.label_message_placeholder), color = Color.Gray) },
+                        label = { Text(stringResource(R.string.label_message_input), color = Color.Gray) },
                         modifier = Modifier.fillMaxWidth()
                     )
                     Row(
@@ -154,7 +153,7 @@ fun SwarmMeshPage() {
             }
         }
         item { Text(stringResource(R.string.mesh_packets_count, posts.size), style = MaterialTheme.typography.titleMedium, color = neonGreen) }
-        
+       
         items(posts) { post ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
