@@ -27,13 +27,12 @@
     <string name="log_email_incoming_blocked">Correo electrónico malicioso entrante bloqueado: %1$s</string>
     <string name="log_email_outgoing_blocked">Correo electrónico saliente detenido (Riesgo de seguridad): %1$s</string>
     <string name="juaris_app_welcome_text" formatted="false">Bienvenido a Juaris, tu app de seguridad del futuro. 100% transparente, 100% en tu móvil. Sin nube. Tu protección, tu hogar, tus reglas.</string>
-    <string name="juaris_app_welcome_audio_file">platzhalter_es.m4a</string>
+    <string name="juaris_app_welcome_audio_file">welcome_audio_es.m4a</string>
     <string name="vpn_disclosure_title">Aviso de seguridad de Juaris VPN</string>
     <string name="vpn_disclosure_message">Juaris utiliza un VpnService local para detectar phishing y malware directamente en tu dispositivo.\n\nTodos los datos permanecen 100%% locales. No se envía nada a servidores externos o nubes.</string>
     <string name="btn_understood">Entendido y Activar</string>
     <string name="btn_cancel">Cancelar</string>
-   
-    
+
     <string name="p2p_swarm_title">Malla de Enjambre Juaris (P2P)</string>
     <string name="p2p_swarm_subtitle">Comunicación segura y descentralizada sin Internet</string>
     <string name="mesh_broadcast_title">Transmitir mensaje al enjambre</string>
@@ -53,13 +52,11 @@
     <string name="toast_p2p_started">¡Nodo de malla P2P iniciado con éxito!</string>
     <string name="toast_bluetooth_missing">¡Se requieren permisos de Bluetooth!</string>
 
-    
     <string name="logs_page_title">Registros de seguridad</string>
     <string name="logs_page_subtitle">Resumen de todas las amenazas y eventos interceptados</string>
     <string name="logs_empty_message">Aún no hay eventos registrados. Tu sistema está seguro.</string>
     <string name="logs_module_prefix">Módulo: %s</string>
 
-    
     <string name="privacy_text">Política de privacidad</string>
     <string name="privacy_link">Leer política de privacidad</string>
     <string name="imprint_title">Aviso legal</string>
@@ -74,13 +71,11 @@
     <string name="imprint_name_y">Descargo de responsabilidad</string>
     <string name="company_footer">Juaris Security - Todos los derechos reservados</string>
 
-    
     <string name="air_gesture_subtitle">Controla tu dispositivo con movimientos de manos</string>
     <string name="air_gesture_desc">Usa gestos sin contacto para navegar</string>
     <string name="air_gesture_status">Sensor listo</string>
     <string name="air_gesture_action">Disparar acción</string>
-    
-    
+
     <string name="mesh_page_title">Red de malla</string>
     <string name="mesh_page_subtitle">Comunicación descentralizada</string>
     <string name="legal_page_title">Información legal</string>
@@ -116,8 +111,7 @@
     <string name="blacklist_items_title">Entradas bloqueadas</string>
     <string name="btn_release">Liberar</string>
     <string name="clipboard_page_title">Portapapeles</string>
-    
-    
+
     <string name="comm_filter_title">Filtro de comunicación</string>
     <string name="call_prot_title">Protección de llamadas</string>
     <string name="call_prot_desc">Proteger contra llamadas sospechosas</string>
@@ -125,7 +119,7 @@
     <string name="sms_prot_desc">Proteger contra mensajes de texto de phishing</string>
     <string name="email_prot_title">Protección de correo</string>
     <string name="email_prot_desc">Proteger contra correos maliciosos</string>
-    <string name="toast_enable_listener">Oyente habilitado con éxito</string>
+    <string name="toast_enable_listener">Servicio de escucha activado con éxito</string>
     <string name="offline_vault_title">Bóveda offline</string>
     <string name="offline_vault_desc">Almacenamiento local seguro para datos sensibles</string>
     <string name="vault_status_unlocked">Bóveda desbloqueada</string>
@@ -142,7 +136,7 @@
     <string name="toast_calendar_warning">Se necesita permiso de calendario para el escaneo autónomo</string>
     <string name="toast_vpn_granted">Permiso VPN concedido</string>
     <string name="toast_vpn_rejected">Permiso VPN rechazado</string>
-    <string name="toast_enable_notification_manual">Habilite el oyente de notificaciones manualmente</string>
+    <string name="toast_enable_notification_manual">Por favor, activa el servicio de escucha de notificaciones en los ajustes</string>
     <string name="emergency_reason_sensor">Emergencia activada por sensor</string>
     <string name="emergency_reason_manual">Botón de pánico manual activado</string>
     <string name="toast_debugger_detected">Advertencia: ¡Depurador detectado!</string>
@@ -189,7 +183,7 @@
     <string name="toast_permission_denied">Permiso de cámara denegado</string>
     <string name="status_paused">En pausa</string>
     <string name="btn_allow_notification_access">Permitir acceso a notificaciones</string>
-     <string name="alert_financial_title">Alerta financiera</string>
+    <string name="alert_financial_title">Alerta financiera</string>
     <string name="alert_service_title">Alerta de servicio</string>
     <string name="alert_anniversary_title">Recordatorio de aniversario</string>
     <string name="alert_birthday_title">Recordatorio de cumpleaños</string>
@@ -208,8 +202,8 @@
     <string name="toast_vault_locked">Bóveda bloqueada con éxito</string>
     <string name="protection_modules_title">Módulos de protección</string>
     <string name="protection_modules_subtitle">Filtros de seguridad activos en tiempo real</string>
-    <string name="toast_enable_listener_manual">Por favor, active el escucha de notificaciones en la configuración</string>
-        
+    <string name="toast_enable_listener_manual">Por favor, activa el servicio de escucha de notificaciones en los ajustes</string>
+
     <string name="widget_title">🛡️ Juaris 360°</string>
     <string name="widget_subtitle">100%% Seguro y Local</string>
     <string name="btn_emergency_widget">🚨 EMERGENCIA</string>
@@ -218,3 +212,5 @@
     <string name="title_intercepted_logs">Llamadas y SMS Interceptados (Log):</string>
     <string name="logs_waiting_for_events">Esperando eventos...</string>
 </resources>
+
+
