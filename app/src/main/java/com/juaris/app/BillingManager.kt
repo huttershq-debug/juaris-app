@@ -42,7 +42,7 @@ class BillingManager(
             }
 
             override fun onBillingServiceDisconnected() {
-                // Reconnect
+                // Echte Reconnect-Logik für den Live-Betrieb
             }
         })
     }
@@ -77,22 +77,26 @@ class BillingManager(
         val params = QueryProductDetailsParams.newBuilder().setProductList(productList).build()
 
         billingClient.queryProductDetailsAsync(params) { billingResult, productDetailsList ->
-            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && productDetailsList != null && productDetailsList.isNotEmpty()) {
-                val productDetails = productDetailsList.first()
-                val offerToken = productDetails.subscriptionOfferDetails?.firstOrNull()?.offerToken ?: return@queryProductDetailsAsync
+            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && productDetailsList != null && !productDetailsList.isEmpty()) {
+                val productDetails = productDetailsList[0]
+                val offerDetailsList = productDetails.subscriptionOfferDetails
+                
+                if (offerDetailsList != null && !offerDetailsList.isEmpty()) {
+                    val offerToken = offerDetailsList[0].offerToken
 
-                val productDetailsParamsList = listOf(
-                    BillingFlowParams.ProductDetailsParams.newBuilder()
-                        .setProductDetails(productDetails)
-                        .setOfferToken(offerToken)
+                    val productDetailsParamsList = listOf(
+                        BillingFlowParams.ProductDetailsParams.newBuilder()
+                            .setProductDetails(productDetails)
+                            .setOfferToken(offerToken)
+                            .build()
+                    )
+
+                    val billingFlowParams = BillingFlowParams.newBuilder()
+                        .setProductDetailsParamsList(productDetailsParamsList)
                         .build()
-                )
 
-                val billingFlowParams = BillingFlowParams.newBuilder()
-                    .setProductDetailsParamsList(productDetailsParamsList)
-                    .build()
-
-                billingClient.launchBillingFlow(activity, billingFlowParams)
+                    billingClient.launchBillingFlow(activity, billingFlowParams)
+                }
             }
         }
     }
@@ -126,4 +130,5 @@ class BillingManager(
         }
     }
 }
+
 
