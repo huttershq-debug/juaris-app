@@ -22,9 +22,10 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Gradle Wrapper bereitstellen
+      - name: Generate and Make Gradle Wrapper Executable
         run: |
           if [ ! -f "./gradlew" ]; then
+            echo "Gradle wrapper not found, generating it via gradle-command..."
             gradle wrapper --gradle-version 8.13
           fi
           chmod +x ./gradlew
@@ -34,7 +35,11 @@ jobs:
         with:
           packages: 'platforms;android-36 build-tools;36.0.0'
 
-      - name: Gradle Cache
+      - name: Accept Android SDK Licenses
+        run: |
+          yes | sdkmanager --licenses || true
+
+      - name: Setup Gradle Cache
         uses: actions/cache@v4
         with:
           path: |
@@ -44,43 +49,101 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Keystore dekodieren
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+      - name: Decode Keystore
         run: |
-          echo "$KEYSTORE_BASE64" | base64 --decode > "$GITHUB_WORKSPACE/juaris-release-key.jks"
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "$GITHUB_WORKSPACE/juaris-release-key.jks"
 
-      - name: Android Lint
-        run: ./gradlew :app:lintRelease --stacktrace
+      # Intelligente XML-Deduplizierung für alle Sprachen
+      - name: Intelligente XML-Deduplizierung für alle Sprachen (Python-Kernel)
+        run: |
+          python3 -c '
+          import xml.etree.ElementTree as ET
+          import glob
 
-      - name: Lint-Berichte hochladen
+          for path in glob.glob("app/src/main/res/**/strings.xml", recursive=True):
+              try:
+                  parser = ET.XMLParser(target=ET.TreeBuilder(insert_comments=True))
+                  tree = ET.parse(path, parser=parser)
+                  root = tree.getroot()
+                 
+                  seen_names = set()
+                  new_children = []
+                  duplicates_found = 0
+
+                  for child in root:
+                      if child.tag == "string":
+                          name = child.attrib.get("name")
+                          if name in seen_names:
+                              duplicates_found += 1
+                              continue
+                          seen_names.add(name)
+                      new_children.append(child)
+
+                  if duplicates_found > 0:
+                      root[:] = new_children
+                      tree.write(path, encoding="utf-8", xml_declaration=True)
+                     
+                      with open(path, "r", encoding="utf-8") as f:
+                          content = f.read()
+                      content = content.replace("&amp;amp;", "&amp;")
+                      with open(path, "w", encoding="utf-8") as f:
+                          f.write(content)
+                         
+                      print(f"🟢 Bereinigt: {path} ({duplicates_found} Duplikate entfernt)")
+                  else:
+                      print(f"⚪ Keine Duplikate in: {path}")
+              except Exception as e:
+                  print(f"❌ Fehler beim Verarbeiten von {path}: {e}")
+          '
+
+      - name: Run Android Lint (Statische Code-Analyse)
+        run: |
+          echo "Scanne den Code nach Fehlern und Problemen..."
+          ./gradlew lintRelease --stacktrace
+
+      - name: Upload Lint Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: juaris-lint-results
           path: app/build/reports/lint-results*
 
-      - name: Unit-Tests
-        run: ./gradlew testDebugUnitTest --stacktrace
+      - name: Run Unit Tests
+        run: |
+          echo "Führe Unit-Tests aus..."
+          ./gradlew testDebugUnitTest --stacktrace
 
-      - name: APK und AAB bauen
+      - name: Upload Unit Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: juaris-unit-test-results
+          path: app/build/reports/tests/testDebugUnitTest/
+
+      - name: Build Both AAB and APK
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew assembleRelease bundleRelease --stacktrace
+        run: |
+          echo "Kompiliere APK und AAB mit 3GB Heap..."
+          ./gradlew assembleRelease bundleRelease --stacktrace \
+            -Dorg.gradle.jvmargs="-Xmx3g" \
+            -Pandroid.useAndroidX=true \
+            -Pandroid.enableJetifier=false
 
-      - name: Release veroeffentlichen
+      - name: Release Both Files
         uses: softprops/action-gh-release@v2
         with:
           files: |
             app/build/outputs/bundle/release/**/*.aab
             app/build/outputs/apk/release/**/*.apk
           tag_name: v1.0.0-${{ github.run_number }}
-          name: "Juaris v1.0.0-${{ github.run_number }}"
-          body: "AAB fuer den Play Store und APK zum direkten Installieren."
+          name: "Juaris Release v1.0.0-${{ github.run_number }} (AAB & APK)"
+          body: "Dieses Release enthält sowohl die .aab-Datei für den Google Play Store als auch die .apk-Datei zum direkten Installieren auf dem Handy."
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Keystore entfernen
         if: always()
         run: rm -f "$GITHUB_WORKSPACE/juaris-release-key.jks"
+
