@@ -8,7 +8,6 @@ package com.juaris.app
 import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
-import android.app.role.RoleManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -74,20 +73,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var securePrefs: SharedPreferences
     private var emergencyReceiver: BroadcastReceiver? = null
     private lateinit var billingManager: BillingManager
-
-    private val callScreeningRoleLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { _ -> }
-
-    private val smsRoleLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            Toast.makeText(this, "Juaris ist jetzt als Standard-SMS-Wächter aktiv!", Toast.LENGTH_LONG).show()
-        } else {
-            Toast.makeText(this, "SMS-Rolle wurde abgelehnt.", Toast.LENGTH_SHORT).show()
-        }
-    }
+    private var hasBootedServices = false
 
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -106,7 +92,7 @@ class MainActivity : AppCompatActivity() {
         if (isGranted) {
             Toast.makeText(this, "Kalender-Zugriff erlaubt! Fristen-Wächter aktiv.", Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(this, "Hinweis: Ohne Kalender-Zugriff kann Juaris Termine nicht automatisch scannen.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Hinweis: Ohne Kalender-Zugriff kann Juaris Termine nicht automatisch scannen.", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -157,7 +143,6 @@ class MainActivity : AppCompatActivity() {
         billingManager.startConnection {}
 
         checkRuntimeIntegrity()
-        checkAndBootProtectionServices()
         registerEmergencyReceiver()
 
         setContent {
@@ -221,7 +206,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        checkAndBootProtectionServices()
+        if (!hasBootedServices) {
+            hasBootedServices = true
+            checkAndBootProtectionServices()
+        }
     }
 
     private fun checkAndBootProtectionServices() {
@@ -285,13 +273,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             startJuarisProtectionService()
             requestBatteryOptimizationExemption()
-
-            val alreadyAskedSms = securePrefs.getBoolean("already_asked_sms", false)
-            if (!alreadyAskedSms) {
-                securePrefs.edit().putBoolean("already_asked_sms", true).apply()
-                requestCallScreeningRoleIfNeeded()
-                requestSmsRoleIfNeeded()
-            }
         }
     }
 
@@ -391,30 +372,6 @@ class MainActivity : AppCompatActivity() {
             startService(intent)
         }
         Toast.makeText(this, "Juaris DNS-Shield Firewall gestartet!", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun requestCallScreeningRoleIfNeeded() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val roleManager = getSystemService(RoleManager::class.java)
-            if (roleManager != null && roleManager.isRoleAvailable(RoleManager.ROLE_CALL_SCREENING)) {
-                if (!roleManager.isRoleHeld(RoleManager.ROLE_CALL_SCREENING)) {
-                    val intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_CALL_SCREENING)
-                    callScreeningRoleLauncher.launch(intent)
-                }
-            }
-        }
-    }
-
-    private fun requestSmsRoleIfNeeded() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val roleManager = getSystemService(RoleManager::class.java)
-            if (roleManager != null && roleManager.isRoleAvailable(RoleManager.ROLE_SMS)) {
-                if (!roleManager.isRoleHeld(RoleManager.ROLE_SMS)) {
-                    val intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_SMS)
-                    smsRoleLauncher.launch(intent)
-                }
-            }
-        }
     }
 
     private fun requestBatteryOptimizationExemption() {
@@ -981,7 +938,7 @@ fun ProtectionModulesPage(
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text("SMS-Phishing-Filter", style = MaterialTheme.typography.bodyLarge, color = Color.White)
-                            Text("Standard-SMS-App Engine", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                            Text("Passiver SMS-Wächter", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                         }
                         Switch(checked = smsProtection, onCheckedChange = onSmsChange)
                     }
@@ -1385,3 +1342,4 @@ fun PrivacyAndLegalContent() {
         }
     }
 }
+
