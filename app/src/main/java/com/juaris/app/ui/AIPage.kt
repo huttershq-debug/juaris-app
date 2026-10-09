@@ -172,7 +172,7 @@ fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
                                     }
 
                                     if (totalFound == 0) {
-                                        "🔍 Deep-Scan abgeschlossen: Keine kritischen Versorger- oder Energiemuster (global multilingual) im System gefunden."
+                                        "🔍 Deep-Scan abgeschlossen: Keine kritischen Versorger- or Energiemuster (global multilingual) im System gefunden."
                                     } else {
                                         "🚨 **Full-Device Scan erfolgreich!** $totalFound relevante Einträge im System verifiziert:\n\n$reportBuilder"
                                     }
@@ -211,5 +211,4 @@ fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
         }
     }
 }
-
 
