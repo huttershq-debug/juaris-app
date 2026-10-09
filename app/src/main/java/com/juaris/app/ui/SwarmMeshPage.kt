@@ -1,5 +1,6 @@
 package com.juaris.app.ui
 
+import android.Manifest
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -81,10 +82,19 @@ fun SwarmMeshPage() {
         }
     }
 
+    // Dynamischer Berechtigungs-Launcher für Android 12+ (API 31+) und ältere Versionen
     val bluetoothPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        if (permissions.values.all { it }) {
+        val allGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            permissions[Manifest.permission.BLUETOOTH_SCAN] == true &&
+            permissions[Manifest.permission.BLUETOOTH_CONNECT] == true &&
+            permissions[Manifest.permission.BLUETOOTH_ADVERTISE] == true
+        } else {
+            permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+        }
+
+        if (allGranted) {
             meshManager.startMeshNode()
             scanStatusText = statusMeshActiveText
             Toast.makeText(context, toastP2pStartedText, Toast.LENGTH_SHORT).show()
@@ -179,13 +189,13 @@ fun SwarmMeshPage() {
                         onClick = {
                             val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                 arrayOf(
-                                    android.Manifest.permission.BLUETOOTH_SCAN,
-                                    android.Manifest.permission.BLUETOOTH_ADVERTISE,
-                                    android.Manifest.permission.BLUETOOTH_CONNECT
+                                    Manifest.permission.BLUETOOTH_SCAN,
+                                    Manifest.permission.BLUETOOTH_ADVERTISE,
+                                    Manifest.permission.BLUETOOTH_CONNECT
                                 )
                             } else {
                                 arrayOf(
-                                    android.Manifest.permission.ACCESS_FINE_LOCATION
+                                    Manifest.permission.ACCESS_FINE_LOCATION
                                 )
                             }
                             bluetoothPermissionLauncher.launch(permissions)
