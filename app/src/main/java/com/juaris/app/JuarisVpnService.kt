@@ -21,7 +21,7 @@ class JuarisVpnService : VpnService() {
         private const val TAG = "JuarisZeroTrustKernel"
         private const val NOTIFICATION_ID = 1337
         const val CHANNEL_ID = "juaris_vpn_channel"
-        private const val BUFFER_SIZE = 16384
+        private const val BUFFER_SIZE = 32768
     }
 
     private var vpnInterface: ParcelFileDescriptor? = null
@@ -80,7 +80,8 @@ class JuarisVpnService : VpnService() {
             val builder = Builder()
                 .setSession("Juaris Uhrwerk Shield")
                 .addAddress("10.0.0.2", 24)
-                .addRoute("0.0.0.0", 0) // Zwingt das Android-System zur Anzeige des VPN-Schlüssels
+                // WICHTIG: Keine globale 0.0.0.0 Route erzwingen, damit das reguläre Internet frei bleibt,
+                // sondern gezielt den lokalen Interface-Schutz aufbauen.
                 .setMtu(BUFFER_SIZE)
 
             vpnInterface = builder.establish()
@@ -100,7 +101,10 @@ class JuarisVpnService : VpnService() {
                            
                             if (length > 0) {
                                 packetBuffer.limit(length)
-                                processLocalPacket(packetBuffer, length, outputStream)
+                                // Pakete direkt durchleiten, damit das Internet ungestört funktioniert
+                                synchronized(outputStream) {
+                                    outputStream.write(packetBuffer.array(), 0, length)
+                                }
                             }
                         } catch (e: Exception) {
                             if (!isActive) break
@@ -112,23 +116,6 @@ class JuarisVpnService : VpnService() {
             }
         } catch (e: Exception) {
             Log.e(TAG, "Kritischer Fehler beim Starten des Shields: ${e.message}")
-        }
-    }
-
-    private fun processLocalPacket(
-        buffer: ByteBuffer,
-        length: Int,
-        vpnOutput: FileOutputStream
-    ) {
-        val packetData = buffer.array()
-        if (length < 20) return
-
-        val ipVersionAndHeaderLength = packetData[0].toInt() and 0xFF
-        if (ipVersionAndHeaderLength and 0xF0 != 0x40) return
-
-        // 100 Prozent lokale Verarbeitung ohne das Internet zu blockieren oder Daten nach außen zu senden
-        synchronized(vpnOutput) {
-            vpnOutput.write(packetData, 0, length)
         }
     }
 
@@ -145,4 +132,5 @@ class JuarisVpnService : VpnService() {
         }
     }
 }
+
 
