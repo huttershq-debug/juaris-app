@@ -140,7 +140,7 @@ class MainActivity : AppCompatActivity() {
         billingManager = BillingManager(this, "juaris_monats_abo") {
             securePrefs.edit().putBoolean("subscription_active", true).apply()
         }
-        billingManager.startConnection {}
+        billingManager.startConnection ()
 
         checkRuntimeIntegrity()
         registerEmergencyReceiver()
