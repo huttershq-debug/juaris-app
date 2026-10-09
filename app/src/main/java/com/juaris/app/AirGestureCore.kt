@@ -70,15 +70,16 @@ class AirGestureCore(private val context: Context) {
                     val delta = currentLuminance - lastLuminance
                     onDebugInfo("Sensor aktiv | Delta: %.1f".format(delta))
 
-                    if (abs(delta) > 15.0) {
+                    // Angepasster, entspannter Schwellenwert (Delta > 10.0) für flüssige Bedienung
+                    if (abs(delta) > 10.0) {
                         consecutiveTriggers++
                         if (consecutiveTriggers >= 2) {
                             onGestureDetected(GestureAction.TRIGGERED)
-                            coolDownFrames = 50
+                            coolDownFrames = 40
                             consecutiveTriggers = 0
                         }
                     } else {
-                        consecutiveTriggers = (consecutiveTriggers - 1).coerceAtLeast(0)
+                        consecutiveTriggers = (consecutiveTrigger - 1).coerceAtLeast(0)
                     }
                 }
                 lastLuminance = currentLuminance
