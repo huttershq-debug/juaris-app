@@ -1,4 +1,4 @@
-package com.juaris.app.ui
+Package com.juaris.app.ui
 
 import android.content.ContentUris
 import android.net.Uri
@@ -22,7 +22,7 @@ import java.util.Calendar
 
 private val TacticalWarningRed = Color(0xFFFF3333)
 private val TacticalGray = Color(0xFF8B949E)
-private val NeonGiftgruen = Color(0xFF00E676) // Einziger zentraler Punkt für diese Farbe
+private val NeonGiftgruen = Color(0xFF00E676)
 
 @Composable
 fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
@@ -61,31 +61,19 @@ fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
                                     val reportBuilder = StringBuilder()
                                     var totalFound = 0
 
-                                    // Universelle, sprachübergreifende Filter (Inklusive Urdu, Hindi, Indonesisch, Bengalisch & globale Standards)
                                     val globalUtilityKeywords = listOf(
-                                        // Urdu (اردو)
                                         "بجلی", "گیس", "پانی", "بل", "انوائس", "میٹر", "ریڈنگ", "بقایا", "مقررہ تاریخ", "توانائی",
-                                        // Hindi (हिन्दी)
                                         "बिजली", "गैस", "पानी", "बिल", "चालान", "मीटर", "रीडिंग", "देय", "ऊर्जा", "खपत",
-                                        // Indonesisch (Bahasa Indonesia)
                                         "listrik", "energi", "daya", "gas", "air", "meteran", "pembacaan", "tagihan", "faktur", "jatuh tempo", "pemeliharaan",
-                                        // Bengalisch (বাংলা)
                                         "বিদ্যুৎ", "গ্যাস", "পানি", "জল", "বিল", "মিটার", "পঠন", "বকেয়া", "শক্তি", "রক্ষণাবেক্ষণ",
-                                        // Deutsch
                                         "strom", "energie", "gas", "wasser", "zähler", "ablesung", "rechnung", "mahnung", "fällig", "netz", "wartung",
-                                        // Spanisch / Portugiesisch
                                         "energia", "luz", "agua", "gas", "medidor", "factura", "cuenta", "vencimiento", "mantenimiento",
-                                        // Französisch
                                         "électricité", "gaz", "eau", "compteur", "relevé", "facture", "échéance", "entretien",
-                                        // Russisch
                                         "энергия", "электричество", "газ", "вода", "счетчик", "счет", "квитанция", "оплата",
-                                        // Arabisch
                                         "كهرباء", "طاقة", "غاز", "ماء", "عداد", "فاتورة", "استحقاق",
-                                        // Globale / Englische Fallbacks
                                         "utility", "utilities", "energy", "power", "electricity", "water", "meter", "reading", "bill", "invoice", "due", "overdue", "outage"
                                     )
 
-                                    // 1. SCHRITT: Durchsuche alle Logs in der Room-Datenbank
                                     val allLogs = try {
                                         db.securityLogDao().getAllLogsSync()
                                     } catch (e: Exception) {
@@ -105,7 +93,6 @@ fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
                                         totalFound += matchingLogs.size
                                     }
 
-                                    // 2. SCHRITT: Durchsuche den gesamten Gerätekalender
                                     try {
                                         val cal = Calendar.getInstance()
                                         cal.add(Calendar.DAY_OF_YEAR, -30)
@@ -149,7 +136,6 @@ fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
                                         reportBuilder.append("\n⚠️ Kalender-Zugriff eingeschränkt oder nicht erlaubt.\n")
                                     }
 
-                                    // 3. SCHRITT: Durchsuche den gesamten SMS-Posteingang unlimitiert
                                     try {
                                         val smsUri = Uri.parse("content://sms/inbox")
                                         val cursor = context.contentResolver.query(
@@ -225,5 +211,3 @@ fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
         }
     }
 }
-
-
