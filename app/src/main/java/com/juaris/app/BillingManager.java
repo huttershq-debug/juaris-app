@@ -102,9 +102,12 @@ public class BillingManager implements PurchasesUpdatedListener {
                 .setProductList(Collections.singletonList(product))
                 .build();
 
-        billingClient.queryProductDetailsAsync(params, (billingResult, productDetailsList) -> {
-            if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && productDetailsList != null) {
-                if (!productDetailsList.isEmpty()) {
+        billingClient.queryProductDetailsAsync(params, (billingResult, productDetailsResult) -> {
+            if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && productDetailsResult != null) {
+                // Korrekte Extraktion der Liste aus dem QueryProductDetailsResult-Objekt
+                List<ProductDetails> productDetailsList = productDetailsResult.getProductDetailsList();
+                
+                if (productDetailsList != null && !productDetailsList.isEmpty()) {
                     ProductDetails productDetails = productDetailsList.get(0);
                     List<ProductDetails.SubscriptionOfferDetails> offerDetailsList = productDetails.getSubscriptionOfferDetails();
 
