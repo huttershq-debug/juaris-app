@@ -22,6 +22,7 @@ import java.util.Calendar
 
 private val TacticalWarningRed = Color(0xFFFF3333)
 private val TacticalGray = Color(0xFF8B949E)
+private val NeonGiftgruen = Color(0xFF00E676)
 
 @Composable
 fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
@@ -43,21 +44,48 @@ fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
             Text("Aktueller Bedrohungs-Level: $threatLevel / 100", style = MaterialTheme.typography.bodySmall, color = TacticalGray)
         }
         item {
-            TacticalPulseCard {
-                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("KI-Insights & Prioritäten", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Text(aiInsights, color = Color.White)
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
                         onClick = {
                             coroutineScope.launch {
-                                aiInsights = "⏳ Deep-Scan läuft: Durchsuche Room-DB, Kalender und SMS-Posteingang..."
+                                aiInsights = "⏳ Deep-Scan läuft: Durchsuche Room-DB, Kalender und SMS-Posteingang (weltweit multilingual)..."
 
                                 val resultReport = withContext(Dispatchers.IO) {
                                     val reportBuilder = StringBuilder()
                                     var totalFound = 0
 
-                                    // 1. SCHRITT: Durchsuche alle Logs in der Room-Datenbank (Multilingual & Global)
+                                    // Universelle, sprachübergreifende Filter (Inklusive Urdu, Hindi, Indonesisch, Bengalisch & globale Standards)
+                                    val globalUtilityKeywords = listOf(
+                                        // Urdu (اردو)
+                                        "بجلی", "گیس", "پانی", "بل", "انوائس", "میٹر", "ریڈنگ", "بقایا", "مقررہ تاریخ", "توانائی",
+                                        // Hindi (हिन्दी)
+                                        "बिजली", "गैस", "पानी", "बिल", "चालान", "मीटर", "रीडिंग", "देय", "ऊर्जा", "खपत",
+                                        // Indonesisch (Bahasa Indonesia)
+                                        "listrik", "energi", "daya", "gas", "air", "meteran", "pembacaan", "tagihan", "faktur", "jatuh tempo", "pemeliharaan",
+                                        // Bengalisch (বাংলা)
+                                        "বিদ্যুৎ", "গ্যাস", "পানি", "জল", "বিল", "মিটার", "পঠন", "বকেয়া", "শক্তি", "রক্ষণাবেক্ষণ",
+                                        // Deutsch
+                                        "strom", "energie", "gas", "wasser", "zähler", "ablesung", "rechnung", "mahnung", "fällig", "netz", "wartung",
+                                        // Spanisch / Portugiesisch
+                                        "energia", "luz", "agua", "gas", "medidor", "factura", "cuenta", "vencimiento", "mantenimiento",
+                                        // Französisch
+                                        "électricité", "gaz", "eau", "compteur", "relevé", "facture", "échéance", "entretien",
+                                        // Russisch
+                                        "энергия", "электричество", "газ", "вода", "счетчик", "счет", "квитанция", "оплата",
+                                        // Arabisch
+                                        "كهرباء", "طاقة", "غاز", "ماء", "عداد", "فاتورة", "استحقاق",
+                                        // Globale / Englische Fallbacks
+                                        "utility", "utilities", "energy", "power", "electricity", "water", "meter", "reading", "bill", "invoice", "due", "overdue", "outage"
+                                    )
+
+                                    // 1. SCHRITT: Durchsuche alle Logs in der Room-Datenbank
                                     val allLogs = try {
                                         db.securityLogDao().getAllLogsSync()
                                     } catch (e: Exception) {
@@ -66,13 +94,7 @@ fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
 
                                     val matchingLogs = allLogs.filter { log ->
                                         val content = "${log.module} ${log.description} ${log.details}".lowercase()
-                                        content.contains("evn") || content.contains("energy") || content.contains("strom") || 
-                                        content.contains("power") || content.contains("gas") || content.contains("water") || 
-                                        content.contains("wasser") || content.contains("utility") || content.contains("meter") || 
-                                        content.contains("zähler") || content.contains("bill") || content.contains("invoice") || 
-                                        content.contains("rechnung") || content.contains("notice") || content.contains("mahnung") || 
-                                        content.contains("appointment") || content.contains("termin") || content.contains("ausbau") || 
-                                        content.contains("ablesung")
+                                        globalUtilityKeywords.any { keyword -> content.contains(keyword) }
                                     }
 
                                     if (matchingLogs.isNotEmpty()) {
@@ -110,12 +132,7 @@ fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
                                                 val desc = if (descIdx != -1) it.getString(descIdx) ?: "" else ""
                                                 val combined = "$title $desc".lowercase()
 
-                                                if (combined.contains("evn") || combined.contains("energy") || combined.contains("strom") ||
-                                                    combined.contains("power") || combined.contains("gas") || combined.contains("water") ||
-                                                    combined.contains("wasser") || combined.contains("utility") || combined.contains("meter") ||
-                                                    combined.contains("zähler") || combined.contains("bill") || combined.contains("invoice") ||
-                                                    combined.contains("rechnung") || combined.contains("notice") || combined.contains("mahnung") ||
-                                                    combined.contains("termin") || combined.contains("ausbau") || combined.contains("ablesung")) {
+                                                if (globalUtilityKeywords.any { keyword -> combined.contains(keyword) }) {
                                                     matchingEvents.add(title.ifEmpty { "Unbenannter Termin" })
                                                 }
                                             }
@@ -132,7 +149,7 @@ fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
                                         reportBuilder.append("\n⚠️ Kalender-Zugriff eingeschränkt oder nicht erlaubt.\n")
                                     }
 
-                                   // 3. SCHRITT: Durchsuche den gesamten SMS-Posteingang unlimitiert
+                                    // 3. SCHRITT: Durchsuche den gesamten SMS-Posteingang unlimitiert
                                     try {
                                         val smsUri = Uri.parse("content://sms/inbox")
                                         val cursor = context.contentResolver.query(
@@ -151,11 +168,7 @@ fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
                                                 val body = if (bodyIdx != -1) it.getString(bodyIdx) ?: "" else ""
                                                 val combined = "$sender $body".lowercase()
 
-                                                if (combined.contains("evn") || combined.contains("energy") || combined.contains("strom") ||
-                                                    combined.contains("power") || combined.contains("gas") || combined.contains("water") ||
-                                                    combined.contains("wasser") || combined.contains("utility") || combined.contains("bill") ||
-                                                    combined.contains("invoice") || combined.contains("rechnung") || combined.contains("mahnung") ||
-                                                    combined.contains("ablesung") || combined.contains("ausbau")) {
+                                                if (globalUtilityKeywords.any { keyword -> combined.contains(keyword) }) {
                                                     matchingSms.add("Absender: $sender | Text: ${body.take(60)}...")
                                                 }
                                             }
@@ -173,7 +186,7 @@ fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
                                     }
 
                                     if (totalFound == 0) {
-                                        "🔍 Deep-Scan abgeschlossen: Keine kritischen Einträge oder lokalen Versorger-Daten (Utility & Energy) im System gefunden."
+                                        "🔍 Deep-Scan abgeschlossen: Keine kritischen Versorger- oder Energiemuster (global multilingual) im System gefunden."
                                     } else {
                                         "🚨 **Full-Device Scan erfolgreich!** $totalFound relevante Einträge im System verifiziert:\n\n$reportBuilder"
                                     }
@@ -191,8 +204,11 @@ fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
             }
         }
         item {
-            TacticalPulseCard {
-                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Modell-Arbeitsspeicher", style = MaterialTheme.typography.titleMedium, color = NeonGiftgruen)
                     Button(
                         onClick = {
