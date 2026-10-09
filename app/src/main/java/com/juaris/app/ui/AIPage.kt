@@ -226,3 +226,4 @@ fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
     }
 }
 
+
