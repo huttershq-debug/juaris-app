@@ -79,7 +79,8 @@ class JuarisVpnService : VpnService() {
         try {
             val builder = Builder()
                 .setSession("Juaris Uhrwerk Shield")
-                .addAddress("10.0.0.2", 32)
+                .addAddress("10.0.0.2", 24) // 24er Netzmaske für korrekte Schnittstellen-Erkennung
+                .addRoute("0.0.0.0", 0) // Zwingt Android zur Anzeige des VPN-Schlüssels oben rechts
                 .setMtu(BUFFER_SIZE)
 
             vpnInterface = builder.establish()
