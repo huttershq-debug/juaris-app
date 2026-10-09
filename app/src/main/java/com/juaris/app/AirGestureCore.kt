@@ -70,12 +70,12 @@ class AirGestureCore(private val context: Context) {
                     val delta = currentLuminance - lastLuminance
                     onDebugInfo("Sensor aktiv | Delta: %.1f".format(delta))
 
-                    // Angepasster, entspannter Schwellenwert (Delta > 10.0) für flüssige Bedienung
-                    if (abs(delta) > 10.0) {
+                    // Hauchdünner, extrem feinfühliger Schwellenwert (7.5) für flüssigste Bedienung
+                    if (abs(delta) > 7.5) {
                         consecutiveTriggers++
                         if (consecutiveTriggers >= 2) {
                             onGestureDetected(GestureAction.TRIGGERED)
-                            coolDownFrames = 40
+                            coolDownFrames = 35
                             consecutiveTriggers = 0
                         }
                     } else {
