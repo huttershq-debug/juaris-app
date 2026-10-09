@@ -1180,7 +1180,15 @@ fun SwarmMeshPage() {
     val bluetoothPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        if (permissions.values.all { it }) {
+        val allGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            permissions[Manifest.permission.BLUETOOTH_SCAN] == true &&
+            permissions[Manifest.permission.BLUETOOTH_CONNECT] == true &&
+            permissions[Manifest.permission.BLUETOOTH_ADVERTISE] == true
+        } else {
+            permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+        }
+
+        if (allGranted) {
             meshManager.startMeshNode()
             Toast.makeText(context, "P2P-Schwarm gestartet", Toast.LENGTH_SHORT).show()
         } else {
@@ -1273,14 +1281,18 @@ fun SwarmMeshPage() {
                     Text("Status: $scanStatusText (Geräte in Reichweite: $discoveredDevicesCount)", color = Color.White)
                     Button(
                         onClick = {
-                            bluetoothPermissionLauncher.launch(
+                            val permissionsToRequest = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                 arrayOf(
                                     Manifest.permission.BLUETOOTH_SCAN,
                                     Manifest.permission.BLUETOOTH_ADVERTISE,
-                                    Manifest.permission.BLUETOOTH_CONNECT,
+                                    Manifest.permission.BLUETOOTH_CONNECT
+                                )
+                            } else {
+                                arrayOf(
                                     Manifest.permission.ACCESS_FINE_LOCATION
                                 )
-                            )
+                            }
+                            bluetoothPermissionLauncher.launch(permissionsToRequest)
                         },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = NeonGiftgruen)
@@ -1342,3 +1354,4 @@ fun PrivacyAndLegalContent() {
         }
     }
 }
+
