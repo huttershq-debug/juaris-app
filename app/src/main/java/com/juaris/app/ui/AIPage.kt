@@ -1,4 +1,4 @@
-Package com.juaris.app.ui
+package com.juaris.app.ui
 
 import android.content.ContentUris
 import android.net.Uri
