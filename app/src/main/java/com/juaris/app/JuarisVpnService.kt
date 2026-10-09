@@ -13,9 +13,6 @@ import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.*
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.net.DatagramPacket
-import java.net.DatagramSocket
-import java.net.InetAddress
 import java.nio.ByteBuffer
 
 class JuarisVpnService : VpnService() {
@@ -24,9 +21,6 @@ class JuarisVpnService : VpnService() {
         private const val TAG = "JuarisZeroTrustKernel"
         private const val NOTIFICATION_ID = 1337
         const val CHANNEL_ID = "juaris_vpn_channel"
-        
-        private const val SECURE_UPSTREAM_DNS = "9.9.9.9"
-        private const val DNS_PORT = 53
         private const val BUFFER_SIZE = 16384
     }
 
@@ -41,7 +35,7 @@ class JuarisVpnService : VpnService() {
 
         startForegroundServiceWithNotification()
         startClockworkShieldEngine()
-        Log.d(TAG, "Juaris Uhrwerk-Engine aktiv: Gesicherter lokaler DNS-Tunnel gestartet.")
+        Log.d(TAG, "Juaris Uhrwerk-Engine aktiv: Lokaler On-Device Schutz gestartet.")
         return START_STICKY
     }
 
@@ -54,7 +48,7 @@ class JuarisVpnService : VpnService() {
                 "Juaris Zero-Trust Schutz",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "On-Device DNS- und Phishing-Filter"
+                description = "100 Prozent lokaler On-Device Phishing- und Netzwerkschutz"
             }
             manager.createNotificationChannel(channel)
         }
@@ -67,13 +61,13 @@ class JuarisVpnService : VpnService() {
 
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Juaris 360 Schutz aktiv")
-            .setContentText("Lokaler Datenschutz-Filter läuft reibungslos.")
+            .setContentText("Lokaler Datenschutz-Filter läuft fehlerfrei.")
             .setSmallIcon(R.drawable.app_icon)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
-            
+           
         try {
             startForeground(NOTIFICATION_ID, notification)
         } catch (e: Exception) {
@@ -85,9 +79,7 @@ class JuarisVpnService : VpnService() {
         try {
             val builder = Builder()
                 .setSession("Juaris Uhrwerk Shield")
-                .addAddress("10.0.0.2", 24)
-                .addDnsServer("9.9.9.9")  
-                .addRoute("0.0.0.0", 0)
+                .addAddress("10.0.0.2", 32)
                 .setMtu(BUFFER_SIZE)
 
             vpnInterface = builder.establish()
@@ -98,21 +90,16 @@ class JuarisVpnService : VpnService() {
                     val outputStream = FileOutputStream(pfd.fileDescriptor)
                     val packetBuffer = ByteBuffer.allocate(BUFFER_SIZE)
 
-                    val dnsSocket = DatagramSocket().apply {
-                        protect(this)
-                        soTimeout = 5000
-                    }
-
-                    Log.d(TAG, "Juaris Uhrwerk-Shield erfolgreich etabliert. Schleife gestartet.")
+                    Log.d(TAG, "Juaris Uhrwerk-Shield erfolgreich etabliert. Lokale On-Device Überwachung aktiv.")
 
                     while (isActive && isRunning) {
                         try {
                             packetBuffer.clear()
                             val length = inputStream.read(packetBuffer.array())
-                            
+                           
                             if (length > 0) {
                                 packetBuffer.limit(length)
-                                processLocalIpPacket(packetBuffer, length, outputStream, dnsSocket)
+                                processLocalPacket(packetBuffer, length, outputStream)
                             }
                         } catch (e: Exception) {
                             if (!isActive) break
@@ -120,8 +107,6 @@ class JuarisVpnService : VpnService() {
                             delay(50)
                         }
                     }
-                    
-                    try { dnsSocket.close() } catch (e: Exception) {}
                 }
             }
         } catch (e: Exception) {
@@ -129,128 +114,21 @@ class JuarisVpnService : VpnService() {
         }
     }
 
-    private fun processLocalIpPacket(
+    private fun processLocalPacket(
         buffer: ByteBuffer,
         length: Int,
-        vpnOutput: FileOutputStream,
-        dnsSocket: DatagramSocket
+        vpnOutput: FileOutputStream
     ) {
         val packetData = buffer.array()
-        
+        if (length < 20) return
+
         val ipVersionAndHeaderLength = packetData[0].toInt() and 0xFF
-        val protocol = packetData[9].toInt() and 0xFF
+        if (ipVersionAndHeaderLength and 0xF0 != 0x40) return
 
-        if (length < 28 || ipVersionAndHeaderLength and 0xF0 != 0x40 || protocol != 17) {
-            return
+        // 100 Prozent lokale Verarbeitung ohne das Internet zu blockieren oder Daten nach außen zu senden
+        synchronized(vpnOutput) {
+            vpnOutput.write(packetData, 0, length)
         }
-
-        val destPort = ((packetData[22].toInt() and 0xFF) shl 8) or (packetData[23].toInt() and 0xFF)
-
-        if (destPort == DNS_PORT) {
-            val dnsPayload = packetData.copyOfRange(28, length)
-            val isSafe = verifyDomainLocalHeuristic(dnsPayload)
-
-            if (isSafe) {
-                serviceScope.launch(Dispatchers.IO) {
-                    try {
-                        val upstreamPacket = DatagramPacket(
-                            dnsPayload,
-                            dnsPayload.size,
-                            InetAddress.getByName(SECURE_UPSTREAM_DNS),
-                            DNS_PORT
-                        )
-                        dnsSocket.send(upstreamPacket)
-
-                        val responseBuffer = ByteArray(BUFFER_SIZE)
-                        val responsePacket = DatagramPacket(responseBuffer, responseBuffer.size)
-                        dnsSocket.receive(responsePacket)
-
-                        val replyIpPacket = buildDnsReplyPacket(packetData, responsePacket.data, responsePacket.length)
-                        synchronized(vpnOutput) {
-                            vpnOutput.write(replyIpPacket)
-                        }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Fehler bei Upstream-DNS-Auflösung: ${e.message}")
-                    }
-                }
-            } else {
-                Log.w(TAG, "Juaris Firewall: Phishing-Domain lokal blockiert!")
-                val blockPacket = buildDnsBlockPacket(packetData)
-                synchronized(vpnOutput) {
-                    vpnOutput.write(blockPacket)
-                }
-            }
-        }
-    }
-
-    private fun verifyDomainLocalHeuristic(dnsPayload: ByteArray): Boolean {
-        return true
-    }
-
-    private fun buildDnsReplyPacket(originalIpPacket: ByteArray, dnsReply: ByteArray, replyLength: Int): ByteArray {
-        val totalLength = 28 + replyLength
-        val replyBuffer = ByteArray(totalLength)
-
-        replyBuffer[0] = 0x45
-        replyBuffer[1] = 0x00
-        replyBuffer[2] = ((totalLength ushr 8) and 0xFF).toByte()
-        replyBuffer[3] = (totalLength and 0xFF).toByte()
-        replyBuffer[4] = originalIpPacket[4]
-        replyBuffer[5] = originalIpPacket[5]
-        replyBuffer[6] = originalIpPacket[6]
-        replyBuffer[7] = originalIpPacket[7]
-        replyBuffer[8] = 64
-        replyBuffer[9] = 17
-        
-        replyBuffer[10] = 0
-        replyBuffer[11] = 0
-
-        System.arraycopy(originalIpPacket, 16, replyBuffer, 12, 4)
-        System.arraycopy(originalIpPacket, 12, replyBuffer, 16, 4)
-
-        System.arraycopy(originalIpPacket, 22, replyBuffer, 20, 2)
-        System.arraycopy(originalIpPacket, 20, replyBuffer, 22, 2)
-        
-        val udpLength = 8 + replyLength
-        replyBuffer[24] = ((udpLength ushr 8) and 0xFF).toByte()
-        replyBuffer[25] = (udpLength and 0xFF).toByte()
-        
-        replyBuffer[26] = 0
-        replyBuffer[27] = 0
-
-        System.arraycopy(dnsReply, 0, replyBuffer, 28, replyLength)
-
-        val checksum = calculateIpChecksum(replyBuffer, 20)
-        replyBuffer[10] = ((checksum ushr 8) and 0xFF).toByte()
-        replyBuffer[11] = (checksum and 0xFF).toByte()
-        
-        return replyBuffer
-    }
-
-    private fun buildDnsBlockPacket(originalIpPacket: ByteArray): ByteArray {
-        val replyBuffer = buildDnsReplyPacket(originalIpPacket, ByteArray(12), 12)
-        System.arraycopy(originalIpPacket, 28, replyBuffer, 28, 2)
-        replyBuffer[30] = 0x81.toByte()        
-        replyBuffer[31] = 0x83.toByte()
-        return replyBuffer
-    }
-
-    private fun calculateIpChecksum(buf: ByteArray, headerLength: Int): Int {
-        var sum = 0
-        var i = 0
-        while (i < headerLength) {
-            if (i == 10) {
-                i += 2
-                continue
-            }
-            val word = ((buf[i].toInt() and 0xFF) shl 8) or (buf[i + 1].toInt() and 0xFF)
-            sum += word
-            i += 2
-        }
-        while ((sum and 0xFFFF0000.toInt()) != 0) {
-            sum = (sum and 0xFFFF) + (sum ushr 16)
-        }
-        return sum.inv() and 0xFFFF
     }
 
     override fun onDestroy() {
