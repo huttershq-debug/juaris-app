@@ -22,7 +22,7 @@ import java.util.Calendar
 
 private val TacticalWarningRed = Color(0xFFFF3333)
 private val TacticalGray = Color(0xFF8B949E)
-private val NeonGiftgruen = Color(0xFF00E676)
+private val NeonGiftgruen = Color(0xFF00E676) // Einziger zentraler Punkt für diese Farbe
 
 @Composable
 fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
@@ -105,7 +105,7 @@ fun AIPage(aiCore: LocalAICore, logs: MutableList<SecurityLogEntity>) {
                                         totalFound += matchingLogs.size
                                     }
 
-                                    // 2. SCHRITT: Durchsuche den gesamten Gerätekalender (30 Tage zurück bis 150 Tage voraus)
+                                    // 2. SCHRITT: Durchsuche den gesamten Gerätekalender
                                     try {
                                         val cal = Calendar.getInstance()
                                         cal.add(Calendar.DAY_OF_YEAR, -30)
