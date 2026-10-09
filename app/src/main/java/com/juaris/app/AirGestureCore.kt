@@ -79,7 +79,7 @@ class AirGestureCore(private val context: Context) {
                             consecutiveTriggers = 0
                         }
                     } else {
-                        consecutiveTriggers = (consecutiveTrigger - 1).coerceAtLeast(0)
+                        consecutiveTriggers = (consecutiveTriggers - 1).coerceAtLeast(0)
                     }
                 }
                 lastLuminance = currentLuminance
