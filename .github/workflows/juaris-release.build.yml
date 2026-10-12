@@ -20,14 +20,19 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
+    - name: Gradle 8.8 erzwingen
+      uses: gradle/actions/setup-gradle@v3
+      with:
+        gradle-version: '8.8'
+
     - name: Gradle Wrapper ausführbar machen
       run: chmod +x gradlew
 
     - name: 1. Google Play App Bundle (.aab) erstellen
-      run: ./gradlew bundleRelease
+      run: ./gradlew bundleRelease --no-daemon
 
     - name: 2. Direkte Test-APK (.apk) für echte Handys erstellen
-      run: ./gradlew assembleRelease
+      run: ./gradlew assembleRelease --no-daemon
 
     - name: 3. Artefakte für den Download bereitstellen
       uses: actions/upload-artifact@v4
@@ -36,5 +41,4 @@ jobs:
         path: |
           app/build/outputs/bundle/release/*.aab
           app/build/outputs/apk/release/*.apk
-
 
