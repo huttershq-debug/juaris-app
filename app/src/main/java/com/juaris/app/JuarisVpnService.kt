@@ -84,14 +84,7 @@ class JuarisVpnService : VpnService() {
                 .addDnsServer("8.8.8.8")
                 .setMtu(BUFFER_SIZE)
 
-            // Eigenen Paket-Traffic der Juaris-App vom Tunnel ausnehmen, um Loops zu verhindern
-            try {
-                builder.addDisjointRoute(android.net.IpPrefix(java.net.InetAddress.getByName("0.0.0.0"), 0))
-            } catch (e: Exception) {
-                // Falls System-API älter ist, greift die Standard-Routenführung
-            }
-
-            // Exkludiere die App selbst aus der VPN-Schleife
+            // Exkludiere die App selbst aus der VPN-Schleife (ab Android 10)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 try {
                     builder.addDisallowedApplication(packageName)
