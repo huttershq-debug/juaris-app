@@ -25,10 +25,19 @@ jobs:
       with:
         gradle-version: '8.8'
 
+    - name: Release-Keystore automatisch auf dem Runner generieren
+      run: |
+        keytool -genkey -v \
+          -keystore juaris-release-key.jks \
+          -keyalg RSA -keysize 2048 -validity 10000 \
+          -alias juaris-alias \
+          -dname "CN=Juaris, OU=Dev, O=Juaris, L=City, S=State, C=US" \
+          -storepass juarispassword -keypass juarispassword
+
     - name: Gradle Wrapper ausführbar machen
       run: chmod +x gradlew
 
-    - name: 1. Google Play App Bundle (.aab) erstellen
+    - name: 1. Google Play App Bundle (.aab) erstellen und signieren
       run: ./gradlew bundleRelease --no-daemon
 
     - name: 2. Direkte Test-APK (.apk) für echte Handys erstellen
@@ -41,4 +50,5 @@ jobs:
         path: |
           app/build/outputs/bundle/release/*.aab
           app/build/outputs/apk/release/*.apk
+
 
