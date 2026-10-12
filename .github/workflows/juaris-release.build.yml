@@ -29,16 +29,16 @@ jobs:
           -keystore juaris-release-key.jks \
           -keyalg RSA -keysize 2048 -validity 10000 \
           -alias juaris-alias \
-          -dname "CN=Juaris, OU=Dev, O=Juaris, L=Local, S=Local, C=AT" \
+          -dname "CN=Juaris, OU=Production, O=Juaris, L=Local, S=Local, C=AT" \
           -storepass juarispassword -keypass juarispassword
 
     - name: Gradle Wrapper ausführbar machen
       run: chmod +x gradlew
 
-    - name: AAB und APK bauen
+    - name: AAB und APK fehlerfrei bauen
       run: ./gradlew bundleRelease assembleRelease --no-daemon
 
-    - name: Artefakte hochladen
+    - name: Artefakte herunterladbar machen
       uses: actions/upload-artifact@v4
       with:
         name: juaris-production-binaries
