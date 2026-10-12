@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Quellcode laden
+    - name: Quellcode vollständig laden
       uses: actions/checkout@v4
 
     - name: Java JDK 17 einrichten
@@ -23,10 +23,10 @@ jobs:
     - name: Gradle einrichten
       uses: gradle/actions/setup-gradle@v3
 
-    - name: Release-Keystore im Hauptverzeichnis erstellen
+    - name: Release-Keystore direkt im app-Ordner erstellen
       run: |
         keytool -genkey -v \
-          -keystore juaris-release-key.jks \
+          -keystore app/juaris-release-key.jks \
           -keyalg RSA -keysize 2048 -validity 10000 \
           -alias juaris-alias \
           -dname "CN=Juaris, OU=Production, O=Juaris, L=Local, S=Local, C=AT" \
@@ -35,14 +35,15 @@ jobs:
     - name: Gradle Wrapper ausführbar machen
       run: chmod +x gradlew
 
-    - name: AAB und APK fehlerfrei bauen
-      run: ./gradlew bundleRelease assembleRelease --no-daemon
+    - name: Alten Build bereinigen und Release AAB & APK fehlerfrei bauen
+      run: ./gradlew clean bundleRelease assembleRelease --no-daemon -Pandroid.injected.signing.store.file=app/juaris-release-key.jks -Pandroid.injected.signing.store.password=juarispassword -Pandroid.injected.signing.key.alias=juaris-alias -Pandroid.injected.signing.key.password=juarispassword
 
-    - name: Artefakte herunterladbar machen
+    - name: Artefakte für Download bereitstellen
       uses: actions/upload-artifact@v4
       with:
         name: juaris-production-binaries
         path: |
           app/build/outputs/bundle/release/*.aab
           app/build/outputs/apk/release/*.apk
+
 
