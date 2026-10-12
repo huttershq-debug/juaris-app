@@ -27,7 +27,7 @@ android {
 
      signingConfigs {
         release {
-            storeFile file("$rootProject.rootDir/juaris-release-key.jks")
+            storeFile file("juaris-release-key.jks")
             storePassword 'juarispassword'
             keyAlias 'juaris-alias'
             keyPassword 'juarispassword'
