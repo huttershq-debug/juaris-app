@@ -79,36 +79,45 @@ class JuarisVpnService : VpnService() {
         try {
             val builder = Builder()
                 .setSession("Juaris Uhrwerk Shield")
-                .addAddress("10.0.0.2", 24)
-                // WICHTIG: Keine globale 0.0.0.0 Route erzwingen, damit das reguläre Internet frei bleibt,
-                // sondern gezielt den lokalen Interface-Schutz aufbauen.
+                .addAddress("10.1.10.1", 32)
+                .addDnsServer("1.1.1.1")
+                .addDnsServer("8.8.8.8")
                 .setMtu(BUFFER_SIZE)
+
+            // Eigenen Paket-Traffic der Juaris-App vom Tunnel ausnehmen, um Loops zu verhindern
+            try {
+                builder.addDisjointRoute(android.net.IpPrefix(java.net.InetAddress.getByName("0.0.0.0"), 0))
+            } catch (e: Exception) {
+                // Falls System-API älter ist, greift die Standard-Routenführung
+            }
+
+            // Exkludiere die App selbst aus der VPN-Schleife
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                try {
+                    builder.addDisallowedApplication(packageName)
+                } catch (e: Exception) {
+                    Log.w(TAG, "Fehler beim Ausnehmen der eigenen App: ${e.message}")
+                }
+            }
 
             vpnInterface = builder.establish()
 
             vpnInterface?.let { pfd ->
                 serviceScope.launch(Dispatchers.IO) {
                     val inputStream = FileInputStream(pfd.fileDescriptor)
-                    val outputStream = FileOutputStream(pfd.fileDescriptor)
                     val packetBuffer = ByteBuffer.allocate(BUFFER_SIZE)
 
-                    Log.d(TAG, "Juaris Uhrwerk-Shield erfolgreich etabliert. Lokale On-Device Überwachung aktiv.")
+                    Log.d(TAG, "Juaris Shield etabliert. Lokale Inspection aktiv.")
 
                     while (isActive && isRunning) {
                         try {
                             packetBuffer.clear()
                             val length = inputStream.read(packetBuffer.array())
-                           
-                            if (length > 0) {
-                                packetBuffer.limit(length)
-                                // Pakete direkt durchleiten, damit das Internet ungestört funktioniert
-                                synchronized(outputStream) {
-                                    outputStream.write(packetBuffer.array(), 0, length)
-                                }
+                            if (length <= 0) {
+                                delay(10)
                             }
                         } catch (e: Exception) {
                             if (!isActive) break
-                            Log.e(TAG, "Shield I/O Fehler in Schleife: ${e.message}")
                             delay(50)
                         }
                     }
@@ -132,5 +141,4 @@ class JuarisVpnService : VpnService() {
         }
     }
 }
-
 
