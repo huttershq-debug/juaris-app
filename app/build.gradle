@@ -25,12 +25,12 @@ android {
         }
     }
 
-    signingConfigs {
+     signingConfigs {
         release {
             storeFile file("$rootProject.rootDir/juaris-release-key.jks")
-            storePassword = findProperty("android.injected.signing.storePassword") ?: findProperty("storePassword") ?: System.getenv("KEYSTORE_PASSWORD")
-            keyAlias = findProperty("android.injected.signing.keyAlias") ?: findProperty("keyAlias") ?: System.getenv("KEY_ALIAS")
-            keyPassword = findProperty("android.injected.signing.keyPassword") ?: findProperty("keyPassword") ?: System.getenv("KEY_PASSWORD")
+            storePassword 'juarispassword'
+            keyAlias 'juaris-alias'
+            keyPassword 'juarispassword'
         }
     }
 
