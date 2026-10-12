@@ -1,0 +1,40 @@
+name: Juaris Real Production AAB and APK Build
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-production-binaries:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Quellcode vollständig laden
+      uses: actions/checkout@v4
+
+    - name: Java JDK 17 einrichten
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Gradle Wrapper ausführbar machen
+      run: chmod +x gradlew
+
+    - name: 1. Google Play App Bundle (.aab) erstellen
+      run: ./gradlew bundleRelease
+
+    - name: 2. Direkte Test-APK (.apk) für echte Handys erstellen
+      run: ./gradlew assembleRelease
+
+    - name: 3. Artefakte für den Download bereitstellen
+      uses: actions/upload-artifact@v4
+      with:
+        name: juaris-release-binaries
+        path: |
+          app/build/outputs/bundle/release/*.aab
+          app/build/outputs/apk/release/*.apk
+
+
