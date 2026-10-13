@@ -38,7 +38,7 @@ jobs:
 
       - name: Generate Keystore
         run: |
-          keytool -genkeyv2 -keystore "$GITHUB_WORKSPACE/app/juaris-release-key.jks" -alias juaris-alias -keyalg RSA -keysize 2048 -validity 10000 -storepass juarispassword -keypass juarispassword -dname "CN=Juaris, OU=Dev, O=Juaris, L=Wiener Neustadt, C=AT"
+          keytool -genkeypair -keystore "$GITHUB_WORKSPACE/app/juaris-release-key.jks" -alias juaris-alias -keyalg RSA -keysize 2048 -validity 10000 -storepass juarispassword -keypass juarispassword -dname "CN=Juaris, OU=Dev, O=Juaris, L=Wiener Neustadt, C=AT"
 
       - name: Intelligente XML-Deduplizierung für alle Sprachen (Python-Kernel)
         run: |
