@@ -346,7 +346,19 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    private val vpnPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            Toast.makeText(this, "VPN-Berechtigung erteilt! Starte Firewall...", Toast.LENGTH_SHORT).show()
+            startVpnServiceInternal()
+        } else {
+            Toast.makeText(this, "Achtung: VPN-Berechtigung wurde abgelehnt.", Toast.LENGTH_LONG).show()
+        }
+    }
+
     private fun startJuarisProtectionService() {
+        // Notification Listener starten
         val serviceIntent = Intent(this, JuarisNotificationListenerService::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(serviceIntent)
@@ -354,24 +366,31 @@ class MainActivity : AppCompatActivity() {
             startService(serviceIntent)
         }
 
-        showVpnProminentDisclosureDialog {
-            val vpnIntent = VpnService.prepare(this)
-            if (vpnIntent != null) {
-                vpnPermissionLauncher.launch(vpnIntent)
-            } else {
-                startVpnServiceInternal()
-            }
+        // VPN Vorbereitung erzwingen (Das bringt den Schlüssel!)
+        val vpnIntent = VpnService.prepare(this)
+        if (vpnIntent != null) {
+            // Löst den Android System-Dialog für das VPN aus
+            vpnPermissionLauncher.launch(vpnIntent)
+        } else {
+            // Berechtigung ist bereits erteilt -> Direkt starten
+            startVpnServiceInternal()
         }
     }
 
     private fun startVpnServiceInternal() {
-        val intent = Intent(this, JuarisVpnService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(intent)
-        } else {
-            startService(intent)
+        try {
+            val intent = Intent(this, JuarisVpnService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
+            }
+            Toast.makeText(this, "Juaris DNS-Shield Firewall aktiv!", Toast.LENGTH_SHORT).show()
+            Log.d("JuarisMain", "JuarisVpnService erfolgreich gestartet.")
+        } catch (e: Exception) {
+            Toast.makeText(this, "Fehler beim Starten des VPN: ${e.message}", Toast.LENGTH_LONG).show()
+            Log.e("JuarisMain", "Fehler beim Starten des VPN-Services", e)
         }
-        Toast.makeText(this, "Juaris DNS-Shield Firewall gestartet!", Toast.LENGTH_SHORT).show()
     }
 
     private fun requestBatteryOptimizationExemption() {
