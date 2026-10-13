@@ -132,7 +132,7 @@ jobs:
           body: "Dieses Release enthält sowohl die .aab-Datei für den Google Play Store als auch die .apk-Datei zum direkten Installieren auf dem Handy."
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Keystore entfernen
-        if: always()
-        run: rm -f "$GITHUB_WORKSPACE/app/juaris-release-key.jks"
+      - name: Generate Keystore
+        run: |
+          keytool -genkeyv2 -keystore "$GITHUB_WORKSPACE/app/juaris-release-key.jks" -alias juaris-alias -keyalg RSA -keysize 2048 validity 10000 storepass juarispassword -keypass juarispassword -dname "CN=Juaris, OU=Dev, O=Juaris, L=Wiener Neustadt, C=AT"
 
