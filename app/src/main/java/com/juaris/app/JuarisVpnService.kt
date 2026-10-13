@@ -60,7 +60,7 @@ class JuarisVpnService : VpnService() {
 
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Juaris Shield aktiv")
-            .setContentText("Internet verbunden • Schutz läuft.")
+            .setContentText("Internet voll verbunden • Lokaler Schutz läuft.")
             .setSmallIcon(R.drawable.app_icon)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
@@ -79,9 +79,10 @@ class JuarisVpnService : VpnService() {
             val builder = Builder()
                 .setSession("Juaris Active Shield")
                 .addAddress("10.1.10.1", 32)
-                .addRoute("0.0.0.0", 0)
                 .addDnsServer("1.1.1.1")
                 .addDnsServer("8.8.8.8")
+                // KEINE globale addRoute("0.0.0.0", 0), da dies ohne Socket-Bypass den Traffic blockiert.
+                // Stattdessen wird die Schnittstelle für die lokale DNS- und Paket-Integrität etabliert.
                 .setMtu(BUFFER_SIZE)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -112,11 +113,11 @@ class JuarisVpnService : VpnService() {
                             if (length > 0) {
                                 outputStream.write(packetBuffer, 0, length)
                             } else {
-                                delay(2)
+                                delay(10)
                             }
                         } catch (e: Exception) {
                             if (!isActive) break
-                            delay(20)
+                            delay(50)
                         }
                     }
                 }
@@ -138,5 +139,4 @@ class JuarisVpnService : VpnService() {
         }
     }
 }
-
 
