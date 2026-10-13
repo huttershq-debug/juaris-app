@@ -20,6 +20,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -140,7 +141,7 @@ class MainActivity : AppCompatActivity() {
         billingManager = BillingManager(this, "juaris_monats_abo") {
             securePrefs.edit().putBoolean("subscription_active", true).apply()
         }
-        billingManager.startConnection ()
+        billingManager.startConnection()
 
         checkRuntimeIntegrity()
         registerEmergencyReceiver()
@@ -346,19 +347,7 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private val vpnPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            Toast.makeText(this, "VPN-Berechtigung erteilt! Starte Firewall...", Toast.LENGTH_SHORT).show()
-            startVpnServiceInternal()
-        } else {
-            Toast.makeText(this, "Achtung: VPN-Berechtigung wurde abgelehnt.", Toast.LENGTH_LONG).show()
-        }
-    }
-
     private fun startJuarisProtectionService() {
-        // Notification Listener starten
         val serviceIntent = Intent(this, JuarisNotificationListenerService::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(serviceIntent)
@@ -366,14 +355,13 @@ class MainActivity : AppCompatActivity() {
             startService(serviceIntent)
         }
 
-        // VPN Vorbereitung erzwingen (Das bringt den Schlüssel!)
-        val vpnIntent = VpnService.prepare(this)
-        if (vpnIntent != null) {
-            // Löst den Android System-Dialog für das VPN aus
-            vpnPermissionLauncher.launch(vpnIntent)
-        } else {
-            // Berechtigung ist bereits erteilt -> Direkt starten
-            startVpnServiceInternal()
+        showVpnProminentDisclosureDialog {
+            val vpnIntent = VpnService.prepare(this)
+            if (vpnIntent != null) {
+                vpnPermissionLauncher.launch(vpnIntent)
+            } else {
+                startVpnServiceInternal()
+            }
         }
     }
 
