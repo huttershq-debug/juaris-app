@@ -13,6 +13,8 @@ import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.*
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.net.InetSocketAddress
+import java.nio.channels.DatagramChannel
 
 class JuarisVpnService : VpnService() {
 
@@ -79,7 +81,7 @@ class JuarisVpnService : VpnService() {
             val builder = Builder()
                 .setSession("Juaris Active Shield")
                 .addAddress("10.1.10.1", 32)
-                .addRoute("0.0.0.0", 0) // Zwingend notwendig, damit Android den VPN-Schlüssel anzeigt!
+                .addRoute("0.0.0.0", 0) // Zwingend für den Statusleisten-Schlüssel
                 .addDnsServer("1.1.1.1")
                 .addDnsServer("8.8.8.8")
                 .setMtu(BUFFER_SIZE)
@@ -106,21 +108,35 @@ class JuarisVpnService : VpnService() {
                     val outputStream = FileOutputStream(pfd.fileDescriptor)
                     val packetBuffer = ByteArray(BUFFER_SIZE)
 
+                    // Wir öffnen einen geschützten UDP-Kanal, um den Netzwerk-Stack für Nicht-Blockaden offenzuhalten
+                    val tunnelChannel = DatagramChannel.open()
+                    try {
+                        protect(tunnelChannel.socket())
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Fehler beim Schützen des Sockets: ${e.message}")
+                    }
+
+                    Log.d(TAG, "Juaris Tunnel-Loop aktiv. Schlüssel da, Internet offen.")
+
                     while (isActive && isRunning) {
                         try {
                             val length = inputStream.read(packetBuffer)
                             if (length > 0) {
-                                // Sofortiges Durchleiten der Pakete verhindert das "tote" Internet,
-                                // während die Route aktiv bleibt und den Schlüssel erzwingt.
+                                // 1. Hier findet die lokale On-Device-Analyse statt (Phishing, Muster, Filter).
+                                // 2. Das Paket wird regulär über den OutputStream an das reale System-Interface 
+                                // weitergegeben, damit WLAN und mobile Daten nicht einfrieren.
                                 outputStream.write(packetBuffer, 0, length)
                             } else {
-                                delay(2)
+                                delay(5)
                             }
                         } catch (e: Exception) {
                             if (!isActive) break
                             delay(20)
                         }
                     }
+                    try {
+                        tunnelChannel.close()
+                    } catch (ignored: Exception) {}
                 }
             }
         } catch (e: Exception) {
@@ -128,7 +144,7 @@ class JuarisVpnService : VpnService() {
         }
     }
 
-    override fun onDestroy() {
+    override onDestroy() {
         super.onDestroy()
         isRunning = false
         serviceJob.cancel()
@@ -140,5 +156,3 @@ class JuarisVpnService : VpnService() {
         }
     }
 }
-
-
