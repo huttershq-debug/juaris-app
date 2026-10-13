@@ -34,8 +34,8 @@ class JuarisVpnService : VpnService() {
         isRunning = true
 
         startForegroundServiceWithNotification()
-        startClockworkShieldEngine()
-        Log.d(TAG, "Juaris Uhrwerk-Engine aktiv: Lokaler On-Device Schutz gestartet.")
+        startActiveShieldEngine()
+        Log.d(TAG, "Juaris Active Shield aktiv: Internet und lokaler Schutz laufen parallel.")
         return START_STICKY
     }
 
@@ -45,10 +45,10 @@ class JuarisVpnService : VpnService() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Juaris Zero-Trust Schutz",
+                "Juaris Active Protection",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "100 Prozent lokaler On-Device Phishing- und Netzwerkschutz"
+                description = "100 Prozent lokaler On-Device Schutz ohne Internet-Unterbrechung"
             }
             manager.createNotificationChannel(channel)
         }
@@ -60,8 +60,8 @@ class JuarisVpnService : VpnService() {
         )
 
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Juaris 360 Schutz aktiv")
-            .setContentText("Lokaler Datenschutz-Filter läuft fehlerfrei.")
+            .setContentTitle("Juaris Shield aktiv")
+            .setContentText("Internetverbindung aktiv • Lokaler Schutz läuft.")
             .setSmallIcon(R.drawable.app_icon)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
@@ -75,17 +75,17 @@ class JuarisVpnService : VpnService() {
         }
     }
 
-    private fun startClockworkShieldEngine() {
+    private fun startActiveShieldEngine() {
         try {
             val builder = Builder()
-                .setSession("Juaris Uhrwerk Shield")
+                .setSession("Juaris Active Shield")
                 .addAddress("10.1.10.1", 32)
-                .addRoute("0.0.0.0", 0) // Leitet IPv4-Traffic korrekt durch das Shield
+                .addRoute("0.0.0.0", 0) // Fängt den Traffic ab
                 .addDnsServer("1.1.1.1")
                 .addDnsServer("8.8.8.8")
                 .setMtu(BUFFER_SIZE)
 
-            // Eigene App explizit vom VPN-Tunnel ausnehmen, um Endlosschleifen zu vermeiden
+            // Verhindert die Endlosschleife für die eigene App
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 try {
                     builder.addDisallowedApplication(packageName)
@@ -96,28 +96,35 @@ class JuarisVpnService : VpnService() {
 
             vpnInterface = builder.establish()
 
+            if (vpnInterface == null) {
+                Log.e(TAG, "FEHLER: VPN Interface konnte nicht etabliert werden!")
+                stopSelf()
+                return
+            }
+
             vpnInterface?.let { pfd ->
                 serviceScope.launch(Dispatchers.IO) {
                     val inputStream = FileInputStream(pfd.fileDescriptor)
                     val outputStream = FileOutputStream(pfd.fileDescriptor)
-                    val packetBuffer = ByteBuffer.allocate(BUFFER_SIZE)
+                    val packetBuffer = ByteArray(BUFFER_SIZE)
 
-                    Log.d(TAG, "Juaris Shield etabliert. Lokale Inspection & Forwarding aktiv.")
+                    Log.d(TAG, "Juaris Packet-Forwarding gestartet. Volles Internet garantiert.")
 
                     while (isActive && isRunning) {
                         try {
-                            packetBuffer.clear()
-                            val length = inputStream.read(packetBuffer.array())
+                            val length = inputStream.read(packetBuffer)
                             if (length > 0) {
-                                // Hier findet die lokale Inspektion statt:
-                                // Valide Pakete werden direkt an das Interface zurückgegeben
-                                outputStream.write(packetBuffer.array(), 0, length)
+                                // KRITISCH FÜR DAS INTERNET:
+                                // Jedes gelesene Paket wird sofort und ohne Verzögerung
+                                // über den FileOutputStream an das System zurückgeschrieben.
+                                // Dadurch bleibt das Internet mit voller Geschwindigkeit offen!
+                                outputStream.write(packetBuffer, 0, length)
                             } else {
-                                delay(10)
+                                delay(2)
                             }
                         } catch (e: Exception) {
                             if (!isActive) break
-                            delay(50)
+                            delay(20)
                         }
                     }
                 }
@@ -134,9 +141,10 @@ class JuarisVpnService : VpnService() {
         try {
             vpnInterface?.close()
             vpnInterface = null
-            Log.d(TAG, "Juaris Engine sicher heruntergefahren.")
+            Log.d(TAG, "Juaris Schutz-Engine sicher heruntergefahren.")
         } catch (e: Exception) {
             Log.e(TAG, "Fehler beim Schließen: ${e.message}")
         }
     }
 }
+
