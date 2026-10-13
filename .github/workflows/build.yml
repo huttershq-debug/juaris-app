@@ -36,9 +36,9 @@ jobs:
         run: |
           yes | sdkmanager --licenses || true
 
-      - name: Decode Keystore
+      - name: Generate Keystore
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "$GITHUB_WORKSPACE/app/juaris-release-key.jks"
+          keytool -genkeyv2 -keystore "$GITHUB_WORKSPACE/app/juaris-release-key.jks" -alias juaris-alias -keyalg RSA -keysize 2048 -validity 10000 -storepass juarispassword -keypass juarispassword -dname "CN=Juaris, OU=Dev, O=Juaris, L=Wiener Neustadt, C=AT"
 
       - name: Intelligente XML-Deduplizierung für alle Sprachen (Python-Kernel)
         run: |
@@ -110,16 +110,16 @@ jobs:
           path: app/build/reports/tests/testDebugUnitTest/
 
       - name: Build Both AAB and APK
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           echo "Kompiliere APK und AAB mit 3GB Heap..."
           ./gradlew assembleRelease bundleRelease --stacktrace \
             -Dorg.gradle.jvmargs="-Xmx3g" \
             -Pandroid.useAndroidX=true \
-            -Pandroid.enableJetifier=false
+            -Pandroid.enableJetifier=false \
+            -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/app/juaris-release-key.jks" \
+            -Pandroid.injected.signing.store.password="juarispassword" \
+            -Pandroid.injected.signing.key.alias="juaris-alias" \
+            -Pandroid.injected.signing.key.password="juarispassword"
 
       - name: Release Both Files
         uses: softprops/action-gh-release@v2
@@ -132,7 +132,7 @@ jobs:
           body: "Dieses Release enthält sowohl die .aab-Datei für den Google Play Store als auch die .apk-Datei zum direkten Installieren auf dem Handy."
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate Keystore
-        run: |
-          keytool -genkeyv2 -keystore "$GITHUB_WORKSPACE/app/juaris-release-key.jks" -alias juaris-alias -keyalg RSA -keysize 2048 validity 10000 storepass juarispassword -keypass juarispassword -dname "CN=Juaris, OU=Dev, O=Juaris, L=Wiener Neustadt, C=AT"
+      - name: Keystore entfernen
+        if: always()
+        run: rm -f "$GITHUB_WORKSPACE/app/juaris-release-key.jks"
 
