@@ -13,7 +13,6 @@ import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.*
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.nio.ByteBuffer
 
 class JuarisVpnService : VpnService() {
 
@@ -35,7 +34,7 @@ class JuarisVpnService : VpnService() {
 
         startForegroundServiceWithNotification()
         startActiveShieldEngine()
-        Log.d(TAG, "Juaris Active Shield aktiv: Internet und lokaler Schutz laufen parallel.")
+        
         return START_STICKY
     }
 
@@ -45,10 +44,10 @@ class JuarisVpnService : VpnService() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Juaris Active Protection",
+                "Juaris Shield Schutz",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "100 Prozent lokaler On-Device Schutz ohne Internet-Unterbrechung"
+                description = "Aktiver lokaler On-Device Schutz"
             }
             manager.createNotificationChannel(channel)
         }
@@ -61,7 +60,7 @@ class JuarisVpnService : VpnService() {
 
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Juaris Shield aktiv")
-            .setContentText("Internetverbindung aktiv • Lokaler Schutz läuft.")
+            .setContentText("Internet verbunden • Schutz läuft.")
             .setSmallIcon(R.drawable.app_icon)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
@@ -71,7 +70,7 @@ class JuarisVpnService : VpnService() {
         try {
             startForeground(NOTIFICATION_ID, notification)
         } catch (e: Exception) {
-            Log.e(TAG, "Fehler beim Starten des Foreground Service", e)
+            Log.e(TAG, "Fehler beim Starten von startForeground: ${e.message}", e)
         }
     }
 
@@ -80,12 +79,11 @@ class JuarisVpnService : VpnService() {
             val builder = Builder()
                 .setSession("Juaris Active Shield")
                 .addAddress("10.1.10.1", 32)
-                .addRoute("0.0.0.0", 0) // Fängt den Traffic ab
+                .addRoute("0.0.0.0", 0)
                 .addDnsServer("1.1.1.1")
                 .addDnsServer("8.8.8.8")
                 .setMtu(BUFFER_SIZE)
 
-            // Verhindert die Endlosschleife für die eigene App
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 try {
                     builder.addDisallowedApplication(packageName)
@@ -97,7 +95,7 @@ class JuarisVpnService : VpnService() {
             vpnInterface = builder.establish()
 
             if (vpnInterface == null) {
-                Log.e(TAG, "FEHLER: VPN Interface konnte nicht etabliert werden!")
+                Log.e(TAG, "KRITISCH: builder.establish() liefert null!")
                 stopSelf()
                 return
             }
@@ -108,16 +106,10 @@ class JuarisVpnService : VpnService() {
                     val outputStream = FileOutputStream(pfd.fileDescriptor)
                     val packetBuffer = ByteArray(BUFFER_SIZE)
 
-                    Log.d(TAG, "Juaris Packet-Forwarding gestartet. Volles Internet garantiert.")
-
                     while (isActive && isRunning) {
                         try {
                             val length = inputStream.read(packetBuffer)
                             if (length > 0) {
-                                // KRITISCH FÜR DAS INTERNET:
-                                // Jedes gelesene Paket wird sofort und ohne Verzögerung
-                                // über den FileOutputStream an das System zurückgeschrieben.
-                                // Dadurch bleibt das Internet mit voller Geschwindigkeit offen!
                                 outputStream.write(packetBuffer, 0, length)
                             } else {
                                 delay(2)
@@ -130,7 +122,7 @@ class JuarisVpnService : VpnService() {
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Kritischer Fehler beim Starten des Shields: ${e.message}")
+            Log.e(TAG, "Fehler beim Aufbau des Shields: ${e.message}", e)
         }
     }
 
@@ -141,10 +133,10 @@ class JuarisVpnService : VpnService() {
         try {
             vpnInterface?.close()
             vpnInterface = null
-            Log.d(TAG, "Juaris Schutz-Engine sicher heruntergefahren.")
         } catch (e: Exception) {
             Log.e(TAG, "Fehler beim Schließen: ${e.message}")
         }
     }
 }
+
 
