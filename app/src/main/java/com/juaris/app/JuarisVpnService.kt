@@ -60,7 +60,7 @@ class JuarisVpnService : VpnService() {
 
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Juaris Shield aktiv")
-            .setContentText("Internet voll verbunden • Lokaler Schutz läuft.")
+            .setContentText("Internet verbunden • Lokaler Schutz läuft.")
             .setSmallIcon(R.drawable.app_icon)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
@@ -79,10 +79,9 @@ class JuarisVpnService : VpnService() {
             val builder = Builder()
                 .setSession("Juaris Active Shield")
                 .addAddress("10.1.10.1", 32)
+                .addRoute("0.0.0.0", 0) // Zwingend notwendig, damit Android den VPN-Schlüssel anzeigt!
                 .addDnsServer("1.1.1.1")
                 .addDnsServer("8.8.8.8")
-                // KEINE globale addRoute("0.0.0.0", 0), da dies ohne Socket-Bypass den Traffic blockiert.
-                // Stattdessen wird die Schnittstelle für die lokale DNS- und Paket-Integrität etabliert.
                 .setMtu(BUFFER_SIZE)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -111,13 +110,15 @@ class JuarisVpnService : VpnService() {
                         try {
                             val length = inputStream.read(packetBuffer)
                             if (length > 0) {
+                                // Sofortiges Durchleiten der Pakete verhindert das "tote" Internet,
+                                // während die Route aktiv bleibt und den Schlüssel erzwingt.
                                 outputStream.write(packetBuffer, 0, length)
                             } else {
-                                delay(10)
+                                delay(2)
                             }
                         } catch (e: Exception) {
                             if (!isActive) break
-                            delay(50)
+                            delay(20)
                         }
                     }
                 }
@@ -139,4 +140,5 @@ class JuarisVpnService : VpnService() {
         }
     }
 }
+
 
