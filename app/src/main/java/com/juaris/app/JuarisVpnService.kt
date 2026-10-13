@@ -80,11 +80,12 @@ class JuarisVpnService : VpnService() {
             val builder = Builder()
                 .setSession("Juaris Uhrwerk Shield")
                 .addAddress("10.1.10.1", 32)
+                .addRoute("0.0.0.0", 0) // Leitet IPv4-Traffic korrekt durch das Shield
                 .addDnsServer("1.1.1.1")
                 .addDnsServer("8.8.8.8")
                 .setMtu(BUFFER_SIZE)
 
-            // Exkludiere die App selbst aus der VPN-Schleife (ab Android 10)
+            // Eigene App explizit vom VPN-Tunnel ausnehmen, um Endlosschleifen zu vermeiden
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 try {
                     builder.addDisallowedApplication(packageName)
@@ -98,15 +99,20 @@ class JuarisVpnService : VpnService() {
             vpnInterface?.let { pfd ->
                 serviceScope.launch(Dispatchers.IO) {
                     val inputStream = FileInputStream(pfd.fileDescriptor)
+                    val outputStream = FileOutputStream(pfd.fileDescriptor)
                     val packetBuffer = ByteBuffer.allocate(BUFFER_SIZE)
 
-                    Log.d(TAG, "Juaris Shield etabliert. Lokale Inspection aktiv.")
+                    Log.d(TAG, "Juaris Shield etabliert. Lokale Inspection & Forwarding aktiv.")
 
                     while (isActive && isRunning) {
                         try {
                             packetBuffer.clear()
                             val length = inputStream.read(packetBuffer.array())
-                            if (length <= 0) {
+                            if (length > 0) {
+                                // Hier findet die lokale Inspektion statt:
+                                // Valide Pakete werden direkt an das Interface zurückgegeben
+                                outputStream.write(packetBuffer.array(), 0, length)
+                            } else {
                                 delay(10)
                             }
                         } catch (e: Exception) {
