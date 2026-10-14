@@ -13,9 +13,6 @@ import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.*
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.net.InetSocketAddress
-import java.nio.ByteBuffer
-import java.nio.channels.DatagramChannel
 
 class JuarisVpnService : VpnService() {
 
@@ -82,13 +79,9 @@ class JuarisVpnService : VpnService() {
             val builder = Builder()
                 .setSession("Juaris Active Shield")
                 .addAddress("10.1.10.1", 32)
-                // Wir definieren ein sauberes lokales Subnetz statt einer blinden globalen Blockade,
-                // wodurch Android den VPN-Dienst als valides Interface akzeptiert (Statusleisten-Schlüssel)
-                .addRoute("10.1.10.0", 24)
-                .addDnsServer("1.1.1.1")
+                .addRoute("10.1.10.0", 24) // Signalisiert Android ein aktives VPN für das Icon, blockiert das Web nicht
                 .setMtu(BUFFER_SIZE)
 
-            // Eigene App vom VPN ausnehmen, um rekursive Loops auf Systemebene zu verhindern
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 try {
                     builder.addDisallowedApplication(packageName)
@@ -111,13 +104,12 @@ class JuarisVpnService : VpnService() {
                     val outputStream = FileOutputStream(pfd.fileDescriptor)
                     val packetBuffer = ByteArray(BUFFER_SIZE)
 
-                    Log.d(TAG, "Juaris Kernel-Tunnel aktiv. Schlüssel da, Internet offen.")
+                    Log.d(TAG, "Juaris Shield Tunnel aktiv. Schlüssel da, Internet offen.")
 
                     while (isActive && isRunning) {
                         try {
                             val length = inputStream.read(packetBuffer)
                             if (length > 0) {
-                                // Lokaler Loopback für interne Integritäts- und Diagnosepakete
                                 outputStream.write(packetBuffer, 0, length)
                             } else {
                                 delay(10)
