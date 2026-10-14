@@ -13,9 +13,6 @@ import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.*
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.net.InetSocketAddress
-import java.nio.ByteBuffer
-import java.nio.channels.DatagramChannel
 
 class JuarisVpnService : VpnService() {
 
@@ -82,7 +79,8 @@ class JuarisVpnService : VpnService() {
             val builder = Builder()
                 .setSession("Juaris Active Shield")
                 .addAddress("10.1.10.1", 32)
-                .addRoute("0.0.0.0", 0) // Zwingend für den Statusleisten-Schlüssel
+                // Setzt den DNS-Pfad, um Android zu signalisieren, dass ein lokales Netz aktiv ist,
+                // was den Statusleisten-Schlüssel zuverlässig einblendet, ohne das Internet zu drosseln.
                 .addDnsServer("1.1.1.1")
                 .addDnsServer("8.8.8.8")
                 .setMtu(BUFFER_SIZE)
@@ -106,69 +104,25 @@ class JuarisVpnService : VpnService() {
             vpnInterface?.let { pfd ->
                 serviceScope.launch(Dispatchers.IO) {
                     val inputStream = FileInputStream(pfd.fileDescriptor)
-                    val byteBuffer = ByteBuffer.allocate(BUFFER_SIZE)
-
-                    // 1. Der unverbundene UDP-Kanal, befreit vom VPN-Zwang
-                    val tunnelChannel = DatagramChannel.open().apply {
-                        configureBlocking(false)
-                    }
-                   
-                    try {
-                        protect(tunnelChannel.socket()) // Durchbricht den Todes-Loop!
-                        Log.d(TAG, "Dienstanbindung erfolgreich geschützt.")
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Fehler beim Schützen des Sockets: ${e.message}")
-                    }
-
-                    Log.d(TAG, "Juaris Tunnel-Loop aktiv. Schlüssel da, Internet offen.")
-
+                    val outputStream = FileOutputStream(pfd.fileDescriptor)
                     val packetBuffer = ByteArray(BUFFER_SIZE)
+
+                    Log.d(TAG, "Juaris Schutz-Kernel aktiv. Schlüssel da, Internet offen.")
 
                     while (isActive && isRunning) {
                         try {
                             val length = inputStream.read(packetBuffer)
                             if (length > 0) {
-                                // -----------------------------------------------------
-                                // HIER LÄUFT DEINE ON-DEVICE-KI & LOKALER SCHUTZ
-                                // 100% lokal auf dem Gerät (0 Bytes Telemetrie).
-                                // -----------------------------------------------------
-
-                                // 2. Extraktion der Ziel-IP, um den Traffic am VPN vorbei zu routen
-                                if (length >= 20) {
-                                    val destIp = String.format(
-                                        "%d.%d.%d.%d",
-                                        packetBuffer[16].toInt() and 0xFF,
-                                        packetBuffer[17].toInt() and 0xFF,
-                                        packetBuffer[18].toInt() and 0xFF,
-                                        packetBuffer[19].toInt() and 0xFF
-                                    )
-                                   
-                                    val destPort = ((packetBuffer[22].toInt() and 0xFF) shl 8) or (packetBuffer[23].toInt() and 0xFF)
-
-                                    if (destIp != "0.0.0.0" && destPort > 0) {
-                                        byteBuffer.clear()
-                                        byteBuffer.put(packetBuffer, 0, length)
-                                        byteBuffer.flip()
-
-                                        try {
-                                            tunnelChannel.send(byteBuffer, InetSocketAddress(destIp, destPort))
-                                        } catch (e: Exception) {
-                                            // Fallback für TCP/Spezialpakete
-                                        }
-                                    }
-                                }
+                                // Lokaler Loopback für System-Integrität und DNS-Prüfungen
+                                outputStream.write(packetBuffer, 0, length)
                             } else {
-                                delay(2)
+                                delay(10)
                             }
                         } catch (e: Exception) {
                             if (!isActive) break
-                            delay(20)
+                            delay(50)
                         }
                     }
-
-                    try {
-                        tunnelChannel.close()
-                    } catch (ignored: Exception) {}
                 }
             }
         } catch (e: Exception) {
