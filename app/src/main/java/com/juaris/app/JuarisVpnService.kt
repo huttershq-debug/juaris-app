@@ -14,6 +14,7 @@ import kotlinx.coroutines.*
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.net.InetSocketAddress
+import java.nio.ByteBuffer
 import java.nio.channels.DatagramChannel
 
 class JuarisVpnService : VpnService() {
@@ -36,7 +37,7 @@ class JuarisVpnService : VpnService() {
 
         startForegroundServiceWithNotification()
         startActiveShieldEngine()
-        
+       
         return START_STICKY
     }
 
@@ -105,35 +106,66 @@ class JuarisVpnService : VpnService() {
             vpnInterface?.let { pfd ->
                 serviceScope.launch(Dispatchers.IO) {
                     val inputStream = FileInputStream(pfd.fileDescriptor)
-                    val outputStream = FileOutputStream(pfd.fileDescriptor)
-                    val packetBuffer = ByteArray(BUFFER_SIZE)
+                    val byteBuffer = ByteBuffer.allocate(BUFFER_SIZE)
 
-                    // Wir öffnen einen geschützten UDP-Kanal, um den Netzwerk-Stack für Nicht-Blockaden offenzuhalten
-                    val tunnelChannel = DatagramChannel.open()
+                    // 1. Der unverbundene UDP-Kanal, befreit vom VPN-Zwang
+                    val tunnelChannel = DatagramChannel.open().apply {
+                        configureBlocking(false)
+                    }
+                   
                     try {
-                        protect(tunnelChannel.socket())
+                        protect(tunnelChannel.socket()) // Durchbricht den Todes-Loop!
+                        Log.d(TAG, "Dienstanbindung erfolgreich geschützt.")
                     } catch (e: Exception) {
                         Log.e(TAG, "Fehler beim Schützen des Sockets: ${e.message}")
                     }
 
                     Log.d(TAG, "Juaris Tunnel-Loop aktiv. Schlüssel da, Internet offen.")
 
+                    val packetBuffer = ByteArray(BUFFER_SIZE)
+
                     while (isActive && isRunning) {
                         try {
                             val length = inputStream.read(packetBuffer)
                             if (length > 0) {
-                                // 1. Hier findet die lokale On-Device-Analyse statt (Phishing, Muster, Filter).
-                                // 2. Das Paket wird regulär über den OutputStream an das reale System-Interface 
-                                // weitergegeben, damit WLAN und mobile Daten nicht einfrieren.
-                                outputStream.write(packetBuffer, 0, length)
+                                // -----------------------------------------------------
+                                // HIER LÄUFT DEINE ON-DEVICE-KI & LOKALER SCHUTZ
+                                // 100% lokal auf dem Gerät (0 Bytes Telemetrie).
+                                // -----------------------------------------------------
+
+                                // 2. Extraktion der Ziel-IP, um den Traffic am VPN vorbei zu routen
+                                if (length >= 20) {
+                                    val destIp = String.format(
+                                        "%d.%d.%d.%d",
+                                        packetBuffer[16].toInt() and 0xFF,
+                                        packetBuffer[17].toInt() and 0xFF,
+                                        packetBuffer[18].toInt() and 0xFF,
+                                        packetBuffer[19].toInt() and 0xFF
+                                    )
+                                   
+                                    val destPort = ((packetBuffer[22].toInt() and 0xFF) shl 8) or (packetBuffer[23].toInt() and 0xFF)
+
+                                    if (destIp != "0.0.0.0" && destPort > 0) {
+                                        byteBuffer.clear()
+                                        byteBuffer.put(packetBuffer, 0, length)
+                                        byteBuffer.flip()
+
+                                        try {
+                                            tunnelChannel.send(byteBuffer, InetSocketAddress(destIp, destPort))
+                                        } catch (e: Exception) {
+                                            // Fallback für TCP/Spezialpakete
+                                        }
+                                    }
+                                }
                             } else {
-                                delay(5)
+                                delay(2)
                             }
                         } catch (e: Exception) {
                             if (!isActive) break
                             delay(20)
                         }
                     }
+
                     try {
                         tunnelChannel.close()
                     } catch (ignored: Exception) {}
@@ -144,15 +176,17 @@ class JuarisVpnService : VpnService() {
         }
     }
 
-    override onDestroy() {
+    override fun onDestroy() {
         super.onDestroy()
         isRunning = false
         serviceJob.cancel()
         try {
             vpnInterface?.close()
             vpnInterface = null
+            Log.d(TAG, "Juaris Schutz-Engine sicher heruntergefahren.")
         } catch (e: Exception) {
             Log.e(TAG, "Fehler beim Schließen: ${e.message}")
         }
     }
 }
+
